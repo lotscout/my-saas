@@ -1,25 +1,28 @@
-export default function MarketplacePage() {
+export default function PropertyAnalysisPage() {
   return (
     <div className="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-primary">
       <nav className="backdrop-blur-xl fixed w-full top-0 z-50 border-b glass-nav bg-white border-slate-200">
         <div className="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
-          <div className="flex items-center gap-2 text-2xl font-black tracking-tighter font-headline text-primary">
+          <div className="flex items-center gap-3 text-2xl font-black tracking-tight font-headline text-slate-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt="LotScout Logo"
-              className="h-8 w-8 inline-block"
-              src="https://lh3.googleusercontent.com/aida/ADBb0uhhFEDihaK0gW7nWl1Cof6WZMsDSNbY-od8VJlRtps6kx1SE1ZVjHaH0jtTP7gQw3D6xGEA0jjUiMjSU4cDljSISH6ss-Pc583SH_Z2ow4amEjKpOwoAcm7v2JueaiLHj6khO7U3_e1xd1GlYFveng1qb0D3-aG5ikI2U907SdCjE78r2W3MJn4lEmCChZxpje37vNN349U1BaP1lOThH9NjsizkKh9Pmp8AMwGBWAtielgARDKBOavIYJbtD6IKQUSZMRtKjofNbE"
+              className="h-10 w-auto object-contain"
+              src="https://lh3.googleusercontent.com/aida/ADBb0uhYBAhgZ_-NuYsbD3CApM8ydUhpttOgnrv0eUhsnJ9QLJo5tG0OMaweilffzmeN-Cm_GJHgSDGgUCy2EwmjDxzN7jgUdCFoVXWn9lWqfga67zPmp-jbdG6xc2QDBXnsTN364cgNt_-jE-l9w805yT7s2WNlamkDRsH4J-XC3yuETVEBCD1T94byjRQMfhgr8UhqzugL5ClZN_7J2MJVJBoE7PTz11yYJgXvc8bRph4wV9fecxQc7fmsK4CAEEdSbZ8eF_h0N-IzsG8"
             />
             LotScout
           </div>
           <div className="hidden md:flex items-center gap-8 font-['Manrope'] tracking-tight font-bold">
-            <a className="transition-colors text-slate-600 hover:text-primary" href="#">Marketplace</a>
+            <a className="transition-colors text-slate-600 hover:text-primary" href="/marketplace">Marketplace</a>
             <a className="transition-colors text-slate-600 hover:text-primary" href="#">Buyer Directory</a>
-            <a className="border-b-2 pb-1 text-primary border-primary" href="#">Deal Analysis</a>
+            <a className="border-b-2 pb-1 text-primary border-primary" href="/property-analysis">Deal Analysis</a>
             <a className="transition-colors text-slate-600 hover:text-primary" href="#">Messaging</a>
           </div>
           <div className="flex items-center gap-4">
-            <button className="font-bold px-6 py-2 rounded-xl hover:opacity-90 transition-all flex items-center gap-2 text-sm shadow-sm bg-primary text-white">
+            <button
+              className="font-bold px-6 py-2 rounded-xl hover:opacity-90 transition-all flex items-center gap-2 text-sm shadow-sm bg-primary text-white"
+              style={{ backgroundColor: '#1B4332' }}
+            >
               <span className="material-symbols-outlined text-[20px]">add_circle</span>
               Create Listing
             </button>
@@ -41,7 +44,7 @@ export default function MarketplacePage() {
           <div className="relative z-10 w-full max-w-5xl text-center space-y-12">
             <div className="space-y-6">
               <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-white tracking-tighter max-w-4xl mx-auto leading-tight">
-                Run Professional&nbsp;
+                Run Professional{' '}
                 <div>
                   <span className="text-on-primary-container">Deal Analysis</span>
                 </div>
@@ -63,6 +66,7 @@ export default function MarketplacePage() {
                 <a
                   className="bg-primary text-on-primary font-bold px-8 py-4 rounded-full transition-all flex items-center gap-2 group shadow-lg hover:opacity-95 active:scale-95"
                   href="#"
+                  style={{ backgroundColor: '#1B4332' }}
                 >
                   Analyze Property
                   <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">analytics</span>
