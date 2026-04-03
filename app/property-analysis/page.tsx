@@ -1,34 +1,9 @@
+import Header from '@/components/Header';
+
 export default function PropertyAnalysisPage() {
   return (
     <div className="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-primary">
-      <nav className="backdrop-blur-xl fixed w-full top-0 z-50 border-b glass-nav bg-white border-slate-200">
-        <div className="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
-          <div className="flex items-center gap-3 text-2xl font-black tracking-tight font-headline text-slate-900">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt="LotScout Logo"
-              className="h-10 w-auto object-contain"
-              src="https://lh3.googleusercontent.com/aida/ADBb0uhYBAhgZ_-NuYsbD3CApM8ydUhpttOgnrv0eUhsnJ9QLJo5tG0OMaweilffzmeN-Cm_GJHgSDGgUCy2EwmjDxzN7jgUdCFoVXWn9lWqfga67zPmp-jbdG6xc2QDBXnsTN364cgNt_-jE-l9w805yT7s2WNlamkDRsH4J-XC3yuETVEBCD1T94byjRQMfhgr8UhqzugL5ClZN_7J2MJVJBoE7PTz11yYJgXvc8bRph4wV9fecxQc7fmsK4CAEEdSbZ8eF_h0N-IzsG8"
-            />
-            LotScout
-          </div>
-          <div className="hidden md:flex items-center gap-8 font-['Manrope'] tracking-tight font-bold">
-            <a className="transition-colors text-slate-600 hover:text-primary" href="/marketplace">Marketplace</a>
-            <a className="transition-colors text-slate-600 hover:text-primary" href="#">Buyer Directory</a>
-            <a className="border-b-2 pb-1 text-primary border-primary" href="/property-analysis">Deal Analysis</a>
-            <a className="transition-colors text-slate-600 hover:text-primary" href="#">Messaging</a>
-          </div>
-          <div className="flex items-center gap-4">
-            <button
-              className="font-bold px-6 py-2 rounded-xl hover:opacity-90 transition-all flex items-center gap-2 text-sm shadow-sm bg-primary text-white"
-              style={{ backgroundColor: '#1B4332' }}
-            >
-              <span className="material-symbols-outlined text-[20px]">add_circle</span>
-              Create Listing
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <main>
         <section className="relative min-h-[870px] flex flex-col items-center justify-center pt-24 px-6 overflow-hidden">
