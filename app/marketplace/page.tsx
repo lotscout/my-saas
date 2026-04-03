@@ -2,7 +2,7 @@ export default function MarketplacePage() {
   return (
     <div className="bg-surface text-on-surface">
       {/* TopNavBar */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-emerald-950/80 backdrop-blur-md border-b border-emerald-900/10 dark:border-emerald-100/10 shadow-sm flex justify-between items-center px-8 h-16 mx-auto">
+      <header className="fixed top-0 w-full z-50 dark:bg-emerald-950/80 backdrop-blur-md border-b border-emerald-900/10 dark:border-emerald-100/10 shadow-sm flex justify-between items-center px-8 h-16 mx-auto bg-white">
         <div className="text-xl font-black text-primary tracking-tighter flex items-center gap-3 font-['Manrope']">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -14,11 +14,15 @@ export default function MarketplacePage() {
         </div>
         <nav className="hidden md:flex items-center gap-8 font-['Manrope'] font-bold tracking-tight h-full">
           <a className="text-primary border-b-2 border-primary pb-1 h-full flex items-center" href="#">Marketplace</a>
-          <a className="text-slate-500 hover:text-primary transition-colors h-full flex items-center" href="#">Buyer Directory</a>
-          <a className="text-slate-500 hover:text-primary transition-colors h-full flex items-center" href="/property-analysis">Deal Analysis</a>
-          <a className="text-slate-500 hover:text-primary transition-colors h-full flex items-center" href="#">Messaging</a>
+          <a className="text-primary/70 hover:text-primary transition-colors h-full flex items-center" href="#">Buyer Directory</a>
+          <a className="text-primary/70 hover:text-primary transition-colors h-full flex items-center" href="/property-analysis">Deal Analysis</a>
+          <a className="text-primary/70 hover:text-primary transition-colors h-full flex items-center" href="#">Messaging</a>
         </nav>
         <div className="flex items-center gap-4">
+          <button className="hidden md:flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-lg font-display font-bold text-sm hover:opacity-90 transition-all shadow-sm">
+            <span className="material-symbols-outlined text-lg">add</span>
+            Create Listing
+          </button>
           <button className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all">
             <span className="material-symbols-outlined">notifications</span>
           </button>
