@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 
 const NAV_LINKS = [
   { label: 'Marketplace', href: '/marketplace' },
-  { label: 'Buyer Directory', href: '#' },
+  { label: 'Buyer Directory', href: '/buyer-directory' },
   { label: 'Deal Analysis', href: '/property-analysis' },
   { label: 'Messaging', href: '#' },
 ];
