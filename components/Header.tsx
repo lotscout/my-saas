@@ -6,7 +6,7 @@ const NAV_LINKS = [
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Buyer Directory', href: '/buyer-directory' },
   { label: 'Deal Analysis', href: '/property-analysis' },
-  { label: 'Messaging', href: '#' },
+  { label: 'Messaging', href: '/messaging' },
 ];
 
 export default function Header() {
