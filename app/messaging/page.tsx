@@ -48,7 +48,11 @@ export default function MessagingPage() {
         </aside>
 
         {/* Messenger Layout Wrapper */}
-        <section className="flex flex-1 ml-64 overflow-hidden">
+        <section className="flex flex-col flex-1 ml-64 overflow-hidden">
+          <div className="px-10 pt-8 pb-4 bg-surface shrink-0">
+            <h1 className="text-6xl font-black text-primary leading-tight font-headline">Messaging</h1>
+          </div>
+          <div className="flex flex-1 overflow-hidden">
           {/* Conversation List */}
           <div className="w-80 flex flex-col bg-white border-r border-outline-variant/15">
             <div className="p-6">
@@ -336,6 +340,7 @@ export default function MessagingPage() {
               </div>
             </div>
           </aside>
+          </div>
         </section>
       </main>
     </div>
