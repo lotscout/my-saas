@@ -6,9 +6,9 @@ export default function MessagingPage() {
       <Header />
 
       {/* Main Layout */}
-      <main className="flex flex-1 pt-16 h-full overflow-hidden">
+      <main className="flex flex-1 pt-24 h-full overflow-hidden">
         {/* SideNavBar */}
-        <aside className="fixed left-0 top-16 h-[calc(100vh-64px)] flex flex-col border-r border-outline-variant/20 bg-white w-64 shadow-none font-['Inter'] text-sm font-medium">
+        <aside className="fixed left-0 top-24 h-[calc(100vh-96px)] flex flex-col border-r border-outline-variant/20 bg-white w-64 shadow-none font-['Inter'] text-sm font-medium">
           <nav className="flex-1 py-4 space-y-1">
             <a className="flex items-center gap-3 bg-primary/5 text-primary border-r-4 border-primary px-6 py-3 transition-colors" href="#">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>chat_bubble</span>
