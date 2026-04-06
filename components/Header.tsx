@@ -19,7 +19,7 @@ export default function Header() {
         <img
           alt="LotScout Logo"
           className="h-8 w-8 object-contain"
-          src="https://lh3.googleusercontent.com/aida/ADBb0uhYBAhgZ_-NuYsbD3CApM8ydUhpttOgnrv0eUhsnJ9QLJo5tG0OMaweilffzmeN-Cm_GJHgSDGgUCy2EwmjDxzN7jgUdCFoVXWn9lWqfga67zPmp-jbdG6xc2QDBXnsTN364cgNt_-jE-l9w805yT7s2WNlamkDRsH4J-XC3yuETVEBCD1T94byjRQMfhgr8UhqzugL5ClZN_7J2MJVJBoE7PTz11yYJgXvc8bRph4wV9fecxQc7fmsK4CAEEdSbZ8eF_h0N-IzsG8"
+          src="/logo.png"
         />
         LotScout
       </div>
