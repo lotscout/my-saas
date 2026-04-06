@@ -10,9 +10,7 @@ export default function MessagingPage() {
         {/* SideNavBar */}
         <aside className="fixed left-0 top-24 h-[calc(100vh-96px)] flex flex-col border-r border-outline-variant/20 bg-white w-64 shadow-none font-['Inter'] text-sm font-medium">
           <nav className="flex-1 py-4 space-y-1">
-            <a className="flex items-center gap-3 bg-primary/5 text-primary border-r-4 border-primary px-6 py-3 transition-colors" href="#">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>chat_bubble</span>
-            </a>
+
             <a className="flex items-center gap-3 text-secondary px-6 py-3 hover:bg-surface-container transition-colors" href="#">
               <span className="material-symbols-outlined">inbox</span>
               Inbox
