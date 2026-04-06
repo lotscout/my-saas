@@ -67,7 +67,7 @@ export default function MessagingPage() {
               <div className="p-4 mx-2 rounded-xl bg-surface-container-lowest border border-primary/20 shadow-sm cursor-pointer">
                 <div className="flex justify-between items-start mb-1">
                   <span className="font-headline font-bold text-sm text-primary">
-                    <a className="hover:underline" href="#">Marcus Vance</a>
+                    <a className="hover:underline" href="#">Marcus Vance</a><span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-teal-100 text-teal-900">Buyer</span>
                   </span>
                   <span className="text-[10px] text-secondary font-medium uppercase tracking-wider">2m ago</span>
                 </div>
@@ -81,7 +81,7 @@ export default function MessagingPage() {
               <div className="p-4 mx-2 mt-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer border border-transparent">
                 <div className="flex justify-between items-start mb-1">
                   <span className="font-headline font-bold text-sm text-primary">
-                    <a className="hover:underline" href="#">Marcus Vance</a>
+                    <a className="hover:underline" href="#">Marcus Vance</a><span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-teal-100 text-teal-900">Buyer</span>
                   </span>
                   <span className="text-[10px] text-secondary font-medium uppercase tracking-wider">1h ago</span>
                 </div>
@@ -94,7 +94,7 @@ export default function MessagingPage() {
               <div className="p-4 mx-2 mt-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer border border-transparent">
                 <div className="flex justify-between items-start mb-1">
                   <span className="font-headline font-bold text-sm text-primary">
-                    <a className="hover:underline" href="#">Marcus Vance</a>
+                    <a className="hover:underline" href="#">Marcus Vance</a><span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900">Seller</span>
                   </span>
                   <span className="text-[10px] text-secondary font-medium uppercase tracking-wider">Yesterday</span>
                 </div>
@@ -120,7 +120,7 @@ export default function MessagingPage() {
                 />
                 <div>
                   <h3 className="font-headline font-extrabold text-primary leading-tight">
-                    <a className="hover:underline" href="#">Julian Thorne</a>
+                    <a className="hover:underline" href="#">Julian Thorne</a><span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900">Seller</span>
                   </h3>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -207,7 +207,7 @@ export default function MessagingPage() {
             {/* Lot Details (Active) */}
             <div className="flex-1 flex flex-col">
               <div className="p-6 border-b border-outline-variant/5">
-                <h3 className="font-headline font-extrabold text-primary text-lg tracking-tight mb-1">Lot Details</h3>
+                <h3 className="font-headline font-extrabold text-primary text-lg tracking-tight mb-1">Lot Details <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Seller Context</span></h3>
                 <p className="text-xs text-secondary">Project: Blackwood Ridge Phase II</p>
               </div>
               <div className="p-6 space-y-8 overflow-y-auto hide-scrollbar flex-1">
@@ -292,7 +292,7 @@ export default function MessagingPage() {
             {/* Buyer Requirements (Hidden) */}
             <div className="hidden flex-1 flex-col">
               <div className="p-6 border-b border-outline-variant/5">
-                <h3 className="font-headline font-extrabold text-primary text-lg tracking-tight mb-1">Buyer Requirements</h3>
+                <h3 className="font-headline font-extrabold text-primary text-lg tracking-tight mb-1">Lot Details <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Seller Context</span></h3>
                 <p className="text-xs text-secondary">Lead: Elena Rodriguez</p>
               </div>
               <div className="p-6 space-y-6 overflow-y-auto hide-scrollbar flex-1">
