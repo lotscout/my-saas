@@ -6,34 +6,25 @@ export default function PropertyAnalysisPage() {
       <Header />
 
       <main>
-        <section className="relative min-h-[870px] flex flex-col items-center justify-center pt-24 px-6 overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#1B4332] to-[#1B4332]/80 opacity-95"></div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt="Topographic landscape background"
-              className="w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaYn2wjOxegWWwjrcTVUFl9gxfyPeUrQatCloSD7gwYRLoszSkj4OXa9LoQe5ZFINW1S60nXMo3B3K9wnmWtMOLOJeg5mR6lmncJVaAfQW2VY-_LdEfWWz2d5xHVtij9Cczu-5Hr9gZkvXZOSePqwoxGnfPOcTtnGi9pydE8tNqF_nceD36s1P6oRWde2b1Ah1OKgZuLhkdesrD6Zr4mP60_siL93t7T840ZwUF9zGELQ2QEXwjk4rSPhmOuO55xh5CjnR6L8omJsk"
-            />
-          </div>
-          <div className="relative z-10 w-full max-w-5xl text-center space-y-12">
+        <section className="min-h-[870px] flex flex-col items-center justify-center pt-24 px-6 bg-white">
+          <div className="w-full max-w-5xl text-center space-y-12">
             <div className="space-y-6">
-              <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-white tracking-tighter max-w-4xl mx-auto leading-tight">
+              <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-primary tracking-tighter max-w-4xl mx-auto leading-tight">
                 Run Professional{' '}
                 <div>
-                  <span className="text-on-primary-container">Deal Analysis</span>
+                  <span className="text-emerald-600">Deal Analysis</span>
                 </div>
               </h1>
-              <p className="text-emerald-100/80 text-lg md:text-2xl max-w-2xl mx-auto font-light leading-relaxed">
+              <p className="text-secondary text-lg md:text-2xl max-w-2xl mx-auto font-light leading-relaxed">
                 Get instant comps, land valuations, and risk assessments for any property.
               </p>
             </div>
             <div className="w-full max-w-3xl mx-auto">
-              <div className="bg-white/10 backdrop-blur-md p-2 rounded-full border border-white/20 shadow-2xl flex items-center gap-2">
+              <div className="bg-surface-container-low p-2 rounded-full border border-outline-variant/30 shadow-sm flex items-center gap-2">
                 <div className="flex-1 flex items-center px-6">
-                  <span className="material-symbols-outlined text-emerald-400 mr-3">location_on</span>
+                  <span className="material-symbols-outlined text-primary mr-3">location_on</span>
                   <input
-                    className="w-full bg-transparent border-none text-white placeholder-emerald-100/50 focus:ring-0 text-lg py-4 font-body"
+                    className="w-full bg-transparent border-none text-on-surface placeholder-secondary/50 focus:ring-0 text-lg py-4 font-body"
                     placeholder="Enter property address or parcel ID to begin..."
                     type="text"
                   />
@@ -41,13 +32,12 @@ export default function PropertyAnalysisPage() {
                 <a
                   className="bg-primary text-on-primary font-bold px-8 py-4 rounded-full transition-all flex items-center gap-2 group shadow-lg hover:opacity-95 active:scale-95"
                   href="#"
-                  style={{ backgroundColor: '#1B4332' }}
                 >
                   Analyze Property
                   <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">analytics</span>
                 </a>
               </div>
-              <div className="mt-4 flex justify-center gap-6 text-emerald-100/60 text-sm">
+              <div className="mt-4 flex justify-center gap-6 text-secondary text-sm">
                 <span className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-xs">check_circle</span> 150M+ Parcels
                 </span>
@@ -60,7 +50,6 @@ export default function PropertyAnalysisPage() {
               </div>
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-surface to-transparent"></div>
         </section>
 
         <section className="bg-surface py-24 px-8">
