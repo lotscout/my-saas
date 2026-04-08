@@ -58,53 +58,43 @@ export default function MarketplacePage() {
           </div>
         </div>
 
-        {/* Bento Grid Listings */}
-        <div className="grid grid-cols-12 gap-10">
-          {/* Large Featured Card */}
-          <div className="col-span-12 lg:col-span-8 group">
-            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-8">
+        {/* Listings Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {/* Promoted — Elderwood Peak Estates */}
+          <div className="flex flex-col group">
+            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="Aerial mountain vista"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxJzpl7PtPZ3P9-BbZWEnnurDCh6iCuzDzxd8ZqqT8JD-uoS6-tQYgI_5g7BnCOd1fs3CLCNTBes6QTw5XNx3DYg00cXSRnCDOV-ZtJM9W4SpVL9aDpq3c-K3x7DHVcOaQzcGxY23ECyKHXOCa9XhyhCMPPI_X5zQB49vCbRWK9mw81BYCTcpT41Tixw8YTyPaCHGElLbCoI2F7Ibp7h4rhUYZ6t3kCUX6-hXPN0VSjjTo3gKOFBoTlscbAUd9I2zokdmW_oU__CKd"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent"></div>
-              <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end">
-                <div>
-                  <div className="flex gap-2 mb-4">
-                    <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Featured Acquisition</span>
-                    <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Residential-A1</span>
-                  </div>
-                  <h2 className="text-white text-4xl font-black">Elderwood Peak Estates</h2>
-                  <p className="text-emerald-100/80 text-sm font-medium mt-1">Aspen Ridge, Colorado • 420.5 Acres</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-emerald-200/60 text-xs font-bold uppercase tracking-widest mb-1">Asking Price</p>
-                  <p className="text-white text-4xl font-black tracking-tight">$4,250,000</p>
-                </div>
+              <div className="absolute top-4 left-4">
+                <span className="bg-amber-400 text-amber-950 px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[12px]">workspace_premium</span>
+                  Promoted
+                </span>
+              </div>
+              <div className="absolute top-4 right-4">
+                <span className="bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Residential-A1</span>
               </div>
             </div>
-            <div className="grid grid-cols-4 gap-6 px-4">
-              <div className="flex flex-col border-l-2 border-primary/20 pl-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Zoning</span>
-                <span className="text-sm font-bold text-primary">R-1 Agricultural</span>
+            <div className="px-2">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-2xl font-black text-primary">Elderwood Peak Estates</h3>
+                <span className="text-3xl font-black text-primary">$4.25M</span>
               </div>
-              <div className="flex flex-col border-l-2 border-primary/20 pl-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Elevation</span>
-                <span className="text-sm font-bold text-primary">8,400 - 9,100 ft</span>
+              <p className="text-slate-500 text-sm mb-4">Aspen Ridge, CO • 420.5 Acres</p>
+              <div className="flex flex-wrap gap-2">
+                <span className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">R-1 Agricultural</span>
+                <span className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">Well, Solar-Ready</span>
               </div>
-              <div className="flex flex-col border-l-2 border-primary/20 pl-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Utilities</span>
-                <span className="text-sm font-bold text-primary">Well, Solar-Ready</span>
-              </div>
-              <div className="flex flex-col items-end justify-center"></div>
             </div>
           </div>
 
-          {/* Side Card 1 */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col">
-            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6 group">
+          {/* Sutter Basin Flats */}
+          <div className="flex flex-col group">
+            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="Verdant plains"
@@ -133,9 +123,9 @@ export default function MarketplacePage() {
             </div>
           </div>
 
-          {/* Grid Item 3 */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-4 flex flex-col">
-            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6 group">
+          {/* Crystal Lake Ridge */}
+          <div className="flex flex-col group">
+            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="Alpine lake"
@@ -156,9 +146,9 @@ export default function MarketplacePage() {
             </div>
           </div>
 
-          {/* Grid Item 4 */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-4 flex flex-col">
-            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6 group">
+          {/* Red Rock Plateau */}
+          <div className="flex flex-col group">
+            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="Desert mesa"
@@ -178,9 +168,9 @@ export default function MarketplacePage() {
             </div>
           </div>
 
-          {/* Grid Item 5 */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-4 flex flex-col">
-            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6 group">
+          {/* Old Growth Sanctuary */}
+          <div className="flex flex-col group">
+            <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="Foggy forest"
