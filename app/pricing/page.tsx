@@ -1,6 +1,17 @@
+'use client';
+
+import { useState } from 'react';
 import Header from '@/components/Header';
 
 export default function PricingPage() {
+  const [isAnnual, setIsAnnual] = useState(false);
+
+  const prices = {
+    standard: isAnnual ? 81 : 97,
+    priority: isAnnual ? 274 : 329,
+    exclusive: isAnnual ? 665 : 799,
+  };
+  const billingLabel = isAnnual ? 'Billed annually' : 'Billed monthly';
   return (
     <div className="bg-background text-on-surface selection:bg-primary-container selection:text-on-primary-container font-body">
       <Header />
@@ -15,10 +26,16 @@ export default function PricingPage() {
           {/* Billing Toggle */}
           <div className="flex flex-col items-center gap-4">
             <div className="bg-surface-container-low p-2 rounded-full flex items-center gap-2 border border-outline/10">
-              <button className="px-12 py-3.5 rounded-full text-base font-bold transition-all bg-surface-container-lowest text-primary shadow-sm">Monthly</button>
-              <button className="px-12 py-3.5 rounded-full text-base font-bold transition-all text-on-surface-variant hover:text-primary">Annual</button>
+              <button
+                className={`px-12 py-3.5 rounded-full text-base font-bold transition-all ${!isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-on-surface-variant hover:text-primary'}`}
+                onClick={() => setIsAnnual(false)}
+              >Monthly</button>
+              <button
+                className={`px-12 py-3.5 rounded-full text-base font-bold transition-all ${isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-on-surface-variant hover:text-primary'}`}
+                onClick={() => setIsAnnual(true)}
+              >Annual</button>
             </div>
-            <span className="text-primary-container font-bold text-sm tracking-widest uppercase bg-primary-fixed px-6 py-2 rounded-full">Annual billing saves 2 months</span>
+            <span className="text-primary-container font-bold text-sm tracking-widest uppercase bg-primary-fixed px-6 py-2 rounded-full">Get two months free when switching to annual billing</span>
           </div>
         </div>
 
@@ -31,10 +48,10 @@ export default function PricingPage() {
               <h3 className="text-4xl font-extrabold text-slate-700 mb-1 font-headline">Standard</h3>
               <p className="text-slate-500 text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For first-time buyers and sellers</p>
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-6xl font-extrabold text-slate-800">$97</span>
+                <span className="text-6xl font-extrabold text-slate-800">${prices.standard}</span>
                 <span className="text-slate-400 text-2xl font-medium">/mo</span>
               </div>
-              <p className="text-slate-400 text-xl font-medium">Billed monthly</p>
+              <p className="text-slate-400 text-xl font-medium">{billingLabel}</p>
             </div>
             <div className="h-px bg-slate-200 w-full mb-8"></div>
             <ul className="space-y-4 mb-14 flex-grow">
@@ -89,10 +106,10 @@ export default function PricingPage() {
               <h3 className="text-4xl font-extrabold text-white mb-1 font-headline">Priority</h3>
               <p className="text-emerald-100/80 text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For active, experienced buyers and sellers</p>
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-6xl font-extrabold text-white">$329</span>
+                <span className="text-6xl font-extrabold text-white">${prices.priority}</span>
                 <span className="text-emerald-200 text-2xl font-medium">/mo</span>
               </div>
-              <p className="text-emerald-200 text-xl font-medium">Billed monthly</p>
+              <p className="text-emerald-200 text-xl font-medium">{billingLabel}</p>
             </div>
             <div className="h-px bg-white/20 w-full mb-8"></div>
             <ul className="space-y-4 mb-14 flex-grow">
@@ -146,10 +163,10 @@ export default function PricingPage() {
               <h3 className="text-4xl font-extrabold text-emerald-50 mb-1 font-headline">Exclusive</h3>
               <p className="text-emerald-400/70 text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For high-volume sellers and firms</p>
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-6xl font-extrabold text-emerald-50">$799</span>
+                <span className="text-6xl font-extrabold text-emerald-50">${prices.exclusive}</span>
                 <span className="text-emerald-400 text-2xl font-medium">/mo</span>
               </div>
-              <p className="text-emerald-400 text-xl font-medium">Billed monthly</p>
+              <p className="text-emerald-400 text-xl font-medium">{billingLabel}</p>
             </div>
             <div className="h-px bg-emerald-800/50 w-full mb-8"></div>
             <ul className="space-y-4 mb-14 flex-grow">
