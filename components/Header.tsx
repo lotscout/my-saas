@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
 
 const NAV_LINKS = [
   { label: 'Marketplace', href: '/marketplace' },
@@ -11,6 +12,18 @@ const NAV_LINKS = [
 
 export default function Header() {
   const pathname = usePathname();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="fixed top-0 w-full z-50 dark:bg-emerald-950/80 backdrop-blur-md border-b border-emerald-900/10 dark:border-emerald-100/10 shadow-sm flex justify-between items-center px-8 h-16 mx-auto bg-white">
@@ -49,9 +62,33 @@ export default function Header() {
         <button className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all">
           <span className="material-symbols-outlined">notifications</span>
         </button>
-        <button className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all">
-          <span className="material-symbols-outlined">account_circle</span>
-        </button>
+        <div className="relative" ref={dropdownRef}>
+          <button
+            className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all"
+            onClick={() => setDropdownOpen((prev) => !prev)}
+          >
+            <span className="material-symbols-outlined">account_circle</span>
+          </button>
+          {dropdownOpen && (
+            <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden z-50">
+              <a
+                href="/profile"
+                className="flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors"
+                onClick={() => setDropdownOpen(false)}
+              >
+                <span className="material-symbols-outlined text-base">person</span>
+                My Profile
+              </a>
+              <button
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors border-t border-outline-variant/10"
+                onClick={() => setDropdownOpen(false)}
+              >
+                <span className="material-symbols-outlined text-base">logout</span>
+                Sign Out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
