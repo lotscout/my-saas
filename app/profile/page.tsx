@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Header from '@/components/Header';
 
 export default function ProfilePage() {
@@ -36,13 +37,13 @@ export default function ProfilePage() {
                 </p>
               </div>
               <div className="pt-2">
-                <a
+                <Link
                   className="inline-flex items-center gap-3 bg-primary text-on-primary px-8 py-4 rounded-2xl text-base font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
-                  href="#settings"
+                  href="/edit-profile"
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>settings</span>
                   Edit Profile &amp; Account Settings
-                </a>
+                </Link>
               </div>
             </div>
           </div>
