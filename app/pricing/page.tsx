@@ -25,180 +25,180 @@ export default function PricingPage() {
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
 
-          {/* Tier 1: Standard */}
-          <div className="bg-surface-container-lowest rounded-2xl p-10 flex flex-col h-full transition-all border border-outline-variant/30 hover:shadow-lg">
+          {/* Tier 1: Standard — light gray/neutral */}
+          <div className="bg-slate-50 rounded-2xl p-10 flex flex-col h-full transition-all border border-slate-200 hover:shadow-lg">
             <div className="mb-8">
-              <h3 className="text-4xl font-extrabold text-primary mb-1 font-headline">Standard</h3>
-              <p className="text-on-surface-variant text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For first-time buyers and sellers</p>
+              <h3 className="text-4xl font-extrabold text-slate-700 mb-1 font-headline">Standard</h3>
+              <p className="text-slate-500 text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For first-time buyers and sellers</p>
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-6xl font-extrabold text-primary">$97</span>
-                <span className="text-secondary text-2xl font-medium">/mo</span>
+                <span className="text-6xl font-extrabold text-slate-800">$97</span>
+                <span className="text-slate-400 text-2xl font-medium">/mo</span>
               </div>
-              <p className="text-secondary text-xl font-medium">Billed monthly</p>
+              <p className="text-slate-400 text-xl font-medium">Billed monthly</p>
             </div>
-            <div className="h-px bg-outline-variant/30 w-full mb-8"></div>
+            <div className="h-px bg-slate-200 w-full mb-8"></div>
             <ul className="space-y-4 mb-14 flex-grow">
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-700 font-bold text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
                 <span>Land Marketplace Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-700 font-bold text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
                 <span>Lot to Buyer Match AI</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-700 font-bold text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
                 <span>Custom Company Profile</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-700 font-bold text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
                 <span>Lot Analysis Reports</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-700 font-bold text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
                 <span>Buyer Directory Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-700 font-bold text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
                 <span>Property Analysis Reports</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface-variant/30 font-medium text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-300 font-medium text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl">remove</span>
                 <span>Unlimited Listings</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface-variant/30 font-medium text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-300 font-medium text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl">remove</span>
                 <span>Promoted Lot Requests</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface-variant/30 font-medium text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-300 font-medium text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl">remove</span>
                 <span>Financing Partners Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface-variant/30 font-medium text-xl whitespace-nowrap">
+              <li className="flex items-center gap-4 text-slate-300 font-medium text-xl whitespace-nowrap">
                 <span className="material-symbols-outlined text-2xl">remove</span>
                 <span>24/7 Support</span>
               </li>
             </ul>
-            <button className="w-full py-5 text-xl border-2 border-outline-variant text-on-surface font-bold rounded-xl hover:bg-surface-container-low transition-colors">Get Started</button>
+            <button className="w-full py-5 text-xl border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-colors">Get Started</button>
           </div>
 
-          {/* Tier 2: Priority */}
-          <div className="bg-surface-container-lowest rounded-2xl p-10 flex flex-col h-full relative border-2 border-[#1b4332] shadow-2xl scale-105 z-10">
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1b4332] text-on-primary text-xs font-black px-8 py-3 rounded-full uppercase tracking-[0.2em] shadow-lg">Most Popular</div>
+          {/* Tier 2: Priority — rich green, most popular */}
+          <div className="bg-emerald-600 rounded-2xl p-10 flex flex-col h-full relative shadow-2xl shadow-emerald-700/40 scale-105 z-10">
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-emerald-950 text-emerald-50 text-xs font-black px-8 py-3 rounded-full uppercase tracking-[0.2em] shadow-lg whitespace-nowrap">Most Popular</div>
             <div className="mb-8 mt-4">
-              <h3 className="text-4xl font-extrabold text-primary mb-1 font-headline">Priority</h3>
-              <p className="text-on-surface-variant text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For active, experienced buyers and sellers</p>
+              <h3 className="text-4xl font-extrabold text-white mb-1 font-headline">Priority</h3>
+              <p className="text-emerald-100/80 text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For active, experienced buyers and sellers</p>
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-6xl font-extrabold text-primary">$329</span>
-                <span className="text-secondary text-2xl font-medium">/mo</span>
+                <span className="text-6xl font-extrabold text-white">$329</span>
+                <span className="text-emerald-200 text-2xl font-medium">/mo</span>
               </div>
-              <p className="text-secondary text-xl font-medium">Billed monthly</p>
+              <p className="text-emerald-200 text-xl font-medium">Billed monthly</p>
             </div>
-            <div className="h-px bg-outline-variant/30 w-full mb-8"></div>
+            <div className="h-px bg-white/20 w-full mb-8"></div>
             <ul className="space-y-4 mb-14 flex-grow">
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Land Marketplace Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Lot to Buyer Match AI</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Custom Company Profile</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Lot Analysis Reports</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Buyer Directory Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Property Analysis Reports</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Unlimited Listings</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Promoted Lot Requests</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface-variant/30 font-medium text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl">remove</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>Financing Partners Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-white font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-200">check</span>
                 <span>24/7 Support</span>
               </li>
             </ul>
-            <button className="w-full py-5 text-xl bg-primary text-on-primary font-bold rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">Get Started</button>
+            <button className="w-full py-5 text-xl bg-white text-emerald-700 font-bold rounded-xl hover:bg-emerald-50 transition-colors shadow-lg">Get Started</button>
           </div>
 
-          {/* Tier 3: Exclusive */}
-          <div className="bg-surface-container-lowest rounded-2xl p-10 flex flex-col h-full transition-all border border-outline-variant/30 hover:shadow-lg">
+          {/* Tier 3: Exclusive — dark premium */}
+          <div className="bg-emerald-950 rounded-2xl p-10 flex flex-col h-full transition-all border border-emerald-800/50 hover:shadow-2xl hover:shadow-emerald-950/50">
             <div className="mb-8">
-              <h3 className="text-4xl font-extrabold text-primary mb-1 font-headline">Exclusive</h3>
-              <p className="text-on-surface-variant text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For high-volume sellers and firms</p>
+              <h3 className="text-4xl font-extrabold text-emerald-50 mb-1 font-headline">Exclusive</h3>
+              <p className="text-emerald-400/70 text-xl whitespace-nowrap overflow-hidden text-ellipsis mb-8">For high-volume sellers and firms</p>
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-6xl font-extrabold text-primary">$799</span>
-                <span className="text-secondary text-2xl font-medium">/mo</span>
+                <span className="text-6xl font-extrabold text-emerald-50">$799</span>
+                <span className="text-emerald-400 text-2xl font-medium">/mo</span>
               </div>
-              <p className="text-secondary text-xl font-medium">Billed monthly</p>
+              <p className="text-emerald-400 text-xl font-medium">Billed monthly</p>
             </div>
-            <div className="h-px bg-outline-variant/30 w-full mb-8"></div>
+            <div className="h-px bg-emerald-800/50 w-full mb-8"></div>
             <ul className="space-y-4 mb-14 flex-grow">
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Land Marketplace Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Lot to Buyer Match AI</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Custom Company Profile</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Lot Analysis Reports</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Buyer Directory Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Property Analysis Reports</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Unlimited Listings</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Promoted Lot Requests</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Financing Partners Access</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>24/7 Support</span>
               </li>
-              <li className="flex items-center gap-4 text-on-surface font-bold text-xl whitespace-nowrap">
-                <span className="material-symbols-outlined text-2xl text-emerald-500">check</span>
+              <li className="flex items-center gap-4 text-emerald-100 font-bold text-xl whitespace-nowrap">
+                <span className="material-symbols-outlined text-2xl text-emerald-400">check</span>
                 <span>Hands-On Listing Support</span>
               </li>
             </ul>
-            <button className="w-full py-5 text-xl border-2 border-outline-variant text-on-surface font-bold rounded-xl hover:bg-surface-container-low transition-colors">Get Started</button>
+            <button className="w-full py-5 text-xl bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-black/30">Get Started</button>
           </div>
 
         </div>
