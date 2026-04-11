@@ -1,0 +1,32 @@
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+const PRICE_ID_MAP: Record<string, string | undefined> = {
+  standardMonthly: process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
+  standardAnnual: process.env.STRIPE_STANDARD_ANNUAL_PRICE_ID,
+  priorityMonthly: process.env.STRIPE_PRIORITY_MONTHLY_PRICE_ID,
+  priorityAnnual: process.env.STRIPE_PRIORITY_ANNUAL_PRICE_ID,
+  exclusiveMonthly: process.env.STRIPE_EXCLUSIVE_MONTHLY_PRICE_ID,
+  exclusiveAnnual: process.env.STRIPE_EXCLUSIVE_ANNUAL_PRICE_ID,
+};
+
+export async function POST(request: Request) {
+  const { priceKey } = await request.json();
+
+  const priceId = PRICE_ID_MAP[priceKey];
+  if (!priceId) {
+    return Response.json({ error: 'Invalid price key' }, { status: 400 });
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+  const session = await stripe.checkout.sessions.create({
+    mode: 'subscription',
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${baseUrl}/success`,
+    cancel_url: `${baseUrl}/pricing`,
+  });
+
+  return Response.json({ url: session.url });
+}

@@ -1,10 +1,28 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
+  const router = useRouter();
+
+  async function handleCheckout(priceKey: string) {
+    setLoading(priceKey);
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priceKey }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      router.push(data.url);
+    } else {
+      setLoading(null);
+    }
+  }
 
   const prices = {
     standard: isAnnual ? 81 : 97,
@@ -96,7 +114,13 @@ export default function PricingPage() {
                 <span>24/7 Support</span>
               </li>
             </ul>
-            <button className="w-full py-5 text-xl border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-colors">Get Started</button>
+            <button
+              onClick={() => handleCheckout(isAnnual ? 'standardAnnual' : 'standardMonthly')}
+              disabled={!!loading}
+              className="w-full py-5 text-xl border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-colors disabled:opacity-60"
+            >
+              {loading === (isAnnual ? 'standardAnnual' : 'standardMonthly') ? 'Loading…' : 'Get Started'}
+            </button>
           </div>
 
           {/* Tier 2: Priority — rich green, most popular */}
@@ -154,7 +178,13 @@ export default function PricingPage() {
                 <span>24/7 Support</span>
               </li>
             </ul>
-            <button className="w-full py-5 text-xl bg-white text-emerald-700 font-bold rounded-xl hover:bg-emerald-50 transition-colors shadow-lg">Get Started</button>
+            <button
+              onClick={() => handleCheckout(isAnnual ? 'priorityAnnual' : 'priorityMonthly')}
+              disabled={!!loading}
+              className="w-full py-5 text-xl bg-white text-emerald-700 font-bold rounded-xl hover:bg-emerald-50 transition-colors shadow-lg disabled:opacity-60"
+            >
+              {loading === (isAnnual ? 'priorityAnnual' : 'priorityMonthly') ? 'Loading…' : 'Get Started'}
+            </button>
           </div>
 
           {/* Tier 3: Exclusive — dark premium */}
@@ -215,7 +245,13 @@ export default function PricingPage() {
                 <span>Hands-On Listing Support</span>
               </li>
             </ul>
-            <button className="w-full py-5 text-xl bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-black/30">Get Started</button>
+            <button
+              onClick={() => handleCheckout(isAnnual ? 'exclusiveAnnual' : 'exclusiveMonthly')}
+              disabled={!!loading}
+              className="w-full py-5 text-xl bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-black/30 disabled:opacity-60"
+            >
+              {loading === (isAnnual ? 'exclusiveAnnual' : 'exclusiveMonthly') ? 'Loading…' : 'Get Started'}
+            </button>
           </div>
 
         </div>
