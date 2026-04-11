@@ -1,38 +1,29 @@
-import Stripe from 'stripe';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  console.log('STRIPE_SECRET_KEY present:', !!secretKey);
-  if (!secretKey) {
-    return Response.json({ error: 'Stripe secret key is not configured' }, { status: 500 });
-  }
+const priceMap: Record<string, string | undefined> = {
+  standardMonthly: process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
+  standardAnnual: process.env.STRIPE_STANDARD_ANNUAL_PRICE_ID,
+  priorityMonthly: process.env.STRIPE_PRIORITY_MONTHLY_PRICE_ID,
+  priorityAnnual: process.env.STRIPE_PRIORITY_ANNUAL_PRICE_ID,
+  exclusiveMonthly: process.env.STRIPE_EXCLUSIVE_MONTHLY_PRICE_ID,
+  exclusiveAnnual: process.env.STRIPE_EXCLUSIVE_ANNUAL_PRICE_ID,
+};
 
-  const stripe = new Stripe(secretKey);
-
-  const priceIdMap: Record<string, string | undefined> = {
-    standardMonthly: process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
-    standardAnnual: process.env.STRIPE_STANDARD_ANNUAL_PRICE_ID,
-    priorityMonthly: process.env.STRIPE_PRIORITY_MONTHLY_PRICE_ID,
-    priorityAnnual: process.env.STRIPE_PRIORITY_ANNUAL_PRICE_ID,
-    exclusiveMonthly: process.env.STRIPE_EXCLUSIVE_MONTHLY_PRICE_ID,
-    exclusiveAnnual: process.env.STRIPE_EXCLUSIVE_ANNUAL_PRICE_ID,
-  };
-
+export async function POST(request: NextRequest) {
+  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
   const { priceKey } = await request.json();
+  const priceId = priceMap[priceKey];
 
-  const priceId = priceIdMap[priceKey];
   if (!priceId) {
-    return Response.json({ error: 'Invalid price key' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
   }
-
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${baseUrl}/success`,
-    cancel_url: `${baseUrl}/pricing`,
+    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
+    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
   });
 
-  return Response.json({ url: session.url });
+  return NextResponse.json({ url: session.url });
 }
