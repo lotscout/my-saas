@@ -17,7 +17,7 @@ export default function PricingPage() {
       });
       const data = await res.json();
       if (data.url) {
-        window.location.href = data.url;
+        window.open(data.url, '_blank');
       } else {
         alert(`Checkout error: ${data.error ?? 'No URL returned'}`);
         setLoading(null);
