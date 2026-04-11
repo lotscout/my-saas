@@ -56,10 +56,6 @@ export default function Header() {
         })}
       </nav>
       <div className="flex items-center gap-4">
-        <button className="hidden md:flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-lg font-display font-bold text-sm hover:opacity-90 transition-all shadow-sm">
-          <span className="material-symbols-outlined text-lg">add</span>
-          Create Listing
-        </button>
         <button className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all">
           <span className="material-symbols-outlined">notifications</span>
         </button>
