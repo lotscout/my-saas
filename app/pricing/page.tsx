@@ -9,15 +9,21 @@ export default function PricingPage() {
 
   async function handleCheckout(priceKey: string) {
     setLoading(priceKey);
-    const res = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priceKey }),
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceKey }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(`Checkout error: ${data.error ?? 'No URL returned'}`);
+        setLoading(null);
+      }
+    } catch (err) {
+      alert(`Checkout error: ${err instanceof Error ? err.message : String(err)}`);
       setLoading(null);
     }
   }
