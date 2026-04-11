@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
-  const router = useRouter();
 
   async function handleCheckout(priceKey: string) {
     setLoading(priceKey);
@@ -18,7 +16,7 @@ export default function PricingPage() {
     });
     const data = await res.json();
     if (data.url) {
-      router.push(data.url);
+      window.location.href = data.url;
     } else {
       setLoading(null);
     }
