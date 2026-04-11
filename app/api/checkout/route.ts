@@ -1,7 +1,5 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 const PRICE_ID_MAP: Record<string, string | undefined> = {
   standardMonthly: process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
   standardAnnual: process.env.STRIPE_STANDARD_ANNUAL_PRICE_ID,
@@ -12,6 +10,13 @@ const PRICE_ID_MAP: Record<string, string | undefined> = {
 };
 
 export async function POST(request: Request) {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    return Response.json({ error: 'Stripe secret key is not configured' }, { status: 500 });
+  }
+
+  const stripe = new Stripe(secretKey);
+
   const { priceKey } = await request.json();
 
   const priceId = PRICE_ID_MAP[priceKey];
