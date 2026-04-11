@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 
 const NAV_LINKS = [
+  { label: 'Dashboard', href: '/dashboard' },
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Buyer Directory', href: '/buyer-directory' },
   { label: 'Deal Analysis', href: '/property-analysis' },

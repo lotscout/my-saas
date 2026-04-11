@@ -10,7 +10,7 @@ export default function MarketplacePage() {
         {/* Hero Search / Title Section */}
         <section className="mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
           <div className="max-w-2xl">
-<h1 className="text-6xl font-black text-primary leading-tight mb-4 whitespace-nowrap">Scout Your Next Deal</h1>
+<h1 className="text-6xl font-black text-primary leading-tight mb-4 whitespace-nowrap">Scout Your <span className="text-emerald-600">Next Deal</span></h1>
             <p className="text-slate-500 font-body text-lg leading-relaxed">
               Advanced land acquisition powered by cartographic precision. Browse 2,400+ off-market listings throughout the U.S
             </p>

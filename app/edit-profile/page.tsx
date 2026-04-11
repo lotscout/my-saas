@@ -1,6 +1,10 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 
 export default function EditProfilePage() {
+  const router = useRouter();
   return (
     <div className="bg-surface text-on-surface antialiased font-body">
       <Header />
@@ -17,7 +21,7 @@ export default function EditProfilePage() {
               </div>
               <div className="flex gap-4">
                 <button className="px-6 py-2.5 rounded-xl text-primary font-semibold border border-outline/20 hover:bg-surface-container-high transition-all">Discard Changes</button>
-                <button className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Save Profile</button>
+                <button onClick={() => router.push('/profile')} className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Save Profile</button>
               </div>
             </div>
 

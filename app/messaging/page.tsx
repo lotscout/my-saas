@@ -7,8 +7,9 @@ export default function MessagingPage() {
 
       {/* Main Layout */}
       <main className="flex flex-1 pt-16 h-full overflow-hidden">
+        <div className="max-w-screen-2xl mx-auto px-8 w-full flex h-full overflow-hidden">
         {/* SideNavBar */}
-        <aside className="fixed left-0 top-16 h-[calc(100vh-64px)] flex flex-col border-r border-outline-variant/20 bg-white w-64 shadow-none font-['Inter'] text-sm font-medium">
+        <aside className="flex-none w-64 h-full flex flex-col border-r border-outline-variant/20 bg-white shadow-none font-['Inter'] text-sm font-medium">
           <nav className="flex-1 py-4 space-y-1">
             <a className="flex items-center gap-3 bg-primary/5 text-primary border-r-4 border-primary px-6 py-3 transition-colors" href="#">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>chat_bubble</span>
@@ -48,7 +49,7 @@ export default function MessagingPage() {
         </aside>
 
         {/* Messenger Layout Wrapper */}
-        <section className="flex flex-1 ml-64 overflow-hidden">
+        <section className="flex flex-1 overflow-hidden">
           {/* Conversation List */}
           <div className="w-80 flex flex-col bg-white border-r border-outline-variant/15">
             <div className="p-6">
@@ -337,6 +338,7 @@ export default function MessagingPage() {
             </div>
           </aside>
         </section>
+        </div>
       </main>
     </div>
   );
