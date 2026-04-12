@@ -3,30 +3,35 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 
+const PRIMARY = '#1B4332';
+const PRIORITY_BG = '#f0f8f4';
+const SECTION_BG = '#f2f4f6';
+const PAGE_BG = '#f7f9fb';
+
 const SECTIONS = [
   {
     label: 'Core Access',
     features: [
-      { name: 'Land Marketplace Access', standard: true, priority: true, exclusive: true },
-      { name: 'Buyer Directory Access', standard: true, priority: true, exclusive: true },
-      { name: 'Custom Company Profile', standard: true, priority: true, exclusive: true },
+      { name: 'Land Marketplace Access', standard: true,  priority: true,  exclusive: true  },
+      { name: 'Buyer Directory Access',  standard: true,  priority: true,  exclusive: true  },
+      { name: 'Custom Company Profile',  standard: true,  priority: true,  exclusive: true  },
     ],
   },
   {
     label: 'Analysis Tools',
     features: [
-      { name: 'Lot Analysis Reports', standard: true, priority: true, exclusive: true },
-      { name: 'Property Analysis Reports', standard: true, priority: true, exclusive: true },
-      { name: 'Lot to Buyer Match AI', standard: true, priority: true, exclusive: true },
+      { name: 'Lot Analysis Reports',      standard: true,  priority: true,  exclusive: true  },
+      { name: 'Property Analysis Reports', standard: true,  priority: true,  exclusive: true  },
+      { name: 'Lot to Buyer Match AI',     standard: true,  priority: true,  exclusive: true  },
     ],
   },
   {
     label: 'Growth Features',
     features: [
-      { name: 'Unlimited Listings', standard: false, priority: true, exclusive: true },
-      { name: 'Promoted Lot Requests', standard: false, priority: true, exclusive: true },
-      { name: 'Financing Partners Access', standard: false, priority: true, exclusive: true },
-      { name: 'Hands-On Listing Support', standard: false, priority: false, exclusive: true },
+      { name: 'Unlimited Listings',          standard: false, priority: true,  exclusive: true  },
+      { name: 'Promoted Lot Requests',       standard: false, priority: true,  exclusive: true  },
+      { name: 'Financing Partners Access',   standard: false, priority: true,  exclusive: true  },
+      { name: 'Hands-On Listing Support',    standard: false, priority: false, exclusive: true  },
     ],
   },
   {
@@ -37,11 +42,22 @@ const SECTIONS = [
   },
 ];
 
-const PRIORITY_BG = '#f0f8f4';
-const PRIORITY_BORDER = '#1B4332';
+const totalFeatures = SECTIONS.reduce((n, s) => n + s.features.length, 0);
+
+// Border styles for priority column cells
+const pBorderSides  = { borderLeft: `2px solid ${PRIMARY}`, borderRight: `2px solid ${PRIMARY}` };
+const pBorderTop    = { borderTop: `2px solid ${PRIMARY}` };
+const pBorderBottom = { borderBottom: `2px solid ${PRIMARY}` };
 
 export default function PricingPage() {
+  const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
+
+  const prices = {
+    standard: isAnnual ? 81  : 97,
+    priority: isAnnual ? 274 : 329,
+    exclusive: isAnnual ? 665 : 799,
+  };
 
   async function handleCheckout(priceKey: string) {
     setLoading(priceKey);
@@ -64,166 +80,254 @@ export default function PricingPage() {
     }
   }
 
+  const priceKey = (tier: string) =>
+    `${tier}${isAnnual ? 'Annual' : 'Monthly'}`;
+
+  let featureIndex = 0;
+
   return (
-    <div className="bg-background text-on-surface font-body">
+    <div style={{ background: PAGE_BG }} className="min-h-screen font-['Inter']">
       <Header />
 
-      <main className="pt-20 pb-6 px-6 md:px-10 max-w-[1100px] mx-auto">
-        <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr>
-                {/* Feature column header — empty */}
-                <th className="w-[35%] p-0 border-r border-slate-200" />
+      <main className="pt-20 pb-8 px-4 md:px-8 max-w-[960px] mx-auto">
 
-                {/* Standard card header */}
-                <th className="w-[21.66%] p-0 border-r border-slate-200 align-top">
+        {/* Billing Toggle */}
+        <div className="flex flex-col items-center gap-2 mb-5">
+          <div className="bg-white border border-slate-200 rounded-full p-1 flex items-center shadow-sm">
+            <button
+              onClick={() => setIsAnnual(false)}
+              className="px-5 py-1.5 rounded-full text-xs font-bold transition-all"
+              style={!isAnnual ? { background: PRIMARY, color: '#fff' } : { color: '#64748b' }}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setIsAnnual(true)}
+              className="px-5 py-1.5 rounded-full text-xs font-bold transition-all"
+              style={isAnnual ? { background: PRIMARY, color: '#fff' } : { color: '#64748b' }}
+            >
+              Annual
+            </button>
+          </div>
+          <span
+            className="text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full"
+            style={{ background: PRIORITY_BG, color: PRIMARY }}
+          >
+            Get 2 months free with annual billing
+          </span>
+        </div>
+
+        {/* Unified pricing table */}
+        {/* overflow:visible so the "Most Popular" badge can float above the table */}
+        <div className="rounded-xl border border-slate-200 shadow-sm bg-white" style={{ overflow: 'visible' }}>
+          <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+            <thead>
+
+              {/* Badge row — only priority cell has content */}
+              <tr>
+                <td style={{ width: '35%',    padding: 0, border: 0 }} />
+                <td style={{ width: '21.67%', padding: 0, border: 0 }} />
+                <td style={{ width: '21.67%', padding: '0 0 6px 0', border: 0, textAlign: 'center' }}>
+                  <span
+                    className="inline-block text-white text-[10px] font-black uppercase tracking-widest px-3 py-0.5 rounded-full whitespace-nowrap"
+                    style={{ background: PRIMARY }}
+                  >
+                    Most Popular
+                  </span>
+                </td>
+                <td style={{ width: '21.67%', padding: 0, border: 0 }} />
+              </tr>
+
+              {/* Card header row */}
+              <tr>
+                {/* Empty feature-label header */}
+                <th style={{ padding: 0, borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }} />
+
+                {/* Standard */}
+                <th style={{ padding: 0, verticalAlign: 'top', borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
                   <div className="p-4 text-left">
-                    <p className="text-xs font-bold text-slate-700 mb-0.5">Standard</p>
-                    <p className="text-[11px] text-slate-400 mb-2">For first-time buyers and sellers</p>
+                    <p className="text-xs font-bold mb-0.5 font-['Manrope']" style={{ color: PRIMARY }}>Standard</p>
+                    <p className="text-[11px] mb-3" style={{ color: '#94a3b8' }}>For first-time buyers and sellers</p>
                     <div className="flex items-baseline gap-0.5 mb-0.5">
-                      <span className="text-xl font-extrabold text-slate-800">$97</span>
-                      <span className="text-slate-400 text-xs">/mo</span>
+                      <span className="text-2xl font-extrabold font-['Manrope']" style={{ color: '#1e293b' }}>${prices.standard}</span>
+                      <span className="text-xs" style={{ color: '#94a3b8' }}>/mo</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mb-3">Billed monthly</p>
+                    <p className="text-[10px] mb-3" style={{ color: '#94a3b8' }}>Billed {isAnnual ? 'annually' : 'monthly'}</p>
                     <button
-                      onClick={() => handleCheckout('standardMonthly')}
+                      onClick={() => handleCheckout(priceKey('standard'))}
                       disabled={!!loading}
-                      className="w-full py-1.5 text-xs font-bold border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-60"
+                      className="w-full py-1.5 text-xs font-bold rounded-lg transition-colors disabled:opacity-60"
+                      style={{ border: `1.5px solid #cbd5e1`, color: '#334155', background: 'transparent' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
-                      {loading === 'standardMonthly' ? 'Loading…' : 'Get Started'}
+                      {loading === priceKey('standard') ? 'Loading…' : 'Get Started'}
                     </button>
                   </div>
                 </th>
 
-                {/* Priority card header */}
-                <th
-                  className="w-[21.66%] p-0 border-r align-top"
-                  style={{ background: PRIORITY_BG, borderColor: PRIORITY_BORDER }}
-                >
-                  <div
-                    className="p-4 text-left border-x-2 border-t-2 rounded-t-xl"
-                    style={{ borderColor: PRIORITY_BORDER }}
-                  >
-                    <span
-                      className="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full mb-2 text-white"
-                      style={{ background: PRIORITY_BORDER }}
-                    >
-                      Most Popular
-                    </span>
-                    <p className="text-xs font-bold mb-0.5" style={{ color: PRIORITY_BORDER }}>Priority</p>
-                    <p className="text-[11px] text-emerald-700/60 mb-2">For active, experienced buyers and sellers</p>
+                {/* Priority */}
+                <th style={{
+                  padding: 0,
+                  verticalAlign: 'top',
+                  background: PRIORITY_BG,
+                  ...pBorderSides,
+                  ...pBorderTop,
+                  borderBottom: `1px solid ${PRIMARY}`,
+                }}>
+                  <div className="p-4 text-left">
+                    <p className="text-xs font-bold mb-0.5 font-['Manrope']" style={{ color: PRIMARY }}>Priority</p>
+                    <p className="text-[11px] mb-3" style={{ color: '#4d7a64' }}>For active, experienced buyers and sellers</p>
                     <div className="flex items-baseline gap-0.5 mb-0.5">
-                      <span className="text-xl font-extrabold" style={{ color: PRIORITY_BORDER }}>$329</span>
-                      <span className="text-xs text-emerald-700/60">/mo</span>
+                      <span className="text-2xl font-extrabold font-['Manrope']" style={{ color: PRIMARY }}>${prices.priority}</span>
+                      <span className="text-xs" style={{ color: '#4d7a64' }}>/mo</span>
                     </div>
-                    <p className="text-[10px] text-emerald-700/60 mb-3">Billed monthly</p>
+                    <p className="text-[10px] mb-3" style={{ color: '#4d7a64' }}>Billed {isAnnual ? 'annually' : 'monthly'}</p>
                     <button
-                      onClick={() => handleCheckout('priorityMonthly')}
+                      onClick={() => handleCheckout(priceKey('priority'))}
                       disabled={!!loading}
-                      className="w-full py-1.5 text-xs font-bold text-white rounded-lg transition-colors disabled:opacity-60"
-                      style={{ background: PRIORITY_BORDER }}
+                      className="w-full py-1.5 text-xs font-bold rounded-lg transition-opacity disabled:opacity-60"
+                      style={{ background: PRIMARY, color: '#fff', border: 'none' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
                     >
-                      {loading === 'priorityMonthly' ? 'Loading…' : 'Get Started'}
+                      {loading === priceKey('priority') ? 'Loading…' : 'Get Started'}
                     </button>
                   </div>
                 </th>
 
-                {/* Exclusive card header */}
-                <th className="w-[21.66%] p-0 align-top">
-                  <div className="p-4 text-left bg-emerald-950 rounded-tr-xl">
-                    <p className="text-xs font-bold text-emerald-50 mb-0.5">Exclusive</p>
-                    <p className="text-[11px] text-emerald-400/70 mb-2">For high-volume sellers and firms</p>
+                {/* Exclusive */}
+                <th style={{ padding: 0, verticalAlign: 'top', borderLeft: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
+                  <div className="p-4 text-left">
+                    <p className="text-xs font-bold mb-0.5 font-['Manrope']" style={{ color: PRIMARY }}>Exclusive</p>
+                    <p className="text-[11px] mb-3" style={{ color: '#94a3b8' }}>For high-volume sellers and firms</p>
                     <div className="flex items-baseline gap-0.5 mb-0.5">
-                      <span className="text-xl font-extrabold text-emerald-50">$799</span>
-                      <span className="text-xs text-emerald-400/70">/mo</span>
+                      <span className="text-2xl font-extrabold font-['Manrope']" style={{ color: '#1e293b' }}>${prices.exclusive}</span>
+                      <span className="text-xs" style={{ color: '#94a3b8' }}>/mo</span>
                     </div>
-                    <p className="text-[10px] text-emerald-400/70 mb-3">Billed monthly</p>
+                    <p className="text-[10px] mb-3" style={{ color: '#94a3b8' }}>Billed {isAnnual ? 'annually' : 'monthly'}</p>
                     <button
-                      onClick={() => handleCheckout('exclusiveMonthly')}
+                      onClick={() => handleCheckout(priceKey('exclusive'))}
                       disabled={!!loading}
-                      className="w-full py-1.5 text-xs font-bold bg-emerald-700 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-60"
+                      className="w-full py-1.5 text-xs font-bold rounded-lg transition-colors disabled:opacity-60"
+                      style={{ border: `1.5px solid #cbd5e1`, color: '#334155', background: 'transparent' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
-                      {loading === 'exclusiveMonthly' ? 'Loading…' : 'Get Started'}
+                      {loading === priceKey('exclusive') ? 'Loading…' : 'Get Started'}
                     </button>
                   </div>
                 </th>
               </tr>
+
             </thead>
 
             <tbody>
-              {SECTIONS.map((section, si) => (
-                <>
-                  {/* Section header row */}
-                  <tr key={`s-${si}`} className="border-t border-slate-200">
-                    <td className="py-1 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 border-r border-slate-200">
-                      {section.label}
-                    </td>
-                    <td className="py-1 bg-slate-50 border-r border-slate-200" />
-                    <td
-                      className="py-1 border-x-2"
-                      style={{ background: PRIORITY_BG, borderColor: PRIORITY_BORDER }}
-                    >
-                      <span
-                        className="block text-center text-[10px] font-black uppercase tracking-widest text-white mx-2 rounded"
-                        style={{ background: PRIORITY_BORDER }}
+              {SECTIONS.map((section, si) => {
+                const isLastSection = si === SECTIONS.length - 1;
+                return (
+                  <>
+                    {/* Section header — uniform across all columns */}
+                    <tr key={`s-${si}`}>
+                      <td
+                        colSpan={4}
+                        style={{
+                          background: SECTION_BG,
+                          borderTop: '1px solid #e2e8f0',
+                          padding: '4px 16px',
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                          color: '#94a3b8',
+                        }}
                       >
                         {section.label}
-                      </span>
-                    </td>
-                    <td className="py-1 bg-slate-50" />
-                  </tr>
-
-                  {/* Feature rows */}
-                  {section.features.map((feature, fi) => (
-                    <tr
-                      key={`f-${si}-${fi}`}
-                      className="border-t border-slate-100"
-                    >
-                      <td className="py-1.5 px-4 text-slate-500 font-medium border-r border-slate-200">
-                        {feature.name}
-                      </td>
-                      <td className="py-1.5 text-center border-r border-slate-200">
-                        {feature.standard
-                          ? <span className="material-symbols-outlined text-sm text-emerald-500">check_circle</span>
-                          : <span className="material-symbols-outlined text-sm text-slate-300">remove</span>}
-                      </td>
-                      <td
-                        className="py-1.5 text-center border-x-2"
-                        style={{ background: PRIORITY_BG, borderColor: PRIORITY_BORDER }}
-                      >
-                        {feature.priority
-                          ? <span className="material-symbols-outlined text-sm" style={{ color: PRIORITY_BORDER }}>check_circle</span>
-                          : <span className="material-symbols-outlined text-sm text-slate-400">remove</span>}
-                      </td>
-                      <td className="py-1.5 text-center bg-emerald-950/[0.03]">
-                        {feature.exclusive
-                          ? <span className="material-symbols-outlined text-sm text-emerald-600">check_circle</span>
-                          : <span className="material-symbols-outlined text-sm text-slate-300">remove</span>}
                       </td>
                     </tr>
-                  ))}
-                </>
-              ))}
+
+                    {/* Feature rows */}
+                    {section.features.map((feature, fi) => {
+                      featureIndex++;
+                      const isLast = isLastSection && fi === section.features.length - 1;
+                      return (
+                        <tr key={`f-${si}-${fi}`}>
+                          {/* Feature name */}
+                          <td style={{
+                            padding: '7px 16px',
+                            borderTop: '1px solid #f1f5f9',
+                            borderRight: '1px solid #e2e8f0',
+                            color: '#64748b',
+                            fontWeight: 500,
+                            fontSize: '13px',
+                            ...(isLast ? { borderBottomLeftRadius: '12px' } : {}),
+                          }}>
+                            {feature.name}
+                          </td>
+
+                          {/* Standard */}
+                          <td style={{
+                            padding: '7px 0',
+                            borderTop: '1px solid #f1f5f9',
+                            borderRight: '1px solid #e2e8f0',
+                            textAlign: 'center',
+                          }}>
+                            {feature.standard
+                              ? <span className="material-symbols-outlined text-sm" style={{ color: '#22c55e' }}>check_circle</span>
+                              : <span className="material-symbols-outlined text-sm" style={{ color: '#cbd5e1' }}>remove</span>}
+                          </td>
+
+                          {/* Priority */}
+                          <td style={{
+                            padding: '7px 0',
+                            borderTop: '1px solid #d1e8dc',
+                            textAlign: 'center',
+                            background: PRIORITY_BG,
+                            ...pBorderSides,
+                            ...(isLast ? pBorderBottom : {}),
+                          }}>
+                            {feature.priority
+                              ? <span className="material-symbols-outlined text-sm" style={{ color: PRIMARY }}>check_circle</span>
+                              : <span className="material-symbols-outlined text-sm" style={{ color: '#a7c4b5' }}>remove</span>}
+                          </td>
+
+                          {/* Exclusive */}
+                          <td style={{
+                            padding: '7px 0',
+                            borderTop: '1px solid #f1f5f9',
+                            borderLeft: '1px solid #e2e8f0',
+                            textAlign: 'center',
+                            ...(isLast ? { borderBottomRightRadius: '12px' } : {}),
+                          }}>
+                            {feature.exclusive
+                              ? <span className="material-symbols-outlined text-sm" style={{ color: '#22c55e' }}>check_circle</span>
+                              : <span className="material-symbols-outlined text-sm" style={{ color: '#cbd5e1' }}>remove</span>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </>
+                );
+              })}
             </tbody>
           </table>
         </div>
+
       </main>
 
       {/* Footer */}
-      <footer className="bg-emerald-950 text-emerald-50 w-full py-20 px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
+      <footer className="w-full py-12 px-8" style={{ background: PRIMARY }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           <div>
-            <div className="text-3xl font-bold text-emerald-50 mb-6 tracking-tighter font-headline">LotScout</div>
-            <p className="font-body text-lg tracking-normal text-emerald-300/60 max-w-sm">&copy; 2024 LotScout Digital Cartography. All rights reserved.</p>
+            <div className="text-2xl font-bold text-white mb-3 tracking-tight font-['Manrope']">LotScout</div>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>&copy; 2024 LotScout Digital Cartography. All rights reserved.</p>
           </div>
-          <div className="flex flex-wrap gap-x-12 gap-y-6 md:justify-end">
-            <a className="font-body text-lg font-medium tracking-normal text-emerald-300/60 hover:text-emerald-50 hover:underline decoration-emerald-500/50 transition-opacity" href="#">Terms of Service</a>
-            <a className="font-body text-lg font-medium tracking-normal text-emerald-300/60 hover:text-emerald-50 hover:underline decoration-emerald-500/50 transition-opacity" href="#">Privacy Policy</a>
-            <a className="font-body text-lg font-medium tracking-normal text-emerald-300/60 hover:text-emerald-50 hover:underline decoration-emerald-500/50 transition-opacity" href="#">Data Sources</a>
-            <a className="font-body text-lg font-medium tracking-normal text-emerald-300/60 hover:text-emerald-50 hover:underline decoration-emerald-500/50 transition-opacity" href="#">Contact Support</a>
+          <div className="flex flex-wrap gap-x-8 gap-y-4 md:justify-end">
+            {['Terms of Service', 'Privacy Policy', 'Data Sources', 'Contact Support'].map(link => (
+              <a key={link} className="text-sm font-medium transition-opacity hover:opacity-100" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }} href="#">
+                {link}
+              </a>
+            ))}
           </div>
         </div>
       </footer>
