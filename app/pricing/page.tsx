@@ -102,7 +102,7 @@ export default function PricingPage() {
           <div style={GRID} className="border-b border-outline-variant/10">
 
             {/* Top-left: billing toggle */}
-            <div className="p-8 flex flex-col justify-center gap-3">
+            <div className="p-5 flex flex-col justify-center gap-3">
               <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full self-start">
                 <button
                   onClick={() => setIsAnnual(false)}
@@ -128,55 +128,57 @@ export default function PricingPage() {
             </div>
 
             {/* Standard */}
-            <div className="p-8 flex flex-col border-l border-outline-variant/10">
+            <div className="p-5 flex flex-col border-l border-outline-variant/10">
               <span className="text-secondary font-bold text-sm tracking-widest mb-2">STANDARD</span>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-6">{billingLabel}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading}
-                className="w-full py-3 px-4 border border-outline text-primary font-bold rounded-xl hover:bg-surface-container-low transition-all active:scale-95 disabled:opacity-60"
+                className="mt-auto w-full py-3 px-4 border border-outline text-primary font-bold rounded-xl hover:bg-surface-container-low transition-all active:scale-95 disabled:opacity-60"
               >
                 {loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
 
             {/* Priority */}
-            <div className="p-8 flex flex-col bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container relative">
+            <div className="p-5 flex flex-col bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container relative">
               <div className="absolute -top-px left-0 right-0 h-1 bg-primary-container" />
-              <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">
-                Most Popular
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-primary-container font-bold text-sm tracking-widest">PRIORITY</span>
+                <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">
+                  Most Popular
+                </span>
               </div>
-              <span className="text-primary-container font-bold text-sm tracking-widest mb-2 mt-4">PRIORITY</span>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.priority}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-6">{billingLabel}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading}
-                className="w-full py-3 px-4 bg-primary text-on-primary font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-60"
+                className="mt-auto w-full py-3 px-4 bg-primary text-on-primary font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-60"
               >
                 {loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
 
             {/* Exclusive */}
-            <div className="p-8 flex flex-col border-l border-outline-variant/10">
+            <div className="p-5 flex flex-col border-l border-outline-variant/10">
               <span className="text-secondary font-bold text-sm tracking-widest mb-2">EXCLUSIVE</span>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-6">{billingLabel}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading}
-                className="w-full py-3 px-4 border border-outline text-primary font-bold rounded-xl hover:bg-surface-container-low transition-all active:scale-95 disabled:opacity-60"
+                className="mt-auto w-full py-3 px-4 border border-outline text-primary font-bold rounded-xl hover:bg-surface-container-low transition-all active:scale-95 disabled:opacity-60"
               >
                 {loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
               </button>
@@ -188,7 +190,7 @@ export default function PricingPage() {
             <div key={si}>
               {/* Section header */}
               <div style={GRID} className="bg-surface-container-low border-t border-outline-variant/10">
-                <div className="p-4 pl-8 col-span-4 flex items-center">
+                <div className="py-1.5 pl-8 pr-4 col-span-4 flex items-center">
                   <span className="text-[10px] font-bold text-secondary tracking-widest uppercase">
                     {section.label}
                   </span>
@@ -202,16 +204,16 @@ export default function PricingPage() {
                   style={GRID}
                   className={fi > 0 ? 'border-t border-outline-variant/5' : ''}
                 >
-                  <div className="p-4 pl-8 text-sm text-secondary flex items-center">
+                  <div className="py-1 pl-8 pr-4 text-sm text-secondary flex items-center">
                     {feature.name}
                   </div>
-                  <div className="p-4 flex justify-center items-center border-l border-outline-variant/10">
+                  <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
                     {feature.standard ? <Check muted /> : <Dash />}
                   </div>
-                  <div className="p-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
+                  <div className="py-1 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
                     {feature.priority ? <Check /> : <Dash />}
                   </div>
-                  <div className="p-4 flex justify-center items-center border-l border-outline-variant/10">
+                  <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
                     {feature.exclusive ? <Check /> : <Dash />}
                   </div>
                 </div>
