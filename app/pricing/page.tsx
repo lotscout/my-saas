@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 
-type Tier = 'standard' | 'priority' | 'exclusive';
-
 const SECTIONS = [
   {
     label: 'Core Access',
@@ -56,7 +54,6 @@ function Cell({ included }: { included: boolean }) {
 }
 
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
 
   async function handleCheckout(priceKey: string) {
@@ -80,24 +77,13 @@ export default function PricingPage() {
     }
   }
 
-  const prices = {
-    standard: isAnnual ? 81 : 97,
-    priority: isAnnual ? 274 : 329,
-    exclusive: isAnnual ? 665 : 799,
-  };
-  const billingLabel = isAnnual ? 'Billed annually' : 'Billed monthly';
-
-  const tiers: { key: Tier; monthlyKey: string; annualKey: string; label: string; desc: string }[] = [
-    { key: 'standard', monthlyKey: 'standardMonthly', annualKey: 'standardAnnual', label: 'Standard', desc: 'For first-time buyers and sellers' },
-    { key: 'priority', monthlyKey: 'priorityMonthly', annualKey: 'priorityAnnual', label: 'Priority', desc: 'For active, experienced buyers and sellers' },
-    { key: 'exclusive', monthlyKey: 'exclusiveMonthly', annualKey: 'exclusiveAnnual', label: 'Exclusive', desc: 'For high-volume sellers and firms' },
-  ];
+  const prices = { standard: 97, priority: 329, exclusive: 799 };
 
   return (
     <div className="bg-background text-on-surface selection:bg-primary-container selection:text-on-primary-container font-body">
       <Header />
 
-      <main className="pt-20 pb-4 px-6 md:px-12 max-w-[1200px] mx-auto">
+      <main className="pt-24 pb-4 px-6 md:px-12 max-w-[1200px] mx-auto">
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3 items-stretch">
@@ -110,13 +96,13 @@ export default function PricingPage() {
               <span className="text-2xl font-extrabold text-slate-800">${prices.standard}</span>
               <span className="text-slate-400 text-sm font-medium">/mo</span>
             </div>
-            <p className="text-slate-400 text-xs mb-2">{billingLabel}</p>
+            <p className="text-slate-400 text-xs mb-2">Billed monthly</p>
             <button
-              onClick={() => handleCheckout(isAnnual ? 'standardAnnual' : 'standardMonthly')}
+              onClick={() => handleCheckout('standardMonthly')}
               disabled={!!loading}
               className="mt-auto w-full py-1.5 text-xs border-2 border-slate-300 text-slate-700 font-bold rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-60"
             >
-              {loading === (isAnnual ? 'standardAnnual' : 'standardMonthly') ? 'Loading…' : 'Get Started'}
+              {loading === 'standardMonthly' ? 'Loading…' : 'Get Started'}
             </button>
           </div>
 
@@ -131,13 +117,13 @@ export default function PricingPage() {
               <span className="text-2xl font-extrabold text-white">${prices.priority}</span>
               <span className="text-emerald-200 text-sm font-medium">/mo</span>
             </div>
-            <p className="text-emerald-200 text-xs mb-2">{billingLabel}</p>
+            <p className="text-emerald-200 text-xs mb-2">Billed monthly</p>
             <button
-              onClick={() => handleCheckout(isAnnual ? 'priorityAnnual' : 'priorityMonthly')}
+              onClick={() => handleCheckout('priorityMonthly')}
               disabled={!!loading}
               className="mt-auto w-full py-1.5 text-xs bg-white text-emerald-700 font-bold rounded-lg hover:bg-emerald-50 transition-colors shadow-lg disabled:opacity-60"
             >
-              {loading === (isAnnual ? 'priorityAnnual' : 'priorityMonthly') ? 'Loading…' : 'Get Started'}
+              {loading === 'priorityMonthly' ? 'Loading…' : 'Get Started'}
             </button>
           </div>
 
@@ -149,33 +135,16 @@ export default function PricingPage() {
               <span className="text-2xl font-extrabold text-emerald-50">${prices.exclusive}</span>
               <span className="text-emerald-400 text-sm font-medium">/mo</span>
             </div>
-            <p className="text-emerald-400 text-xs mb-2">{billingLabel}</p>
+            <p className="text-emerald-400 text-xs mb-2">Billed monthly</p>
             <button
-              onClick={() => handleCheckout(isAnnual ? 'exclusiveAnnual' : 'exclusiveMonthly')}
+              onClick={() => handleCheckout('exclusiveMonthly')}
               disabled={!!loading}
               className="mt-auto w-full py-1.5 text-xs bg-emerald-700 text-white font-bold rounded-lg hover:bg-emerald-600 transition-colors shadow-lg shadow-black/30 disabled:opacity-60"
             >
-              {loading === (isAnnual ? 'exclusiveAnnual' : 'exclusiveMonthly') ? 'Loading…' : 'Get Started'}
+              {loading === 'exclusiveMonthly' ? 'Loading…' : 'Get Started'}
             </button>
           </div>
 
-        </div>
-
-        {/* Billing Toggle */}
-        <div className="flex flex-col items-center gap-1.5 mb-3">
-          <div className="bg-surface-container-low p-1 rounded-full flex items-center gap-1 border border-outline/10">
-            <button
-              className={`px-6 py-1 rounded-full text-xs font-bold transition-all ${!isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-on-surface-variant hover:text-primary'}`}
-              onClick={() => setIsAnnual(false)}
-            >Monthly</button>
-            <button
-              className={`px-6 py-1 rounded-full text-xs font-bold transition-all ${isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-on-surface-variant hover:text-primary'}`}
-              onClick={() => setIsAnnual(true)}
-            >Annual</button>
-          </div>
-          <span className="text-primary-container font-bold text-xs tracking-widest uppercase bg-primary-fixed px-3 py-1 rounded-full">
-            Get two months free when switching to annual billing
-          </span>
         </div>
 
         {/* Feature Comparison Table */}
