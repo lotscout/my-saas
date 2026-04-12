@@ -1,4 +1,8 @@
+'use client';
+
 import Header from '@/components/Header';
+
+const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
 export default function DashboardPage() {
   return (
@@ -14,7 +18,7 @@ export default function DashboardPage() {
             <h1 className="text-4xl font-extrabold tracking-tighter text-primary font-headline">Good morning, Alexander</h1>
           </div>
           <div className="text-right">
-            <p className="text-secondary font-semibold font-body">Tuesday, May 14</p>
+            <p className="text-secondary font-semibold font-body">{today}</p>
             <p className="text-on-surface-variant text-sm">Central Texas Market • Open</p>
           </div>
         </header>
