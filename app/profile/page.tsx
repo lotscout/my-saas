@@ -31,7 +31,7 @@ export default function ProfilePage() {
                     Verified Seller
                   </span>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-extrabold text-primary font-headline">Alex Rivers</h1>
+                <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">Alex <span className="text-emerald-600">Rivers</span></h1>
                 <p className="text-secondary text-lg md:text-xl max-w-2xl font-medium leading-relaxed">
                   Principal Strategist at Terra Capital Group &bull; 15+ Years in Utility-Scale Solar &amp; Residential Land Acquisition.
                 </p>

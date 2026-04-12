@@ -15,7 +15,7 @@ export default function DashboardPage() {
         <header className="flex justify-between items-end mb-10">
           <div>
             <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Overview</p>
-            <h1 className="text-3xl font-extrabold tracking-tighter text-primary font-headline">Good morning, Alexander</h1>
+            <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">Good Morning, <span className="text-emerald-600">Alexander</span></h1>
           </div>
           <div className="text-right">
             <p className="text-secondary font-semibold font-body">{today}</p>

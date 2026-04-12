@@ -96,6 +96,12 @@ export default function PricingPage() {
       <Header />
 
       <main className="flex-grow pt-24 pb-20 px-6 max-w-7xl mx-auto w-full">
+        {/* Page heading */}
+        <header className="mb-8">
+          <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Plans</p>
+          <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">Platform <span className="text-emerald-600">Pricing</span></h1>
+        </header>
+
         <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
 
           {/* ── Column headers ── */}

@@ -11,7 +11,7 @@ export default function PropertyAnalysisPage() {
         <header className="mb-6">
           <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Tools</p>
           <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
-            Run Professional <span className="text-emerald-600">Deal Analysis</span>
+            Deal <span className="text-emerald-600">Analysis</span>
           </h1>
         </header>
 
