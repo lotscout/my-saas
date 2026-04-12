@@ -121,11 +121,11 @@ export default function PricingPage() {
           </div>
 
           {/* Priority */}
-          <div className="bg-emerald-600 border-2 border-emerald-400 rounded-xl p-3 flex flex-col relative shadow-2xl shadow-emerald-700/40 scale-105 z-10">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-950 text-emerald-50 text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-[0.15em] shadow-lg whitespace-nowrap">
+          <div className="bg-emerald-600 border-2 border-emerald-400 rounded-xl p-3 flex flex-col shadow-2xl shadow-emerald-700/40 scale-105 z-10">
+            <div className="self-start bg-emerald-950 text-emerald-50 text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-[0.15em] mb-1.5 whitespace-nowrap">
               Most Popular
             </div>
-            <h3 className="text-lg font-extrabold text-white mb-0.5 font-headline mt-2.5">Priority</h3>
+            <h3 className="text-lg font-extrabold text-white mb-0.5 font-headline">Priority</h3>
             <p className="text-emerald-100/80 text-xs mb-2">For active, experienced buyers and sellers</p>
             <div className="flex items-baseline gap-1 mb-0.5">
               <span className="text-2xl font-extrabold text-white">${prices.priority}</span>
