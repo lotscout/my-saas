@@ -16,7 +16,7 @@ export default function EditProfilePage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-outline-variant/30 pb-8">
               <div className="space-y-1">
-                <h1 className="text-4xl font-headline font-extrabold text-primary tracking-tight">Edit Profile</h1>
+                <h1 className="text-3xl font-headline font-extrabold text-primary tracking-tight">Edit Profile</h1>
                 <p className="text-secondary font-medium">Update your digital identity and investment preferences on the LotScout network.</p>
               </div>
               <div className="flex gap-4">

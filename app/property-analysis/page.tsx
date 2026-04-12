@@ -9,7 +9,7 @@ export default function PropertyAnalysisPage() {
         <section className="min-h-[870px] flex flex-col items-center justify-center pt-24 px-6 bg-white">
           <div className="w-full max-w-5xl text-center space-y-12">
             <div className="space-y-6">
-              <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-primary tracking-tighter max-w-4xl mx-auto leading-tight">
+              <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter max-w-4xl mx-auto leading-tight">
                 Run Professional{' '}
                 <div>
                   <span className="text-emerald-600">Deal Analysis</span>

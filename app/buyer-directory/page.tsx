@@ -11,7 +11,7 @@ export default function BuyerDirectoryPage() {
           {/* Hero Header Section */}
           <header className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
             <div className="max-w-2xl">
-              <h1 className="text-5xl md:text-6xl font-black text-[#1B4332] leading-[0.9] mb-6">
+              <h1 className="text-4xl md:text-5xl font-black text-[#1B4332] leading-[0.9] mb-6">
                 Buyer <span className="text-emerald-600">Directory</span>
               </h1>
               <p className="text-slate-600 text-lg font-body max-w-lg leading-relaxed">
