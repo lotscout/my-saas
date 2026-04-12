@@ -41,10 +41,36 @@ export default function PropertyAnalysisPage() {
           </div>
         </div>
 
-        {/* Two-column layout: sample report (left 60%) + how it works (right 40%) */}
+        {/* Two-column layout: how it works (left 40%) + sample report (right 60%) */}
         <div className="mt-8 flex flex-col lg:flex-row gap-8 items-start">
 
-          {/* ── Left: Sample Report Mockup (60%) ── */}
+          {/* ── Left: How it works (40%) ── */}
+          <div className="w-full lg:w-[40%] lg:sticky lg:top-28">
+            <h2 className="font-headline text-3xl font-extrabold text-primary tracking-tight mb-2">How it works</h2>
+            <p className="text-secondary text-sm leading-relaxed mb-8">
+              LotScout uses advanced data and mapping technology to quickly analyze land, so you can confidently make smarter buying and selling decisions.
+            </p>
+            <div className="space-y-4">
+              {[
+                { icon: 'input',        step: '01', title: 'Input Property',              body: 'Search by address, parcel ID, or simply drop a pin on our high-resolution topographic map interface.' },
+                { icon: 'auto_awesome', step: '02', title: 'AI-Powered Comparison',       body: 'Our engine instantly scans thousands of recent transactions and environmental data points to calculate true market value.' },
+                { icon: 'description',  step: '03', title: 'Export Comprehensive Report', body: 'Download a detailed PDF report containing zoning insights, risk assessments, and comparable property maps.' },
+              ].map(({ icon, step, title, body }) => (
+                <div key={step} className="flex gap-5 bg-surface-container-low p-6 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
+                  <div className="flex-none w-12 h-12 bg-primary text-on-primary rounded-lg flex items-center justify-center shadow-inner">
+                    <span className="material-symbols-outlined text-xl">{icon}</span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest mb-0.5">Step {step}</p>
+                    <h3 className="font-headline text-base font-bold text-primary mb-1">{title}</h3>
+                    <p className="text-secondary leading-relaxed text-sm">{body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Right: Sample Report Mockup (60%) ── */}
           <div className="w-full lg:w-[60%] rounded-2xl border border-outline-variant/30 overflow-hidden shadow-xl">
 
             {/* Report header bar */}
@@ -193,32 +219,6 @@ export default function PropertyAnalysisPage() {
                 </div>
 
               </div>
-            </div>
-          </div>
-
-          {/* ── Right: How it works (40%) ── */}
-          <div className="w-full lg:w-[40%] lg:sticky lg:top-28">
-            <h2 className="font-headline text-3xl font-extrabold text-primary tracking-tight mb-2">How it works</h2>
-            <p className="text-secondary text-sm leading-relaxed mb-8">
-              LotScout uses advanced data and mapping technology to quickly analyze land, so you can confidently make smarter buying and selling decisions.
-            </p>
-            <div className="space-y-4">
-              {[
-                { icon: 'input',        step: '01', title: 'Input Property',              body: 'Search by address, parcel ID, or simply drop a pin on our high-resolution topographic map interface.' },
-                { icon: 'auto_awesome', step: '02', title: 'AI-Powered Comparison',       body: 'Our engine instantly scans thousands of recent transactions and environmental data points to calculate true market value.' },
-                { icon: 'description',  step: '03', title: 'Export Comprehensive Report', body: 'Download a detailed PDF report containing zoning insights, risk assessments, and comparable property maps.' },
-              ].map(({ icon, step, title, body }) => (
-                <div key={step} className="flex gap-5 bg-surface-container-low p-6 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
-                  <div className="flex-none w-12 h-12 bg-primary text-on-primary rounded-lg flex items-center justify-center shadow-inner">
-                    <span className="material-symbols-outlined text-xl">{icon}</span>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest mb-0.5">Step {step}</p>
-                    <h3 className="font-headline text-base font-bold text-primary mb-1">{title}</h3>
-                    <p className="text-secondary leading-relaxed text-sm">{body}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
