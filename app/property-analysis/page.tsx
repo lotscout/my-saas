@@ -42,7 +42,7 @@ export default function PropertyAnalysisPage() {
         </div>
 
         {/* Two-column layout: how it works (left 40%) + sample report (right 60%) */}
-        <div className="mt-8 flex flex-col lg:flex-row gap-8 items-start">
+        <div className="mt-16 flex flex-col lg:flex-row gap-20 items-start">
 
           {/* ── Left: How it works (40%) ── */}
           <div className="w-full lg:w-[40%] lg:sticky lg:top-28">
@@ -69,6 +69,9 @@ export default function PropertyAnalysisPage() {
               ))}
             </div>
           </div>
+
+          {/* ── Divider ── */}
+          <div className="hidden lg:block w-px self-stretch bg-outline-variant/30" />
 
           {/* ── Right: Sample Report Mockup (60%) ── */}
           <div className="w-full lg:w-[60%] rounded-2xl border border-outline-variant/30 overflow-hidden shadow-xl">
