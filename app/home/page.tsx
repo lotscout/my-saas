@@ -51,17 +51,17 @@ export default function HomePage() {
         </div>
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="max-w-4xl">
-            <h1 className="font-headline text-6xl md:text-8xl font-extrabold text-white tracking-tight leading-[1.05] mb-8">
+            <h1 className="font-headline text-7xl md:text-9xl font-extrabold text-white tracking-tight leading-[1.05] mb-8">
               Stop Waiting.<br />Start Closing.
             </h1>
-            <p className="font-body text-xl md:text-2xl text-on-primary-container leading-relaxed mb-12 max-w-2xl">
+            <p className="font-body text-2xl md:text-3xl text-on-primary-container leading-relaxed mb-12 max-w-2xl">
               LotScout connects serious land buyers and sellers directly. No realtors, no commissions, no wasted months. Just verified deals, AI-powered analysis, and a matched network built for land professionals.
             </p>
             <div className="flex flex-wrap gap-4 mb-16">
               <button className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</button>
               <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</button>
             </div>
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-on-primary-container font-medium text-sm md:text-base border-t border-white/10 pt-8">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-on-primary-container font-medium text-base md:text-lg border-t border-white/10 pt-8">
               <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">verified</span> 92% of deals close within 25 days</span>
               <span className="w-1.5 h-1.5 rounded-full bg-on-primary-container/30"></span>
               <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">payments</span> Zero Realtor Commission</span>
@@ -76,7 +76,7 @@ export default function HomePage() {
       <div className="bg-emerald-900 py-4 px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
           <span className="material-symbols-outlined text-emerald-300 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>lock_open</span>
-          <p className="text-white font-semibold text-base">
+          <p className="text-white font-semibold text-lg">
             All listings on LotScout are off-market. Sell without a realtor and keep 100% of your proceeds.
           </p>
         </div>
@@ -85,11 +85,11 @@ export default function HomePage() {
       {/* SECTION 2: The Problem */}
       <section className="py-28 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-5xl font-bold text-primary mb-16 tracking-tight">The Old Way Is Costing You</h2>
+          <h2 className="font-headline text-6xl font-bold text-primary mb-16 tracking-tight">The Old Way Is Costing You</h2>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Before LotScout */}
             <div className="bg-error-container/20 rounded-2xl p-8 md:p-12">
-              <h3 className="font-headline text-3xl font-bold text-on-error-container mb-10">Before LotScout</h3>
+              <h3 className="font-headline text-4xl font-bold text-on-error-container mb-10">Before LotScout</h3>
               <ul className="space-y-7">
                 {[
                   'Wait 6 to 12 months for traditional listings to gain traction',
@@ -100,14 +100,14 @@ export default function HomePage() {
                 ].map((text) => (
                   <li key={text} className="flex items-start gap-4">
                     <span className="material-symbols-outlined text-error text-2xl flex-none" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
-                    <span className="text-on-surface-variant font-medium text-lg leading-snug">{text}</span>
+                    <span className="text-on-surface-variant font-medium text-xl leading-snug">{text}</span>
                   </li>
                 ))}
               </ul>
             </div>
             {/* With LotScout */}
             <div className="bg-primary-fixed/20 rounded-2xl p-8 md:p-12 border border-primary/5">
-              <h3 className="font-headline text-3xl font-bold text-primary mb-10">With LotScout</h3>
+              <h3 className="font-headline text-4xl font-bold text-primary mb-10">With LotScout</h3>
               <ul className="space-y-7">
                 {[
                   'Average closing time reduced to under 30 days',
@@ -118,7 +118,7 @@ export default function HomePage() {
                 ].map((text) => (
                   <li key={text} className="flex items-start gap-4">
                     <span className="material-symbols-outlined text-primary text-2xl flex-none" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    <span className="text-on-surface font-semibold text-lg leading-snug">{text}</span>
+                    <span className="text-on-surface font-semibold text-xl leading-snug">{text}</span>
                   </li>
                 ))}
               </ul>
@@ -131,8 +131,8 @@ export default function HomePage() {
       <section className="py-28 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16">
-            <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-4">Built for Both Sides of the Deal</h2>
-            <p className="text-secondary text-xl max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
+            <h2 className="font-headline text-6xl font-bold text-primary tracking-tight mb-4">Built for Both Sides of the Deal</h2>
+            <p className="text-secondary text-2xl max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-0 overflow-hidden rounded-3xl">
             {/* Seller */}
@@ -142,7 +142,7 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-white text-3xl">sell</span>
                 </div>
                 <h3 className="font-headline text-3xl font-bold text-white mb-6">I&apos;m a Seller</h3>
-                <p className="text-on-primary-container text-lg mb-8">Reach a curated network of institutional and private buyers ready to deploy capital immediately.</p>
+                <p className="text-on-primary-container text-xl mb-8">Reach a curated network of institutional and private buyers ready to deploy capital immediately.</p>
                 <ul className="space-y-4 mb-12">
                   {[
                     'Priority listing exposure',
@@ -165,7 +165,7 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-primary text-3xl">search_insights</span>
                 </div>
                 <h3 className="font-headline text-3xl font-bold text-primary mb-6">I&apos;m a Buyer</h3>
-                <p className="text-secondary text-lg mb-8">Gain access to off-market inventory and deep-data insights before the general public sees the listing.</p>
+                <p className="text-secondary text-xl mb-8">Gain access to off-market inventory and deep-data insights before the general public sees the listing.</p>
                 <ul className="space-y-4 mb-12">
                   {[
                     'Off-market land opportunities',
@@ -190,8 +190,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-3">Where Buyers &amp; Sellers Are Active</h2>
-              <p className="text-secondary text-xl max-w-xl">LotScout members are transacting land across the country every day.</p>
+              <h2 className="font-headline text-6xl font-bold text-primary tracking-tight mb-3">Where Buyers &amp; Sellers Are Active</h2>
+              <p className="text-secondary text-2xl max-w-xl">LotScout members are transacting land across the country every day.</p>
             </div>
             {/* Legend */}
             <div className="flex items-center gap-6 flex-shrink-0">
@@ -282,8 +282,8 @@ export default function HomePage() {
             { stat: '2,400+', label: 'Active Listings' },
           ].map(({ stat, label }) => (
             <div key={label} className="text-center p-8 bg-white/5 rounded-2xl">
-              <div className="text-4xl md:text-5xl font-extrabold mb-2 text-primary-fixed">{stat}</div>
-              <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
+              <div className="text-5xl md:text-6xl font-extrabold mb-2 text-primary-fixed">{stat}</div>
+              <div className="text-on-primary-container font-medium uppercase tracking-widest text-sm">{label}</div>
             </div>
           ))}
         </div>
@@ -293,13 +293,13 @@ export default function HomePage() {
       <section className="py-28 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
-            <h2 className="font-headline text-5xl font-bold text-primary tracking-tight">A Glimpse of What&apos;s Inside</h2>
+            <h2 className="font-headline text-6xl font-bold text-primary tracking-tight">A Glimpse of What&apos;s Inside</h2>
             <span className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold px-4 py-2 rounded-full flex-shrink-0">
               <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
               All properties are off-market listings
             </span>
           </div>
-          <p className="text-secondary text-lg mb-12">These deals are not listed on Zillow, Realtor.com, or the MLS. You only find them here.</p>
+          <p className="text-secondary text-xl mb-12">All properties on LotScout are off-market listings you won&apos;t find on Zillow or Realtor.com.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1 */}
             <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high">
@@ -359,8 +359,8 @@ export default function HomePage() {
       {/* SECTION 7: New Buyers Added Daily */}
       <section className="py-28 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
-          <p className="text-secondary text-xl mb-12 max-w-2xl">
+          <h2 className="font-headline text-6xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
+          <p className="text-secondary text-2xl mb-12 max-w-2xl">
             Sellers — these buyers are actively searching for land like yours right now.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -374,9 +374,9 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
                 </span>
               </div>
-              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">Vanguard Land Trust</h3>
-              <p className="text-secondary text-sm font-medium mb-4">Denver, CO</p>
-              <div className="space-y-2 text-sm flex-grow">
+              <h3 className="font-headline font-extrabold text-primary text-xl leading-tight mb-0.5">Vanguard Land Trust</h3>
+              <p className="text-secondary text-base font-medium mb-4">Denver, CO</p>
+              <div className="space-y-2 text-base flex-grow">
                 <div className="flex items-center gap-2 text-on-surface-variant">
                   <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
                   <span>50 to 500 acres</span>
@@ -403,9 +403,9 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
                 </span>
               </div>
-              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">BuildWorks Inc.</h3>
-              <p className="text-secondary text-sm font-medium mb-4">Austin, TX</p>
-              <div className="space-y-2 text-sm flex-grow">
+              <h3 className="font-headline font-extrabold text-primary text-xl leading-tight mb-0.5">BuildWorks Inc.</h3>
+              <p className="text-secondary text-base font-medium mb-4">Austin, TX</p>
+              <div className="space-y-2 text-base flex-grow">
                 <div className="flex items-center gap-2 text-on-surface-variant">
                   <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
                   <span>5 to 20 acres</span>
@@ -432,9 +432,9 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
                 </span>
               </div>
-              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">Meridian Land Holdings</h3>
-              <p className="text-secondary text-sm font-medium mb-4">Seattle, WA</p>
-              <div className="space-y-2 text-sm flex-grow">
+              <h3 className="font-headline font-extrabold text-primary text-xl leading-tight mb-0.5">Meridian Land Holdings</h3>
+              <p className="text-secondary text-base font-medium mb-4">Seattle, WA</p>
+              <div className="space-y-2 text-base flex-grow">
                 <div className="flex items-center gap-2 text-on-surface-variant">
                   <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
                   <span>100 to 1,000 acres</span>
@@ -476,13 +476,13 @@ export default function HomePage() {
       {/* SECTION 8: Pricing Teaser */}
       <section className="py-28 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-5xl font-bold text-primary mb-16 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
+          <h2 className="font-headline text-6xl font-bold text-primary mb-16 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {/* Standard */}
             <div className="bg-white p-10 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Standard</h3>
+              <h3 className="font-headline text-2xl font-bold text-primary mb-2">Standard</h3>
               <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-extrabold text-primary">$97</span>
+                <span className="text-5xl font-extrabold text-primary">$97</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
@@ -494,7 +494,7 @@ export default function HomePage() {
                   'Property Analysis Reports (24hr delivery)',
                   'Lot Analysis Reports (24hr delivery)',
                 ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
+                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-base">
                     <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
                   </li>
                 ))}
@@ -504,9 +504,9 @@ export default function HomePage() {
             {/* Priority */}
             <div className="bg-white p-10 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
+              <h3 className="font-headline text-2xl font-bold text-primary mb-2">Priority</h3>
               <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-extrabold text-primary">$329</span>
+                <span className="text-5xl font-extrabold text-primary">$329</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
@@ -519,18 +519,18 @@ export default function HomePage() {
                   'Property Analysis Reports (15 min delivery)',
                   'Lot Analysis Reports (15 min delivery)',
                 ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface font-semibold text-sm">
+                  <li key={f} className="flex items-start gap-3 text-on-surface font-semibold text-base">
                     <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Get Priority Access</button>
+              <button className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Get Started</button>
             </div>
             {/* Exclusive */}
             <div className="bg-white p-10 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
+              <h3 className="font-headline text-2xl font-bold text-primary mb-2">Exclusive</h3>
               <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-extrabold text-primary">$799</span>
+                <span className="text-5xl font-extrabold text-primary">$799</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
@@ -538,7 +538,7 @@ export default function HomePage() {
                   'Everything in Priority',
                   'Hands-On Listing Support',
                 ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
+                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-base">
                     <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
                   </li>
                 ))}
@@ -553,8 +553,8 @@ export default function HomePage() {
       <section className="py-28 bg-primary px-8 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="font-headline text-5xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">Your Next Land Partnership Starts Here</h2>
-          <p className="text-on-primary-container text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">
+          <h2 className="font-headline text-6xl md:text-7xl font-extrabold text-white mb-8 tracking-tight">Your Next Land Partnership Starts Here</h2>
+          <p className="text-on-primary-container text-2xl md:text-3xl mb-12 max-w-2xl mx-auto leading-relaxed">
             LotScout connects serious buyers and sellers of off-market land directly. No realtors. No commission. No waiting on the MLS. Just the right match at the right time.
           </p>
           <button className="bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors active:scale-95 transition-transform">Get Started Free</button>
