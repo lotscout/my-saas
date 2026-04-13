@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 
 const SELLERS = [
@@ -38,6 +41,172 @@ const BUYERS = [
   { city: 'Oklahoma City, OK',  x: '40%', y: '55%' },
 ];
 
+const HERO_SELLERS = [
+  { city: 'Austin, TX',         lat: 30.27,  lng: -97.74,   count: 24 },
+  { city: 'Denver, CO',         lat: 39.74,  lng: -104.98,  count: 18 },
+  { city: 'Nashville, TN',      lat: 36.17,  lng: -86.78,   count: 15 },
+  { city: 'Charlotte, NC',      lat: 35.23,  lng: -80.84,   count: 22 },
+  { city: 'Phoenix, AZ',        lat: 33.45,  lng: -112.07,  count: 19 },
+  { city: 'Boise, ID',          lat: 43.61,  lng: -116.20,  count: 11 },
+  { city: 'Fort Myers, FL',     lat: 26.64,  lng: -81.87,   count: 17 },
+  { city: 'Raleigh, NC',        lat: 35.78,  lng: -78.64,   count: 13 },
+  { city: 'Kansas City, MO',    lat: 39.10,  lng: -94.58,   count: 9  },
+  { city: 'Atlanta, GA',        lat: 33.75,  lng: -84.39,   count: 21 },
+  { city: 'Dallas, TX',         lat: 32.78,  lng: -96.80,   count: 28 },
+  { city: 'Salt Lake City, UT', lat: 40.76,  lng: -111.89,  count: 14 },
+  { city: 'Billings, MT',       lat: 45.78,  lng: -108.50,  count: 8  },
+  { city: 'Tulsa, OK',          lat: 36.15,  lng: -95.99,   count: 10 },
+  { city: 'Columbia, SC',       lat: 34.00,  lng: -81.03,   count: 12 },
+  { city: 'Albuquerque, NM',    lat: 35.08,  lng: -106.65,  count: 9  },
+  { city: 'Sacramento, CA',     lat: 38.58,  lng: -121.49,  count: 16 },
+  { city: 'Memphis, TN',        lat: 35.15,  lng: -90.05,   count: 11 },
+  { city: 'Lubbock, TX',        lat: 33.58,  lng: -101.85,  count: 8  },
+  { city: 'Knoxville, TN',      lat: 35.96,  lng: -83.92,   count: 10 },
+  { city: 'Fargo, ND',          lat: 46.88,  lng: -96.79,   count: 7  },
+  { city: 'Wichita, KS',        lat: 37.69,  lng: -97.34,   count: 12 },
+];
+
+const HERO_BUYERS = [
+  { city: 'Seattle, WA',        lat: 47.61,  lng: -122.33,  count: 31 },
+  { city: 'Chicago, IL',        lat: 41.88,  lng: -87.63,   count: 27 },
+  { city: 'New York, NY',       lat: 40.71,  lng: -74.01,   count: 35 },
+  { city: 'Los Angeles, CA',    lat: 34.05,  lng: -118.24,  count: 29 },
+  { city: 'Houston, TX',        lat: 29.76,  lng: -95.37,   count: 33 },
+  { city: 'Minneapolis, MN',    lat: 44.98,  lng: -93.27,   count: 18 },
+  { city: 'Columbus, OH',       lat: 39.96,  lng: -82.99,   count: 16 },
+  { city: 'Portland, OR',       lat: 45.52,  lng: -122.68,  count: 22 },
+  { city: 'San Francisco, CA',  lat: 37.77,  lng: -122.42,  count: 24 },
+  { city: 'Boston, MA',         lat: 42.36,  lng: -71.06,   count: 19 },
+  { city: 'Miami, FL',          lat: 25.77,  lng: -80.19,   count: 26 },
+  { city: 'Indianapolis, IN',   lat: 39.77,  lng: -86.16,   count: 14 },
+  { city: 'Louisville, KY',     lat: 38.25,  lng: -85.76,   count: 12 },
+  { city: 'Richmond, VA',       lat: 37.54,  lng: -77.44,   count: 15 },
+  { city: 'Tampa, FL',          lat: 27.95,  lng: -82.46,   count: 20 },
+  { city: 'Pittsburgh, PA',     lat: 40.44,  lng: -79.99,   count: 13 },
+  { city: 'Detroit, MI',        lat: 42.33,  lng: -83.05,   count: 17 },
+  { city: 'Oklahoma City, OK',  lat: 35.47,  lng: -97.52,   count: 11 },
+  { city: 'San Antonio, TX',    lat: 29.42,  lng: -98.49,   count: 23 },
+  { city: 'San Diego, CA',      lat: 32.72,  lng: -117.16,  count: 20 },
+  { city: 'Las Vegas, NV',      lat: 36.17,  lng: -115.14,  count: 18 },
+  { city: 'Omaha, NE',          lat: 41.26,  lng: -95.94,   count: 13 },
+];
+
+function HeroMap() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const loadScript = (src: string): Promise<void> =>
+      new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = () => resolve();
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+
+    let cancelled = false;
+
+    (async () => {
+      await loadScript('https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js');
+      if (cancelled || !svgRef.current || !containerRef.current) return;
+
+      const res = await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const us: any = await res.json();
+      if (cancelled || !svgRef.current || !containerRef.current) return;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const d3 = (window as any).d3;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const topojson = (window as any).topojson;
+
+      const w = containerRef.current.clientWidth;
+      const h = Math.round(w * 0.64);
+
+      const svg = d3.select(svgRef.current).attr('width', w).attr('height', h);
+      svg.selectAll('*').remove();
+
+      const statesFeature = topojson.feature(us, us.objects.states);
+      const projection = d3.geoAlbersUsa().fitSize([w, h], statesFeature);
+      const path = d3.geoPath().projection(projection);
+
+      svg.selectAll('path.state')
+        .data(statesFeature.features)
+        .enter().append('path')
+        .attr('d', path)
+        .attr('fill', '#e8ede9')
+        .attr('stroke', '#c1c8c2')
+        .attr('stroke-width', 0.5);
+
+      const tooltip = tooltipRef.current;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const plotDots = (data: typeof HERO_SELLERS, color: string) => {
+        data.forEach(({ city, lat, lng, count }) => {
+          const coords = projection([lng, lat]);
+          if (!coords) return;
+          const r = 4 + Math.sqrt(count) * 0.8;
+          svg.append('circle')
+            .attr('cx', coords[0])
+            .attr('cy', coords[1])
+            .attr('r', r)
+            .attr('fill', color)
+            .attr('fill-opacity', 0.85)
+            .attr('stroke', 'white')
+            .attr('stroke-width', 1)
+            .style('cursor', 'pointer')
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .on('mouseover', (_event: any) => {
+              if (!tooltip) return;
+              tooltip.style.display = 'block';
+              tooltip.textContent = `${city}: ${count} active`;
+            })
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .on('mousemove', (event: any) => {
+              if (!tooltip || !containerRef.current) return;
+              const rect = containerRef.current.getBoundingClientRect();
+              tooltip.style.left = `${event.clientX - rect.left + 10}px`;
+              tooltip.style.top = `${event.clientY - rect.top - 36}px`;
+            })
+            .on('mouseout', () => {
+              if (!tooltip) return;
+              tooltip.style.display = 'none';
+            });
+        });
+      };
+
+      plotDots(HERO_SELLERS, '#1b4332');
+      plotDots(HERO_BUYERS, '#86af99');
+    })();
+
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      <svg ref={svgRef} className="w-full rounded-xl overflow-hidden" />
+      <div
+        ref={tooltipRef}
+        className="absolute hidden z-50 bg-white/95 text-primary text-xs font-bold px-2.5 py-1.5 rounded-lg shadow-lg pointer-events-none border border-outline-variant/20 whitespace-nowrap"
+      />
+      <div className="flex items-center gap-6 mt-3 px-1">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#1b4332]" />
+          <span className="text-xs font-semibold text-on-primary-container/80">Seller active</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#86af99]" />
+          <span className="text-xs font-semibold text-on-primary-container/80">Buyer active</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-primary">
@@ -50,23 +219,30 @@ export default function HomePage() {
           <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary-fixed-dim rounded-full blur-3xl"></div>
         </div>
         <div className="max-w-7xl mx-auto px-8 relative z-10">
-          <div className="max-w-4xl">
-            <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
-              Stop Waiting.<br />Start Closing.
-            </h1>
-            <p className="font-body text-lg text-on-primary-container leading-relaxed mb-8 max-w-2xl">
-              LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.
-            </p>
-            <div className="flex flex-wrap gap-4 mb-10">
-              <button className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</button>
+          <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center">
+            {/* Left column: hero text */}
+            <div>
+              <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
+                Stop Waiting.<br />Start Closing.
+              </h1>
+              <p className="font-body text-lg text-on-primary-container leading-relaxed mb-8 max-w-2xl">
+                LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.
+              </p>
+              <div className="flex flex-wrap gap-4 mb-10">
+                <button className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</button>
+                <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</button>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-on-primary-container font-medium text-sm md:text-base border-t border-white/10 pt-6">
+                <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">verified</span> 92% of deals close within 25 days</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-on-primary-container/30"></span>
+                <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">payments</span> Zero Realtor Commission</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-on-primary-container/30"></span>
+                <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">groups</span> 2,400+ Active Buyers &amp; Sellers</span>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-on-primary-container font-medium text-sm md:text-base border-t border-white/10 pt-6">
-              <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">verified</span> 92% of deals close within 25 days</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-on-primary-container/30"></span>
-              <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">payments</span> Zero Realtor Commission</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-on-primary-container/30"></span>
-              <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">groups</span> 2,400+ Active Buyers &amp; Sellers</span>
+            {/* Right column: interactive map */}
+            <div className="hidden md:block">
+              <HeroMap />
             </div>
           </div>
         </div>
