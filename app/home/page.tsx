@@ -223,7 +223,7 @@ export default function HomePage() {
             {/* Left column: hero text */}
             <div>
               <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
-                Stop Waiting.<br />Start Closing.
+                America&apos;s #1 Platform for Off-Market Land Deals.
               </h1>
               <p className="font-body text-lg text-on-primary-container leading-relaxed mb-8 max-w-2xl">
                 LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.
