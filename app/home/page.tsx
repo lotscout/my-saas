@@ -44,24 +44,24 @@ export default function HomePage() {
       <Header />
 
       {/* SECTION 1: Hero */}
-      <header className="pt-32 pb-24 md:pt-48 md:pb-32 bg-primary-container relative overflow-hidden">
+      <header className="pt-24 pb-16 md:pt-32 md:pb-20 bg-primary-container relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
           <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary-fixed-dim rounded-full blur-3xl"></div>
         </div>
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="max-w-4xl">
-            <h1 className="font-headline text-7xl md:text-9xl font-extrabold text-white tracking-tight leading-[1.05] mb-8">
+            <h1 className="font-headline text-6xl md:text-8xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
               Stop Waiting.<br />Start Closing.
             </h1>
-            <p className="font-body text-2xl md:text-3xl text-on-primary-container leading-relaxed mb-12 max-w-2xl">
+            <p className="font-body text-xl md:text-2xl text-on-primary-container leading-relaxed mb-8 max-w-2xl">
               LotScout connects serious land buyers and sellers directly. No realtors, no commissions, no wasted months. Just verified deals, AI-powered analysis, and a matched network built for land professionals.
             </p>
-            <div className="flex flex-wrap gap-4 mb-16">
+            <div className="flex flex-wrap gap-4 mb-10">
               <button className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</button>
               <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</button>
             </div>
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-on-primary-container font-medium text-base md:text-lg border-t border-white/10 pt-8">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-on-primary-container font-medium text-sm md:text-base border-t border-white/10 pt-6">
               <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">verified</span> 92% of deals close within 25 days</span>
               <span className="w-1.5 h-1.5 rounded-full bg-on-primary-container/30"></span>
               <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">payments</span> Zero Realtor Commission</span>
@@ -83,14 +83,14 @@ export default function HomePage() {
       </div>
 
       {/* SECTION 2: The Problem */}
-      <section className="py-28 bg-surface px-8">
+      <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-6xl font-bold text-primary mb-16 tracking-tight">The Old Way Is Costing You</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">The Old Way Is Costing You</h2>
+          <div className="grid md:grid-cols-2 gap-6">
             {/* Before LotScout */}
-            <div className="bg-error-container/20 rounded-2xl p-8 md:p-12">
-              <h3 className="font-headline text-4xl font-bold text-on-error-container mb-10">Before LotScout</h3>
-              <ul className="space-y-7">
+            <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
+              <h3 className="font-headline text-2xl font-bold text-on-error-container mb-5">Before LotScout</h3>
+              <ul className="space-y-3">
                 {[
                   'Wait 6 to 12 months for traditional listings to gain traction',
                   'Lose up to 10% of equity to realtor commissions and fees',
@@ -98,17 +98,17 @@ export default function HomePage() {
                   'Endless calls with unverified, tire-kicking buyers',
                   "Generic listing sites that don't understand land zoning",
                 ].map((text) => (
-                  <li key={text} className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-error text-2xl flex-none" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
-                    <span className="text-on-surface-variant font-medium text-xl leading-snug">{text}</span>
+                  <li key={text} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-error text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
+                    <span className="text-on-surface-variant font-medium text-base leading-snug">{text}</span>
                   </li>
                 ))}
               </ul>
             </div>
             {/* With LotScout */}
-            <div className="bg-primary-fixed/20 rounded-2xl p-8 md:p-12 border border-primary/5">
-              <h3 className="font-headline text-4xl font-bold text-primary mb-10">With LotScout</h3>
-              <ul className="space-y-7">
+            <div className="bg-primary-fixed/20 rounded-2xl p-6 md:p-8 border border-primary/5">
+              <h3 className="font-headline text-2xl font-bold text-primary mb-5">With LotScout</h3>
+              <ul className="space-y-3">
                 {[
                   'Average closing time reduced to under 30 days',
                   'Zero commission. Keep 100% of your property value',
@@ -116,9 +116,9 @@ export default function HomePage() {
                   'Instantly match with verified cash buyers and developers',
                   'Land-exclusive platform built for professionals',
                 ].map((text) => (
-                  <li key={text} className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-primary text-2xl flex-none" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    <span className="text-on-surface font-semibold text-xl leading-snug">{text}</span>
+                  <li key={text} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="text-on-surface font-semibold text-base leading-snug">{text}</span>
                   </li>
                 ))}
               </ul>
@@ -128,22 +128,22 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 3: Who It's For */}
-      <section className="py-28 bg-surface-container-low px-8">
+      <section className="py-16 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-16">
-            <h2 className="font-headline text-6xl font-bold text-primary tracking-tight mb-4">Built for Both Sides of the Deal</h2>
-            <p className="text-secondary text-2xl max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
+          <div className="mb-8">
+            <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-3">Built for Both Sides of the Deal</h2>
+            <p className="text-secondary text-xl max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-0 overflow-hidden rounded-3xl">
             {/* Seller */}
-            <div className="bg-primary p-12 md:p-16 flex flex-col justify-between">
+            <div className="bg-primary p-8 md:p-10 flex flex-col justify-between">
               <div>
-                <div className="bg-on-primary-container/20 w-16 h-16 rounded-full flex items-center justify-center mb-8">
-                  <span className="material-symbols-outlined text-white text-3xl">sell</span>
+                <div className="bg-on-primary-container/20 w-14 h-14 rounded-full flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-white text-2xl">sell</span>
                 </div>
-                <h3 className="font-headline text-3xl font-bold text-white mb-6">I&apos;m a Seller</h3>
-                <p className="text-on-primary-container text-xl mb-8">Reach a curated network of institutional and private buyers ready to deploy capital immediately.</p>
-                <ul className="space-y-4 mb-12">
+                <h3 className="font-headline text-2xl font-bold text-white mb-4">I&apos;m a Seller</h3>
+                <p className="text-on-primary-container text-base mb-6">Reach a curated network of institutional and private buyers ready to deploy capital immediately.</p>
+                <ul className="space-y-3 mb-8">
                   {[
                     'Priority listing exposure',
                     'Direct-to-buyer messaging',
@@ -159,14 +159,14 @@ export default function HomePage() {
               <button className="w-full bg-primary-fixed text-primary py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors">List My Property</button>
             </div>
             {/* Buyer */}
-            <div className="bg-white p-12 md:p-16 flex flex-col justify-between">
+            <div className="bg-white p-8 md:p-10 flex flex-col justify-between">
               <div>
-                <div className="bg-primary/5 w-16 h-16 rounded-full flex items-center justify-center mb-8">
-                  <span className="material-symbols-outlined text-primary text-3xl">search_insights</span>
+                <div className="bg-primary/5 w-14 h-14 rounded-full flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-primary text-2xl">search_insights</span>
                 </div>
-                <h3 className="font-headline text-3xl font-bold text-primary mb-6">I&apos;m a Buyer</h3>
-                <p className="text-secondary text-xl mb-8">Gain access to off-market inventory and deep-data insights before the general public sees the listing.</p>
-                <ul className="space-y-4 mb-12">
+                <h3 className="font-headline text-2xl font-bold text-primary mb-4">I&apos;m a Buyer</h3>
+                <p className="text-secondary text-base mb-6">Gain access to off-market inventory and deep-data insights before the general public sees the listing.</p>
+                <ul className="space-y-3 mb-8">
                   {[
                     'Off-market land opportunities',
                     'AI topographic assessments',
@@ -186,114 +186,125 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 4: US Map */}
-      <section className="py-28 bg-surface px-8">
+      <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+
+            {/* Left: headline, description, legend, stats */}
             <div>
-              <h2 className="font-headline text-6xl font-bold text-primary tracking-tight mb-3">Where Buyers &amp; Sellers Are Active</h2>
-              <p className="text-secondary text-2xl max-w-xl">LotScout members are transacting land across the country every day.</p>
-            </div>
-            {/* Legend */}
-            <div className="flex items-center gap-6 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm ring-2 ring-emerald-200"></div>
-                <span className="text-sm font-semibold text-secondary">Sellers</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-900 shadow-sm ring-2 ring-emerald-800/30"></div>
-                <span className="text-sm font-semibold text-secondary">Buyers</span>
-              </div>
-            </div>
-          </div>
+              <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-3">Where Buyers &amp; Sellers Are Active</h2>
+              <p className="text-secondary text-xl mb-8">LotScout members are transacting land across the country every day.</p>
 
-          <div className="bg-white rounded-2xl border border-outline-variant/20 shadow-xl overflow-hidden">
-            {/* Map header bar */}
-            <div className="bg-surface-container-low px-6 py-3 flex items-center justify-between border-b border-outline-variant/15">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-bold text-secondary uppercase tracking-widest">Live Network</span>
+              {/* Legend */}
+              <div className="flex items-center gap-8 mb-8">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm ring-2 ring-emerald-200"></div>
+                  <span className="text-sm font-semibold text-secondary">Sellers</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-900 shadow-sm ring-2 ring-emerald-800/30"></div>
+                  <span className="text-sm font-semibold text-secondary">Buyers</span>
+                </div>
               </div>
-              <div className="flex items-center gap-6 text-xs font-semibold text-secondary">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>{SELLERS.length} Active Sellers</span>
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-900 inline-block"></span>{BUYERS.length} Active Buyers</span>
+
+              {/* Stats */}
+              <div className="flex gap-6">
+                <div className="bg-surface-container-low rounded-xl px-6 py-4 flex-1 text-center">
+                  <div className="text-3xl font-extrabold text-emerald-600 mb-1">{SELLERS.length}</div>
+                  <div className="text-xs font-bold text-secondary uppercase tracking-widest">Active Sellers</div>
+                </div>
+                <div className="bg-surface-container-low rounded-xl px-6 py-4 flex-1 text-center">
+                  <div className="text-3xl font-extrabold text-emerald-900 mb-1">{BUYERS.length}</div>
+                  <div className="text-xs font-bold text-secondary uppercase tracking-widest">Active Buyers</div>
+                </div>
               </div>
             </div>
 
-            {/* Map container */}
-            <div className="relative bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-50 overflow-hidden" style={{ paddingBottom: '50%' }}>
-              {/* Grid lines */}
-              <div
-                className="absolute inset-0 opacity-[0.07]"
-                style={{ backgroundImage: 'linear-gradient(#1B4332 1px, transparent 1px), linear-gradient(90deg, #1B4332 1px, transparent 1px)', backgroundSize: '80px 80px' }}
-              />
-              {/* Subtle US region shading */}
-              <div className="absolute inset-4 rounded-xl bg-emerald-50/40 border border-emerald-100/60" />
+            {/* Right: interactive map */}
+            <div className="bg-white rounded-2xl border border-outline-variant/20 shadow-xl overflow-hidden">
+              {/* Map header bar */}
+              <div className="bg-surface-container-low px-4 py-2.5 flex items-center justify-between border-b border-outline-variant/15">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-xs font-bold text-secondary uppercase tracking-widest">Live Network</span>
+                </div>
+                <span className="text-xs text-secondary font-medium">Hover a dot to see location</span>
+              </div>
 
-              {/* Seller dots */}
-              {SELLERS.map((dot) => (
+              {/* Map container */}
+              <div className="relative bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-50 overflow-hidden" style={{ paddingBottom: '62%' }}>
+                {/* Grid lines */}
                 <div
-                  key={dot.city}
-                  className="absolute group"
-                  style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
-                >
-                  <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
-                    <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                      {dot.city}
+                  className="absolute inset-0 opacity-[0.07]"
+                  style={{ backgroundImage: 'linear-gradient(#1B4332 1px, transparent 1px), linear-gradient(90deg, #1B4332 1px, transparent 1px)', backgroundSize: '60px 60px' }}
+                />
+                <div className="absolute inset-4 rounded-xl bg-emerald-50/40 border border-emerald-100/60" />
+
+                {/* Seller dots */}
+                {SELLERS.map((dot) => (
+                  <div
+                    key={dot.city}
+                    className="absolute group"
+                    style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
+                  >
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
+                      <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                        {dot.city}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {/* Buyer dots */}
-              {BUYERS.map((dot) => (
-                <div
-                  key={dot.city}
-                  className="absolute group"
-                  style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
-                >
-                  <div className="w-3.5 h-3.5 rounded-full bg-emerald-900 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
-                    <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                      {dot.city}
+                {/* Buyer dots */}
+                {BUYERS.map((dot) => (
+                  <div
+                    key={dot.city}
+                    className="absolute group"
+                    style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
+                  >
+                    <div className="w-3.5 h-3.5 rounded-full bg-emerald-900 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
+                      <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                        {dot.city}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              {/* Map footer */}
+              <div className="bg-surface-container-low px-4 py-2 border-t border-outline-variant/15 text-xs text-secondary font-medium">
+                Continental US shown · Updated daily
+              </div>
             </div>
 
-            {/* Map footer */}
-            <div className="bg-surface-container-low px-6 py-3 border-t border-outline-variant/15 flex flex-wrap gap-x-8 gap-y-1 text-xs text-secondary font-medium">
-              <span>Hover a dot to see location</span>
-              <span>Updated daily</span>
-              <span>Continental US shown</span>
-            </div>
           </div>
         </div>
       </section>
 
       {/* SECTION 5: Social Proof Stats */}
-      <section className="py-24 bg-primary text-white px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="py-16 bg-primary text-white px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
             { stat: '92%',    label: 'Fast Closing Rate' },
             { stat: '0%',     label: 'Commission Paid' },
             { stat: '3x',     label: 'Deal Efficiency' },
             { stat: '2,400+', label: 'Active Listings' },
           ].map(({ stat, label }) => (
-            <div key={label} className="text-center p-8 bg-white/5 rounded-2xl">
-              <div className="text-5xl md:text-6xl font-extrabold mb-2 text-primary-fixed">{stat}</div>
-              <div className="text-on-primary-container font-medium uppercase tracking-widest text-sm">{label}</div>
+            <div key={label} className="text-center p-6 bg-white/5 rounded-2xl">
+              <div className="text-4xl md:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
+              <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* SECTION 6: Marketplace Preview */}
-      <section className="py-28 bg-surface px-8">
+      <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
-            <h2 className="font-headline text-6xl font-bold text-primary tracking-tight">A Glimpse of What&apos;s Inside</h2>
+            <h2 className="font-headline text-5xl font-bold text-primary tracking-tight">A Glimpse of What&apos;s Inside</h2>
             <span className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold px-4 py-2 rounded-full flex-shrink-0">
               <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
               All properties are off-market listings
@@ -357,10 +368,10 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 7: New Buyers Added Daily */}
-      <section className="py-28 bg-surface-container-low px-8">
+      <section className="py-16 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-6xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
-          <p className="text-secondary text-2xl mb-12 max-w-2xl">
+          <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
+          <p className="text-secondary text-xl mb-10 max-w-2xl">
             Sellers — these buyers are actively searching for land like yours right now.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -474,18 +485,18 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 8: Pricing Teaser */}
-      <section className="py-28 bg-surface px-8">
+      <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-6xl font-bold text-primary mb-16 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
+          <h2 className="font-headline text-5xl font-bold text-primary mb-10 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {/* Standard */}
-            <div className="bg-white p-10 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
+            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
               <h3 className="font-headline text-2xl font-bold text-primary mb-2">Standard</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-5xl font-extrabold text-primary">$97</span>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-4xl font-extrabold text-primary">$97</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-4 mb-10 flex-grow">
+              <ul className="space-y-3 mb-8 flex-grow">
                 {[
                   'Land Marketplace Access',
                   'Lot to Buyer Match AI',
@@ -502,14 +513,14 @@ export default function HomePage() {
               <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
             </div>
             {/* Priority */}
-            <div className="bg-white p-10 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative">
+            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
               <h3 className="font-headline text-2xl font-bold text-primary mb-2">Priority</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-5xl font-extrabold text-primary">$329</span>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-4xl font-extrabold text-primary">$329</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-4 mb-10 flex-grow">
+              <ul className="space-y-3 mb-8 flex-grow">
                 {[
                   'Everything in Standard',
                   'Unlimited Listings',
@@ -527,13 +538,13 @@ export default function HomePage() {
               <button className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Get Started</button>
             </div>
             {/* Exclusive */}
-            <div className="bg-white p-10 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
+            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
               <h3 className="font-headline text-2xl font-bold text-primary mb-2">Exclusive</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-5xl font-extrabold text-primary">$799</span>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-4xl font-extrabold text-primary">$799</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-4 mb-10 flex-grow">
+              <ul className="space-y-3 mb-8 flex-grow">
                 {[
                   'Everything in Priority',
                   'Hands-On Listing Support',
@@ -550,11 +561,11 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 9: Final CTA */}
-      <section className="py-28 bg-primary px-8 text-center relative overflow-hidden">
+      <section className="py-16 bg-primary px-8 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="font-headline text-6xl md:text-7xl font-extrabold text-white mb-8 tracking-tight">Your Next Land Partnership Starts Here</h2>
-          <p className="text-on-primary-container text-2xl md:text-3xl mb-12 max-w-2xl mx-auto leading-relaxed">
+          <h2 className="font-headline text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">Your Next Land Partnership Starts Here</h2>
+          <p className="text-on-primary-container text-xl md:text-2xl mb-10 max-w-2xl mx-auto leading-relaxed">
             LotScout connects serious buyers and sellers of off-market land directly. No realtors. No commission. No waiting on the MLS. Just the right match at the right time.
           </p>
           <button className="bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors active:scale-95 transition-transform">Get Started Free</button>
