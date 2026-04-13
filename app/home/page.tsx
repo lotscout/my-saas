@@ -55,7 +55,7 @@ export default function HomePage() {
               Stop Waiting.<br />Start Closing.
             </h1>
             <p className="font-body text-xl md:text-2xl text-on-primary-container leading-relaxed mb-8 max-w-2xl">
-              LotScout connects serious land buyers and sellers directly. No realtors, no commissions, no wasted months. Just verified deals, AI-powered analysis, and a matched network built for land professionals.
+              LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.
             </p>
             <div className="flex flex-wrap gap-4 mb-10">
               <button className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</button>
