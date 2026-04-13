@@ -82,52 +82,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* SECTION 2: The Problem */}
-      <section className="py-16 bg-surface px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">The Old Way Is Costing You</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Before LotScout */}
-            <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
-              <h3 className="font-headline text-2xl font-bold text-on-error-container mb-5">Before LotScout</h3>
-              <ul className="space-y-3">
-                {[
-                  'Wait 6 to 12 months for traditional listings to gain traction',
-                  'Lose up to 10% of equity to realtor commissions and fees',
-                  'Manual data verification and title research create costly delays',
-                  'Endless calls with unverified, tire-kicking buyers',
-                  "Generic listing sites that don't understand land zoning",
-                ].map((text) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-error text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
-                    <span className="text-on-surface-variant font-medium text-lg leading-snug">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {/* With LotScout */}
-            <div className="bg-primary-fixed/20 rounded-2xl p-6 md:p-8 border border-primary/5">
-              <h3 className="font-headline text-2xl font-bold text-primary mb-5">With LotScout</h3>
-              <ul className="space-y-3">
-                {[
-                  'Average closing time reduced to under 30 days',
-                  'Zero commission. Keep 100% of your property value',
-                  'AI-powered zoning and topographic analysis reports',
-                  'Instantly match with verified cash buyers and developers',
-                  'Land-exclusive platform built for professionals',
-                ].map((text) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-primary text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    <span className="text-on-surface font-semibold text-lg leading-snug">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3: Who It's For */}
+      {/* SECTION 2: Who It's For */}
       <section className="py-16 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
@@ -180,6 +135,51 @@ export default function HomePage() {
                 </ul>
               </div>
               <button className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition-colors">Find Land Now</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: The Problem */}
+      <section className="py-16 bg-surface px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">The Old Way Is Costing You</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Before LotScout */}
+            <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
+              <h3 className="font-headline text-2xl font-bold text-on-error-container mb-5">Before LotScout</h3>
+              <ul className="space-y-3">
+                {[
+                  'Wait 6 to 12 months for traditional listings to gain traction',
+                  'Lose up to 10% of equity to realtor commissions and fees',
+                  'Manual data verification and title research create costly delays',
+                  'Endless calls with unverified, tire-kicking buyers',
+                  "Generic listing sites that don't understand land zoning",
+                ].map((text) => (
+                  <li key={text} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-error text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
+                    <span className="text-on-surface-variant font-medium text-lg leading-snug">{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* With LotScout */}
+            <div className="bg-primary-fixed/20 rounded-2xl p-6 md:p-8 border border-primary/5">
+              <h3 className="font-headline text-2xl font-bold text-primary mb-5">With LotScout</h3>
+              <ul className="space-y-3">
+                {[
+                  'Average closing time reduced to under 30 days',
+                  'Zero commission. Keep 100% of your property value',
+                  'AI-powered zoning and topographic analysis reports',
+                  'Instantly match with verified cash buyers and developers',
+                  'Land-exclusive platform built for professionals',
+                ].map((text) => (
+                  <li key={text} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="text-on-surface font-semibold text-lg leading-snug">{text}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
