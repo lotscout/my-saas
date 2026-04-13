@@ -258,225 +258,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* SECTION 2: Who It's For */}
-      <section className="py-16 bg-surface-container-low px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-3">Built for Both Sides of the Deal</h2>
-            <p className="text-secondary text-lg max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-0 overflow-hidden rounded-3xl">
-            {/* Seller */}
-            <div className="bg-primary p-8 md:p-10 flex flex-col justify-between">
-              <div>
-                <div className="bg-on-primary-container/20 w-14 h-14 rounded-full flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined text-white text-2xl">sell</span>
-                </div>
-                <h3 className="font-headline text-2xl font-bold text-white mb-4">I&apos;m a Seller</h3>
-                <p className="text-on-primary-container text-lg mb-6">Reach a curated network of institutional and private buyers ready to deploy capital immediately.</p>
-                <ul className="space-y-3 mb-8">
-                  {[
-                    'Priority listing exposure',
-                    'Direct-to-buyer messaging',
-                    'Automated land valuation',
-                    'Identity verification for buyers',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-white/90 font-medium">
-                      <span className="material-symbols-outlined text-primary-fixed-dim">check</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <button className="w-full bg-primary-fixed text-primary py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors">List My Property</button>
-            </div>
-            {/* Buyer */}
-            <div className="bg-white p-8 md:p-10 flex flex-col justify-between">
-              <div>
-                <div className="bg-primary/5 w-14 h-14 rounded-full flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined text-primary text-2xl">search_insights</span>
-                </div>
-                <h3 className="font-headline text-2xl font-bold text-primary mb-4">I&apos;m a Buyer</h3>
-                <p className="text-secondary text-lg mb-6">Gain access to off-market inventory and deep-data insights before the general public sees the listing.</p>
-                <ul className="space-y-3 mb-8">
-                  {[
-                    'Off-market land opportunities',
-                    'AI topographic assessments',
-                    'Custom search alert criteria',
-                    'Direct-to-seller negotiations',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-on-surface-variant font-medium">
-                      <span className="material-symbols-outlined text-primary">check</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <button className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition-colors">Find Land Now</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3: The Problem */}
-      <section className="py-16 bg-surface px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">The Old Way Is Costing You</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Before LotScout */}
-            <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
-              <h3 className="font-headline text-2xl font-bold text-on-error-container mb-5">Before LotScout</h3>
-              <ul className="space-y-3">
-                {[
-                  'Wait 6 to 12 months for traditional listings to gain traction',
-                  'Lose up to 10% of equity to realtor commissions and fees',
-                  'Manual data verification and title research create costly delays',
-                  'Endless calls with unverified, tire-kicking buyers',
-                  "Generic listing sites that don't understand land zoning",
-                ].map((text) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-error text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
-                    <span className="text-on-surface-variant font-medium text-lg leading-snug">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {/* With LotScout */}
-            <div className="bg-primary-fixed/20 rounded-2xl p-6 md:p-8 border border-primary/5">
-              <h3 className="font-headline text-2xl font-bold text-primary mb-5">With LotScout</h3>
-              <ul className="space-y-3">
-                {[
-                  'Average closing time reduced to under 30 days',
-                  'Zero commission. Keep 100% of your property value',
-                  'AI-powered zoning and topographic analysis reports',
-                  'Instantly match with verified cash buyers and developers',
-                  'Land-exclusive platform built for professionals',
-                ].map((text) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-primary text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    <span className="text-on-surface font-semibold text-lg leading-snug">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 4: US Map */}
-      <section className="py-16 bg-surface px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-
-            {/* Left: headline, description, legend, stats */}
-            <div>
-              <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-3">Where Buyers &amp; Sellers Are Active</h2>
-              <p className="text-secondary text-lg mb-8">LotScout members are transacting land across the country every day.</p>
-
-              {/* Legend */}
-              <div className="flex items-center gap-8 mb-8">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm ring-2 ring-emerald-200"></div>
-                  <span className="text-sm font-semibold text-secondary">Sellers</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-emerald-900 shadow-sm ring-2 ring-emerald-800/30"></div>
-                  <span className="text-sm font-semibold text-secondary">Buyers</span>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="flex gap-6">
-                <div className="bg-surface-container-low rounded-xl px-6 py-4 flex-1 text-center">
-                  <div className="text-3xl font-extrabold text-emerald-600 mb-1">{SELLERS.length}</div>
-                  <div className="text-xs font-bold text-secondary uppercase tracking-widest">Active Sellers</div>
-                </div>
-                <div className="bg-surface-container-low rounded-xl px-6 py-4 flex-1 text-center">
-                  <div className="text-3xl font-extrabold text-emerald-900 mb-1">{BUYERS.length}</div>
-                  <div className="text-xs font-bold text-secondary uppercase tracking-widest">Active Buyers</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: interactive map */}
-            <div className="bg-white rounded-2xl border border-outline-variant/20 shadow-xl overflow-hidden">
-              {/* Map header bar */}
-              <div className="bg-surface-container-low px-4 py-2.5 flex items-center justify-between border-b border-outline-variant/15">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-xs font-bold text-secondary uppercase tracking-widest">Live Network</span>
-                </div>
-                <span className="text-xs text-secondary font-medium">Hover a dot to see location</span>
-              </div>
-
-              {/* Map container */}
-              <div className="relative bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-50 overflow-hidden" style={{ paddingBottom: '62%' }}>
-                {/* Grid lines */}
-                <div
-                  className="absolute inset-0 opacity-[0.07]"
-                  style={{ backgroundImage: 'linear-gradient(#1B4332 1px, transparent 1px), linear-gradient(90deg, #1B4332 1px, transparent 1px)', backgroundSize: '60px 60px' }}
-                />
-                <div className="absolute inset-4 rounded-xl bg-emerald-50/40 border border-emerald-100/60" />
-
-                {/* Seller dots */}
-                {SELLERS.map((dot) => (
-                  <div
-                    key={dot.city}
-                    className="absolute group"
-                    style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
-                  >
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
-                      <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                        {dot.city}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Buyer dots */}
-                {BUYERS.map((dot) => (
-                  <div
-                    key={dot.city}
-                    className="absolute group"
-                    style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
-                  >
-                    <div className="w-3.5 h-3.5 rounded-full bg-emerald-900 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
-                      <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                        {dot.city}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Map footer */}
-              <div className="bg-surface-container-low px-4 py-2 border-t border-outline-variant/15 text-xs text-secondary font-medium">
-                Continental US shown · Updated daily
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 5: Social Proof Stats */}
-      <section className="py-16 bg-primary text-white px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { stat: '92%',    label: 'Fast Closing Rate' },
-            { stat: '0%',     label: 'Commission Paid' },
-            { stat: '3x',     label: 'Deal Efficiency' },
-            { stat: '2,400+', label: 'Active Listings' },
-          ].map(({ stat, label }) => (
-            <div key={label} className="text-center p-6 bg-white/5 rounded-2xl">
-              <div className="text-4xl md:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
-              <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SECTION 6: Marketplace Preview */}
+      {/* SECTION 2: Marketplace Preview */}
       <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
@@ -543,7 +325,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 7: New Buyers Added Daily */}
+      {/* SECTION 3: New Buyers Added Daily */}
       <section className="py-16 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
@@ -657,6 +439,224 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* SECTION 4: Who It's For */}
+      <section className="py-16 bg-surface-container-low px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-3">Built for Both Sides of the Deal</h2>
+            <p className="text-secondary text-lg max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-0 overflow-hidden rounded-3xl">
+            {/* Seller */}
+            <div className="bg-primary p-8 md:p-10 flex flex-col justify-between">
+              <div>
+                <div className="bg-on-primary-container/20 w-14 h-14 rounded-full flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-white text-2xl">sell</span>
+                </div>
+                <h3 className="font-headline text-2xl font-bold text-white mb-4">I&apos;m a Seller</h3>
+                <p className="text-on-primary-container text-lg mb-6">Reach a curated network of institutional and private buyers ready to deploy capital immediately.</p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Priority listing exposure',
+                    'Direct-to-buyer messaging',
+                    'Automated land valuation',
+                    'Identity verification for buyers',
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-3 text-white/90 font-medium">
+                      <span className="material-symbols-outlined text-primary-fixed-dim">check</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button className="w-full bg-primary-fixed text-primary py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors">List My Property</button>
+            </div>
+            {/* Buyer */}
+            <div className="bg-white p-8 md:p-10 flex flex-col justify-between">
+              <div>
+                <div className="bg-primary/5 w-14 h-14 rounded-full flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-primary text-2xl">search_insights</span>
+                </div>
+                <h3 className="font-headline text-2xl font-bold text-primary mb-4">I&apos;m a Buyer</h3>
+                <p className="text-secondary text-lg mb-6">Gain access to off-market inventory and deep-data insights before the general public sees the listing.</p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Off-market land opportunities',
+                    'AI topographic assessments',
+                    'Custom search alert criteria',
+                    'Direct-to-seller negotiations',
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-3 text-on-surface-variant font-medium">
+                      <span className="material-symbols-outlined text-primary">check</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition-colors">Find Land Now</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5: The Problem */}
+      <section className="py-16 bg-surface px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">The Old Way Is Costing You</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Before LotScout */}
+            <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
+              <h3 className="font-headline text-2xl font-bold text-on-error-container mb-5">Before LotScout</h3>
+              <ul className="space-y-3">
+                {[
+                  'Wait 6 to 12 months for traditional listings to gain traction',
+                  'Lose up to 10% of equity to realtor commissions and fees',
+                  'Manual data verification and title research create costly delays',
+                  'Endless calls with unverified, tire-kicking buyers',
+                  "Generic listing sites that don't understand land zoning",
+                ].map((text) => (
+                  <li key={text} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-error text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
+                    <span className="text-on-surface-variant font-medium text-lg leading-snug">{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* With LotScout */}
+            <div className="bg-primary-fixed/20 rounded-2xl p-6 md:p-8 border border-primary/5">
+              <h3 className="font-headline text-2xl font-bold text-primary mb-5">With LotScout</h3>
+              <ul className="space-y-3">
+                {[
+                  'Average closing time reduced to under 30 days',
+                  'Zero commission. Keep 100% of your property value',
+                  'AI-powered zoning and topographic analysis reports',
+                  'Instantly match with verified cash buyers and developers',
+                  'Land-exclusive platform built for professionals',
+                ].map((text) => (
+                  <li key={text} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="text-on-surface font-semibold text-lg leading-snug">{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 6: US Map */}
+      <section className="py-16 bg-surface px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+
+            {/* Left: headline, description, legend, stats */}
+            <div>
+              <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-3">Where Buyers &amp; Sellers Are Active</h2>
+              <p className="text-secondary text-lg mb-8">LotScout members are transacting land across the country every day.</p>
+
+              {/* Legend */}
+              <div className="flex items-center gap-8 mb-8">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm ring-2 ring-emerald-200"></div>
+                  <span className="text-sm font-semibold text-secondary">Sellers</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-900 shadow-sm ring-2 ring-emerald-800/30"></div>
+                  <span className="text-sm font-semibold text-secondary">Buyers</span>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="flex gap-6">
+                <div className="bg-surface-container-low rounded-xl px-6 py-4 flex-1 text-center">
+                  <div className="text-3xl font-extrabold text-emerald-600 mb-1">{SELLERS.length}</div>
+                  <div className="text-xs font-bold text-secondary uppercase tracking-widest">Active Sellers</div>
+                </div>
+                <div className="bg-surface-container-low rounded-xl px-6 py-4 flex-1 text-center">
+                  <div className="text-3xl font-extrabold text-emerald-900 mb-1">{BUYERS.length}</div>
+                  <div className="text-xs font-bold text-secondary uppercase tracking-widest">Active Buyers</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: interactive map */}
+            <div className="bg-white rounded-2xl border border-outline-variant/20 shadow-xl overflow-hidden">
+              {/* Map header bar */}
+              <div className="bg-surface-container-low px-4 py-2.5 flex items-center justify-between border-b border-outline-variant/15">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-xs font-bold text-secondary uppercase tracking-widest">Live Network</span>
+                </div>
+                <span className="text-xs text-secondary font-medium">Hover a dot to see location</span>
+              </div>
+
+              {/* Map container */}
+              <div className="relative bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-50 overflow-hidden" style={{ paddingBottom: '62%' }}>
+                {/* Grid lines */}
+                <div
+                  className="absolute inset-0 opacity-[0.07]"
+                  style={{ backgroundImage: 'linear-gradient(#1B4332 1px, transparent 1px), linear-gradient(90deg, #1B4332 1px, transparent 1px)', backgroundSize: '60px 60px' }}
+                />
+                <div className="absolute inset-4 rounded-xl bg-emerald-50/40 border border-emerald-100/60" />
+
+                {/* Seller dots */}
+                {SELLERS.map((dot) => (
+                  <div
+                    key={dot.city}
+                    className="absolute group"
+                    style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
+                  >
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
+                      <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                        {dot.city}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Buyer dots */}
+                {BUYERS.map((dot) => (
+                  <div
+                    key={dot.city}
+                    className="absolute group"
+                    style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
+                  >
+                    <div className="w-3.5 h-3.5 rounded-full bg-emerald-900 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
+                      <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                        {dot.city}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Map footer */}
+              <div className="bg-surface-container-low px-4 py-2 border-t border-outline-variant/15 text-xs text-secondary font-medium">
+                Continental US shown · Updated daily
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 7: Social Proof Stats */}
+      <section className="py-16 bg-primary text-white px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { stat: '92%',    label: 'Fast Closing Rate' },
+            { stat: '0%',     label: 'Commission Paid' },
+            { stat: '3x',     label: 'Deal Efficiency' },
+            { stat: '2,400+', label: 'Active Listings' },
+          ].map(({ stat, label }) => (
+            <div key={label} className="text-center p-6 bg-white/5 rounded-2xl">
+              <div className="text-4xl md:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
+              <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
