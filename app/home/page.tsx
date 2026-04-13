@@ -1,5 +1,43 @@
 import Header from '@/components/Header';
 
+const SELLERS = [
+  { city: 'Portland, OR',       x: '9%',  y: '17%' },
+  { city: 'San Francisco, CA',  x: '5%',  y: '42%' },
+  { city: 'Salt Lake City, UT', x: '19%', y: '30%' },
+  { city: 'Phoenix, AZ',        x: '16%', y: '58%' },
+  { city: 'Denver, CO',         x: '27%', y: '36%' },
+  { city: 'Dallas, TX',         x: '36%', y: '64%' },
+  { city: 'Houston, TX',        x: '38%', y: '72%' },
+  { city: 'Minneapolis, MN',    x: '50%', y: '15%' },
+  { city: 'Kansas City, MO',    x: '47%', y: '40%' },
+  { city: 'Nashville, TN',      x: '60%', y: '50%' },
+  { city: 'Atlanta, GA',        x: '63%', y: '60%' },
+  { city: 'New York, NY',       x: '80%', y: '27%' },
+  { city: 'Boston, MA',         x: '83%', y: '20%' },
+  { city: 'Raleigh, NC',        x: '71%', y: '48%' },
+  { city: 'Boise, ID',          x: '14%', y: '20%' },
+  { city: 'San Antonio, TX',    x: '33%', y: '72%' },
+];
+
+const BUYERS = [
+  { city: 'Seattle, WA',        x: '7%',  y: '10%' },
+  { city: 'Los Angeles, CA',    x: '8%',  y: '52%' },
+  { city: 'Las Vegas, NV',      x: '14%', y: '44%' },
+  { city: 'Albuquerque, NM',    x: '24%', y: '54%' },
+  { city: 'Austin, TX',         x: '35%', y: '70%' },
+  { city: 'Chicago, IL',        x: '58%', y: '26%' },
+  { city: 'St. Louis, MO',      x: '54%', y: '42%' },
+  { city: 'Memphis, TN',        x: '57%', y: '55%' },
+  { city: 'Miami, FL',          x: '68%', y: '80%' },
+  { city: 'Tampa, FL',          x: '65%', y: '74%' },
+  { city: 'Philadelphia, PA',   x: '77%', y: '32%' },
+  { city: 'Washington, DC',     x: '75%', y: '38%' },
+  { city: 'Charlotte, NC',      x: '68%', y: '48%' },
+  { city: 'Sacramento, CA',     x: '6%',  y: '35%' },
+  { city: 'Columbus, OH',       x: '64%', y: '34%' },
+  { city: 'Oklahoma City, OK',  x: '40%', y: '55%' },
+];
+
 export default function HomePage() {
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-primary">
@@ -13,11 +51,11 @@ export default function HomePage() {
         </div>
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="max-w-4xl">
-            <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.1] mb-8">
+            <h1 className="font-headline text-6xl md:text-8xl font-extrabold text-white tracking-tight leading-[1.05] mb-8">
               Stop Waiting.<br />Start Closing.
             </h1>
-            <p className="font-body text-lg md:text-xl text-on-primary-container leading-relaxed mb-12 max-w-2xl">
-              LotScout connects serious land buyers and sellers directly — no realtors, no commissions, no wasted months. Just verified deals, AI-powered analysis, and a matched network built for land professionals.
+            <p className="font-body text-xl md:text-2xl text-on-primary-container leading-relaxed mb-12 max-w-2xl">
+              LotScout connects serious land buyers and sellers directly. No realtors, no commissions, no wasted months. Just verified deals, AI-powered analysis, and a matched network built for land professionals.
             </p>
             <div className="flex flex-wrap gap-4 mb-16">
               <button className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</button>
@@ -34,43 +72,53 @@ export default function HomePage() {
         </div>
       </header>
 
+      {/* Off-market callout banner */}
+      <div className="bg-emerald-900 py-4 px-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
+          <span className="material-symbols-outlined text-emerald-300 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>lock_open</span>
+          <p className="text-white font-semibold text-base">
+            All listings on LotScout are off-market. Sell without a realtor and keep 100% of your proceeds.
+          </p>
+        </div>
+      </div>
+
       {/* SECTION 2: The Problem */}
-      <section className="py-24 bg-surface px-8">
+      <section className="py-28 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-16 tracking-tight">The Old Way Is Costing You</h2>
+          <h2 className="font-headline text-5xl font-bold text-primary mb-16 tracking-tight">The Old Way Is Costing You</h2>
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Old Way */}
+            {/* Before LotScout */}
             <div className="bg-error-container/20 rounded-2xl p-8 md:p-12">
-              <h3 className="font-headline text-2xl font-bold text-on-error-container mb-8">Selling on Your Own or With a Realtor</h3>
-              <ul className="space-y-6">
+              <h3 className="font-headline text-3xl font-bold text-on-error-container mb-10">Before LotScout</h3>
+              <ul className="space-y-7">
                 {[
-                  'Wait 6-12 months for traditional listings to gain traction',
-                  'Lose up to 10% of equity to realtor commissions & fees',
-                  'Manual data verification and title research bottlenecks',
-                  'Endless calls with unverified, tire-kicking "buyers"',
+                  'Wait 6 to 12 months for traditional listings to gain traction',
+                  'Lose up to 10% of equity to realtor commissions and fees',
+                  'Manual data verification and title research create costly delays',
+                  'Endless calls with unverified, tire-kicking buyers',
                   "Generic listing sites that don't understand land zoning",
                 ].map((text) => (
                   <li key={text} className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-error font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
-                    <span className="text-on-surface-variant font-medium">{text}</span>
+                    <span className="material-symbols-outlined text-error text-2xl flex-none" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
+                    <span className="text-on-surface-variant font-medium text-lg leading-snug">{text}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            {/* LotScout Way */}
+            {/* With LotScout */}
             <div className="bg-primary-fixed/20 rounded-2xl p-8 md:p-12 border border-primary/5">
-              <h3 className="font-headline text-2xl font-bold text-primary mb-8">With LotScout</h3>
-              <ul className="space-y-6">
+              <h3 className="font-headline text-3xl font-bold text-primary mb-10">With LotScout</h3>
+              <ul className="space-y-7">
                 {[
                   'Average closing time reduced to under 30 days',
-                  'Zero Commission—keep 100% of your property\'s value',
+                  'Zero commission. Keep 100% of your property value',
                   'AI-powered zoning and topographic analysis reports',
-                  'Instantly match with verified cash buyers & developers',
+                  'Instantly match with verified cash buyers and developers',
                   'Land-exclusive platform built for professionals',
                 ].map((text) => (
                   <li key={text} className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-primary font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    <span className="text-on-surface font-semibold">{text}</span>
+                    <span className="material-symbols-outlined text-primary text-2xl flex-none" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="text-on-surface font-semibold text-lg leading-snug">{text}</span>
                   </li>
                 ))}
               </ul>
@@ -80,11 +128,11 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 3: Who It's For */}
-      <section className="py-24 bg-surface-container-low px-8">
+      <section className="py-28 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16">
-            <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-4">Built for Both Sides of the Deal</h2>
-            <p className="text-secondary text-lg max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
+            <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-4">Built for Both Sides of the Deal</h2>
+            <p className="text-secondary text-xl max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-0 overflow-hidden rounded-3xl">
             {/* Seller */}
@@ -137,70 +185,100 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 4: Live Activity Feed */}
-      <section className="py-24 bg-surface px-8 overflow-hidden">
+      {/* SECTION 4: US Map */}
+      <section className="py-28 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
-            <div className="flex items-center gap-4">
-              <h2 className="font-headline text-3xl font-bold text-primary tracking-tight">Deals Happening Right Now</h2>
-              <span className="flex items-center gap-1 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span> Live
-              </span>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-3">Where Buyers &amp; Sellers Are Active</h2>
+              <p className="text-secondary text-xl max-w-xl">LotScout members are transacting land across the country every day.</p>
+            </div>
+            {/* Legend */}
+            <div className="flex items-center gap-6 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm ring-2 ring-emerald-200"></div>
+                <span className="text-sm font-semibold text-secondary">Sellers</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-emerald-900 shadow-sm ring-2 ring-emerald-800/30"></div>
+                <span className="text-sm font-semibold text-secondary">Buyers</span>
+              </div>
             </div>
           </div>
-          <div className="flex gap-6 overflow-x-auto pb-8 no-scrollbar -mx-8 px-8">
-            {[
-              { tag: 'MATCH',       time: '2 mins ago',   body: 'Institutional Buyer matched with 420-Acre Timberland in Oregon.',        stat: '$1,240,000 Deal' },
-              { tag: 'NEW LISTING', time: '14 mins ago',  body: 'Prime Development Lot listed in Austin, TX suburbs.',                     stat: '12.5 Acres · $850k' },
-              { tag: 'ANALYSIS',    time: '32 mins ago',  body: 'Topographic & Zoning AI Report completed for parcel #4492.',              stat: '99.8% Accuracy Score' },
-              { tag: 'CLOSED',      time: '1 hour ago',   body: 'Transaction finalized: "The Ranch at Cedar Creek".',                      stat: '$3,400,000 · 18 Days' },
-              { tag: 'MATCH',       time: '2 hours ago',  body: 'Solar Developer matched with Arizona Desert Flatland.',                   stat: '850 Acres · Off-Market' },
-            ].map((card, i) => (
-              <div key={i} className="flex-none w-80 bg-white p-6 rounded-xl border-l-4 border-emerald-500 shadow-sm">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-xs font-bold text-secondary tracking-widest uppercase">{card.tag}</span>
-                  <span className="text-xs text-slate-400">{card.time}</span>
-                </div>
-                <p className="text-on-surface font-medium mb-3">{card.body}</p>
-                <div className="text-primary font-bold">{card.stat}</div>
+
+          <div className="bg-white rounded-2xl border border-outline-variant/20 shadow-xl overflow-hidden">
+            {/* Map header bar */}
+            <div className="bg-surface-container-low px-6 py-3 flex items-center justify-between border-b border-outline-variant/15">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-xs font-bold text-secondary uppercase tracking-widest">Live Network</span>
               </div>
-            ))}
+              <div className="flex items-center gap-6 text-xs font-semibold text-secondary">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>{SELLERS.length} Active Sellers</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-900 inline-block"></span>{BUYERS.length} Active Buyers</span>
+              </div>
+            </div>
+
+            {/* Map container */}
+            <div className="relative bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-50 overflow-hidden" style={{ paddingBottom: '50%' }}>
+              {/* Grid lines */}
+              <div
+                className="absolute inset-0 opacity-[0.07]"
+                style={{ backgroundImage: 'linear-gradient(#1B4332 1px, transparent 1px), linear-gradient(90deg, #1B4332 1px, transparent 1px)', backgroundSize: '80px 80px' }}
+              />
+              {/* Subtle US region shading */}
+              <div className="absolute inset-4 rounded-xl bg-emerald-50/40 border border-emerald-100/60" />
+
+              {/* Seller dots */}
+              {SELLERS.map((dot) => (
+                <div
+                  key={dot.city}
+                  className="absolute group"
+                  style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
+                >
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
+                    <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                      {dot.city}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Buyer dots */}
+              {BUYERS.map((dot) => (
+                <div
+                  key={dot.city}
+                  className="absolute group"
+                  style={{ left: dot.x, top: dot.y, transform: 'translate(-50%, -50%)' }}
+                >
+                  <div className="w-3.5 h-3.5 rounded-full bg-emerald-900 shadow-md ring-2 ring-white cursor-pointer hover:scale-150 transition-transform" />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20">
+                    <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                      {dot.city}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Map footer */}
+            <div className="bg-surface-container-low px-6 py-3 border-t border-outline-variant/15 flex flex-wrap gap-x-8 gap-y-1 text-xs text-secondary font-medium">
+              <span>Hover a dot to see location</span>
+              <span>Updated daily</span>
+              <span>Continental US shown</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 5: How It Works */}
-      <section className="py-24 bg-surface-container-low px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-20 text-center tracking-tight">How LotScout Works</h2>
-          <div className="grid md:grid-cols-3 gap-12 relative">
-            {[
-              { num: '1', icon: 'account_circle', title: 'Create Your Profile',    body: 'Verified professionals only. Tell us if you are selling inventory or hunting for specific acquisitions.' },
-              { num: '2', icon: 'hub',            title: 'Get Matched Instantly',  body: 'Our AI engine pairs inventory with demand in real-time, notifying both parties of a compatible deal.' },
-              { num: '3', icon: 'handshake',      title: 'Close the Deal',         body: 'Communicate directly, review analysis reports, and move to escrow without expensive intermediaries.' },
-            ].map(({ num, icon, title, body }) => (
-              <div key={num} className="relative z-10 text-center">
-                <div className="w-20 h-20 bg-primary-container text-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl font-headline text-2xl font-bold">{num}</div>
-                <div className="bg-primary/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="material-symbols-outlined text-primary text-3xl">{icon}</span>
-                </div>
-                <h3 className="font-headline text-xl font-bold text-primary mb-4">{title}</h3>
-                <p className="text-secondary leading-relaxed">{body}</p>
-              </div>
-            ))}
-            {/* Connecting line (desktop) */}
-            <div className="hidden md:block absolute top-10 left-[20%] right-[20%] h-0.5 bg-primary/10 -z-0"></div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 6: Social Proof Stats */}
+      {/* SECTION 5: Social Proof Stats */}
       <section className="py-24 bg-primary text-white px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { stat: '92%',   label: 'Fast Closing Rate' },
-            { stat: '0%',    label: 'Commision Paid' },
-            { stat: '3x',    label: 'Deal Efficiency' },
+            { stat: '92%',    label: 'Fast Closing Rate' },
+            { stat: '0%',     label: 'Commission Paid' },
+            { stat: '3x',     label: 'Deal Efficiency' },
             { stat: '2,400+', label: 'Active Listings' },
           ].map(({ stat, label }) => (
             <div key={label} className="text-center p-8 bg-white/5 rounded-2xl">
@@ -211,10 +289,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 7: Marketplace Preview */}
-      <section className="py-24 bg-surface px-8">
+      {/* SECTION 6: Marketplace Preview */}
+      <section className="py-28 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-12 tracking-tight">A Glimpse of What&apos;s Inside</h2>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+            <h2 className="font-headline text-5xl font-bold text-primary tracking-tight">A Glimpse of What&apos;s Inside</h2>
+            <span className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold px-4 py-2 rounded-full flex-shrink-0">
+              <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+              All properties are off-market listings
+            </span>
+          </div>
+          <p className="text-secondary text-lg mb-12">These deals are not listed on Zillow, Realtor.com, or the MLS. You only find them here.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1 */}
             <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high">
@@ -255,7 +340,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            {/* Card 4 — locked/blurred */}
+            {/* Card 4 - locked */}
             <div className="relative bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high group">
               <div
                 className="blur-md grayscale opacity-50 h-full w-full absolute inset-0 bg-cover bg-center"
@@ -271,26 +356,150 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 8: Pricing Teaser */}
-      <section className="py-24 bg-surface-container-low px-8">
+      {/* SECTION 7: New Buyers Added Daily */}
+      <section className="py-28 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-16 text-center tracking-tight">Simple, Transparent Pricing — No Hidden Fees</h2>
+          <h2 className="font-headline text-5xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
+          <p className="text-secondary text-xl mb-12 max-w-2xl">
+            Sellers — these buyers are actively searching for land like yours right now.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Buyer Card 1 */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-none">
+                  <span className="material-symbols-outlined text-primary text-2xl">corporate_fare</span>
+                </div>
+                <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
+                </span>
+              </div>
+              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">Vanguard Land Trust</h3>
+              <p className="text-secondary text-sm font-medium mb-4">Denver, CO</p>
+              <div className="space-y-2 text-sm flex-grow">
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
+                  <span>50 to 500 acres</span>
+                </div>
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">payments</span>
+                  <span>$500k to $2M budget</span>
+                </div>
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">nature</span>
+                  <span>Agricultural / Conservation</span>
+                </div>
+              </div>
+              <button className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">View Profile</button>
+            </div>
+
+            {/* Buyer Card 2 */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-none">
+                  <span className="material-symbols-outlined text-primary text-2xl">construction</span>
+                </div>
+                <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
+                </span>
+              </div>
+              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">BuildWorks Inc.</h3>
+              <p className="text-secondary text-sm font-medium mb-4">Austin, TX</p>
+              <div className="space-y-2 text-sm flex-grow">
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
+                  <span>5 to 20 acres</span>
+                </div>
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">payments</span>
+                  <span>$200k to $800k budget</span>
+                </div>
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">home_work</span>
+                  <span>Light Industrial / Residential</span>
+                </div>
+              </div>
+              <button className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">View Profile</button>
+            </div>
+
+            {/* Buyer Card 3 */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-none">
+                  <span className="material-symbols-outlined text-primary text-2xl">forest</span>
+                </div>
+                <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
+                </span>
+              </div>
+              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">Meridian Land Holdings</h3>
+              <p className="text-secondary text-sm font-medium mb-4">Seattle, WA</p>
+              <div className="space-y-2 text-sm flex-grow">
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
+                  <span>100 to 1,000 acres</span>
+                </div>
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">payments</span>
+                  <span>$1M to $5M budget</span>
+                </div>
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-base text-primary/50">park</span>
+                  <span>Timberland / Recreational</span>
+                </div>
+              </div>
+              <button className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">View Profile</button>
+            </div>
+
+            {/* Card 4 - locked */}
+            <div className="relative bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high">
+              <div className="blur-sm opacity-40 absolute inset-0 p-6 space-y-4 pointer-events-none">
+                <div className="w-12 h-12 bg-primary/10 rounded-full"></div>
+                <div className="h-4 bg-surface-container-high rounded w-3/4"></div>
+                <div className="h-3 bg-surface-container-high rounded w-1/2"></div>
+                <div className="space-y-2 pt-2">
+                  <div className="h-3 bg-surface-container-high rounded w-full"></div>
+                  <div className="h-3 bg-surface-container-high rounded w-5/6"></div>
+                  <div className="h-3 bg-surface-container-high rounded w-4/5"></div>
+                </div>
+              </div>
+              <div className="relative z-10 p-6 flex flex-col items-center justify-center h-full text-center min-h-[280px]">
+                <span className="material-symbols-outlined text-primary text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                <p className="font-headline font-bold text-primary mb-6 leading-snug">Sign up to see all active buyers</p>
+                <button className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 8: Pricing Teaser */}
+      <section className="py-28 bg-surface px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="font-headline text-5xl font-bold text-primary mb-16 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {/* Standard */}
-            <div className="bg-white p-10 rounded-2xl flex flex-col shadow-sm">
+            <div className="bg-white p-10 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Standard</h3>
               <div className="flex items-baseline gap-1 mb-6">
                 <span className="text-4xl font-extrabold text-primary">$97</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
-                {['Browse Public Marketplace', '3 Land Listings per Month', 'Basic Property Data', 'Direct Messaging'].map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-on-surface-variant text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg">check</span> {f}
+                {[
+                  'Land Marketplace Access',
+                  'Lot to Buyer Match AI',
+                  'Custom Company Profile',
+                  'Buyer Directory Access',
+                  'Property Analysis Reports (24hr delivery)',
+                  'Lot Analysis Reports (24hr delivery)',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
+                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Start Free Trial</button>
+              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
             </div>
             {/* Priority */}
             <div className="bg-white p-10 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative">
@@ -301,44 +510,54 @@ export default function HomePage() {
                 <span className="text-secondary">/mo</span>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
-                <li className="flex items-center gap-3 text-on-surface font-semibold text-sm">
-                  <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>star</span> Off-Market Access
-                </li>
-                {['Unlimited Listings', 'Priority Match AI', 'Topographic Analysis Reports', 'Identity Verified Badge'].map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-on-surface font-semibold text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg">check</span> {f}
+                {[
+                  'Everything in Standard',
+                  'Unlimited Listings',
+                  'Promoted Lot Requests',
+                  'Financing Partners Access',
+                  '24/7 Support',
+                  'Property Analysis Reports (15 min delivery)',
+                  'Lot Analysis Reports (15 min delivery)',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-3 text-on-surface font-semibold text-sm">
+                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
                   </li>
                 ))}
               </ul>
               <button className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Get Priority Access</button>
             </div>
             {/* Exclusive */}
-            <div className="bg-white p-10 rounded-2xl flex flex-col shadow-sm">
+            <div className="bg-white p-10 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
               <div className="flex items-baseline gap-1 mb-6">
                 <span className="text-4xl font-extrabold text-primary">$799</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
-                {['Everything in Priority', 'Custom API Land Sourcing', 'Dedicated Acquisition Manager', 'Legal Document Templates'].map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-on-surface-variant text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg">check</span> {f}
+                {[
+                  'Everything in Priority',
+                  'Hands-On Listing Support',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
+                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Contact Enterprise</button>
+              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
             </div>
           </div>
         </div>
       </section>
 
       {/* SECTION 9: Final CTA */}
-      <section className="py-24 bg-primary px-8 text-center relative overflow-hidden">
+      <section className="py-28 bg-primary px-8 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="font-headline text-4xl md:text-5xl font-extrabold text-white mb-8 tracking-tight">Your Next Land Deal Is Already on LotScout</h2>
-          <p className="text-on-primary-container text-lg md:text-xl mb-12 max-w-2xl mx-auto">While you&apos;re reading this, buyers and sellers are matching right now. Don&apos;t let another deal close without you.</p>
-          <button className="bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors scale-95 active:scale-90 transition-transform">Get Started Free</button>
+          <h2 className="font-headline text-5xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">Your Next Land Partnership Starts Here</h2>
+          <p className="text-on-primary-container text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">
+            LotScout connects serious buyers and sellers of off-market land directly. No realtors. No commission. No waiting on the MLS. Just the right match at the right time.
+          </p>
+          <button className="bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors active:scale-95 transition-transform">Get Started Free</button>
         </div>
       </section>
 
