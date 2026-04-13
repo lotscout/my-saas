@@ -258,7 +258,100 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* SECTION 2: Marketplace Preview */}
+      {/* SECTION 2: Social Proof Stats */}
+      <section className="py-16 bg-primary text-white px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { stat: '92%',    label: 'Fast Closing Rate' },
+            { stat: '0%',     label: 'Commission Paid' },
+            { stat: '3x',     label: 'Deal Efficiency' },
+            { stat: '2,400+', label: 'Active Listings' },
+          ].map(({ stat, label }) => (
+            <div key={label} className="text-center p-6 bg-white/5 rounded-2xl">
+              <div className="text-4xl md:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
+              <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 3: Pricing Teaser */}
+      <section className="py-16 bg-surface px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="font-headline text-4xl font-bold text-primary mb-10 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Standard */}
+            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
+              <h3 className="font-headline text-xl font-bold text-primary mb-2">Standard</h3>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-4xl font-extrabold text-primary">$97</span>
+                <span className="text-secondary">/mo</span>
+              </div>
+              <ul className="space-y-3 mb-8 flex-grow">
+                {[
+                  'Land Marketplace Access',
+                  'Lot to Buyer Match AI',
+                  'Custom Company Profile',
+                  'Buyer Directory Access',
+                  'Property Analysis Reports (24hr delivery)',
+                  'Lot Analysis Reports (24hr delivery)',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
+                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
+                  </li>
+                ))}
+              </ul>
+              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
+            </div>
+            {/* Priority */}
+            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
+              <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-4xl font-extrabold text-primary">$329</span>
+                <span className="text-secondary">/mo</span>
+              </div>
+              <ul className="space-y-3 mb-8 flex-grow">
+                {[
+                  'Everything in Standard',
+                  'Unlimited Listings',
+                  'Promoted Lot Requests',
+                  'Financing Partners Access',
+                  '24/7 Support',
+                  'Property Analysis Reports (15 min delivery)',
+                  'Lot Analysis Reports (15 min delivery)',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-3 text-on-surface font-semibold text-sm">
+                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
+                  </li>
+                ))}
+              </ul>
+              <button className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Get Started</button>
+            </div>
+            {/* Exclusive */}
+            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
+              <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-4xl font-extrabold text-primary">$799</span>
+                <span className="text-secondary">/mo</span>
+              </div>
+              <ul className="space-y-3 mb-8 flex-grow">
+                {[
+                  'Everything in Priority',
+                  'Hands-On Listing Support',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
+                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
+                  </li>
+                ))}
+              </ul>
+              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 4: Marketplace Preview */}
       <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
@@ -325,7 +418,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 3: New Buyers Added Daily */}
+      {/* SECTION 5: New Buyers Added Daily */}
       <section className="py-16 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
@@ -442,7 +535,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 4: Who It's For */}
+      {/* SECTION 6: Who It's For */}
       <section className="py-16 bg-surface-container-low px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
@@ -500,7 +593,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 5: The Problem */}
+      {/* SECTION 7: The Problem */}
       <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">The Old Way Is Costing You</h2>
@@ -545,7 +638,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 6: US Map */}
+      {/* SECTION 8: US Map */}
       <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -639,99 +732,6 @@ export default function HomePage() {
               </div>
             </div>
 
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 7: Social Proof Stats */}
-      <section className="py-16 bg-primary text-white px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { stat: '92%',    label: 'Fast Closing Rate' },
-            { stat: '0%',     label: 'Commission Paid' },
-            { stat: '3x',     label: 'Deal Efficiency' },
-            { stat: '2,400+', label: 'Active Listings' },
-          ].map(({ stat, label }) => (
-            <div key={label} className="text-center p-6 bg-white/5 rounded-2xl">
-              <div className="text-4xl md:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
-              <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SECTION 8: Pricing Teaser */}
-      <section className="py-16 bg-surface px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-10 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Standard */}
-            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Standard</h3>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$97</span>
-                <span className="text-secondary">/mo</span>
-              </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Land Marketplace Access',
-                  'Lot to Buyer Match AI',
-                  'Custom Company Profile',
-                  'Buyer Directory Access',
-                  'Property Analysis Reports (24hr delivery)',
-                  'Lot Analysis Reports (24hr delivery)',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
-              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
-            </div>
-            {/* Priority */}
-            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$329</span>
-                <span className="text-secondary">/mo</span>
-              </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Everything in Standard',
-                  'Unlimited Listings',
-                  'Promoted Lot Requests',
-                  'Financing Partners Access',
-                  '24/7 Support',
-                  'Property Analysis Reports (15 min delivery)',
-                  'Lot Analysis Reports (15 min delivery)',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface font-semibold text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
-              <button className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Get Started</button>
-            </div>
-            {/* Exclusive */}
-            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$799</span>
-                <span className="text-secondary">/mo</span>
-              </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Everything in Priority',
-                  'Hands-On Listing Support',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
-              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
-            </div>
           </div>
         </div>
       </section>
