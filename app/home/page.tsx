@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Header from '@/components/Header';
+import Link from 'next/link';
 
 
 const HERO_SELLERS = [
@@ -173,10 +173,23 @@ function HeroMap() {
 export default function HomePage() {
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-primary">
-      <Header />
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-surface-container-high">
+        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
+          <Link href="/home" className="font-headline text-xl font-extrabold text-primary tracking-tight">LotScout</Link>
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/home#platform" className="text-sm font-semibold text-secondary hover:text-primary transition-colors">Platform</Link>
+            <Link href="/home#marketplace" className="text-sm font-semibold text-secondary hover:text-primary transition-colors">Marketplace</Link>
+            <Link href="/home#pricing" className="text-sm font-semibold text-secondary hover:text-primary transition-colors">Pricing</Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/sign-in" className="px-4 py-2 rounded-lg border border-primary/30 text-primary text-sm font-bold hover:bg-primary/5 transition-colors">Sign In</Link>
+            <Link href="/sign-up" className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">Sign Up</Link>
+          </div>
+        </div>
+      </nav>
 
       {/* SECTION 1: Hero */}
-      <header className="pt-24 pb-16 md:pt-32 md:pb-20 bg-primary-container relative overflow-hidden">
+      <header className="pt-32 pb-16 md:pt-40 md:pb-20 bg-primary-container relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
           <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary-fixed-dim rounded-full blur-3xl"></div>
@@ -192,8 +205,8 @@ export default function HomePage() {
                 LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.
               </p>
               <div className="flex flex-wrap gap-4 mb-10">
-                <button className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</button>
-                <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</button>
+                <Link href="/sign-up" className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
+                <Link href="/sign-up" className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
               </div>
             </div>
             {/* Right column: interactive map */}
@@ -285,7 +298,7 @@ export default function HomePage() {
               <div className="relative z-10 p-6 flex flex-col items-center justify-center h-full text-center bg-white/20 backdrop-blur-[2px]">
                 <span className="material-symbols-outlined text-primary text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
                 <p className="font-headline font-bold text-primary mb-6">Sign up to unlock 2,400+ off-market listings</p>
-                <button className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</button>
+                <Link href="/sign-up" className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</Link>
               </div>
             </div>
           </div>
@@ -402,7 +415,7 @@ export default function HomePage() {
               <div className="relative z-10 p-6 flex flex-col items-center justify-center h-full text-center min-h-[280px]">
                 <span className="material-symbols-outlined text-primary text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
                 <p className="font-headline font-bold text-primary mb-6 leading-snug">Sign up to see all active buyers</p>
-                <button className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</button>
+                <Link href="/sign-up" className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</Link>
               </div>
             </div>
           </div>
@@ -480,7 +493,7 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
-              <button className="w-full bg-primary-fixed text-primary py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors">List My Property</button>
+              <Link href="/sign-up" className="w-full bg-primary-fixed text-primary py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors text-center block">List My Property</Link>
             </div>
             {/* Buyer */}
             <div className="bg-white p-8 md:p-10 flex flex-col justify-between">
@@ -500,7 +513,7 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
-              <button className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition-colors">Find Land Now</button>
+              <Link href="/sign-up" className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition-colors text-center block">Find Land Now</Link>
             </div>
           </div>
         </div>
@@ -532,7 +545,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
+              <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
             {/* Priority */}
             <div className="bg-white p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative">
@@ -557,7 +570,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Get Started</button>
+              <Link href="/sign-up" className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all text-center block">Get Started</Link>
             </div>
             {/* Exclusive */}
             <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
@@ -576,7 +589,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors">Get Started</button>
+              <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
           </div>
         </div>
@@ -590,7 +603,7 @@ export default function HomePage() {
           <p className="text-on-primary-container text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
             LotScout connects serious buyers and sellers of off-market land directly. No realtors. No commission. No waiting on the MLS. Just the right match at the right time.
           </p>
-          <button className="bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors active:scale-95 transition-transform">Get Started Free</button>
+          <Link href="/sign-up" className="inline-block bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors active:scale-95">Get Started Free</Link>
         </div>
       </section>
 
