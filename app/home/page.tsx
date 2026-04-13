@@ -582,7 +582,14 @@ export default function HomePage() {
               <ul className="space-y-3 mb-8 flex-grow">
                 {[
                   'Everything in Priority',
-                  'Hands-On Listing Support',
+                  'Dedicated Full-Time Account Manager',
+                  'Early Access to New Listings Before Anyone Else',
+                  'Early Access to New Buyers Before Anyone Else',
+                  'Hands-On Listing Support and Deal Guidance',
+                  'White-Glove Onboarding and Setup',
+                  'Priority Deal Matching with Top-Tier Buyers',
+                  'Quarterly Market Intelligence Reports',
+                  "Direct Line to LotScout's Land Experts",
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
                     <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
