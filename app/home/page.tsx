@@ -231,10 +231,10 @@ export default function HomePage() {
       <section className="py-16 bg-primary text-white px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { stat: '92%',    label: 'Fast Closing Rate' },
-            { stat: '0%',     label: 'Commission Paid' },
-            { stat: '3x',     label: 'Deal Efficiency' },
-            { stat: '2,400+', label: 'Active Listings' },
+            { stat: '92%',     label: 'Fast Closing Rate' },
+            { stat: '$4.32M',  label: 'Commission Saved' },
+            { stat: '72M+',    label: 'Land Transactions' },
+            { stat: '2,400+',  label: 'Active Listings' },
           ].map(({ stat, label }) => (
             <div key={label} className="text-center p-6 bg-white/5 rounded-2xl">
               <div className="text-4xl md:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
