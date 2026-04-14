@@ -425,22 +425,22 @@ export default function HomePage() {
       {/* SECTION 5: The Problem */}
       <section className="py-16 bg-surface px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">The Old Way Is Costing You</h2>
+          <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">Sound Familiar?</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {/* Before LotScout */}
             <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
               <h3 className="font-headline text-2xl font-bold text-on-error-container mb-5">Before LotScout</h3>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {[
-                  'Wait 6 to 12 months for traditional listings to gain traction',
-                  'Lose up to 10% of equity to realtor commissions and fees',
-                  'Manual data verification and title research create costly delays',
-                  'Endless calls with unverified, tire-kicking buyers',
-                  "Generic listing sites that don't understand land zoning",
+                  "You've been waiting 6–12 months and still haven't found the right buyer or property",
+                  "You're paying out 5–10% in commissions on every deal and watching your profits shrink",
+                  "You're not confident in the land value or data — every analysis takes days and costs hundreds",
+                  "You're spending hours scrolling through MLS listings that have nothing to do with land",
+                  "You found the perfect lot but someone else already closed on it before you even knew it existed",
                 ].map((text) => (
                   <li key={text} className="flex items-start gap-3">
                     <span className="material-symbols-outlined text-error text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
-                    <span className="text-on-surface-variant font-medium text-lg leading-snug">{text}</span>
+                    <span className="text-on-surface-variant font-medium text-base leading-snug">{text}</span>
                   </li>
                 ))}
               </ul>
@@ -448,17 +448,18 @@ export default function HomePage() {
             {/* With LotScout */}
             <div className="bg-primary-fixed/20 rounded-2xl p-6 md:p-8 border border-primary/5">
               <h3 className="font-headline text-2xl font-bold text-primary mb-5">With LotScout</h3>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {[
-                  'Average closing time reduced to under 30 days',
-                  'Zero commission. Keep 100% of your property value',
-                  'AI-powered zoning and topographic analysis reports',
-                  'Instantly match with verified cash buyers and developers',
-                  'Land-exclusive platform built for professionals',
+                  'Find a verified buyer or seller in under 30 days — 6x faster than the traditional market',
+                  'Save thousands on realtor commissions and closing costs — keep 100% of your proceeds',
+                  'Every listing includes an in-depth AI analysis so you never spend hours researching a property again',
+                  'Get instantly matched with hundreds of active buyers or sellers the moment you join',
+                  '24/7 support from real people who know land — always someone in your corner on every deal',
+                  'Higher profits, faster closes — the average LotScout deal closes 6x faster than the MLS',
                 ].map((text) => (
                   <li key={text} className="flex items-start gap-3">
                     <span className="material-symbols-outlined text-primary text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    <span className="text-on-surface font-semibold text-lg leading-snug">{text}</span>
+                    <span className="text-on-surface font-semibold text-base leading-snug">{text}</span>
                   </li>
                 ))}
               </ul>
