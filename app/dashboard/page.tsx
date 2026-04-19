@@ -172,7 +172,11 @@ export default function DashboardPage() {
           .eq('active', true),
       ]);
 
-      setFirstName(profileRes.data?.first_name ?? null);
+      setFirstName(
+        profileRes.data?.first_name ??
+        (user.user_metadata?.first_name as string | undefined) ??
+        null
+      );
       setTier((profileRes.data?.tier as Tier) ?? null);
       setMessages((messagesRes.data as Message[]) ?? []);
       setReports((reportsRes.data as Report[]) ?? []);
