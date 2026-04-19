@@ -33,7 +33,7 @@ function formatPrice(price: number): string {
   return `$${price}`;
 }
 
-function matchScore(listing: UserListing, criteria: BuyerCriteriaRow): number {
+function matchScore(listing: any, criteria: any): number {
   let score = 70;
   if (criteria.land_type && listing.land_type && criteria.land_type === listing.land_type) score += 10;
   if (criteria.location && listing.county && listing.county.toLowerCase().includes(criteria.location.toLowerCase())) score += 10;
@@ -47,7 +47,7 @@ function matchScore(listing: UserListing, criteria: BuyerCriteriaRow): number {
   return Math.min(score, 100);
 }
 
-function listingMatchesCriteria(listing: UserListing | FeedListing, criteria: BuyerCriteriaRow): boolean {
+function listingMatchesCriteria(listing: any, criteria: any): boolean {
   if (criteria.min_acreage != null && listing.acreage != null && listing.acreage < criteria.min_acreage) return false;
   if (criteria.max_acreage != null && listing.acreage != null && listing.acreage > criteria.max_acreage) return false;
   if (criteria.min_budget != null && listing.price != null && listing.price < criteria.min_budget) return false;
@@ -86,17 +86,6 @@ interface FeedListing {
   created_at: any;
 }
 
-interface BuyerCriteriaRow {
-  id: any;
-  user_id: any;
-  location: any;
-  min_acreage: any;
-  max_acreage: any;
-  min_budget: any;
-  max_budget: any;
-  land_type: any;
-  buyer: any;
-}
 
 interface Report {
   id: any;
@@ -117,13 +106,13 @@ function senderName(msg: Message): string {
   return [first_name, last_name].filter(Boolean).join(' ') || 'Unknown';
 }
 
-function buyerName(b: BuyerCriteriaRow): string {
+function buyerName(b: any): string {
   if (!b.buyer) return 'Anonymous Buyer';
   const { first_name, last_name } = b.buyer;
   return [first_name, last_name].filter(Boolean).join(' ') || 'Anonymous Buyer';
 }
 
-function criteriaLabel(b: BuyerCriteriaRow): string {
+function criteriaLabel(b: any): string {
   const parts: string[] = [];
   if (b.land_type) parts.push(b.land_type.charAt(0).toUpperCase() + b.land_type.slice(1));
   if (b.min_acreage != null || b.max_acreage != null) {
@@ -139,7 +128,7 @@ export default function DashboardPage() {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [tier, setTier] = useState<Tier | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [matchedBuyers, setMatchedBuyers] = useState<{ criteria: BuyerCriteriaRow; score: number }[]>([]);
+  const [matchedBuyers, setMatchedBuyers] = useState<any[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [newListings, setNewListings] = useState<FeedListing[]>([]);
   const [hasBuyerCriteria, setHasBuyerCriteria] = useState(false);
@@ -182,11 +171,11 @@ export default function DashboardPage() {
         null
       );
       setTier((profileRes.data?.tier as Tier) ?? null);
-      setMessages((messagesRes.data as Message[]) ?? []);
-      setReports((reportsRes.data as Report[]) ?? []);
+      setMessages((messagesRes.data as any[]) ?? []);
+      setReports((reportsRes.data as any[]) ?? []);
 
-      const userListings: UserListing[] = (userListingsRes.data as UserListing[]) ?? [];
-      const userCriteria: BuyerCriteriaRow[] = (userCriteriaRes.data as BuyerCriteriaRow[]) ?? [];
+      const userListings: any[] = (userListingsRes.data as any[]) ?? [];
+      const userCriteria: any[] = (userCriteriaRes.data as any[]) ?? [];
       setHasBuyerCriteria(userCriteria.length > 0);
 
       // Matched buyers: find other users' active criteria that match user's listings
@@ -198,7 +187,7 @@ export default function DashboardPage() {
           .neq('user_id', user.id);
 
         if (allCriteria) {
-          const scored = (allCriteria as BuyerCriteriaRow[])
+          const scored = (allCriteria as any[])
             .filter(criteria => userListings.some(l => listingMatchesCriteria(l, criteria)))
             .map(criteria => ({
               criteria,
@@ -221,7 +210,7 @@ export default function DashboardPage() {
           .limit(50);
 
         if (feedListings) {
-          const matched = (feedListings as FeedListing[])
+          const matched = (feedListings as any[])
             .filter(listing => userCriteria.some(c => listingMatchesCriteria(listing, c)))
             .slice(0, 4);
           setNewListings(matched);
