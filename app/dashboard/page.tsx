@@ -57,50 +57,54 @@ function listingMatchesCriteria(listing: UserListing | FeedListing, criteria: Bu
 }
 
 interface Message {
-  id: string;
-  body: string;
-  created_at: string;
-  listing_id: string;
+  id: any;
+  body: any;
+  created_at: any;
+  listing_id: any;
   sender: any;
   listing: any;
 }
 
 interface UserListing {
-  id: string;
-  acreage: number | null;
-  price: number | null;
-  county: string | null;
-  land_type: string | null;
+  id: any;
+  address: any;
+  acreage: any;
+  price: any;
+  status: any;
+  county?: any;
+  land_type?: any;
 }
 
 interface FeedListing {
-  id: string;
-  title: string;
-  location: string | null;
-  county: string | null;
-  acreage: number | null;
-  price: number | null;
-  land_type: string | null;
-  created_at: string;
+  id: any;
+  title: any;
+  location: any;
+  county: any;
+  acreage: any;
+  price: any;
+  land_type: any;
+  created_at: any;
 }
 
 interface BuyerCriteriaRow {
-  id: string;
-  user_id: string;
-  location: string | null;
-  min_acreage: number | null;
-  max_acreage: number | null;
-  min_budget: number | null;
-  max_budget: number | null;
-  land_type: string | null;
-  buyer: { first_name: string | null; last_name: string | null } | null;
+  id: any;
+  user_id: any;
+  location: any;
+  min_acreage: any;
+  max_acreage: any;
+  min_budget: any;
+  max_budget: any;
+  land_type: any;
+  buyer: any;
 }
 
 interface Report {
-  id: string;
-  title: string;
-  score: number | null;
-  created_at: string;
+  id: any;
+  created_at: any;
+  address: any;
+  score: any;
+  status: any;
+  title?: any;
 }
 
 function Skeleton({ className }: { className?: string }) {
