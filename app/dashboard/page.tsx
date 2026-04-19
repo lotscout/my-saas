@@ -60,9 +60,9 @@ interface Message {
   id: string;
   body: string;
   created_at: string;
-  listing_id: string | null;
-  sender: { first_name: string | null; last_name: string | null } | null;
-  listing: { title: string } | null;
+  listing_id: string;
+  sender: any;
+  listing: any;
 }
 
 interface UserListing {
