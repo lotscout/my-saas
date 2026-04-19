@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
+import LockedFeature from '@/components/LockedFeature';
 import { createClient } from '@/lib/supabase/client';
+import type { Tier } from '@/lib/permissions';
 
 const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
@@ -131,6 +133,7 @@ function criteriaLabel(b: BuyerCriteriaRow): string {
 
 export default function DashboardPage() {
   const [firstName, setFirstName] = useState<string | null>(null);
+  const [tier, setTier] = useState<Tier | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [matchedBuyers, setMatchedBuyers] = useState<{ criteria: BuyerCriteriaRow; score: number }[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -147,7 +150,7 @@ export default function DashboardPage() {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
       const [profileRes, messagesRes, reportsRes, userListingsRes, userCriteriaRes] = await Promise.all([
-        supabase.from('profiles').select('first_name').eq('id', user.id).single(),
+        supabase.from('profiles').select('first_name, tier').eq('id', user.id).single(),
         supabase.from('messages')
           .select('id, body, created_at, listing_id, sender:sender_id(first_name, last_name), listing:listing_id(title)')
           .eq('recipient_id', user.id)
@@ -170,6 +173,7 @@ export default function DashboardPage() {
       ]);
 
       setFirstName(profileRes.data?.first_name ?? null);
+      setTier((profileRes.data?.tier as Tier) ?? null);
       setMessages((messagesRes.data as Message[]) ?? []);
       setReports((reportsRes.data as Report[]) ?? []);
 
@@ -356,8 +360,23 @@ export default function DashboardPage() {
                         <div className="w-full h-full bg-primary flex items-center justify-center rounded-full text-white font-bold text-xl">{score}</div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-on-surface text-lg truncate">{buyerName(criteria)}</h4>
-                        <p className="text-sm text-secondary mb-2 truncate">Seeking: {criteriaLabel(criteria)}</p>
+                        {!loading && tier === 'standard' ? (
+                          <LockedFeature
+                            requiredTier="priority"
+                            message="Upgrade to Priority to view buyer contact details"
+                            className="rounded-xl mb-2"
+                          >
+                            <div className="p-1">
+                              <h4 className="font-bold text-on-surface text-lg truncate">{buyerName(criteria)}</h4>
+                              <p className="text-sm text-secondary truncate">Seeking: {criteriaLabel(criteria)}</p>
+                            </div>
+                          </LockedFeature>
+                        ) : (
+                          <>
+                            <h4 className="font-bold text-on-surface text-lg truncate">{buyerName(criteria)}</h4>
+                            <p className="text-sm text-secondary mb-2 truncate">Seeking: {criteriaLabel(criteria)}</p>
+                          </>
+                        )}
                         <div className="flex gap-2 flex-wrap">
                           {criteria.max_budget && (
                             <span className="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase">
@@ -416,7 +435,14 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-on-surface">{report.title}</h4>
-                        <p className="text-xs text-secondary">Analyzed: {relativeTime(report.created_at)}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-secondary">Analyzed: {relativeTime(report.created_at)}</p>
+                          {!loading && tier && (
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${tier === 'standard' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                              {tier === 'standard' ? '24hr delivery' : '15min delivery'}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <a href="/property-analysis" className="flex items-center gap-1 text-primary font-bold text-sm hover:underline shrink-0">
@@ -482,6 +508,125 @@ export default function DashboardPage() {
             </div>
           )}
 
+        </section>
+
+        {/* Premium Features */}
+        <section className="mb-12">
+          <h3 className="text-primary font-bold tracking-tight text-xl font-headline mb-6">Plan Features</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+
+            {/* 24/7 Support */}
+            {loading ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
+            ) : tier && !['priority', 'exclusive'].includes(tier) ? (
+              <LockedFeature requiredTier="priority" message="Upgrade to Priority for 24/7 support" className="rounded-2xl">
+                <div className="bg-surface-container-lowest p-6 rounded-2xl">
+                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">support_agent</span>
+                  <h4 className="font-bold text-on-surface text-sm mb-1">24/7 Support</h4>
+                  <p className="text-xs text-secondary">Dedicated support line available any time.</p>
+                </div>
+              </LockedFeature>
+            ) : (
+              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
+                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>support_agent</span>
+                <h4 className="font-bold text-on-surface text-sm mb-1">24/7 Support</h4>
+                <a href="/messaging" className="text-xs text-emerald-600 font-bold hover:underline">Open a support chat →</a>
+              </div>
+            )}
+
+            {/* Financing Partners */}
+            {loading ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
+            ) : tier === 'exclusive' ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
+                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance</span>
+                <h4 className="font-bold text-on-surface text-sm mb-1">Financing Partners</h4>
+                <p className="text-xs text-secondary">Access our network of 12 preferred lenders.</p>
+              </div>
+            ) : (
+              <LockedFeature
+                requiredTier="exclusive"
+                message={tier === 'priority' ? 'Upgrade to Exclusive to access financing partners' : 'Exclusive plan required to access financing partners'}
+                className="rounded-2xl"
+              >
+                <div className="bg-surface-container-lowest p-6 rounded-2xl">
+                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">account_balance</span>
+                  <h4 className="font-bold text-on-surface text-sm mb-1">Financing Partners</h4>
+                  <p className="text-xs text-secondary">Network of 12 preferred lenders.</p>
+                </div>
+              </LockedFeature>
+            )}
+
+            {/* Account Manager */}
+            {loading ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
+            ) : tier === 'exclusive' ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
+                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>manage_accounts</span>
+                <h4 className="font-bold text-on-surface text-sm mb-1">Account Manager</h4>
+                <p className="text-xs text-secondary">Jordan Ellis · <a href="mailto:jellis@lotscout.com" className="text-emerald-600 font-bold hover:underline">jellis@lotscout.com</a></p>
+              </div>
+            ) : (
+              <LockedFeature
+                requiredTier="exclusive"
+                message={tier === 'priority' ? 'Upgrade to Exclusive for a dedicated account manager' : 'Exclusive plan required for a dedicated account manager'}
+                className="rounded-2xl"
+              >
+                <div className="bg-surface-container-lowest p-6 rounded-2xl">
+                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">manage_accounts</span>
+                  <h4 className="font-bold text-on-surface text-sm mb-1">Account Manager</h4>
+                  <p className="text-xs text-secondary">Dedicated advisor for your portfolio.</p>
+                </div>
+              </LockedFeature>
+            )}
+
+            {/* Early Access */}
+            {loading ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
+            ) : tier === 'exclusive' ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
+                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>early_on</span>
+                <h4 className="font-bold text-on-surface text-sm mb-1">Early Access</h4>
+                <a href="/marketplace" className="text-xs text-emerald-600 font-bold hover:underline">View 48hr early listings →</a>
+              </div>
+            ) : (
+              <LockedFeature
+                requiredTier="exclusive"
+                message={tier === 'priority' ? 'Upgrade to Exclusive for 48hr early access to new listings and buyers' : 'Exclusive plan required for early access to listings and buyers'}
+                className="rounded-2xl"
+              >
+                <div className="bg-surface-container-lowest p-6 rounded-2xl">
+                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">early_on</span>
+                  <h4 className="font-bold text-on-surface text-sm mb-1">Early Access</h4>
+                  <p className="text-xs text-secondary">48hr head start on new listings.</p>
+                </div>
+              </LockedFeature>
+            )}
+
+            {/* Quarterly Reports */}
+            {loading ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
+            ) : tier === 'exclusive' ? (
+              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
+                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart_4_bars</span>
+                <h4 className="font-bold text-on-surface text-sm mb-1">Quarterly Reports</h4>
+                <a href="#" className="text-xs text-emerald-600 font-bold hover:underline">Download Q1 2026 report →</a>
+              </div>
+            ) : (
+              <LockedFeature
+                requiredTier="exclusive"
+                message={tier === 'priority' ? 'Upgrade to Exclusive for quarterly market intelligence reports' : 'Upgrade to Exclusive for quarterly market intelligence reports'}
+                className="rounded-2xl"
+              >
+                <div className="bg-surface-container-lowest p-6 rounded-2xl">
+                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">bar_chart_4_bars</span>
+                  <h4 className="font-bold text-on-surface text-sm mb-1">Quarterly Reports</h4>
+                  <p className="text-xs text-secondary">Deep-dive market intelligence every quarter.</p>
+                </div>
+              </LockedFeature>
+            )}
+
+          </div>
         </section>
 
         {/* Weekly Market Update */}
