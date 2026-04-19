@@ -1,6 +1,12 @@
+'use client';
+
 import Header from '@/components/Header';
+import LockedFeature from '@/components/LockedFeature';
+import { useUserTier } from '@/hooks/useUserTier';
 
 export default function PropertyAnalysisPage() {
+  const { isAtLeast, loading } = useUserTier();
+  const canViewReport = !loading && isAtLeast('priority');
   return (
     <div className="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-primary">
       <Header />
@@ -86,6 +92,35 @@ export default function PropertyAnalysisPage() {
               <span className="text-white/50 text-xs">Generated Apr 12, 2026 • LotScout AI</span>
             </div>
 
+            {canViewReport ? null : (
+              <div className="bg-amber-50 border-b border-amber-200 px-8 py-3 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-amber-800 text-sm">
+                  <span className="material-symbols-outlined text-base text-amber-500">schedule</span>
+                  <span className="font-semibold">Standard plan: <span className="font-bold">24hr report delivery</span></span>
+                </div>
+                <a href="/pricing" className="text-xs font-bold text-emerald-700 hover:underline shrink-0">Upgrade to Priority for 15min delivery →</a>
+              </div>
+            )}
+            {!canViewReport && !loading ? (
+              <LockedFeature
+                requiredTier="priority"
+                message="Upgrade to Priority for full report access and 15min delivery"
+                className="rounded-none"
+              >
+                <div className="bg-surface-container-lowest p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 pointer-events-none">
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white rounded-xl border border-outline-variant/20 p-6 shadow-sm h-40" />
+                    <div className="bg-white rounded-xl border border-outline-variant/20 p-6 shadow-sm h-48" />
+                    <div className="bg-white rounded-xl border border-outline-variant/20 p-6 shadow-sm h-36" />
+                  </div>
+                  <div className="space-y-6">
+                    <div className="bg-primary rounded-xl p-6 h-48" />
+                    <div className="bg-white rounded-xl border border-outline-variant/20 p-6 shadow-sm h-40" />
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 h-32" />
+                  </div>
+                </div>
+              </LockedFeature>
+            ) : (
             <div className="bg-surface-container-lowest p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
               {/* Left column */}
@@ -223,6 +258,7 @@ export default function PropertyAnalysisPage() {
 
               </div>
             </div>
+            )}
           </div>
 
         </div>

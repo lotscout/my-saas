@@ -1,6 +1,12 @@
+'use client';
+
 import Header from '@/components/Header';
+import LockedFeature from '@/components/LockedFeature';
+import { useUserTier } from '@/hooks/useUserTier';
 
 export default function MessagingPage() {
+  const { isAtLeast, loading } = useUserTier();
+  const canViewContactDetails = !loading && isAtLeast('priority');
   return (
     <div className="bg-surface font-body text-on-surface overflow-hidden h-screen flex flex-col">
       <Header />
@@ -209,7 +215,14 @@ export default function MessagingPage() {
 
           {/* Contextual Sidebar */}
           <aside className="w-72 bg-white border-l border-outline-variant/15 flex flex-col">
+            {canViewContactDetails ? null : (
+              <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 text-xs text-amber-800 font-semibold flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-sm text-amber-500">lock</span>
+                Upgrade to Priority to view contact &amp; deal details
+              </div>
+            )}
             {/* Lot Details (Active) */}
+            {canViewContactDetails ? (
             <div className="flex-1 flex flex-col">
               <div className="p-6 border-b border-outline-variant/5">
                 <h3 className="font-headline font-extrabold text-primary text-lg tracking-tight mb-1">Lot Details <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Seller Context</span></h3>
@@ -294,6 +307,20 @@ export default function MessagingPage() {
               </div>
             </div>
 
+            ) : (
+              <LockedFeature
+                requiredTier="priority"
+                message="Upgrade to Priority to view contact details and deal context"
+                className="flex-1"
+              >
+                <div className="p-6 space-y-6">
+                  <div className="h-40 bg-surface-container-high rounded-xl" />
+                  <div className="h-6 bg-surface-container-high rounded-lg w-3/4" />
+                  <div className="h-6 bg-surface-container-high rounded-lg w-1/2" />
+                  <div className="h-24 bg-surface-container-high rounded-xl" />
+                </div>
+              </LockedFeature>
+            )}
             {/* Buyer Requirements (Hidden) */}
             <div className="hidden flex-1 flex-col">
               <div className="p-6 border-b border-outline-variant/5">
