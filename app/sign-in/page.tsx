@@ -10,6 +10,9 @@ export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   async function handleGoogleSignIn() {
     setGoogleLoading(true);
@@ -39,12 +42,30 @@ export default function SignInPage() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
-      setError(signInError.message);
+      setError('Invalid email or password');
       setLoading(false);
       return;
     }
 
     router.push('/dashboard');
+  }
+
+  async function handleForgotPassword(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setForgotLoading(true);
+    setError(null);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+    });
+
+    setForgotLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      setResetSent(true);
+    }
   }
 
   return (
@@ -100,7 +121,7 @@ export default function SignInPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="password" className="block text-sm font-semibold text-on-surface">Password</label>
-                <Link href="#" className="text-xs font-semibold text-primary hover:underline">Forgot Password?</Link>
+                <button type="button" onClick={() => { setResetSent(false); setError(null); const el = document.getElementById('forgot-section'); el?.classList.toggle('hidden'); }} className="text-xs font-semibold text-primary hover:underline">Forgot Password?</button>
               </div>
               <input
                 id="password"
@@ -125,6 +146,32 @@ export default function SignInPage() {
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
+
+          {/* Forgot password section */}
+          <div id="forgot-section" className="hidden mt-4 pt-4 border-t border-surface-container-high">
+            {resetSent ? (
+              <p className="text-sm text-center text-secondary">Check your email for a password reset link.</p>
+            ) : (
+              <form onSubmit={handleForgotPassword} className="space-y-3">
+                <p className="text-sm font-semibold text-on-surface">Reset your password</p>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-surface-container-high bg-surface text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors text-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={forgotLoading}
+                  className="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+                </button>
+              </form>
+            )}
+          </div>
         </div>
 
         {/* Sign up link */}

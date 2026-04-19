@@ -28,7 +28,7 @@ export default function SignUpPage() {
     }
 
     const supabase = createClient();
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -41,6 +41,14 @@ export default function SignUpPage() {
       setError(signUpError.message);
       setLoading(false);
       return;
+    }
+
+    if (data.user) {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: data.user.id, firstName, lastName, email }),
+      });
     }
 
     setEmailSent(true);
