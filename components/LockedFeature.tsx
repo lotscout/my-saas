@@ -12,7 +12,7 @@ interface Props {
 
 export default function LockedFeature({ children, requiredTier, message, className = '' }: Props) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={`relative min-h-[160px] ${className}`}>
       <div className="blur-sm pointer-events-none select-none" aria-hidden="true">
         {children}
       </div>
