@@ -34,35 +34,106 @@ export async function POST(request: NextRequest) {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.client_reference_id;
       const tier = session.metadata?.tier;
+      const stripeCustomerId = session.customer as string;
+      const stripeSubscriptionId = session.subscription as string;
 
       if (!userId || !tier) {
         console.error('checkout.session.completed: missing userId or tier', { userId, tier });
         break;
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({ tier })
-        .eq('id', userId);
+      // Fetch subscription details from Stripe for period dates
+      let periodStart: Date | null = null;
+      let periodEnd: Date | null = null;
+      let stripePriceId: string | null = null;
 
-      if (error) console.error('Failed to update tier on checkout:', error);
+      if (stripeSubscriptionId) {
+        try {
+          const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+          periodStart = new Date(stripeSub.current_period_start * 1000);
+          periodEnd = new Date(stripeSub.current_period_end * 1000);
+          stripePriceId = stripeSub.items.data[0]?.price?.id ?? null;
+        } catch (e) {
+          console.error('Failed to retrieve Stripe subscription:', e);
+        }
+      }
+
+      // Upsert into subscriptions table (keyed on user_id)
+      const { error: subError } = await supabase
+        .from('subscriptions')
+        .upsert({
+          user_id: userId,
+          stripe_customer_id: stripeCustomerId,
+          stripe_subscription_id: stripeSubscriptionId,
+          stripe_price_id: stripePriceId,
+          tier,
+          status: 'active',
+          current_period_start: periodStart,
+          current_period_end: periodEnd,
+          cancel_at_period_end: false,
+          updated_at: new Date(),
+        }, { onConflict: 'user_id' });
+
+      if (subError) console.error('Failed to upsert subscription on checkout:', subError);
+      break;
+    }
+
+    case 'customer.subscription.updated': {
+      const subscription = event.data.object as Stripe.Subscription;
+      const stripeCustomerId = subscription.customer as string;
+
+      // Look up user by stripe_customer_id
+      const { data: subRow, error: lookupError } = await supabase
+        .from('subscriptions')
+        .select('user_id')
+        .eq('stripe_customer_id', stripeCustomerId)
+        .single();
+
+      if (lookupError || !subRow) {
+        console.error('subscription.updated: could not find user for customer', { stripeCustomerId });
+        break;
+      }
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({
+          status: subscription.status,
+          cancel_at_period_end: subscription.cancel_at_period_end,
+          current_period_start: new Date(subscription.current_period_start * 1000),
+          current_period_end: new Date(subscription.current_period_end * 1000),
+          updated_at: new Date(),
+        })
+        .eq('user_id', subRow.user_id);
+
+      if (error) console.error('Failed to update subscription on subscription.updated:', error);
       break;
     }
 
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription;
-      const customerId = subscription.customer as string;
+      const stripeCustomerId = subscription.customer as string;
 
-      const customer = await stripe.customers.retrieve(customerId);
-      if (customer.deleted || !('email' in customer) || !customer.email) {
-        console.error('subscription.deleted: could not resolve customer email', { customerId });
+      // Look up user by stripe_customer_id — never use email for this
+      const { data: subRow, error: lookupError } = await supabase
+        .from('subscriptions')
+        .select('user_id')
+        .eq('stripe_customer_id', stripeCustomerId)
+        .single();
+
+      if (lookupError || !subRow) {
+        console.error('subscription.deleted: could not find user for customer', { stripeCustomerId });
         break;
       }
 
       const { error } = await supabase
-        .from('profiles')
-        .update({ tier: 'standard' })
-        .eq('email', customer.email);
+        .from('subscriptions')
+        .update({
+          tier: 'standard',
+          status: 'canceled',
+          cancelled_at: new Date(),
+          updated_at: new Date(),
+        })
+        .eq('user_id', subRow.user_id);
 
       if (error) console.error('Failed to downgrade tier on subscription deletion:', error);
       break;
@@ -70,13 +141,25 @@ export async function POST(request: NextRequest) {
 
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice;
+      const stripeCustomerId = invoice.customer as string;
+
       console.error('invoice.payment_failed', {
         invoiceId: invoice.id,
-        customerId: invoice.customer,
+        customerId: stripeCustomerId,
         customerEmail: invoice.customer_email,
         amountDue: invoice.amount_due,
         attemptCount: invoice.attempt_count,
       });
+
+      // Mark subscription as past_due
+      if (stripeCustomerId) {
+        const { error } = await supabase
+          .from('subscriptions')
+          .update({ status: 'past_due', updated_at: new Date() })
+          .eq('stripe_customer_id', stripeCustomerId);
+
+        if (error) console.error('Failed to mark past_due on payment failure:', error);
+      }
       break;
     }
 
