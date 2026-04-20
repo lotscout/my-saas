@@ -134,6 +134,16 @@ export default function DashboardPage() {
   const [hasBuyerCriteria, setHasBuyerCriteria] = useState(false);
   const [loading, setLoading] = useState(true);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [showSubmittedToast, setShowSubmittedToast] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && sessionStorage.getItem('listing_submitted')) {
+      sessionStorage.removeItem('listing_submitted');
+      setShowSubmittedToast(true);
+      const t = setTimeout(() => setShowSubmittedToast(false), 6000);
+      return () => clearTimeout(t);
+    }
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -227,6 +237,19 @@ export default function DashboardPage() {
   return (
     <div className="bg-surface text-on-surface antialiased font-body">
       <Header />
+
+      {showSubmittedToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-primary text-white px-6 py-4 rounded-2xl shadow-2xl">
+          <span className="material-symbols-outlined text-emerald-300" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          <div>
+            <p className="font-bold text-sm">Listing submitted for review!</p>
+            <p className="text-white/70 text-xs">You'll receive an email confirmation shortly.</p>
+          </div>
+          <button onClick={() => setShowSubmittedToast(false)} className="ml-2 text-white/60 hover:text-white transition-colors">
+            <span className="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
+      )}
 
       <main className="max-w-[1440px] mx-auto pt-24 pb-12 px-8">
 

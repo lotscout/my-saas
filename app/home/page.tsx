@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import CreateListingGate from '@/components/CreateListingGate';
 
 
 const HERO_SELLERS = [
@@ -206,7 +207,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-4 mb-10">
                 <Link href="/sign-up" className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
-                <Link href="/sign-up" className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
+                <CreateListingGate className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</CreateListingGate>
               </div>
             </div>
             {/* Right column: interactive map */}
@@ -494,7 +495,7 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
-              <Link href="/sign-up" className="w-full bg-primary-fixed text-primary py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors text-center block">List My Property</Link>
+              <CreateListingGate className="w-full bg-primary-fixed text-primary py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors text-center block">List My Property</CreateListingGate>
             </div>
             {/* Buyer */}
             <div className="bg-white p-8 md:p-10 flex flex-col justify-between">
