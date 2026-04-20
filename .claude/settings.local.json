@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(sed -n '12,20p' app/buyer-directory/page.tsx)",
+      "Bash(sed -n '1,60p' app/messaging/page.tsx)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(npx tsc:*)",
+      "Bash(cat C:/Users/bobby/my-saas/next.config.*)",
+      "Bash(git pull *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npm run *)",
+      "Bash(git *)",
+      "Bash(curl *)"
+    ]
+  }
+}
