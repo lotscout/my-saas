@@ -133,6 +133,7 @@ export default function DashboardPage() {
   const [newListings, setNewListings] = useState<FeedListing[]>([]);
   const [hasBuyerCriteria, setHasBuyerCriteria] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -507,124 +508,33 @@ export default function DashboardPage() {
 
         </section>
 
-        {/* Premium Features */}
-        <section className="mb-12">
-          <h3 className="text-primary font-bold tracking-tight text-xl font-headline mb-6">Plan Features</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-
-            {/* 24/7 Support */}
-            {loading ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
-            ) : tier && !['priority', 'exclusive'].includes(tier) ? (
-              <LockedFeature requiredTier="priority" message="Upgrade to Priority for 24/7 support" className="rounded-2xl">
-                <div className="bg-surface-container-lowest p-6 rounded-2xl">
-                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">support_agent</span>
-                  <h4 className="font-bold text-on-surface text-sm mb-1">24/7 Support</h4>
-                  <p className="text-xs text-secondary">Dedicated support line available any time.</p>
-                </div>
-              </LockedFeature>
-            ) : (
-              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
-                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>support_agent</span>
-                <h4 className="font-bold text-on-surface text-sm mb-1">24/7 Support</h4>
-                <a href="/messaging" className="text-xs text-emerald-600 font-bold hover:underline">Open a support chat →</a>
-              </div>
-            )}
-
-            {/* Financing Partners */}
-            {loading ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
-            ) : tier === 'exclusive' ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
-                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance</span>
-                <h4 className="font-bold text-on-surface text-sm mb-1">Financing Partners</h4>
-                <p className="text-xs text-secondary">Access our network of 12 preferred lenders.</p>
-              </div>
-            ) : (
-              <LockedFeature
-                requiredTier="exclusive"
-                message={tier === 'priority' ? 'Upgrade to Exclusive to access financing partners' : 'Exclusive plan required to access financing partners'}
-                className="rounded-2xl"
+        {/* Upgrade Banner — standard tier only, dismissible */}
+        {!loading && tier === 'standard' && !bannerDismissed && (
+          <section className="mb-12">
+            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-emerald-800 to-emerald-600 p-8 shadow-lg">
+              <button
+                onClick={() => setBannerDismissed(true)}
+                className="absolute top-4 right-4 text-emerald-200/70 hover:text-white transition-colors"
+                aria-label="Dismiss"
               >
-                <div className="bg-surface-container-lowest p-6 rounded-2xl">
-                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">account_balance</span>
-                  <h4 className="font-bold text-on-surface text-sm mb-1">Financing Partners</h4>
-                  <p className="text-xs text-secondary">Network of 12 preferred lenders.</p>
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                <span className="material-symbols-outlined text-4xl text-emerald-300 shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-white font-black text-xl tracking-tight mb-1">Unlock the Full Power of LotScout</h3>
+                  <p className="text-emerald-100/80 text-sm leading-relaxed">Upgrade your plan to access financing partners, a dedicated account manager, early access to listings and buyers, and quarterly market reports.</p>
                 </div>
-              </LockedFeature>
-            )}
-
-            {/* Account Manager */}
-            {loading ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
-            ) : tier === 'exclusive' ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
-                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>manage_accounts</span>
-                <h4 className="font-bold text-on-surface text-sm mb-1">Account Manager</h4>
-                <p className="text-xs text-secondary">Jordan Ellis · <a href="mailto:jellis@lotscout.com" className="text-emerald-600 font-bold hover:underline">jellis@lotscout.com</a></p>
+                <a
+                  href="/pricing"
+                  className="shrink-0 bg-white text-emerald-800 font-black text-xs uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-emerald-50 transition-colors shadow-sm whitespace-nowrap"
+                >
+                  View Pricing Plans
+                </a>
               </div>
-            ) : (
-              <LockedFeature
-                requiredTier="exclusive"
-                message={tier === 'priority' ? 'Upgrade to Exclusive for a dedicated account manager' : 'Exclusive plan required for a dedicated account manager'}
-                className="rounded-2xl"
-              >
-                <div className="bg-surface-container-lowest p-6 rounded-2xl">
-                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">manage_accounts</span>
-                  <h4 className="font-bold text-on-surface text-sm mb-1">Account Manager</h4>
-                  <p className="text-xs text-secondary">Dedicated advisor for your portfolio.</p>
-                </div>
-              </LockedFeature>
-            )}
-
-            {/* Early Access */}
-            {loading ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
-            ) : tier === 'exclusive' ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
-                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>early_on</span>
-                <h4 className="font-bold text-on-surface text-sm mb-1">Early Access</h4>
-                <a href="/marketplace" className="text-xs text-emerald-600 font-bold hover:underline">View 48hr early listings →</a>
-              </div>
-            ) : (
-              <LockedFeature
-                requiredTier="exclusive"
-                message={tier === 'priority' ? 'Upgrade to Exclusive for 48hr early access to new listings and buyers' : 'Exclusive plan required for early access to listings and buyers'}
-                className="rounded-2xl"
-              >
-                <div className="bg-surface-container-lowest p-6 rounded-2xl">
-                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">early_on</span>
-                  <h4 className="font-bold text-on-surface text-sm mb-1">Early Access</h4>
-                  <p className="text-xs text-secondary">48hr head start on new listings.</p>
-                </div>
-              </LockedFeature>
-            )}
-
-            {/* Quarterly Reports */}
-            {loading ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6"><Skeleton className="h-32" /></div>
-            ) : tier === 'exclusive' ? (
-              <div className="bg-surface-container-lowest rounded-2xl p-6 border border-emerald-200">
-                <span className="material-symbols-outlined text-3xl text-emerald-600 mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart_4_bars</span>
-                <h4 className="font-bold text-on-surface text-sm mb-1">Quarterly Reports</h4>
-                <a href="#" className="text-xs text-emerald-600 font-bold hover:underline">Download Q1 2026 report →</a>
-              </div>
-            ) : (
-              <LockedFeature
-                requiredTier="exclusive"
-                message={tier === 'priority' ? 'Upgrade to Exclusive for quarterly market intelligence reports' : 'Upgrade to Exclusive for quarterly market intelligence reports'}
-                className="rounded-2xl"
-              >
-                <div className="bg-surface-container-lowest p-6 rounded-2xl">
-                  <span className="material-symbols-outlined text-3xl text-primary mb-3 block">bar_chart_4_bars</span>
-                  <h4 className="font-bold text-on-surface text-sm mb-1">Quarterly Reports</h4>
-                  <p className="text-xs text-secondary">Deep-dive market intelligence every quarter.</p>
-                </div>
-              </LockedFeature>
-            )}
-
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
         {/* Weekly Market Update */}
         <section className="bg-primary rounded-[2rem] p-10 relative overflow-hidden text-white shadow-2xl">
