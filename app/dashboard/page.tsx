@@ -156,8 +156,9 @@ export default function DashboardPage() {
 
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-      const [profileRes, messagesRes, reportsRes, userListingsRes, userCriteriaRes] = await Promise.all([
-        supabase.from('profiles').select('first_name, last_name, tier, avatar_url, bio, phone, company_name').eq('id', user.id).single(),
+      const [profileRes, subRes, messagesRes, reportsRes, userListingsRes, userCriteriaRes] = await Promise.all([
+        supabase.from('profiles').select('first_name, last_name, avatar_url, bio, phone, company_name').eq('id', user.id).single(),
+        supabase.from('subscriptions').select('tier').eq('user_id', user.id).eq('status', 'active').single(),
         supabase.from('messages')
           .select('id, body, created_at, listing_id, sender:sender_id(first_name, last_name), listing:listing_id(title)')
           .eq('recipient_id', user.id)
@@ -184,7 +185,7 @@ export default function DashboardPage() {
         (user.user_metadata?.first_name as string | undefined) ??
         null
       );
-      setTier((profileRes.data?.tier as Tier) ?? null);
+      setTier((subRes?.data?.tier as Tier) ?? null);
 
       // Profile completeness checklist
       const p = profileRes.data;

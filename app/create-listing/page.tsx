@@ -64,12 +64,21 @@ export default function CreateListingPage() {
       }
       const { data } = await supabase
         .from('profiles')
-        .select('id, tier, email, first_name, last_name')
+        .select('id, email, first_name, last_name')
         .eq('id', user.id)
         .single()
       console.log('[create-listing] profile row:', data)
+
+      // Get tier from subscriptions table (profiles.tier does not exist)
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('tier')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single()
+
       if (data) {
-        setProfile(data)
+        setProfile({ ...data, tier: sub?.tier ?? null })
         const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')
         if (fullName) setFormData(prev => ({ ...prev, digital_signature: fullName }))
       }
