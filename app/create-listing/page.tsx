@@ -42,14 +42,32 @@ export default function CreateListingPage() {
   const [toast, setToast] = useState('')
 
   useEffect(() => {
+    console.log('[create-listing] page mounted — checking session')
     const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { router.push('/sign-in'); return }
+    supabase.auth.getSession().then(({ data: { session }, error: sessionError }) => {
+      console.log('[create-listing] getSession result:', {
+        session: session ? { user_id: session.user.id, email: session.user.email, expires_at: session.expires_at } : null,
+        sessionError: sessionError?.message ?? null,
+      })
+    })
+    supabase.auth.getUser().then(async ({ data: { user }, error: userError }) => {
+      console.log('[create-listing] getUser result:', {
+        user: user ? { id: user.id, email: user.email } : null,
+        userError: userError?.message ?? null,
+      })
+      // AUTH CHECK TEMPORARILY REMOVED FOR DEBUGGING
+      // if (!user) { router.push('/sign-in'); return }
+      if (!user) {
+        console.log('[create-listing] no user — would redirect to /sign-in (disabled for debug)')
+        setTierChecked(true)
+        return
+      }
       const { data } = await supabase
         .from('profiles')
         .select('id, tier, email, first_name, last_name')
         .eq('id', user.id)
         .single()
+      console.log('[create-listing] profile row:', data)
       if (data) {
         setProfile(data)
         const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')

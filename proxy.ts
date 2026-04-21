@@ -40,9 +40,15 @@ export async function proxy(request: NextRequest) {
   )
 
   // getUser() validates the JWT server-side — never trust only the cookie value.
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  console.log('[proxy] path:', request.nextUrl.pathname)
+  console.log('[proxy] user:', user?.id ?? 'null')
+  console.log('[proxy] getUser error:', error?.message ?? 'none')
+  console.log('[proxy] cookies:', request.cookies.getAll().map(c => c.name).join(', '))
 
   if (isProtected(request.nextUrl.pathname) && !user) {
+    console.log('[proxy] REDIRECTING to /sign-in — no user on protected route')
     const signIn = request.nextUrl.clone()
     signIn.pathname = '/sign-in'
     return NextResponse.redirect(signIn)
