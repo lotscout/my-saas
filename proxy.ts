@@ -11,6 +11,7 @@ const PROTECTED = [
   '/edit-profile',
   '/property-analysis',
   '/deal-analysis',
+  '/admin',
 ]
 
 function isProtected(pathname: string) {
