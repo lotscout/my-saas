@@ -7,6 +7,23 @@ import { createClient } from '@/lib/supabase/client';
 
 const ADMIN_EMAIL = 'bobby@lotscout.com';
 
+interface BuyerRequest {
+  id: string;
+  status: string;
+  target_regions: string[] | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  min_acreage: number | null;
+  max_acreage: number | null;
+  use_case: string | null;
+  created_at: string;
+  user_id: string;
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+  } | null;
+}
+
 interface Listing {
   id: string;
   title: string;
@@ -67,6 +84,10 @@ export default function AdminListingsPage() {
   const [pending, setPending] = useState<Listing[]>([]);
   const [recent, setRecent] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingBuyers, setPendingBuyers] = useState<BuyerRequest[]>([]);
+  const [buyerActionLoading, setBuyerActionLoading] = useState<string | null>(null);
+  const [buyerRejectModal, setBuyerRejectModal] = useState<{ id: string } | null>(null);
+  const [buyerRejectReason, setBuyerRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [rejectModal, setRejectModal] = useState<{ id: string; title: string } | null>(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -86,10 +107,37 @@ export default function AdminListingsPage() {
         return;
       }
 
-      await fetchListings();
+      await Promise.all([fetchListings(), fetchBuyerRequests()]);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function fetchBuyerRequests() {
+    const supabase = createClient();
+    const { data: buyers } = await supabase
+      .from('buyer_requests')
+      .select('id, status, target_regions, budget_min, budget_max, min_acreage, max_acreage, use_case, created_at, user_id')
+      .eq('status', 'pending_review')
+      .order('created_at', { ascending: false });
+
+    if (!buyers?.length) {
+      setPendingBuyers([]);
+      return;
+    }
+
+    const userIds = [...new Set(buyers.map((b: BuyerRequest) => b.user_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', userIds);
+
+    const profileMap: Record<string, { full_name: string | null; email: string | null }> = {};
+    (profiles ?? []).forEach((p: { id: string; full_name: string | null; email: string | null }) => {
+      profileMap[p.id] = { full_name: p.full_name, email: p.email };
+    });
+
+    setPendingBuyers(buyers.map((b: BuyerRequest) => ({ ...b, profiles: profileMap[b.user_id] ?? null })));
+  }
 
   async function fetchListings() {
     setLoading(true);
@@ -144,6 +192,43 @@ export default function AdminListingsPage() {
     setTimeout(() => setToast(null), 4000);
   }
 
+  async function handleApproveBuyer(id: string) {
+    setBuyerActionLoading(id);
+    try {
+      const res = await fetch(`/api/admin/buyer-requests/${id}/approve`, { method: 'PATCH' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Failed to approve');
+      showToast('Buyer request approved — buyer notified!', 'success');
+      await fetchBuyerRequests();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Error approving buyer request', 'error');
+    } finally {
+      setBuyerActionLoading(null);
+    }
+  }
+
+  async function handleRejectBuyer() {
+    if (!buyerRejectModal) return;
+    setBuyerActionLoading(buyerRejectModal.id);
+    try {
+      const res = await fetch(`/api/admin/buyer-requests/${buyerRejectModal.id}/reject`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: buyerRejectReason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Failed to reject');
+      showToast('Buyer request rejected — buyer notified.', 'success');
+      setBuyerRejectModal(null);
+      setBuyerRejectReason('');
+      await fetchBuyerRequests();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Error rejecting buyer request', 'error');
+    } finally {
+      setBuyerActionLoading(null);
+    }
+  }
+
   async function handleApprove(id: string) {
     setActionLoading(id);
     try {
@@ -191,6 +276,39 @@ export default function AdminListingsPage() {
           toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
         }`}>
           {toast.message}
+        </div>
+      )}
+
+      {/* Buyer Reject Modal */}
+      {buyerRejectModal && (
+        <div className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h3 className="font-headline font-bold text-lg text-on-surface mb-1">Reject Buyer Request</h3>
+            <label className="block text-sm font-medium text-on-surface mb-1 mt-3">
+              Reason <span className="text-on-surface/40">(optional — sent to buyer)</span>
+            </label>
+            <textarea
+              value={buyerRejectReason}
+              onChange={e => setBuyerRejectReason(e.target.value)}
+              placeholder="e.g. Criteria too broad, missing contact preference..."
+              className="w-full border border-outline-variant rounded-xl px-3 py-2 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-primary/30 mb-4"
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setBuyerRejectModal(null); setBuyerRejectReason(''); }}
+                className="px-4 py-2 text-sm rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectBuyer}
+                disabled={buyerActionLoading === buyerRejectModal.id}
+                className="px-4 py-2 text-sm rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {buyerActionLoading === buyerRejectModal.id ? 'Rejecting…' : 'Reject Request'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -305,6 +423,85 @@ export default function AdminListingsPage() {
                                 <button
                                   onClick={() => setRejectModal({ id: listing.id, title: listing.title })}
                                   disabled={actionLoading === listing.id}
+                                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* Pending Buyer Requests */}
+            <section className="mb-12">
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="font-headline font-bold text-xl text-on-surface">Pending Buyer Requests</h2>
+                {pendingBuyers.length > 0 && (
+                  <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                    {pendingBuyers.length}
+                  </span>
+                )}
+              </div>
+
+              {pendingBuyers.length === 0 ? (
+                <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-10 text-center text-on-surface/40 text-sm">
+                  No buyer requests pending review. ✅
+                </div>
+              ) : (
+                <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-outline-variant/20 bg-surface-container-low">
+                          <th className="text-left px-5 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Buyer</th>
+                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Regions</th>
+                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Budget</th>
+                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Acreage</th>
+                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Use Case</th>
+                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Submitted</th>
+                          <th className="px-4 py-3"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/10">
+                        {pendingBuyers.map(buyer => (
+                          <tr key={buyer.id} className="hover:bg-surface-container-low/50 transition-colors">
+                            <td className="px-5 py-4">
+                              <div className="text-on-surface font-medium">{buyer.profiles?.full_name || '—'}</div>
+                              <div className="text-on-surface/50 text-xs">{buyer.profiles?.email || '—'}</div>
+                            </td>
+                            <td className="px-4 py-4 text-on-surface/70">
+                              {(buyer.target_regions ?? []).join(', ') || '—'}
+                            </td>
+                            <td className="px-4 py-4 text-on-surface/70 whitespace-nowrap">
+                              {buyer.budget_min || buyer.budget_max
+                                ? `$${Number(buyer.budget_min ?? 0).toLocaleString()} – $${Number(buyer.budget_max ?? 0).toLocaleString()}`
+                                : '—'}
+                            </td>
+                            <td className="px-4 py-4 text-on-surface/70 whitespace-nowrap">
+                              {buyer.min_acreage || buyer.max_acreage
+                                ? `${buyer.min_acreage ?? '?'} – ${buyer.max_acreage ?? '?'} ac`
+                                : '—'}
+                            </td>
+                            <td className="px-4 py-4 text-on-surface/70">{buyer.use_case || '—'}</td>
+                            <td className="px-4 py-4 text-on-surface/60">{formatDate(buyer.created_at)}</td>
+                            <td className="px-4 py-4">
+                              <div className="flex items-center gap-2 justify-end">
+                                <button
+                                  onClick={() => handleApproveBuyer(buyer.id)}
+                                  disabled={buyerActionLoading === buyer.id}
+                                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+                                >
+                                  {buyerActionLoading === buyer.id ? '…' : 'Approve'}
+                                </button>
+                                <button
+                                  onClick={() => setBuyerRejectModal({ id: buyer.id })}
+                                  disabled={buyerActionLoading === buyer.id}
                                   className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
                                 >
                                   Reject
