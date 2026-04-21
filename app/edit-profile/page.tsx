@@ -25,19 +25,19 @@ export default function EditProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/sign-in'); return; }
       setEmail(user.email ?? '');
+      // user_metadata holds first_name/last_name set at signup — use as fallback
+      const meta = (user.user_metadata ?? {}) as Record<string, string>;
       const { data } = await supabase
         .from('profiles')
         .select('first_name, last_name, phone, bio, company_name, tier')
         .eq('id', user.id)
         .single();
-      if (data) {
-        setFirstName(data.first_name ?? '');
-        setLastName(data.last_name ?? '');
-        setPhone(data.phone ?? '');
-        setBio(data.bio ?? '');
-        setCompanyName(data.company_name ?? '');
-        setTier(data.tier ?? '');
-      }
+      setFirstName(data?.first_name ?? meta.first_name ?? '');
+      setLastName(data?.last_name ?? meta.last_name ?? '');
+      setPhone(data?.phone ?? '');
+      setBio(data?.bio ?? '');
+      setCompanyName(data?.company_name ?? '');
+      setTier(data?.tier ?? '');
       setLoading(false);
     }
     load();
@@ -49,13 +49,14 @@ export default function EditProfilePage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { error } = await supabase.from('profiles').update({
+    const { error } = await supabase.from('profiles').upsert({
+      id: user.id,
       first_name: firstName || null,
       last_name: lastName || null,
       phone: phone || null,
       bio: bio || null,
       company_name: companyName || null,
-    }).eq('id', user.id);
+    });
 
     setSaving(false);
     if (error) {
