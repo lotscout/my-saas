@@ -5,6 +5,12 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
 
+const TIER_LABELS: Record<string, string> = {
+  standard: 'Standard',
+  priority: 'Priority',
+  exclusive: 'Exclusive',
+};
+
 interface Profile {
   first_name: string | null;
   last_name: string | null;
@@ -26,10 +32,19 @@ export default function ProfilePage() {
       setEmail(user.email ?? null);
       const { data } = await supabase
         .from('profiles')
-        .select('first_name, last_name, bio, avatar_url, company_name, tier')
+        .select('first_name, last_name, bio, avatar_url, company_name')
         .eq('id', user.id)
         .single();
-      if (data) setProfile(data);
+
+      // Tier is authoritative in subscriptions, not profiles
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('tier')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (data) setProfile({ ...data, tier: sub?.tier ?? null });
     }
     load();
   }, []);
@@ -68,7 +83,7 @@ export default function ProfilePage() {
                   <div className="flex flex-wrap justify-center md:justify-start gap-2">
                     <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 border border-primary/20">
                       <span className="material-symbols-outlined" style={{ fontSize: '14px', fontVariationSettings: "'FILL' 1" }}>verified</span>
-                      {profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)} Member
+                      {TIER_LABELS[profile.tier] ?? profile.tier} Member
                     </span>
                   </div>
                 )}
@@ -124,7 +139,7 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-bold uppercase tracking-widest text-white/50">Membership</p>
-                <p className="text-2xl font-headline font-semibold capitalize">{profile?.tier ?? 'Free'}</p>
+                <p className="text-2xl font-headline font-semibold">{profile?.tier ? (TIER_LABELS[profile.tier] ?? profile.tier) : 'Free'}</p>
               </div>
               {profile?.company_name && (
                 <div className="space-y-1">
