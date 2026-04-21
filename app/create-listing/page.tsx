@@ -348,22 +348,9 @@ export default function CreateListingPage() {
                 <div className="bg-primary-fixed text-on-primary-fixed px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="flex items-center space-x-3">
                     <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                    <p className="text-sm font-bold tracking-tight">Upgrade to LotScout Pro for priority placement and 4K drone video hosting.</p>
+                    <p className="text-sm font-bold tracking-tight">Listings created by LotScout are 4X as likely to be viewed by buyers. Upgrade to Exclusive for hands-on listing support.</p>
                   </div>
-                  <a href="#" className="text-xs font-black uppercase tracking-widest bg-primary text-white px-4 py-2 rounded-full hover:bg-on-primary-container transition-colors">Learn More</a>
-                </div>
-              </div>
-
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 rounded-xl bg-surface-container-low">
-                  <span className="material-symbols-outlined text-secondary mb-3 block">gavel</span>
-                  <h4 className="font-bold text-primary text-sm mb-1">Land Ethics &amp; Compliance</h4>
-                  <p className="text-xs text-secondary leading-relaxed">All listings must adhere to our ethical standards for sustainable land development and environmental stewardship.</p>
-                </div>
-                <div className="p-6 rounded-xl bg-surface-container-low">
-                  <span className="material-symbols-outlined text-secondary mb-3 block">support_agent</span>
-                  <h4 className="font-bold text-primary text-sm mb-1">Need Assistance?</h4>
-                  <p className="text-xs text-secondary leading-relaxed">Our Advisors are standing by to help you verify your ownership type or structure complex deal terms.</p>
+                  <a href="/pricing" className="text-xs font-black uppercase tracking-widest bg-primary text-white px-4 py-2 rounded-full hover:bg-on-primary-container transition-colors whitespace-nowrap">Upgrade Now</a>
                 </div>
               </div>
             </>
