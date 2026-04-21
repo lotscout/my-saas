@@ -9,6 +9,8 @@ const PROTECTED = [
   '/messaging',
   '/profile',
   '/edit-profile',
+  '/property-analysis',
+  '/deal-analysis',
 ]
 
 function isProtected(pathname: string) {
