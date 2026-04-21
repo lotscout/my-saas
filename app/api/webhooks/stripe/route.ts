@@ -50,8 +50,9 @@ export async function POST(request: NextRequest) {
       if (stripeSubscriptionId) {
         try {
           const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-          periodStart = new Date(stripeSub.current_period_start * 1000);
-          periodEnd = new Date(stripeSub.current_period_end * 1000);
+          const subAny = stripeSub as any;
+          periodStart = new Date(subAny.current_period_start * 1000);
+          periodEnd = new Date(subAny.current_period_end * 1000);
           stripePriceId = stripeSub.items.data[0]?.price?.id ?? null;
         } catch (e) {
           console.error('Failed to retrieve Stripe subscription:', e);
@@ -99,8 +100,8 @@ export async function POST(request: NextRequest) {
         .update({
           status: subscription.status,
           cancel_at_period_end: subscription.cancel_at_period_end,
-          current_period_start: new Date(subscription.current_period_start * 1000),
-          current_period_end: new Date(subscription.current_period_end * 1000),
+          current_period_start: new Date((subscription as any).current_period_start * 1000),
+          current_period_end: new Date((subscription as any).current_period_end * 1000),
           updated_at: new Date(),
         })
         .eq('user_id', subRow.user_id);
