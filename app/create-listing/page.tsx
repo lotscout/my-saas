@@ -55,13 +55,8 @@ export default function CreateListingPage() {
         user: user ? { id: user.id, email: user.email } : null,
         userError: userError?.message ?? null,
       })
-      // AUTH CHECK TEMPORARILY REMOVED FOR DEBUGGING
-      // if (!user) { router.push('/sign-in'); return }
-      if (!user) {
-        console.log('[create-listing] no user — would redirect to /sign-in (disabled for debug)')
-        setTierChecked(true)
-        return
-      }
+      if (!user) { router.push('/sign-in'); return }
+
       const { data } = await supabase
         .from('profiles')
         .select('id, email, first_name, last_name')
@@ -69,7 +64,7 @@ export default function CreateListingPage() {
         .single()
       console.log('[create-listing] profile row:', data)
 
-      // Get tier from subscriptions table (profiles.tier does not exist)
+      // Get tier from subscriptions table (profiles.tier is not the source of truth)
       const { data: sub } = await supabase
         .from('subscriptions')
         .select('tier')
@@ -77,10 +72,14 @@ export default function CreateListingPage() {
         .eq('status', 'active')
         .single()
 
+      console.log('[create-listing] resolved tier for gate:', sub?.tier ?? null)
+
       if (data) {
         setProfile({ ...data, tier: sub?.tier ?? null })
         const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')
         if (fullName) setFormData(prev => ({ ...prev, digital_signature: fullName }))
+      } else if (sub?.tier) {
+        setProfile({ id: user.id, email: user.email ?? null, first_name: null, last_name: null, tier: sub.tier })
       }
       setTierChecked(true)
     })

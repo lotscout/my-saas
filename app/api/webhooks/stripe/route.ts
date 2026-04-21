@@ -76,6 +76,13 @@ export async function POST(request: NextRequest) {
         }, { onConflict: 'user_id' });
 
       if (subError) console.error('Failed to upsert subscription on checkout:', subError);
+
+      // Sync tier to profiles table so all reads stay consistent
+      const { error: profileTierError } = await supabase
+        .from('profiles')
+        .upsert({ id: userId, tier }, { onConflict: 'id' });
+
+      if (profileTierError) console.error('Failed to sync tier to profiles on checkout:', profileTierError);
       break;
     }
 
@@ -137,6 +144,14 @@ export async function POST(request: NextRequest) {
         .eq('user_id', subRow.user_id);
 
       if (error) console.error('Failed to downgrade tier on subscription deletion:', error);
+
+      // Sync downgrade to profiles table
+      const { error: profileDowngradeError } = await supabase
+        .from('profiles')
+        .update({ tier: 'standard' })
+        .eq('id', subRow.user_id);
+
+      if (profileDowngradeError) console.error('Failed to sync tier downgrade to profiles:', profileDowngradeError);
       break;
     }
 

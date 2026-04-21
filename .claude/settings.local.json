@@ -14,7 +14,9 @@
       "Bash(npm run *)",
       "Bash(git *)",
       "Bash(curl *)",
-      "Bash(npx vercel *)"
+      "Bash(npx vercel *)",
+      "Bash(node *)",
+      "Bash(xargs grep *)"
     ]
   }
 }
