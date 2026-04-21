@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
+import CreateListingGate from '@/components/CreateListingGate';
 import { createClient } from '@/lib/supabase/client';
 import type { Tier } from '@/lib/permissions';
 
@@ -278,10 +279,9 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <section className="flex flex-wrap gap-3 mb-12">
           {[
-            { icon: 'analytics',  label: 'Analyze a Property', href: '/property-analysis' },
-            { icon: 'explore',    label: 'Browse Marketplace', href: '/marketplace'        },
-            { icon: 'groups',     label: 'Find Buyers',        href: '/buyer-directory'    },
-            { icon: 'add_circle', label: 'Create Listing',     href: '/marketplace'        },
+            { icon: 'analytics', label: 'Analyze a Property', href: '/property-analysis' },
+            { icon: 'explore',   label: 'Browse Marketplace', href: '/marketplace'        },
+            { icon: 'groups',    label: 'Find Buyers',        href: '/buyer-directory'    },
           ].map(({ icon, label, href }) => (
             <a
               key={label}
@@ -292,6 +292,10 @@ export default function DashboardPage() {
               <span className="text-sm font-semibold text-primary">{label}</span>
             </a>
           ))}
+          <CreateListingGate className="flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group border border-outline-variant/10">
+            <span className="material-symbols-outlined text-primary">add_circle</span>
+            <span className="text-sm font-semibold text-primary">Create Listing</span>
+          </CreateListingGate>
         </section>
 
         {/* Action Required: Hero Section */}
