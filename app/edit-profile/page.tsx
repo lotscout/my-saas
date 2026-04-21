@@ -1,13 +1,91 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
+import { createClient } from '@/lib/supabase/client';
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [bio, setBio] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [tier, setTier] = useState('');
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push('/sign-in'); return; }
+      setEmail(user.email ?? '');
+      const { data } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, phone, bio, company_name, tier')
+        .eq('id', user.id)
+        .single();
+      if (data) {
+        setFirstName(data.first_name ?? '');
+        setLastName(data.last_name ?? '');
+        setPhone(data.phone ?? '');
+        setBio(data.bio ?? '');
+        setCompanyName(data.company_name ?? '');
+        setTier(data.tier ?? '');
+      }
+      setLoading(false);
+    }
+    load();
+  }, [router]);
+
+  async function handleSave() {
+    setSaving(true);
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase.from('profiles').update({
+      first_name: firstName || null,
+      last_name: lastName || null,
+      phone: phone || null,
+      bio: bio || null,
+      company_name: companyName || null,
+    }).eq('id', user.id);
+
+    setSaving(false);
+    if (error) {
+      setToast('Failed to save: ' + error.message);
+    } else {
+      setToast('Profile saved!');
+      setTimeout(() => { setToast(null); router.push('/profile'); }, 1200);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-surface text-on-surface antialiased font-body min-h-screen">
+        <Header />
+        <div className="pt-16 flex items-center justify-center min-h-screen">
+          <p className="text-secondary">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-surface text-on-surface antialiased font-body">
       <Header />
+
+      {toast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-primary text-white px-6 py-3 rounded-xl shadow-lg text-sm font-semibold">
+          {toast}
+        </div>
+      )}
 
       <div className="pt-16 flex min-h-screen">
         <main className="flex-1 bg-surface-container-low p-8 md:p-12">
@@ -20,8 +98,10 @@ export default function EditProfilePage() {
                 <p className="text-secondary font-medium">Update your digital identity and investment preferences on the LotScout network.</p>
               </div>
               <div className="flex gap-4">
-                <button className="px-6 py-2.5 rounded-xl text-primary font-semibold border border-outline/20 hover:bg-surface-container-high transition-all">Discard Changes</button>
-                <button onClick={() => router.push('/profile')} className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Save Profile</button>
+                <button onClick={() => router.push('/profile')} className="px-6 py-2.5 rounded-xl text-primary font-semibold border border-outline/20 hover:bg-surface-container-high transition-all">Discard Changes</button>
+                <button onClick={handleSave} disabled={saving} className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                  {saving ? 'Saving...' : 'Save Profile'}
+                </button>
               </div>
             </div>
 
@@ -32,13 +112,8 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined text-primary-container">badge</span>
                   Profile Identity
                 </h3>
-                <div className="relative group w-40 h-40 mx-auto">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt="Profile preview"
-                    className="w-full h-full rounded-full object-cover border-4 border-surface shadow-md"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtV0KtoFHTNEPt7J6TcuQgOUzQgcRwVpXeNZVLl3Xj6ohVrIQDacSXWK4NsAXRHdkZpA_aLPly1_cs3BMEi9qmgMHy8t8DzRB3IgS1PaqnXr0UDZc3FKdN0Ij0aaUORqh9yrJTwkTN16AVpZWUuzgXIP7Hbh0TOYdeFs3aSt_Sa2dNnXn2omcdqos7hmmwj6kEqI80LXeyP-xiqxPEvFbfrTLW-6bXEmyWRg76ccQf2d1IG7Sq0exgOeIOGU9nf8sopJNoskU1iNcj"
-                  />
+                <div className="relative group w-40 h-40 mx-auto flex items-center justify-center bg-surface rounded-full border-4 border-surface shadow-md">
+                  <span className="material-symbols-outlined text-primary/30" style={{ fontSize: '80px' }}>account_circle</span>
                   <button className="absolute bottom-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform">
                     <span className="material-symbols-outlined text-sm">photo_camera</span>
                   </button>
@@ -46,134 +121,86 @@ export default function EditProfilePage() {
                 <p className="text-xs text-center text-secondary leading-relaxed">JPG, GIF or PNG. Max size of 2MB.</p>
               </div>
 
-              <div className="lg:col-span-8 bg-surface-container-lowest p-8 rounded-xl space-y-8">
-                <div className="space-y-4">
-                  <label className="block text-sm font-bold text-primary tracking-wide uppercase">Select Platform Role</label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <label className="relative flex flex-col p-4 border border-outline-variant/50 rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors has-[:checked]:border-primary-container has-[:checked]:bg-primary-fixed/20 group">
-                      <input defaultChecked className="hidden" name="role" type="radio" />
-                      <span className="material-symbols-outlined text-primary mb-2">shopping_cart</span>
-                      <span className="font-bold text-primary">Buyer</span>
-                      <span className="text-xs text-secondary mt-1">Seeking land acquisitions</span>
-                    </label>
-                    <label className="relative flex flex-col p-4 border border-outline-variant/50 rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors has-[:checked]:border-primary-container has-[:checked]:bg-primary-fixed/20 group">
-                      <input className="hidden" name="role" type="radio" />
-                      <span className="material-symbols-outlined text-primary mb-2">sell</span>
-                      <span className="font-bold text-primary">Seller</span>
-                      <span className="text-xs text-secondary mt-1">Listing land for sale</span>
-                    </label>
-                    <label className="relative flex flex-col p-4 border border-outline-variant/50 rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors has-[:checked]:border-primary-container has-[:checked]:bg-primary-fixed/20 group">
-                      <input className="hidden" name="role" type="radio" />
-                      <span className="material-symbols-outlined text-primary mb-2">handshake</span>
-                      <span className="font-bold text-primary">Both</span>
-                      <span className="text-xs text-secondary mt-1">Full network access</span>
-                    </label>
+              <div className="lg:col-span-8 bg-surface-container-lowest p-8 rounded-xl space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-bold text-primary tracking-wide uppercase">First Name</label>
+                    <input
+                      className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:bg-surface-container-lowest transition-all"
+                      placeholder="First name"
+                      value={firstName}
+                      onChange={e => setFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-bold text-primary tracking-wide uppercase">Last Name</label>
+                    <input
+                      className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:bg-surface-container-lowest transition-all"
+                      placeholder="Last name"
+                      value={lastName}
+                      onChange={e => setLastName(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-bold text-primary tracking-wide uppercase">Professional Narrative</label>
+                  <label className="block text-sm font-bold text-primary tracking-wide uppercase">Professional Bio</label>
                   <textarea
                     className="w-full bg-surface-container-low border-none rounded-xl p-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:bg-surface-container-lowest transition-all"
                     placeholder="Describe your experience in land acquisition or development..."
                     rows={4}
+                    value={bio}
+                    onChange={e => setBio(e.target.value)}
                   />
                 </div>
               </div>
             </section>
 
-            {/* Contact & Company Verification Section */}
+            {/* Contact & Company Section */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Contact Information */}
               <div className="bg-surface-container-lowest p-8 rounded-xl space-y-6">
                 <h3 className="font-headline text-xl font-bold text-primary">Contact Information</h3>
                 <div className="space-y-4">
-                  {/* Phone */}
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <label className="block text-xs font-bold text-secondary uppercase mb-1">Phone Number</label>
-                      <input
-                        className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
-                        type="tel"
-                        defaultValue="+1 (555) 000-0000"
-                      />
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] font-bold text-outline mb-1">PUBLIC</span>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input defaultChecked className="sr-only peer" type="checkbox" />
-                        <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
-                      </label>
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-secondary uppercase mb-1">Phone Number</label>
+                    <input
+                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                    />
                   </div>
-                  {/* Website */}
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <label className="block text-xs font-bold text-secondary uppercase mb-1">Website URL</label>
-                      <input
-                        className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
-                        type="url"
-                        defaultValue="www.lotscout-investments.com"
-                      />
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] font-bold text-outline mb-1">PUBLIC</span>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input className="sr-only peer" type="checkbox" />
-                        <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
-                      </label>
-                    </div>
-                  </div>
-                  {/* Email */}
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <label className="block text-xs font-bold text-secondary uppercase mb-1">Email Address</label>
-                      <input
-                        className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
-                        type="email"
-                        defaultValue="executive@lotscout.com"
-                      />
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] font-bold text-outline mb-1">PUBLIC</span>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input defaultChecked className="sr-only peer" type="checkbox" />
-                        <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
-                      </label>
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-secondary uppercase mb-1">Email Address</label>
+                    <input
+                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium opacity-60 cursor-not-allowed"
+                      type="email"
+                      value={email}
+                      readOnly
+                    />
+                    <p className="text-[11px] text-secondary mt-1">Email cannot be changed here.</p>
                   </div>
                 </div>
               </div>
 
-              {/* Company Verification */}
+              {/* Company */}
               <div className="bg-surface-container-lowest p-8 rounded-xl space-y-6 flex flex-col">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-headline text-xl font-bold text-primary">Company Verification</h3>
-                  <span className="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-bold rounded-full tracking-widest uppercase">Pending</span>
+                  <h3 className="font-headline text-xl font-bold text-primary">Company</h3>
                 </div>
                 <div className="space-y-4 flex-1">
                   <div>
-                    <label className="block text-xs font-bold text-secondary uppercase mb-1">Legal Company Name</label>
+                    <label className="block text-xs font-bold text-secondary uppercase mb-1">Company Name</label>
                     <input
                       className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
-                      placeholder="LotScout Holdings LLC"
+                      placeholder="Your company or firm name"
                       type="text"
+                      value={companyName}
+                      onChange={e => setCompanyName(e.target.value)}
                     />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-secondary uppercase mb-1">EIN Number (Tax ID)</label>
-                    <input
-                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
-                      placeholder="XX-XXXXXXX"
-                      type="text"
-                    />
-                  </div>
-                  <div className="p-4 bg-primary-fixed/10 border border-primary-fixed-dim/20 rounded-xl mt-4">
-                    <p className="text-xs text-primary leading-relaxed">
-                      <strong>Verification Protocol:</strong> Once submitted, our compliance team will review your credentials within 48 business hours. Verified accounts receive the &quot;Institutional Grade&quot; badge.
-                    </p>
                   </div>
                 </div>
-                <button className="w-full mt-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">Submit for Verification</button>
               </div>
             </section>
 
@@ -181,19 +208,20 @@ export default function EditProfilePage() {
             <section className="bg-surface-container-lowest p-8 rounded-xl space-y-8">
               <div className="flex items-center justify-between border-b border-outline-variant/30 pb-4">
                 <h3 className="font-headline text-xl font-bold text-primary">Account Management</h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-secondary uppercase tracking-wider">Current Tier:</span>
-                  <span className="px-3 py-1 bg-primary-fixed text-on-primary-fixed text-xs font-bold rounded-full border border-primary-fixed-dim/30">Institutional</span>
-                </div>
+                {tier && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-secondary uppercase tracking-wider">Current Tier:</span>
+                    <span className="px-3 py-1 bg-primary-fixed text-on-primary-fixed text-xs font-bold rounded-full border border-primary-fixed-dim/30 capitalize">{tier}</span>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="space-y-2 max-w-xl">
                   <h4 className="font-headline font-bold text-primary">Subscription Plan</h4>
-                  <p className="text-sm text-secondary leading-relaxed">Your current institutional plan includes unlimited listings, advanced analytics, and priority verification support. Billing occurs annually on the 1st of January.</p>
+                  <p className="text-sm text-secondary leading-relaxed">Upgrade your plan to unlock more listings, advanced analytics, and priority support.</p>
                 </div>
                 <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
                   <a href="/pricing" className="w-full md:w-auto px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container transition-all shadow-lg shadow-primary/10 active:scale-95 text-center">Upgrade Plan</a>
-                  <button className="text-xs font-bold text-error/60 hover:text-error transition-colors underline decoration-error/30 hover:decoration-error decoration-2 underline-offset-4">Delete Account</button>
                 </div>
               </div>
             </section>
@@ -206,12 +234,8 @@ export default function EditProfilePage() {
               <div className="flex-1 space-y-1">
                 <h4 className="font-headline font-bold text-primary">Content Safety &amp; Standards</h4>
                 <p className="text-sm text-secondary leading-relaxed">
-                  To maintain the professional ecosystem of LotScout, all profile content and uploaded images are moderated. Professional standards are enforced to ensure high-quality interactions across our institutional-grade platform.
+                  To maintain the professional ecosystem of LotScout, all profile content is moderated. Professional standards are enforced to ensure high-quality interactions.
                 </p>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-bold text-outline uppercase tracking-widest">Compliance ID</p>
-                <p className="text-xs font-mono font-bold text-primary">LS-9981-X</p>
               </div>
             </footer>
 
