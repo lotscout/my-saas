@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { containsProfanity } from '@/lib/profanity-filter'
 
 const STEPS = [
   { label: 'Ownership Type',       sub: 'Verify your legal authority' },
@@ -43,6 +44,7 @@ export default function CreateListingPage() {
   const [step2Errors, setStep2Errors] = useState<Record<string, string>>({})
   const [titleStreaming, setTitleStreaming] = useState(false)
   const [step3ContactError, setStep3ContactError] = useState('')
+  const [profanityErrors, setProfanityErrors] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     console.log('[create-listing] page mounted — checking session')
@@ -456,9 +458,11 @@ export default function CreateListingPage() {
                         type="text"
                         value={formData.title ?? ''}
                         onChange={e => set('title', e.target.value)}
+                        onBlur={e => setProfanityErrors(prev => ({ ...prev, title: containsProfanity(e.target.value) }))}
                         placeholder="e.g. 40-Acre Highland Retreat with River Access"
                         className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline-variant"
                       />
+                      {profanityErrors.title && <p className="text-xs text-error font-medium mt-1">Please remove inappropriate language</p>}
                     </div>
                   </section>
 
@@ -628,14 +632,20 @@ export default function CreateListingPage() {
                     <textarea
                       value={formData.additional_information ?? ''}
                       onChange={e => set('additional_information', e.target.value.slice(0, 1000))}
+                      onBlur={e => setProfanityErrors(prev => ({ ...prev, additional_information: containsProfanity(e.target.value) }))}
                       placeholder="The narrative story of your land. Discuss topography, views, wildlife, and potential uses..."
                       rows={8}
                       maxLength={1000}
                       className="w-full bg-surface-container-low border-none rounded-lg p-6 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline-variant leading-relaxed"
                     />
-                    <p className={`text-xs text-right font-medium ${(formData.additional_information ?? '').length >= 950 ? 'text-error' : 'text-secondary'}`}>
-                      {(formData.additional_information ?? '').length}/1000
-                    </p>
+                    <div className="flex justify-between items-center">
+                      {profanityErrors.additional_information
+                        ? <p className="text-xs text-error font-medium">Please remove inappropriate language</p>
+                        : <span />}
+                      <p className={`text-xs font-medium ${(formData.additional_information ?? '').length >= 950 ? 'text-error' : 'text-secondary'}`}>
+                        {(formData.additional_information ?? '').length}/1000
+                      </p>
+                    </div>
                   </section>
 
                   {/* Pricing & Timeline */}
@@ -806,10 +816,12 @@ export default function CreateListingPage() {
                     <textarea
                       value={formData.additional_information ?? ''}
                       onChange={e => set('additional_information', e.target.value)}
+                      onBlur={e => setProfanityErrors(prev => ({ ...prev, additional_information: containsProfanity(e.target.value) }))}
                       placeholder="Describe terrain features, access roads, utilities, or specific land use potential..."
                       rows={5}
                       className="w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary/20 rounded-xl text-on-surface placeholder:text-outline/60 p-5"
                     />
+                    {profanityErrors.additional_information && <p className="text-xs text-error font-medium mt-1">Please remove inappropriate language</p>}
                   </div>
 
                   {/* Contact Preferences */}

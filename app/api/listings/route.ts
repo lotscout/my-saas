@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { Resend } from 'resend';
+import { containsProfanity } from '@/lib/profanity-filter';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +13,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    const textFields: [string, string][] = [
+      ['title', body.title],
+      ['property_description', body.propertyDescription],
+      ['additional_information', body.additionalInformation],
+    ];
+    for (const [, value] of textFields) {
+      if (value && containsProfanity(value)) {
+        return NextResponse.json(
+          { error: 'Your submission contains inappropriate language. Please review and resubmit.' },
+          { status: 400 }
+        );
+      }
+    }
 
     const { data: listing, error } = await supabase
       .from('listings')
