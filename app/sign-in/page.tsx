@@ -13,6 +13,7 @@ export default function SignInPage() {
   const [resetEmail, setResetEmail] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   async function handleGoogleSignIn() {
     setGoogleLoading(true);
@@ -46,6 +47,13 @@ export default function SignInPage() {
       setLoading(false);
       return;
     }
+
+    // Set cookie persistence and UA fingerprint server-side
+    await fetch('/api/auth/post-signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rememberMe }),
+    });
 
     router.push('/dashboard');
   }
@@ -133,6 +141,16 @@ export default function SignInPage() {
                 className="w-full px-4 py-3 rounded-xl border border-surface-container-high bg-surface text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors text-sm"
               />
             </div>
+
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-surface-container-high text-primary focus:ring-primary/30"
+              />
+              <span className="text-sm text-on-surface-variant font-medium">Remember me</span>
+            </label>
 
             {error && (
               <p className="text-sm text-error font-medium bg-error-container/20 px-4 py-3 rounded-xl">{error}</p>

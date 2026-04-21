@@ -1,7 +1,8 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 const NAV_LINKS = [
   { label: 'Dashboard', href: '/dashboard' },
@@ -13,8 +14,15 @@ const NAV_LINKS = [
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/sign-in');
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -78,7 +86,7 @@ export default function Header() {
               </a>
               <button
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors border-t border-outline-variant/10"
-                onClick={() => setDropdownOpen(false)}
+                onClick={handleSignOut}
               >
                 <span className="material-symbols-outlined text-base">logout</span>
                 Sign Out
