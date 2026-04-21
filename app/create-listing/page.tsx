@@ -40,6 +40,9 @@ export default function CreateListingPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [toast, setToast] = useState('')
+  const [step2Errors, setStep2Errors] = useState<Record<string, string>>({})
+  const [titleStreaming, setTitleStreaming] = useState(false)
+  const [step3ContactError, setStep3ContactError] = useState('')
 
   useEffect(() => {
     console.log('[create-listing] page mounted — checking session')
@@ -197,6 +200,72 @@ export default function CreateListingPage() {
       }
     } finally {
       setAiStreaming(false)
+    }
+  }
+
+  function validateStep2(): Record<string, string> {
+    const errors: Record<string, string> = {}
+    if (!formData.street_address?.trim() && !formData.apn?.trim())
+      errors.address = 'Enter a street address or APN — at least one is required'
+    const lotVal = lotSizeUnit === 'acres' ? formData.lot_size_acres : formData.lot_size_sqft
+    if (!lotVal || Number(lotVal) <= 0) errors.lot_size = 'Lot size is required'
+    if (!formData.zoning) errors.zoning = 'Select a zoning type'
+    if (!(formData.road_access ?? []).length) errors.road_access = 'Select at least one road access type'
+    if (!(formData.utilities ?? []).length) errors.utilities = 'Select at least one utility'
+    if (!formData.asking_price || Number(formData.asking_price) <= 0) errors.asking_price = 'Asking price is required'
+    if (!formData.comparable_market_value || Number(formData.comparable_market_value) <= 0)
+      errors.comparable_market_value = 'Comparable market value is required'
+    if (!formData.preferred_close_date) errors.preferred_close_date = 'Preferred close date is required'
+    return errors
+  }
+
+  function handleStep3Next() {
+    if (!(formData.contact_methods ?? []).length) {
+      setStep3ContactError('Please select at least one contact method')
+      return
+    }
+    setStep3ContactError('')
+    setCurrentStep(4)
+  }
+
+  function handleStep2Next() {
+    const errors = validateStep2()
+    setStep2Errors(errors)
+    if (Object.keys(errors).length === 0) setCurrentStep(3)
+  }
+
+  async function generateTitle() {
+    setTitleStreaming(true)
+    set('title', '')
+    try {
+      const lotVal = lotSizeUnit === 'acres' ? formData.lot_size_acres : formData.lot_size_sqft
+      const res = await fetch('/api/generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'title',
+          state: formData.state,
+          county: formData.county,
+          lotSize: lotVal,
+          lotSizeUnit,
+          zoning: formData.zoning,
+          roadAccess: formData.road_access,
+          utilities: formData.utilities,
+          context: formData.additional_information,
+        }),
+      })
+      if (!res.ok || !res.body) throw new Error('Stream failed')
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let text = ''
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        text += decoder.decode(value, { stream: true })
+        set('title', text)
+      }
+    } finally {
+      setTitleStreaming(false)
     }
   }
 
@@ -369,22 +438,25 @@ export default function CreateListingPage() {
                       <h2 className="font-headline text-xl font-bold text-primary tracking-tight">Core Details</h2>
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-sm font-bold text-secondary tracking-wide">Title *</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-sm font-bold text-secondary tracking-wide">Title *</label>
+                        <button
+                          type="button"
+                          onClick={generateTitle}
+                          disabled={titleStreaming}
+                          className="flex items-center gap-1.5 bg-secondary-fixed text-on-secondary-fixed px-3 py-1.5 rounded-full text-xs font-bold hover:brightness-95 transition-all disabled:opacity-60"
+                        >
+                          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            {titleStreaming ? 'hourglass_empty' : 'auto_awesome'}
+                          </span>
+                          {titleStreaming ? 'Writing…' : 'Write with AI'}
+                        </button>
+                      </div>
                       <input
                         type="text"
                         value={formData.title ?? ''}
                         onChange={e => set('title', e.target.value)}
                         placeholder="e.g. 40-Acre Highland Retreat with River Access"
-                        className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline-variant"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-sm font-bold text-secondary tracking-wide">Property Description *</label>
-                      <textarea
-                        value={formData.property_description ?? ''}
-                        onChange={e => set('property_description', e.target.value)}
-                        placeholder="Brief summary of the land's primary appeal..."
-                        rows={4}
                         className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline-variant"
                       />
                     </div>
@@ -398,26 +470,27 @@ export default function CreateListingPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="md:col-span-2 space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">Address</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">Address *</label>
                         <input
                           type="text"
                           value={formData.street_address ?? ''}
-                          onChange={e => set('street_address', e.target.value)}
-                          placeholder="Street name or physical markers"
-                          className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all"
+                          onChange={e => { set('street_address', e.target.value); setStep2Errors(prev => ({ ...prev, address: '' })) }}
+                          placeholder="Street name"
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.address ? 'ring-2 ring-error' : ''}`}
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">APN (Parcel Number)</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">APN (Parcel Number) *</label>
                         <input
                           type="text"
                           value={formData.apn ?? ''}
-                          onChange={e => set('apn', e.target.value)}
+                          onChange={e => { set('apn', e.target.value); setStep2Errors(prev => ({ ...prev, address: '' })) }}
                           placeholder="00-000-00"
-                          className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all"
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.address ? 'ring-2 ring-error' : ''}`}
                         />
                       </div>
                     </div>
+                    {step2Errors.address && <p className="text-xs text-error font-medium -mt-4">{step2Errors.address}</p>}
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                       <div className="space-y-1">
                         <label className="block text-sm font-bold text-secondary tracking-wide">State</label>
@@ -465,12 +538,12 @@ export default function CreateListingPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-4">
                         <div className="space-y-1">
-                          <label className="block text-sm font-bold text-secondary tracking-wide">Lot Size</label>
-                          <div className="flex bg-surface-container-low rounded-lg p-1">
+                          <label className="block text-sm font-bold text-secondary tracking-wide">Lot Size *</label>
+                          <div className={`flex bg-surface-container-low rounded-lg p-1 ${step2Errors.lot_size ? 'ring-2 ring-error' : ''}`}>
                             <input
                               type="number"
                               value={lotSizeUnit === 'acres' ? (formData.lot_size_acres ?? '') : (formData.lot_size_sqft ?? '')}
-                              onChange={e => set(lotSizeUnit === 'acres' ? 'lot_size_acres' : 'lot_size_sqft', e.target.value)}
+                              onChange={e => { set(lotSizeUnit === 'acres' ? 'lot_size_acres' : 'lot_size_sqft', e.target.value); setStep2Errors(prev => ({ ...prev, lot_size: '' })) }}
                               placeholder="0.00"
                               className="flex-grow bg-transparent border-none p-3 focus:ring-0"
                             />
@@ -487,14 +560,15 @@ export default function CreateListingPage() {
                               >Sq Ft</button>
                             </div>
                           </div>
+                          {step2Errors.lot_size && <p className="text-xs text-error font-medium">{step2Errors.lot_size}</p>}
                         </div>
                         <div className="space-y-1">
-                          <label className="block text-sm font-bold text-secondary tracking-wide">Zoning</label>
+                          <label className="block text-sm font-bold text-secondary tracking-wide">Zoning *</label>
                           <div className="relative">
                             <select
                               value={formData.zoning ?? ''}
-                              onChange={e => set('zoning', e.target.value)}
-                              className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+                              onChange={e => { set('zoning', e.target.value); setStep2Errors(prev => ({ ...prev, zoning: '' })) }}
+                              className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all appearance-none ${step2Errors.zoning ? 'ring-2 ring-error' : ''}`}
                             >
                               <option value="">Select Zoning</option>
                               <option value="Residential">Residential</option>
@@ -504,37 +578,40 @@ export default function CreateListingPage() {
                             </select>
                             <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-secondary text-sm">expand_more</span>
                           </div>
+                          {step2Errors.zoning && <p className="text-xs text-error font-medium">{step2Errors.zoning}</p>}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-3">
-                          <span className="block text-sm font-bold text-secondary tracking-wide">Road Access</span>
+                          <span className="block text-sm font-bold text-secondary tracking-wide">Road Access *</span>
                           {['Paved', 'Dirt/Gravel', 'No Access'].map(opt => (
                             <label key={opt} className="flex items-center space-x-3 text-sm font-medium text-on-surface-variant cursor-pointer group">
                               <input
                                 type="checkbox"
                                 checked={(formData.road_access ?? []).includes(opt)}
-                                onChange={() => toggleArray('road_access', opt)}
+                                onChange={() => { toggleArray('road_access', opt); setStep2Errors(prev => ({ ...prev, road_access: '' })) }}
                                 className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20"
                               />
                               <span className="group-hover:text-primary transition-colors">{opt}</span>
                             </label>
                           ))}
+                          {step2Errors.road_access && <p className="text-xs text-error font-medium">{step2Errors.road_access}</p>}
                         </div>
                         <div className="space-y-3">
-                          <span className="block text-sm font-bold text-secondary tracking-wide">Utilities</span>
+                          <span className="block text-sm font-bold text-secondary tracking-wide">Utilities *</span>
                           {['Electricity', 'Water Well', 'Septic'].map(opt => (
                             <label key={opt} className="flex items-center space-x-3 text-sm font-medium text-on-surface-variant cursor-pointer group">
                               <input
                                 type="checkbox"
                                 checked={(formData.utilities ?? []).includes(opt)}
-                                onChange={() => toggleArray('utilities', opt)}
+                                onChange={() => { toggleArray('utilities', opt); setStep2Errors(prev => ({ ...prev, utilities: '' })) }}
                                 className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20"
                               />
                               <span className="group-hover:text-primary transition-colors">{opt}</span>
                             </label>
                           ))}
+                          {step2Errors.utilities && <p className="text-xs text-error font-medium">{step2Errors.utilities}</p>}
                         </div>
                       </div>
                     </div>
@@ -547,21 +624,18 @@ export default function CreateListingPage() {
                         <span className="material-symbols-outlined text-primary-fixed-dim">auto_awesome</span>
                         <h2 className="font-headline text-xl font-bold text-primary tracking-tight">Detailed Description</h2>
                       </div>
-                      <button
-                        type="button"
-                        className="flex items-center space-x-2 bg-secondary-fixed text-on-secondary-fixed px-4 py-2 rounded-full text-xs font-bold hover:brightness-95 transition-all"
-                      >
-                        <span className="material-symbols-outlined text-base">psychology</span>
-                        <span>Write with AI</span>
-                      </button>
                     </div>
                     <textarea
                       value={formData.additional_information ?? ''}
-                      onChange={e => set('additional_information', e.target.value)}
+                      onChange={e => set('additional_information', e.target.value.slice(0, 1000))}
                       placeholder="The narrative story of your land. Discuss topography, views, wildlife, and potential uses..."
                       rows={8}
+                      maxLength={1000}
                       className="w-full bg-surface-container-low border-none rounded-lg p-6 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline-variant leading-relaxed"
                     />
+                    <p className={`text-xs text-right font-medium ${(formData.additional_information ?? '').length >= 950 ? 'text-error' : 'text-secondary'}`}>
+                      {(formData.additional_information ?? '').length}/1000
+                    </p>
                   </section>
 
                   {/* Pricing & Timeline */}
@@ -572,24 +646,26 @@ export default function CreateListingPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">Asking Price ($)</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">Asking Price ($) *</label>
                         <input
                           type="number"
                           value={formData.asking_price ?? ''}
-                          onChange={e => set('asking_price', e.target.value)}
+                          onChange={e => { set('asking_price', e.target.value); setStep2Errors(prev => ({ ...prev, asking_price: '' })) }}
                           placeholder="50,000"
-                          className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all"
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.asking_price ? 'ring-2 ring-error' : ''}`}
                         />
+                        {step2Errors.asking_price && <p className="text-xs text-error font-medium">{step2Errors.asking_price}</p>}
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">Comparable Value ($)</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">Comparable Market Value ($) *</label>
                         <input
                           type="number"
                           value={formData.comparable_market_value ?? ''}
-                          onChange={e => set('comparable_market_value', e.target.value)}
+                          onChange={e => { set('comparable_market_value', e.target.value); setStep2Errors(prev => ({ ...prev, comparable_market_value: '' })) }}
                           placeholder="55,000"
-                          className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all"
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.comparable_market_value ? 'ring-2 ring-error' : ''}`}
                         />
+                        {step2Errors.comparable_market_value && <p className="text-xs text-error font-medium">{step2Errors.comparable_market_value}</p>}
                       </div>
                     </div>
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pt-2">
@@ -606,13 +682,14 @@ export default function CreateListingPage() {
                         </div>
                       </label>
                       <div className="space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">Preferred Close Date</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">Preferred Close Date *</label>
                         <input
                           type="date"
                           value={formData.preferred_close_date ?? ''}
-                          onChange={e => set('preferred_close_date', e.target.value)}
-                          className="w-full md:w-64 bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all"
+                          onChange={e => { set('preferred_close_date', e.target.value); setStep2Errors(prev => ({ ...prev, preferred_close_date: '' })) }}
+                          className={`w-full md:w-64 bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.preferred_close_date ? 'ring-2 ring-error' : ''}`}
                         />
+                        {step2Errors.preferred_close_date && <p className="text-xs text-error font-medium">{step2Errors.preferred_close_date}</p>}
                       </div>
                     </div>
                   </section>
@@ -629,7 +706,7 @@ export default function CreateListingPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setCurrentStep(3)}
+                      onClick={handleStep2Next}
                       className="bg-primary text-on-primary px-12 py-4 rounded-xl font-headline font-bold tracking-tight shadow-xl shadow-primary/10 hover:brightness-125 transition-all flex items-center space-x-3"
                     >
                       <span>Continue to Media</span>
@@ -737,20 +814,21 @@ export default function CreateListingPage() {
 
                   {/* Contact Preferences */}
                   <div className="md:col-span-2 space-y-4 pt-4">
-                    <h3 className="text-primary font-headline font-bold text-lg border-b border-surface-container-low pb-2">Contact Preferences</h3>
+                    <h3 className="text-primary font-headline font-bold text-lg border-b border-surface-container-low pb-2">Contact Preferences *</h3>
                     <div className="flex flex-wrap gap-6 pt-2">
                       {['Email', 'Phone Call', 'Text / SMS'].map(opt => (
                         <label key={opt} className="flex items-center gap-3 cursor-pointer group">
                           <input
                             type="checkbox"
                             checked={(formData.contact_methods ?? []).includes(opt)}
-                            onChange={() => toggleArray('contact_methods', opt)}
+                            onChange={() => { toggleArray('contact_methods', opt); setStep3ContactError('') }}
                             className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20 bg-surface-container-low"
                           />
                           <span className="text-on-surface font-medium group-hover:text-primary transition-colors">{opt}</span>
                         </label>
                       ))}
                     </div>
+                    {step3ContactError && <p className="text-xs text-error font-medium">{step3ContactError}</p>}
                   </div>
                 </div>
 
@@ -765,7 +843,7 @@ export default function CreateListingPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(4)}
+                    onClick={handleStep3Next}
                     className="w-full sm:w-auto px-14 py-3.5 rounded-full bg-primary text-on-primary font-headline font-bold tracking-tight hover:scale-105 transition-all shadow-xl shadow-primary/10"
                   >
                     Next
