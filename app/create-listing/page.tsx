@@ -44,7 +44,7 @@ export default function CreateListingPage() {
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { setTierChecked(true); return }
+      if (!user) { router.push('/sign-in'); return }
       const { data } = await supabase
         .from('profiles')
         .select('id, tier, email, first_name, last_name')

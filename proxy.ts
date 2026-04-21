@@ -42,26 +42,10 @@ export async function proxy(request: NextRequest) {
   // getUser() validates the JWT server-side — never trust only the cookie value.
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (isProtected(request.nextUrl.pathname)) {
-    if (!user) {
-      const signIn = request.nextUrl.clone()
-      signIn.pathname = '/sign-in'
-      return NextResponse.redirect(signIn)
-    }
-
-    // UA fingerprint check: if the stored UA doesn't match the current
-    // request's UA, the session is being used from a different device/browser.
-    const storedUA = request.cookies.get('_ls_ua')?.value
-    const currentUA = request.headers.get('user-agent') ?? ''
-    if (storedUA && storedUA !== currentUA) {
-      await supabase.auth.signOut()
-      const signIn = request.nextUrl.clone()
-      signIn.pathname = '/sign-in'
-      const res = NextResponse.redirect(signIn)
-      // Clear the stale fingerprint cookie
-      res.cookies.delete('_ls_ua')
-      return res
-    }
+  if (isProtected(request.nextUrl.pathname) && !user) {
+    const signIn = request.nextUrl.clone()
+    signIn.pathname = '/sign-in'
+    return NextResponse.redirect(signIn)
   }
 
   return supabaseResponse
