@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
 
-const ADMIN_EMAIL = 'bobbysue83@gmail.com';
+const ADMIN_EMAIL = 'bobby@lotscout.com';
 
 interface Listing {
   id: string;
