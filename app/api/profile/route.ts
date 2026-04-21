@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     email,
     first_name: firstName ?? null,
     last_name: lastName ?? null,
-    tier: 'standard',
+    full_name: [firstName, lastName].filter(Boolean).join(' ') || null,
   });
 
   if (error) {
