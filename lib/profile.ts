@@ -18,11 +18,22 @@ export async function getUserProfile(
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, tier, created_at, first_name, last_name, email')
+    .select('id, created_at, first_name, last_name, email')
     .eq('id', user.id)
     .single();
 
   if (error || !data) return null;
 
-  return data as UserProfile;
+  // Look up tier from subscriptions table
+  const { data: sub } = await supabase
+    .from('subscriptions')
+    .select('tier')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  return {
+    ...data,
+    tier: (sub?.tier ?? null) as Tier,
+  } as UserProfile;
 }
