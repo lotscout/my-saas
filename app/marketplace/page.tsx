@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import ListingLimitBanner from '@/components/ListingLimitBanner';
 import UpgradeModal from '@/components/UpgradeModal';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 const LISTINGS = [
   {
@@ -93,25 +94,80 @@ function SellerContact({ seller }: { seller: typeof LISTINGS[0]['seller'] }) {
   );
 }
 
+function formatBudget(min: number | null, max: number | null): string {
+  const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${(n / 1000).toFixed(0)}k`;
+  if (min && max) return `${fmt(min)} – ${fmt(max)}`;
+  if (min) return `${fmt(min)}+`;
+  if (max) return `Up to ${fmt(max)}`;
+  return 'Flexible';
+}
+
+interface BuyerRequest {
+  id: string;
+  user_id: string;
+  status: string;
+  target_regions: string[];
+  budget_min: number | null;
+  budget_max: number | null;
+  min_acreage: number | null;
+  max_acreage: number | null;
+  use_case: string;
+  zoning_preference: string[];
+  timeline: string;
+  additional_notes: string | null;
+  contact_preference: string[];
+  created_at: string;
+  profiles: { first_name: string | null; last_name: string | null; avatar_url: string | null } | null;
+}
+
 export default function MarketplacePage() {
   const { tier, profile, loading, listingsThisPeriod, listingStatus } = usePermissions();
   const [showBlockedModal, setShowBlockedModal] = useState(false);
   const [showFreeModal, setShowFreeModal] = useState(false);
+  const [showBuyerFreeModal, setShowBuyerFreeModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'properties' | 'buyer-requests'>('properties');
+  const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
+  const [buyerRequestsLoading, setBuyerRequestsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
   const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
+  const isPaidUser = !loading && !!tier;
+
+  useEffect(() => {
+    if (activeTab !== 'buyer-requests') return;
+    setBuyerRequestsLoading(true);
+    const supabase = createClient();
+    supabase
+      .from('buyer_requests')
+      .select('*, profiles(first_name, last_name, avatar_url)')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setBuyerRequests((data as BuyerRequest[]) ?? []);
+        setBuyerRequestsLoading(false);
+      });
+  }, [activeTab]);
+
+  const filteredListings = useMemo(() => {
+    if (!searchQuery.trim()) return LISTINGS;
+    const q = searchQuery.toLowerCase();
+    return LISTINGS.filter(l =>
+      l.location.toLowerCase().includes(q) || l.title.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
 
   function handleCreateListing() {
     if (loading) return;
-    if (!profile || !tier) {
-      setShowFreeModal(true);
-      return;
-    }
-    if (listingStatus === 'blocked') {
-      setShowBlockedModal(true);
-    } else {
-      router.push('/create-listing');
-    }
+    if (!profile || !tier) { setShowFreeModal(true); return; }
+    if (listingStatus === 'blocked') { setShowBlockedModal(true); }
+    else { router.push('/create-listing'); }
+  }
+
+  function handlePostBuyerRequest() {
+    if (loading) return;
+    if (!profile || !tier) { setShowBuyerFreeModal(true); return; }
+    router.push('/create-buyer-request');
   }
 
   return (
@@ -119,27 +175,19 @@ export default function MarketplacePage() {
       <Header />
 
       {showBlockedModal && (
-        <UpgradeModal
-          featureName="Unlimited Listings"
-          requiredTier="priority"
-          onDismiss={() => setShowBlockedModal(false)}
-        />
+        <UpgradeModal featureName="Unlimited Listings" requiredTier="priority" onDismiss={() => setShowBlockedModal(false)} />
       )}
 
       {showFreeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowFreeModal(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
-            <button onClick={() => setShowFreeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors" aria-label="Dismiss">
-              <span className="material-symbols-outlined text-xl">close</span>
-            </button>
+            <button onClick={() => setShowFreeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
             <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
               <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Create a Listing</h2>
-            <p className="text-secondary text-sm mb-6 leading-relaxed">
-              Listing your property requires a paid LotScout account. Choose a plan to get started.
-            </p>
+            <p className="text-secondary text-sm mb-6 leading-relaxed">Listing your property requires a paid LotScout account. Choose a plan to get started.</p>
             <div className="flex gap-3">
               <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
               <button onClick={() => setShowFreeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
@@ -148,7 +196,26 @@ export default function MarketplacePage() {
         </div>
       )}
 
+      {showBuyerFreeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowBuyerFreeModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
+            <button onClick={() => setShowBuyerFreeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
+            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            </div>
+            <h2 className="font-headline text-xl font-bold text-primary mb-2">Post Buying Criteria</h2>
+            <p className="text-secondary text-sm mb-6 leading-relaxed">Posting buyer requests requires a paid LotScout account. Choose a plan to get started.</p>
+            <div className="flex gap-3">
+              <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
+              <button onClick={() => setShowBuyerFreeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="pt-24 px-10 pb-20 min-h-screen max-w-[1400px] mx-auto">
+        {/* Header */}
         <section className="mb-8 flex flex-col md:flex-row justify-between items-end gap-6">
           <div className="max-w-2xl">
             <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
@@ -164,99 +231,277 @@ export default function MarketplacePage() {
           </div>
         </section>
 
-        {/* Listing limit banner for standard tier */}
-        {!loading && tier === 'standard' && listingsThisPeriod >= 2 && (
-          <div className="mb-6">
-            <ListingLimitBanner listingsUsed={listingsThisPeriod} tier="standard" />
-          </div>
-        )}
-
-        <div className="grid grid-cols-12 gap-8 mb-12">
-          <div className="col-span-12 flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
-            {['Acreage Range', 'Zoning Type', 'Utilities Access', 'Soil Composition'].map(filter => (
-              <div key={filter} className="group relative">
-                <button className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary">
-                  {filter}
-                  <span className="material-symbols-outlined text-sm">expand_more</span>
-                </button>
-              </div>
-            ))}
-            <div className="ml-auto flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort By:</span>
-              <select className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer">
-                <option>Newest First</option>
-                <option>Price: High to Low</option>
-                <option>Acreage: Largest</option>
-              </select>
-            </div>
-          </div>
+        {/* Tab toggle */}
+        <div className="mb-8 flex items-center gap-1 bg-surface-container-low p-1 rounded-full w-fit">
+          <button
+            onClick={() => setActiveTab('properties')}
+            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+              activeTab === 'properties'
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-secondary hover:text-on-surface'
+            }`}
+          >
+            Properties
+          </button>
+          <button
+            onClick={() => setActiveTab('buyer-requests')}
+            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+              activeTab === 'buyer-requests'
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-secondary hover:text-on-surface'
+            }`}
+          >
+            Buyer Requests
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {LISTINGS.map(listing => (
-            <div key={listing.id} className="flex flex-col group">
-              <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={listing.imgAlt}
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                  src={listing.img}
+        {/* ── PROPERTIES TAB ── */}
+        {activeTab === 'properties' && (
+          <>
+            {!loading && tier === 'standard' && listingsThisPeriod >= 2 && (
+              <div className="mb-6">
+                <ListingLimitBanner listingsUsed={listingsThisPeriod} tier="standard" />
+              </div>
+            )}
+
+            {/* Search bar */}
+            <div className="mb-6">
+              <div className="relative max-w-xl">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search by zip code, city, county, or state..."
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-4 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
                 />
-                {listing.promoted && (
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-amber-400 text-amber-950 px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[12px]">workspace_premium</span>
-                      Promoted
-                    </span>
-                  </div>
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
+                    <span className="material-symbols-outlined text-lg">close</span>
+                  </button>
                 )}
-                {listing.badge?.position === 'top-right' && (
-                  <div className="absolute top-4 right-4">
-                    <span className="bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.badge.label}</span>
-                  </div>
-                )}
-                {listing.badge?.position === 'bottom-left' && (
-                  <div className="absolute bottom-4 left-4">
-                    <span className="bg-primary/90 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.badge.label}</span>
-                  </div>
-                )}
-                {!listing.promoted && !listing.badge && (
-                  <div className="absolute top-4 right-4">
-                    <button className="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm text-primary hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-lg">favorite</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-8 mb-12">
+              <div className="col-span-12 flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
+                {['Acreage Range', 'Zoning Type', 'Utilities Access'].map(filter => (
+                  <div key={filter} className="group relative">
+                    <button className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary">
+                      {filter}
+                      <span className="material-symbols-outlined text-sm">expand_more</span>
                     </button>
                   </div>
-                )}
-              </div>
-
-              <div className="px-2 flex-1 flex flex-col">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-2xl font-black text-primary">{listing.title}</h3>
-                  <span className="text-3xl font-black text-primary">{listing.price}</span>
+                ))}
+                <div className="ml-auto flex items-center gap-3">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort By:</span>
+                  <select className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer">
+                    <option>Newest First</option>
+                    <option>Price: High to Low</option>
+                    <option>Acreage: Largest</option>
+                  </select>
                 </div>
-                <p className="text-slate-500 text-sm mb-4">{listing.location} • {listing.acreage}</p>
-                <div className="flex flex-wrap gap-2 mb-auto">
-                  {listing.tags.map(tag => (
-                    <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
-                  ))}
-                </div>
-
-                {/* Seller contact — locked for standard */}
-                {canViewContact ? (
-                  <SellerContact seller={listing.seller} />
-                ) : (
-                  <LockedFeature
-                    requiredTier="priority"
-                    message="Upgrade to Priority to contact this seller"
-                    className="rounded-xl mt-3"
-                  >
-                    <SellerContact seller={listing.seller} />
-                  </LockedFeature>
-                )}
               </div>
             </div>
-          ))}
-        </div>
+
+            {filteredListings.length === 0 ? (
+              <div className="text-center py-20 text-secondary">
+                <span className="material-symbols-outlined text-5xl mb-4 block">search_off</span>
+                <p className="font-headline text-xl font-bold text-primary mb-2">No listings found</p>
+                <p className="text-sm">Try a different search term</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {filteredListings.map(listing => (
+                  <div key={listing.id} className="flex flex-col group">
+                    <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img alt={listing.imgAlt} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src={listing.img} />
+                      {listing.promoted && (
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-amber-400 text-amber-950 px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[12px]">workspace_premium</span>Promoted
+                          </span>
+                        </div>
+                      )}
+                      {listing.badge?.position === 'top-right' && (
+                        <div className="absolute top-4 right-4">
+                          <span className="bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.badge.label}</span>
+                        </div>
+                      )}
+                      {listing.badge?.position === 'bottom-left' && (
+                        <div className="absolute bottom-4 left-4">
+                          <span className="bg-primary/90 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.badge.label}</span>
+                        </div>
+                      )}
+                      {!listing.promoted && !listing.badge && (
+                        <div className="absolute top-4 right-4">
+                          <button className="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm text-primary hover:scale-110 transition-transform">
+                            <span className="material-symbols-outlined text-lg">favorite</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-2 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-2xl font-black text-primary">{listing.title}</h3>
+                        <span className="text-3xl font-black text-primary">{listing.price}</span>
+                      </div>
+                      <p className="text-slate-500 text-sm mb-4">{listing.location} • {listing.acreage}</p>
+                      <div className="flex flex-wrap gap-2 mb-auto">
+                        {listing.tags.map(tag => (
+                          <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
+                        ))}
+                      </div>
+                      {canViewContact ? (
+                        <SellerContact seller={listing.seller} />
+                      ) : (
+                        <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
+                          <SellerContact seller={listing.seller} />
+                        </LockedFeature>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── BUYER REQUESTS TAB ── */}
+        {activeTab === 'buyer-requests' && (
+          <>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <p className="text-slate-500 text-sm">Active buyers looking for land that matches your listings</p>
+              </div>
+              <button
+                onClick={handlePostBuyerRequest}
+                className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/10"
+              >
+                <span className="material-symbols-outlined text-lg">add</span>
+                Post Buying Criteria
+              </button>
+            </div>
+
+            {buyerRequestsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-surface-container-low rounded-2xl p-6 animate-pulse space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-surface-container-high" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-3 bg-surface-container-high rounded w-24" />
+                        <div className="h-2 bg-surface-container-high rounded w-16" />
+                      </div>
+                    </div>
+                    <div className="h-2 bg-surface-container-high rounded w-full" />
+                    <div className="h-2 bg-surface-container-high rounded w-3/4" />
+                  </div>
+                ))}
+              </div>
+            ) : buyerRequests.length === 0 ? (
+              <div className="text-center py-24 text-secondary">
+                <span className="material-symbols-outlined text-6xl mb-4 block text-primary/20">person_search</span>
+                <p className="font-headline text-2xl font-bold text-primary mb-2">No buyer requests yet</p>
+                <p className="text-sm mb-6">Be the first to post your buying criteria and connect with sellers</p>
+                <button onClick={handlePostBuyerRequest} className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
+                  Post Buying Criteria
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {buyerRequests.map(req => {
+                  const firstName = req.profiles?.first_name ?? '';
+                  const lastName = req.profiles?.last_name ?? '';
+                  const displayName = [firstName, lastName].filter(Boolean).join(' ') || 'Anonymous Buyer';
+                  const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || 'AB';
+                  const blurIdentity = !canViewContact;
+
+                  return (
+                    <div key={req.id} className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
+                      {/* Header: avatar + name + badge */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${blurIdentity ? 'blur-sm' : ''}`}>
+                            {req.profiles?.avatar_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={req.profiles.avatar_url} alt="Buyer" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-primary font-bold text-sm">{initials}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className={`font-bold text-primary text-sm ${blurIdentity ? 'blur-sm select-none' : ''}`}>{displayName}</p>
+                            <p className="text-[10px] text-secondary uppercase tracking-widest font-bold">Verified Buyer</p>
+                          </div>
+                        </div>
+                        <span className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                          Active Buying
+                        </span>
+                      </div>
+
+                      {/* Details */}
+                      <div className="space-y-2.5 text-sm">
+                        {req.target_regions?.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <span className="material-symbols-outlined text-secondary text-base mt-0.5">location_on</span>
+                            <span className="text-on-surface-variant">{req.target_regions.join(', ')}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-secondary text-base">payments</span>
+                          <span className="text-on-surface-variant">{formatBudget(req.budget_min, req.budget_max)}</span>
+                        </div>
+                        {req.min_acreage && (
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-secondary text-base">landscape</span>
+                            <span className="text-on-surface-variant">
+                              {req.min_acreage}{req.max_acreage ? ` – ${req.max_acreage}` : '+'} acres
+                            </span>
+                          </div>
+                        )}
+                        {req.use_case && (
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-secondary text-base">agriculture</span>
+                            <span className="bg-primary/8 text-primary px-2 py-0.5 rounded-full text-xs font-bold capitalize">{req.use_case}</span>
+                          </div>
+                        )}
+                        {req.timeline && (
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-secondary text-base">schedule</span>
+                            <span className="text-on-surface-variant text-xs">{req.timeline}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Contact button */}
+                      <div className="pt-2 mt-auto border-t border-outline-variant/20">
+                        {canViewContact ? (
+                          <button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
+                            <span className="material-symbols-outlined text-base">mail</span>
+                            Contact Buyer
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => router.push('/pricing')}
+                            className="w-full flex items-center justify-center gap-2 bg-surface-container-high text-secondary py-2.5 rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-base">lock</span>
+                            Upgrade to Contact
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </main>
 
       <footer className="w-full py-16 px-8 bg-primary dark:bg-black grid grid-cols-1 md:grid-cols-2 items-center gap-8 z-10 relative">
@@ -279,10 +524,10 @@ export default function MarketplacePage() {
         </div>
       </footer>
 
-      {/* FAB — blocked for standard tier at limit */}
+      {/* FAB */}
       <div className="fixed bottom-10 right-10 z-[60]">
         <button
-          onClick={handleCreateListing}
+          onClick={activeTab === 'properties' ? handleCreateListing : handlePostBuyerRequest}
           className="bg-primary text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform ring-4 ring-white/10"
         >
           <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
