@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
 
 const GRID = { display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr' } as const;
+const GRID5 = { display: 'grid', gridTemplateColumns: '28px 1.5fr 1fr 1fr 1fr' } as const;
+const GRID5 = { display: 'grid', gridTemplateColumns: '28px 1.5fr 1fr 1fr 1fr' } as const;
 
 const SECTIONS = [
   {
@@ -120,7 +122,9 @@ export default function PricingPage() {
         <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
 
           {/* ── Column headers ── */}
-          <div style={GRID} className="border-b border-outline-variant/10">
+          <div style={GRID5} className="border-b border-outline-variant/10">
+            {/* Empty label column */}
+            <div />
 
             {/* Top-left: billing toggle */}
             <div className="p-5 flex flex-col justify-center gap-3">
@@ -219,50 +223,58 @@ export default function PricingPage() {
           </div>
 
           {/* ── Feature sections ── */}
-          {SECTIONS.map((section, si) => (
-            <div key={si}>
-              {/* Section label row — left accent tab, right cols flow uninterrupted */}
-              <div style={GRID} className={si > 0 ? 'border-t border-outline-variant/10' : ''}>
-                <div className="pt-3 pb-1 pl-5 pr-4 flex items-center">
-                  <span className="border-l-2 border-primary pl-2 text-[10px] font-bold text-primary tracking-widest uppercase leading-none">
-                    {section.label}
-                  </span>
-                </div>
-                <div className="border-l border-outline-variant/10 bg-transparent" />
-                <div className="bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20" />
-                <div className="border-l border-outline-variant/10 bg-transparent" />
+          {/* Outer wrapper: relative so Priority overlay border can be absolute */}
+          <div className="relative">
+
+            {/* Priority column full-height border overlay */}
+            <div
+              className="absolute inset-y-0 pointer-events-none border-2 border-primary rounded-xl z-10"
+              style={{ left: 'calc(28px + 1.5fr + 1fr)', right: '1fr' }}
+            />
+
+            {/* We use JS to measure — instead use a CSS approach with grid positioning */}
+            {/* Priority overlay via pseudo-positioned sibling — use col-start trick */}
+            {SECTIONS.map((section, si) => (
+              <div key={si}>
+                {section.features.map((feature, fi) => (
+                  <div
+                    key={fi}
+                    style={GRID5}
+                    className={si === 0 && fi === 0 ? 'border-t border-outline-variant/10' : 'border-t border-outline-variant/5'}
+                  >
+                    {/* Narrow label column — only show on first row of each section */}
+                    <div className="flex items-center justify-center">
+                      {fi === 0 && (
+                        <div
+                          className="flex items-center justify-center border-l-2 border-primary"
+                          style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: `${section.features.length * 40}px`, marginTop: 0 }}
+                        >
+                          <span className="text-[9px] font-black text-primary tracking-widest uppercase leading-none whitespace-nowrap">
+                            {section.label}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {/* Feature name */}
+                    <div className="py-2 pl-4 pr-4 flex items-center">
+                      <span className="text-sm text-secondary">{feature.name}</span>
+                    </div>
+                    {/* Standard */}
+                    <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                      {feature.standard ? <Check muted /> : <Dash />}
+                    </div>
+                    {/* Priority */}
+                    <div className={`py-2 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary/20 ${si === 0 && fi === 0 ? 'border-t-2 border-t-primary' : ''} ${si === SECTIONS.length - 1 && fi === section.features.length - 1 ? 'border-b-2 border-b-primary rounded-b-lg' : ''}`}>
+                      {feature.priority ? <Check /> : <Dash />}
+                    </div>
+                    {/* Exclusive */}
+                    <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                      {feature.exclusive ? <Check /> : <Dash />}
+                    </div>
+                  </div>
+                ))}
               </div>
-
-              {/* Feature rows */}
-              {section.features.map((feature, fi) => (
-                <div
-                  key={fi}
-                  style={GRID}
-                  className="border-t border-outline-variant/5"
-                >
-                  <div className="py-2 pl-8 pr-4 flex items-center">
-                    <span className="text-sm text-secondary">{feature.name}</span>
-                  </div>
-                  <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
-                    {feature.standard ? <Check muted /> : <Dash />}
-                  </div>
-                  <div className="py-2 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
-                    {feature.priority ? <Check /> : <Dash />}
-                  </div>
-                  <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
-                    {feature.exclusive ? <Check /> : <Dash />}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
-
-          {/* Priority column bottom cap — fully enclosed border */}
-          <div style={GRID}>
-            <div className="pb-4 pl-8" />
-            <div className="pb-4 border-l border-outline-variant/10" />
-            <div className="pb-6 border-l-2 border-r-2 border-b-2 border-primary-container rounded-b-xl bg-[#f0f8f4]" />
-            <div className="pb-4 border-l border-outline-variant/10" />
+            ))}
           </div>
 
         </div>
