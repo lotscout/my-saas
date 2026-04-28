@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { Resend } from 'resend';
 
-const ADMIN_EMAIL = 'bobbysue83@gmail.com';
+const ADMIN_EMAIL = 'bobby@lotscout.com';
 
 export async function PATCH(
   request: NextRequest,

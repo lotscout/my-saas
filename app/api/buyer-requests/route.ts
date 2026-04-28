@@ -1,8 +1,9 @@
 // -- Run this in Supabase SQL editor before testing:
-// -- create table buyer_requests (id uuid primary key default gen_random_uuid(), user_id uuid references auth.users, state text, county text, zip_code text, city text, location_notes text, zoning text[], area_unit text default 'acres', min_acreage numeric, max_acreage numeric, road_access text[], utilities text[], min_budget numeric, max_budget numeric, price_per_acre numeric, financing text[], primary_use_case text, use_case_description text, specific_requirements text, target_close_date date, timeline_urgency text, working_with_agent boolean default false, contact_methods text[], additional_notes text, created_at timestamptz default now());
+// -- create table buyer_requests (id uuid primary key default gen_random_uuid(), user_id uuid references auth.users, status text default 'pending_review', target_regions text[], budget_min numeric, budget_max numeric, min_acreage numeric, max_acreage numeric, use_case text, zoning_preference text[], timeline text, additional_notes text, contact_preference text[], created_at timestamptz default now(), updated_at timestamptz default now());
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { Resend } from 'resend';
 import { containsProfanity } from '@/lib/profanity-filter';
 
@@ -18,10 +19,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const textFields: [string, string][] = [
-      ['location_notes', body.locationNotes],
-      ['use_case_description', body.useCaseDescription],
-      ['specific_requirements', body.specificRequirements],
-      ['additional_notes', body.additionalNotes],
+      ['use_case', body.use_case],
+      ['additional_notes', body.additional_notes],
     ];
     for (const [, value] of textFields) {
       if (value && containsProfanity(value)) {
@@ -32,54 +31,52 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { data: profile } = await supabase
+    const service = createServiceClient();
+
+    const { data: buyerRequest, error: insertError } = await service
+      .from('buyer_requests')
+      .insert({
+        user_id: user.id,
+        status: 'pending_review',
+        target_regions: body.target_regions ?? [],
+        budget_min: body.budget_min ? Number(body.budget_min) : null,
+        budget_max: body.budget_max ? Number(body.budget_max) : null,
+        min_acreage: body.min_acreage ? Number(body.min_acreage) : null,
+        max_acreage: body.max_acreage ? Number(body.max_acreage) : null,
+        use_case: body.use_case ?? null,
+        zoning_preference: body.zoning_preference ?? [],
+        timeline: body.timeline ?? null,
+        additional_notes: body.additional_notes ?? null,
+        contact_preference: body.contact_preference ?? [],
+      })
+      .select()
+      .single();
+
+    if (insertError || !buyerRequest) {
+      console.error('[buyer-requests] Insert error:', insertError);
+      return NextResponse.json({ error: insertError?.message ?? 'Insert failed' }, { status: 500 });
+    }
+
+    const { data: profile } = await service
       .from('profiles')
       .select('first_name, last_name, email')
       .eq('id', user.id)
       .single();
 
-    const { error } = await supabase.from('buyer_requests').insert({
-      user_id: user.id,
-      state: body.state || null,
-      county: body.county || null,
-      zip_code: body.zipCode || null,
-      city: body.city || null,
-      location_notes: body.locationNotes || null,
-      zoning: body.zoning ?? [],
-      area_unit: body.areaUnit ?? 'acres',
-      min_acreage: body.minAcreage ? Number(body.minAcreage) : null,
-      max_acreage: body.maxAcreage ? Number(body.maxAcreage) : null,
-      road_access: body.roadAccess ?? [],
-      utilities: body.utilities ?? [],
-      min_budget: body.minBudget ? Number(String(body.minBudget).replace(/,/g, '')) : null,
-      max_budget: body.maxBudget ? Number(String(body.maxBudget).replace(/,/g, '')) : null,
-      price_per_acre: body.pricePerAcre ? Number(String(body.pricePerAcre).replace(/,/g, '')) : null,
-      financing: body.financing ?? [],
-      primary_use_case: body.primaryUseCase || null,
-      use_case_description: body.useCaseDescription || null,
-      specific_requirements: body.specificRequirements || null,
-      target_close_date: body.targetCloseDate || null,
-      timeline_urgency: body.timelineUrgency || null,
-      working_with_agent: body.workingWithAgent ?? false,
-      contact_methods: body.contactMethods ?? [],
-      additional_notes: body.additionalNotes || null,
-    });
+    const buyerName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'there';
+    const buyerEmail = profile?.email || user.email;
+    const submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 
-    if (error) {
-      console.error('buyer_requests insert error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    const regionsList = (body.target_regions ?? []).join(', ') || '—';
+    const budgetRange = body.budget_min || body.budget_max
+      ? `$${Number(body.budget_min || 0).toLocaleString()} – $${Number(body.budget_max || 0).toLocaleString()}`
+      : '—';
+    const acreageRange = body.min_acreage || body.max_acreage
+      ? `${body.min_acreage ?? '?'} – ${body.max_acreage ?? '?'} acres`
+      : '—';
 
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      const buyerName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Unknown';
-      const buyerEmail = profile?.email ?? user.email ?? '';
-      const submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
-      const budgetStr = `$${Number(String(body.minBudget).replace(/,/g, '')).toLocaleString()} – $${Number(String(body.maxBudget).replace(/,/g, '')).toLocaleString()}`;
-      const acreageStr = body.maxAcreage
-        ? `${body.minAcreage} – ${body.maxAcreage} ${body.areaUnit ?? 'acres'}`
-        : `${body.minAcreage}+ ${body.areaUnit ?? 'acres'}`;
-      const regions = [body.state, body.county, body.city].filter(Boolean).join(', ') || 'Not specified';
 
       await resend.emails.send({
         from: 'support@lotscout.com',
@@ -90,12 +87,14 @@ export async function POST(request: NextRequest) {
           <table cellpadding="8" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
             <tr><td style="font-weight:bold;color:#666">Buyer Name</td><td>${buyerName}</td></tr>
             <tr><td style="font-weight:bold;color:#666">Email</td><td>${buyerEmail}</td></tr>
-            <tr><td style="font-weight:bold;color:#666">Target Regions</td><td>${regions}</td></tr>
-            <tr><td style="font-weight:bold;color:#666">Budget</td><td>${budgetStr}</td></tr>
-            <tr><td style="font-weight:bold;color:#666">Acreage</td><td>${acreageStr}</td></tr>
-            <tr><td style="font-weight:bold;color:#666">Use Case</td><td>${body.primaryUseCase || 'Not specified'}</td></tr>
+            <tr><td style="font-weight:bold;color:#666">Target Regions</td><td>${regionsList}</td></tr>
+            <tr><td style="font-weight:bold;color:#666">Budget</td><td>${budgetRange}</td></tr>
+            <tr><td style="font-weight:bold;color:#666">Acreage Range</td><td>${acreageRange}</td></tr>
+            <tr><td style="font-weight:bold;color:#666">Use Case</td><td>${body.use_case || '—'}</td></tr>
+            <tr><td style="font-weight:bold;color:#666">Timeline</td><td>${body.timeline || '—'}</td></tr>
             <tr><td style="font-weight:bold;color:#666">Submitted</td><td>${submittedAt} CT</td></tr>
           </table>
+          <p style="color:#d97706;font-weight:bold;margin-top:16px">⚠ Review at <a href="https://lotscout.com/admin/buyer-requests">lotscout.com/admin/buyer-requests</a></p>
         `,
       });
 
@@ -110,13 +109,18 @@ export async function POST(request: NextRequest) {
                 <h1 style="color:white;margin:0;font-size:22px">LotScout</h1>
               </div>
               <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
-                <h2 style="color:#1B4332;margin-top:0">Your buying criteria is live!</h2>
+                <h2 style="color:#1B4332;margin-top:0">Request Submitted!</h2>
                 <p>Hi ${buyerName},</p>
-                <p>Your buying criteria has been successfully posted to the LotScout marketplace. Sellers who match your requirements can now find and contact you directly.</p>
+                <p>Your buying criteria has been successfully submitted. Our team will review it and your profile will go live within <strong>24 hours</strong>.</p>
                 <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin:24px 0">
-                  <p style="margin:0 0 4px;color:#666;font-size:12px;text-transform:uppercase;letter-spacing:0.05em">Your Criteria</p>
-                  <p style="margin:0;font-weight:bold;color:#1B4332">${body.primaryUseCase || 'Land Purchase'}</p>
-                  <p style="margin:4px 0 0;color:#6b7280;font-size:14px">${regions} · ${acreageStr} · ${budgetStr}</p>
+                  <p style="margin:0 0 12px;color:#666;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Your Criteria</p>
+                  <table cellpadding="4" style="font-size:14px;width:100%">
+                    <tr><td style="color:#666;width:40%">Target Regions</td><td style="font-weight:500">${regionsList}</td></tr>
+                    <tr><td style="color:#666">Budget</td><td style="font-weight:500">${budgetRange}</td></tr>
+                    <tr><td style="color:#666">Acreage</td><td style="font-weight:500">${acreageRange}</td></tr>
+                    <tr><td style="color:#666">Use Case</td><td style="font-weight:500">${body.use_case || '—'}</td></tr>
+                    <tr><td style="color:#666">Timeline</td><td style="font-weight:500">${body.timeline || '—'}</td></tr>
+                  </table>
                 </div>
                 <p style="color:#6b7280;font-size:13px">Questions? Reply to this email or visit <a href="https://lotscout.com" style="color:#059669">lotscout.com</a>.</p>
               </div>
@@ -125,12 +129,39 @@ export async function POST(request: NextRequest) {
         });
       }
     } catch (emailErr) {
-      console.error('Email send error:', emailErr);
+      console.error('[buyer-requests] Email error:', emailErr);
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, requestId: buyerRequest.id });
   } catch (err) {
-    console.error('buyer-requests route error:', err);
+    console.error('[buyer-requests] Error:', err);
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { data: requests, error } = await supabase
+      .from('buyer_requests')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ requests });
+  } catch (err) {
+    console.error('[buyer-requests GET] Error:', err);
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });
   }
