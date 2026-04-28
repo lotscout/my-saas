@@ -221,24 +221,19 @@ export default function PricingPage() {
           {/* ── Feature sections ── */}
           {SECTIONS.map((section, si) => (
             <div key={si}>
-              {/* Section header */}
-              <div style={GRID} className="border-t border-outline-variant/10">
-                <div className="pt-4 pb-1 pl-8 pr-4 col-span-4 flex items-center">
-                  <span className="text-[10px] font-bold text-primary tracking-widest uppercase">
-                    {section.label}
-                  </span>
-                </div>
-              </div>
-
-              {/* Feature rows */}
               {section.features.map((feature, fi) => (
                 <div
                   key={fi}
                   style={GRID}
-                  className={fi > 0 ? 'border-t border-outline-variant/5' : ''}
+                  className={si > 0 || fi > 0 ? 'border-t border-outline-variant/5' : ''}
                 >
-                  <div className="py-1 pl-8 pr-4 text-sm text-secondary flex items-center">
-                    {feature.name}
+                  <div className="py-1 pl-8 pr-4 flex flex-col justify-center">
+                    {fi === 0 && (
+                      <span className="text-[10px] font-bold text-primary tracking-widest uppercase mb-0.5">
+                        {section.label}
+                      </span>
+                    )}
+                    <span className="text-sm text-secondary">{feature.name}</span>
                   </div>
                   <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
                     {feature.standard ? <Check muted /> : <Dash />}
