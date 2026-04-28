@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
+import { createClient } from '@/lib/supabase/client';
 
 const GRID = { display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr' } as const;
 
@@ -57,6 +58,21 @@ function Dash() {
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
+  const [userTier, setUserTier] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('tier')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+      if (data?.tier) setUserTier(data.tier);
+    });
+  }, []);
 
   const prices = {
     standard: isAnnual ? 81  : 97,
@@ -98,7 +114,6 @@ export default function PricingPage() {
       <main className="flex-grow pt-24 pb-20 px-6 max-w-7xl mx-auto w-full">
         {/* Page heading */}
         <header className="mb-8">
-          <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Plans</p>
           <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">Platform <span className="text-emerald-600">Pricing</span></h1>
         </header>
 
@@ -135,7 +150,12 @@ export default function PricingPage() {
 
             {/* Standard */}
             <div className="p-5 flex flex-col border-l border-outline-variant/10">
-              <span className="text-secondary font-bold text-sm tracking-widest mb-2">STANDARD</span>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-secondary font-bold text-sm tracking-widest">STANDARD</span>
+                {userTier === 'standard' && (
+                  <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">Current Plan</span>
+                )}
+              </div>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
@@ -143,10 +163,10 @@ export default function PricingPage() {
               <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
-                disabled={!!loading}
-                className="mt-auto w-full py-3 px-4 border border-outline text-primary font-bold rounded-xl hover:bg-surface-container-low transition-all active:scale-95 disabled:opacity-60"
+                disabled={!!loading || userTier === 'standard'}
+                className={`mt-auto w-full py-3 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'border border-outline text-primary hover:bg-surface-container-low'}`}
               >
-                {loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
+                {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
 
@@ -155,9 +175,11 @@ export default function PricingPage() {
               <div className="absolute -top-px left-0 right-0 h-1 bg-primary-container" />
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-primary-container font-bold text-sm tracking-widest">PRIORITY</span>
-                <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">
-                  Most Popular
-                </span>
+                {userTier === 'priority' ? (
+                  <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">Current Plan</span>
+                ) : (
+                  <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">Most Popular</span>
+                )}
               </div>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.priority}</span>
@@ -166,16 +188,21 @@ export default function PricingPage() {
               <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
-                disabled={!!loading}
-                className="mt-auto w-full py-3 px-4 bg-primary text-on-primary font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-60"
+                disabled={!!loading || userTier === 'priority'}
+                className={`mt-auto w-full py-3 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-primary text-on-primary hover:opacity-90 shadow-lg shadow-primary/20'}`}
               >
-                {loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
+                {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
 
             {/* Exclusive */}
             <div className="p-5 flex flex-col border-l border-outline-variant/10">
-              <span className="text-secondary font-bold text-sm tracking-widest mb-2">EXCLUSIVE</span>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-secondary font-bold text-sm tracking-widest">EXCLUSIVE</span>
+                {userTier === 'exclusive' && (
+                  <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">Current Plan</span>
+                )}
+              </div>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
@@ -183,10 +210,10 @@ export default function PricingPage() {
               <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
-                disabled={!!loading}
-                className="mt-auto w-full py-3 px-4 border border-outline text-primary font-bold rounded-xl hover:bg-surface-container-low transition-all active:scale-95 disabled:opacity-60"
+                disabled={!!loading || userTier === 'exclusive'}
+                className={`mt-auto w-full py-3 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'border border-outline text-primary hover:bg-surface-container-low'}`}
               >
-                {loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
+                {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
           </div>
@@ -195,9 +222,9 @@ export default function PricingPage() {
           {SECTIONS.map((section, si) => (
             <div key={si}>
               {/* Section header */}
-              <div style={GRID} className="bg-surface-container-low border-t border-outline-variant/10">
-                <div className="py-1.5 pl-8 pr-4 col-span-4 flex items-center">
-                  <span className="text-[10px] font-bold text-secondary tracking-widest uppercase">
+              <div style={GRID} className="border-t border-outline-variant/10">
+                <div className="pt-4 pb-1 pl-8 pr-4 col-span-4 flex items-center">
+                  <span className="text-[10px] font-bold text-primary tracking-widest uppercase">
                     {section.label}
                   </span>
                 </div>
