@@ -221,27 +221,35 @@ export default function PricingPage() {
           {/* ── Feature sections ── */}
           {SECTIONS.map((section, si) => (
             <div key={si}>
+              {/* Section label row — left accent tab, right cols flow uninterrupted */}
+              <div style={GRID} className={si > 0 ? 'border-t border-outline-variant/10' : ''}>
+                <div className="pt-3 pb-1 pl-5 pr-4 flex items-center">
+                  <span className="border-l-2 border-primary pl-2 text-[10px] font-bold text-primary tracking-widest uppercase leading-none">
+                    {section.label}
+                  </span>
+                </div>
+                <div className="border-l border-outline-variant/10 bg-transparent" />
+                <div className="bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20" />
+                <div className="border-l border-outline-variant/10 bg-transparent" />
+              </div>
+
+              {/* Feature rows */}
               {section.features.map((feature, fi) => (
                 <div
                   key={fi}
                   style={GRID}
-                  className={si > 0 || fi > 0 ? 'border-t border-outline-variant/5' : ''}
+                  className="border-t border-outline-variant/5"
                 >
-                  <div className="py-1 pl-8 pr-4 flex flex-col justify-center">
-                    {fi === 0 && (
-                      <span className="text-[10px] font-bold text-primary tracking-widest uppercase mb-0.5">
-                        {section.label}
-                      </span>
-                    )}
+                  <div className="py-2 pl-8 pr-4 flex items-center">
                     <span className="text-sm text-secondary">{feature.name}</span>
                   </div>
-                  <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                  <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
                     {feature.standard ? <Check muted /> : <Dash />}
                   </div>
-                  <div className="py-1 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
+                  <div className="py-2 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
                     {feature.priority ? <Check /> : <Dash />}
                   </div>
-                  <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                  <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
                     {feature.exclusive ? <Check /> : <Dash />}
                   </div>
                 </div>
@@ -249,12 +257,12 @@ export default function PricingPage() {
             </div>
           ))}
 
-          {/* Priority column bottom cap */}
-          <div style={GRID} className="bg-[#f0f8f4]/30">
-            <div className="p-4 pl-8" />
-            <div className="p-4 border-l border-outline-variant/10" />
-            <div className="p-8 border-l-2 border-r-2 border-b-2 border-primary-container rounded-b-2xl bg-[#f0f8f4]" />
-            <div className="p-4 border-l border-outline-variant/10" />
+          {/* Priority column bottom cap — fully enclosed border */}
+          <div style={GRID}>
+            <div className="pb-4 pl-8" />
+            <div className="pb-4 border-l border-outline-variant/10" />
+            <div className="pb-6 border-l-2 border-r-2 border-b-2 border-primary-container rounded-b-xl bg-[#f0f8f4]" />
+            <div className="pb-4 border-l border-outline-variant/10" />
           </div>
 
         </div>
