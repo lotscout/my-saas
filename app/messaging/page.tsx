@@ -1,14 +1,36 @@
 'use client';
 
+import { useState } from 'react';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import { useUserTier } from '@/hooks/useUserTier';
 
 export default function MessagingPage() {
-  const { isAtLeast, loading } = useUserTier();
+  const { isAtLeast, loading, tier } = useUserTier();
   const canViewContactDetails = !loading && isAtLeast('priority');
+  const isFreeUser = !loading && !tier;
+  const [showSendUpgradeModal, setShowSendUpgradeModal] = useState(false);
   return (
     <div className="bg-surface font-body text-on-surface overflow-hidden h-screen flex flex-col">
+      {showSendUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowSendUpgradeModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
+            <button onClick={() => setShowSendUpgradeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors">
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            </div>
+            <h2 className="font-headline text-xl font-bold text-primary mb-2">Upgrade to Send Messages</h2>
+            <p className="text-secondary text-sm mb-6 leading-relaxed">Messaging buyers and sellers is available on paid plans. Upgrade to start closing deals.</p>
+            <div className="flex gap-3">
+              <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
+              <button onClick={() => setShowSendUpgradeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
       <Header />
 
       {/* Main Layout */}
@@ -192,24 +214,34 @@ export default function MessagingPage() {
 
             {/* Input Area */}
             <div className="p-6 bg-white border-t border-outline-variant/10">
-              <div className="bg-surface-container-low rounded-2xl p-2 flex items-center gap-2">
-                <button className="p-2 text-primary hover:bg-surface-container-high rounded-xl transition-all">
-                  <span className="material-symbols-outlined">add_circle</span>
+              {isFreeUser ? (
+                <button
+                  onClick={() => setShowSendUpgradeModal(true)}
+                  className="w-full flex items-center justify-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 py-4 rounded-2xl font-bold text-sm hover:bg-amber-100 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-base">lock</span>
+                  Upgrade to Send Messages
                 </button>
-                <input
-                  className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2"
-                  placeholder="Type your message here..."
-                  type="text"
-                />
-                <div className="flex items-center gap-1">
-                  <button className="p-2 text-secondary hover:bg-surface-container-high rounded-xl transition-all">
-                    <span className="material-symbols-outlined">mood</span>
+              ) : (
+                <div className="bg-surface-container-low rounded-2xl p-2 flex items-center gap-2">
+                  <button className="p-2 text-primary hover:bg-surface-container-high rounded-xl transition-all">
+                    <span className="material-symbols-outlined">add_circle</span>
                   </button>
-                  <button className="bg-primary text-on-primary p-2.5 rounded-xl flex items-center justify-center shadow-md hover:opacity-90 active:scale-95 transition-all">
-                    <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
-                  </button>
+                  <input
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2"
+                    placeholder="Type your message here..."
+                    type="text"
+                  />
+                  <div className="flex items-center gap-1">
+                    <button className="p-2 text-secondary hover:bg-surface-container-high rounded-xl transition-all">
+                      <span className="material-symbols-outlined">mood</span>
+                    </button>
+                    <button className="bg-primary text-on-primary p-2.5 rounded-xl flex items-center justify-center shadow-md hover:opacity-90 active:scale-95 transition-all">
+                      <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
