@@ -125,6 +125,7 @@ export default function MarketplacePage() {
   const [showBlockedModal, setShowBlockedModal] = useState(false);
   const [showFreeModal, setShowFreeModal] = useState(false);
   const [showBuyerFreeModal, setShowBuyerFreeModal] = useState(false);
+  const [showContactUpgradeModal, setShowContactUpgradeModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'properties' | 'buyer-requests'>('properties');
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
   const [buyerRequestsLoading, setBuyerRequestsLoading] = useState(false);
@@ -132,6 +133,7 @@ export default function MarketplacePage() {
   const router = useRouter();
 
   const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
+  const isFreeUser = !loading && !tier;
   const isPaidUser = !loading && !!tier;
 
   useEffect(() => {
@@ -209,6 +211,24 @@ export default function MarketplacePage() {
             <div className="flex gap-3">
               <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
               <button onClick={() => setShowBuyerFreeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showContactUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowContactUpgradeModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
+            <button onClick={() => setShowContactUpgradeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
+            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            </div>
+            <h2 className="font-headline text-xl font-bold text-primary mb-2">Upgrade to Contact Sellers</h2>
+            <p className="text-secondary text-sm mb-6 leading-relaxed">Contacting sellers and making offers requires a paid LotScout account. Upgrade to get direct access to every deal.</p>
+            <div className="flex gap-3">
+              <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
+              <button onClick={() => setShowContactUpgradeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
             </div>
           </div>
         </div>
@@ -355,6 +375,16 @@ export default function MarketplacePage() {
                       </div>
                       {canViewContact ? (
                         <SellerContact seller={listing.seller} />
+                      ) : isFreeUser ? (
+                        <div className="pt-3 mt-3 border-t border-surface-container">
+                          <button
+                            onClick={() => setShowContactUpgradeModal(true)}
+                            className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-base">lock</span>
+                            Upgrade to Contact Seller
+                          </button>
+                        </div>
                       ) : (
                         <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
                           <SellerContact seller={listing.seller} />
@@ -484,6 +514,14 @@ export default function MarketplacePage() {
                           <button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
                             <span className="material-symbols-outlined text-base">mail</span>
                             Contact Buyer
+                          </button>
+                        ) : isFreeUser ? (
+                          <button
+                            onClick={() => setShowContactUpgradeModal(true)}
+                            className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-base">lock</span>
+                            Upgrade to Contact Buyer
                           </button>
                         ) : (
                           <button
