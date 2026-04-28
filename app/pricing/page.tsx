@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/client';
 
 const GRID = { display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr' } as const;
 const GRID5 = { display: 'grid', gridTemplateColumns: '28px 1.5fr 1fr 1fr 1fr' } as const;
-const GRID5 = { display: 'grid', gridTemplateColumns: '28px 1.5fr 1fr 1fr 1fr' } as const;
 
 const SECTIONS = [
   {
