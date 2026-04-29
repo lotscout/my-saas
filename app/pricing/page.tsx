@@ -149,10 +149,10 @@ export default function PricingPage() {
               <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
-                disabled={!!loading}
-                className="mt-auto w-full py-3 px-4 border border-outline text-primary font-bold rounded-xl hover:bg-surface-container-low transition-all active:scale-95 disabled:opacity-60"
+                disabled={!!loading || userTier === 'standard'}
+                className={`mt-auto w-full py-3 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'border border-outline text-primary hover:bg-surface-container-low'}`}
               >
-                {loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
+                {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
 
@@ -161,11 +161,10 @@ export default function PricingPage() {
               <div className="absolute -top-px left-0 right-0 h-1 bg-primary-container" />
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-primary-container font-bold text-sm tracking-widest uppercase">Priority</span>
-                <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">
-                  Most Popular
-                </span>
-                {userTier === 'priority' && (
+                {userTier === 'priority' ? (
                   <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight leading-none">Current Plan</span>
+                ) : (
+                  <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">Most Popular</span>
                 )}
               </div>
               <div className="flex items-baseline gap-1 mb-1">
@@ -175,10 +174,10 @@ export default function PricingPage() {
               <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
-                disabled={!!loading}
-                className="mt-auto w-full py-3 px-4 bg-primary text-on-primary font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-60"
+                disabled={!!loading || userTier === 'priority'}
+                className={`mt-auto w-full py-3 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-primary text-on-primary hover:opacity-90 shadow-lg shadow-primary/20'}`}
               >
-                {loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
+                {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
 
@@ -197,10 +196,10 @@ export default function PricingPage() {
               <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
-                disabled={!!loading}
-                className="mt-auto w-full py-3 px-4 border border-outline text-primary font-bold rounded-xl hover:bg-surface-container-low transition-all active:scale-95 disabled:opacity-60"
+                disabled={!!loading || userTier === 'exclusive'}
+                className={`mt-auto w-full py-3 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'border border-outline text-primary hover:bg-surface-container-low'}`}
               >
-                {loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
+                {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
           </div>
