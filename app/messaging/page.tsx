@@ -5,8 +5,11 @@ import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import { useUserTier } from '@/hooks/useUserTier';
 
+type NavTab = 'messages' | 'unread' | 'archived' | 'drafts';
+
 export default function MessagingPage() {
   const { isAtLeast, loading, tier } = useUserTier();
+  const [activeNav, setActiveNav] = useState<NavTab>('messages');
   const canViewContactDetails = !loading && isAtLeast('priority');
   const isFreeUser = !loading && !tier;
   const [showSendUpgradeModal, setShowSendUpgradeModal] = useState(false);
@@ -41,41 +44,27 @@ export default function MessagingPage() {
           <div className="px-6 pt-6 pb-2">
           </div>
           <nav className="flex-1 py-4 space-y-1">
-            <a className="flex items-center gap-3 bg-primary/5 text-primary border-r-4 border-primary px-6 py-3 transition-colors" href="#">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>chat_bubble</span>
-              Messages
-            </a>
-            <a className="flex items-center gap-3 text-secondary px-6 py-3 hover:bg-surface-container transition-colors" href="#">
-              <span className="material-symbols-outlined">mark_email_unread</span>
-              Unread
-            </a>
-            <a className="flex items-center gap-3 text-secondary px-6 py-3 hover:bg-surface-container transition-colors" href="#">
-              <span className="material-symbols-outlined">archive</span>
-              Archived
-            </a>
-            <a className="flex items-center gap-3 text-secondary px-6 py-3 hover:bg-surface-container transition-colors" href="#">
-              <span className="material-symbols-outlined">drafts</span>
-              Drafts
-            </a>
-            <div className="pt-4 mt-4 border-t border-outline-variant/10">
-              <a className="flex items-center gap-3 text-secondary px-6 py-3 hover:bg-surface-container transition-colors" href="#">
-                <span className="material-symbols-outlined">settings</span>
-                Settings
-              </a>
-            </div>
+            {([
+              { id: 'messages', icon: 'chat_bubble', label: 'Messages', fill: true },
+              { id: 'unread', icon: 'mark_email_unread', label: 'Unread', fill: false },
+              { id: 'archived', icon: 'archive', label: 'Archived', fill: false },
+              { id: 'drafts', icon: 'drafts', label: 'Drafts', fill: false },
+            ] as { id: NavTab; icon: string; label: string; fill: boolean }[]).map(({ id, icon, label, fill }) => (
+              <button
+                key={id}
+                onClick={() => setActiveNav(id)}
+                className={`w-full flex items-center gap-3 px-6 py-3 transition-colors text-left ${
+                  activeNav === id
+                    ? 'bg-primary/5 text-primary border-r-4 border-primary'
+                    : 'text-secondary hover:bg-surface-container'
+                }`}
+              >
+                <span className="material-symbols-outlined" style={fill ? { fontVariationSettings: "'FILL' 1" } : {}}>{icon}</span>
+                {label}
+              </button>
+            ))}
           </nav>
-          <div className="p-4 border-t border-outline-variant/10 flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="w-10 h-10 rounded-full bg-surface-container-high object-cover"
-              alt="Close-up portrait of a professional land advisor in a modern office with natural light"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9Ktglef8AI4ykXAWzOB9XzckpYb0f07uLTLy5mc9tg1kEKR_O96hlZ_l4cOctEZLpQDQhI4DVgSmfMJPQkoQawSBaulkGQP2jlovQqHDQOc0uMIZv2a4UDPROG-0OAZo1QN7VJXHGPyoX9HvrQZ0K8wtw8hbhqsUyultmNZ2B25fN7sV0zQEDGXUi6er36ff3kRAVhORs9cJ0zYd1cGzOu-TFyZ4iLr834wtiYQdYwsKwgwtPLz5L-daOjH-cqsl2MRPBhg0s8YjW"
-            />
-            <div>
-              <p className="font-bold text-primary">LotScout Messenger</p>
-              <p className="text-xs text-secondary">Expert Land Advisory</p>
-            </div>
-          </div>
+
         </aside>
 
         {/* Messenger Layout Wrapper */}
