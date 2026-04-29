@@ -1,28 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Header from '@/components/Header';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-
-const ADMIN_EMAIL = 'bobby@lotscout.com';
-
-interface BuyerRequest {
-  id: string;
-  status: string;
-  target_regions: string[] | null;
-  budget_min: number | null;
-  budget_max: number | null;
-  min_acreage: number | null;
-  max_acreage: number | null;
-  use_case: string | null;
-  created_at: string;
-  user_id: string;
-  profiles?: {
-    full_name: string | null;
-    email: string | null;
-  } | null;
-}
 
 interface Listing {
   id: string;
@@ -36,160 +15,164 @@ interface Listing {
   created_at: string;
   updated_at: string;
   user_id: string;
-  profiles?: {
-    full_name: string | null;
-    email: string | null;
-  } | null;
+  profiles?: { full_name: string | null; email: string | null } | null;
 }
 
-function formatPrice(price: number | null): string {
-  if (price == null) return '—';
-  if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(2)}M`;
-  if (price >= 1_000) return `$${Math.round(price / 1_000)}K`;
-  return `$${price.toLocaleString()}`;
+interface BuyerRequest {
+  id: string;
+  status: string;
+  target_regions: string[] | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  min_acreage: number | null;
+  max_acreage: number | null;
+  use_case: string | null;
+  created_at: string;
+  user_id: string;
+  profiles?: { full_name: string | null; email: string | null } | null;
 }
 
-function formatAcreage(acres: number | null, sqft: number | null): string {
+const STATUS_FILTERS = ['all', 'pending_review', 'active', 'revision_needed', 'rejected'] as const;
+type StatusFilter = typeof STATUS_FILTERS[number];
+
+const STATUS_LABEL: Record<string, string> = {
+  all: 'All',
+  pending_review: 'Pending',
+  active: 'Published',
+  revision_needed: 'Revision Needed',
+  rejected: 'Rejected',
+};
+
+const STATUS_BADGE: Record<string, string> = {
+  active: 'bg-emerald-100 text-emerald-800',
+  rejected: 'bg-red-100 text-red-700',
+  pending_review: 'bg-amber-100 text-amber-800',
+  revision_needed: 'bg-orange-100 text-orange-800',
+};
+
+function fmt$(n: number | null) {
+  if (n == null) return '—';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
+  return `$${n.toLocaleString()}`;
+}
+
+function fmtAc(acres: number | null, sqft: number | null) {
   if (acres != null) return `${acres.toLocaleString()} ac`;
   if (sqft != null) return `${sqft.toLocaleString()} sqft`;
   return '—';
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-  });
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    active: 'bg-emerald-100 text-emerald-800',
-    rejected: 'bg-red-100 text-red-700',
-    pending_review: 'bg-amber-100 text-amber-800',
-  };
-  const labels: Record<string, string> = {
-    active: 'Approved',
-    rejected: 'Rejected',
-    pending_review: 'Pending',
-  };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] ?? 'bg-gray-100 text-gray-700'}`}>
-      {labels[status] ?? status}
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[status] ?? 'bg-gray-100 text-gray-700'}`}>
+      {STATUS_LABEL[status] ?? status}
     </span>
   );
 }
 
 export default function AdminListingsPage() {
-  const router = useRouter();
-  const [pending, setPending] = useState<Listing[]>([]);
-  const [recent, setRecent] = useState<Listing[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending_review');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [modal, setModal] = useState<{ id: string; title: string; action: 'revision_needed' | 'rejected' } | null>(null);
+  const [modalReason, setModalReason] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
   const [pendingBuyers, setPendingBuyers] = useState<BuyerRequest[]>([]);
   const [buyerActionLoading, setBuyerActionLoading] = useState<string | null>(null);
   const [buyerRejectModal, setBuyerRejectModal] = useState<{ id: string } | null>(null);
   const [buyerRejectReason, setBuyerRejectReason] = useState('');
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [rejectModal, setRejectModal] = useState<{ id: string; title: string } | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+  function showToast(message: string, type: 'success' | 'error') {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  }
 
-      if (!user) {
-        router.replace('/sign-in');
-        return;
-      }
-      if (user.email !== ADMIN_EMAIL) {
-        router.replace('/dashboard');
-        return;
-      }
-
-      await Promise.all([fetchListings(), fetchBuyerRequests()]);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function fetchBuyerRequests() {
+  const fetchListings = useCallback(async () => {
+    setLoading(true);
     const supabase = createClient();
-    const { data: buyers } = await supabase
-      .from('buyer_requests')
-      .select('id, status, target_regions, budget_min, budget_max, min_acreage, max_acreage, use_case, created_at, user_id')
-      .eq('status', 'pending_review')
-      .order('created_at', { ascending: false });
 
-    if (!buyers?.length) {
-      setPendingBuyers([]);
-      return;
+    let query = supabase
+      .from('listings')
+      .select('id, title, status, state, county, lot_size_acres, lot_size_sqft, asking_price, created_at, updated_at, user_id')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (statusFilter !== 'all') {
+      query = query.eq('status', statusFilter);
     }
 
-    const userIds = [...new Set(buyers.map((b: BuyerRequest) => b.user_id))];
+    const { data } = await query;
+    const rows = data ?? [];
+
+    if (!rows.length) { setListings([]); setLoading(false); return; }
+
+    const userIds = [...new Set(rows.map((r: Listing) => r.user_id))];
     const { data: profiles } = await supabase
       .from('profiles')
       .select('id, full_name, email')
       .in('id', userIds);
 
-    const profileMap: Record<string, { full_name: string | null; email: string | null }> = {};
-    (profiles ?? []).forEach((p: { id: string; full_name: string | null; email: string | null }) => {
-      profileMap[p.id] = { full_name: p.full_name, email: p.email };
-    });
+    const pm: Record<string, { full_name: string | null; email: string | null }> = {};
+    (profiles ?? []).forEach((p: { id: string; full_name: string | null; email: string | null }) => { pm[p.id] = p; });
 
-    setPendingBuyers(buyers.map((b: BuyerRequest) => ({ ...b, profiles: profileMap[b.user_id] ?? null })));
-  }
-
-  async function fetchListings() {
-    setLoading(true);
-    const supabase = createClient();
-
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-
-    const [pendingRes, recentRes] = await Promise.all([
-      supabase
-        .from('listings')
-        .select('id, title, status, state, county, lot_size_acres, lot_size_sqft, asking_price, created_at, updated_at, user_id')
-        .eq('status', 'pending_review')
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('listings')
-        .select('id, title, status, state, county, lot_size_acres, lot_size_sqft, asking_price, created_at, updated_at, user_id')
-        .in('status', ['active', 'rejected'])
-        .gte('updated_at', thirtyDaysAgo)
-        .order('updated_at', { ascending: false })
-        .limit(50),
-    ]);
-
-    // Enrich with profile data
-    async function enrichWithProfiles(listings: Listing[]): Promise<Listing[]> {
-      if (!listings.length) return listings;
-      const userIds = [...new Set(listings.map(l => l.user_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, email')
-        .in('id', userIds);
-
-      const profileMap: Record<string, { full_name: string | null; email: string | null }> = {};
-      (profiles ?? []).forEach((p: { id: string; full_name: string | null; email: string | null }) => {
-        profileMap[p.id] = { full_name: p.full_name, email: p.email };
-      });
-
-      return listings.map(l => ({ ...l, profiles: profileMap[l.user_id] ?? null }));
-    }
-
-    const [enrichedPending, enrichedRecent] = await Promise.all([
-      enrichWithProfiles(pendingRes.data ?? []),
-      enrichWithProfiles(recentRes.data ?? []),
-    ]);
-
-    setPending(enrichedPending);
-    setRecent(enrichedRecent);
+    setListings(rows.map((r: Listing) => ({ ...r, profiles: pm[r.user_id] ?? null })));
     setLoading(false);
-  }
+  }, [statusFilter]);
 
-  function showToast(message: string, type: 'success' | 'error') {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+  const fetchBuyerRequests = useCallback(async () => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from('buyer_requests')
+      .select('id, status, target_regions, budget_min, budget_max, min_acreage, max_acreage, use_case, created_at, user_id')
+      .eq('status', 'pending_review')
+      .order('created_at', { ascending: false });
+
+    const rows = data ?? [];
+    if (!rows.length) { setPendingBuyers([]); return; }
+
+    const supabase2 = createClient();
+    const userIds = [...new Set(rows.map((r: BuyerRequest) => r.user_id))];
+    const { data: profiles } = await supabase2
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', userIds);
+
+    const pm: Record<string, { full_name: string | null; email: string | null }> = {};
+    (profiles ?? []).forEach((p: { id: string; full_name: string | null; email: string | null }) => { pm[p.id] = p; });
+
+    setPendingBuyers(rows.map((r: BuyerRequest) => ({ ...r, profiles: pm[r.user_id] ?? null })));
+  }, []);
+
+  useEffect(() => { fetchListings(); }, [fetchListings]);
+  useEffect(() => { fetchBuyerRequests(); }, [fetchBuyerRequests]);
+
+  async function handleStatus(id: string, status: string, reason?: string) {
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/admin/listings/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Failed');
+      const labels: Record<string, string> = { active: 'approved', revision_needed: 'sent for revision', rejected: 'rejected' };
+      showToast(`Listing ${labels[status] ?? 'updated'} — seller notified.`, 'success');
+      setModal(null);
+      setModalReason('');
+      await fetchListings();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Error', 'error');
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleApproveBuyer(id: string) {
@@ -197,11 +180,11 @@ export default function AdminListingsPage() {
     try {
       const res = await fetch(`/api/admin/buyer-requests/${id}/approve`, { method: 'PATCH' });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Failed to approve');
-      showToast('Buyer request approved — buyer notified!', 'success');
+      if (!res.ok) throw new Error(data.error ?? 'Failed');
+      showToast('Buyer request approved.', 'success');
       await fetchBuyerRequests();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Error approving buyer request', 'error');
+      showToast(err instanceof Error ? err.message : 'Error', 'error');
     } finally {
       setBuyerActionLoading(null);
     }
@@ -217,65 +200,67 @@ export default function AdminListingsPage() {
         body: JSON.stringify({ reason: buyerRejectReason }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Failed to reject');
-      showToast('Buyer request rejected — buyer notified.', 'success');
+      if (!res.ok) throw new Error(data.error ?? 'Failed');
+      showToast('Buyer request rejected.', 'success');
       setBuyerRejectModal(null);
       setBuyerRejectReason('');
       await fetchBuyerRequests();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Error rejecting buyer request', 'error');
+      showToast(err instanceof Error ? err.message : 'Error', 'error');
     } finally {
       setBuyerActionLoading(null);
     }
   }
 
-  async function handleApprove(id: string) {
-    setActionLoading(id);
-    try {
-      const res = await fetch(`/api/admin/listings/${id}/approve`, { method: 'PATCH' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Failed to approve');
-      showToast('Listing approved and seller notified!', 'success');
-      await fetchListings();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Error approving listing', 'error');
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
-  async function handleReject() {
-    if (!rejectModal) return;
-    setActionLoading(rejectModal.id);
-    try {
-      const res = await fetch(`/api/admin/listings/${rejectModal.id}/reject`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: rejectReason }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Failed to reject');
-      showToast('Listing rejected and seller notified.', 'success');
-      setRejectModal(null);
-      setRejectReason('');
-      await fetchListings();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Error rejecting listing', 'error');
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
   return (
-    <div className="bg-surface text-on-surface antialiased font-body min-h-screen">
-      <Header />
-
+    <div className="p-8 max-w-7xl mx-auto">
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${
+        <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium ${
           toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
         }`}>
           {toast.message}
+        </div>
+      )}
+
+      {/* Reject / Revision Modal */}
+      {modal && (
+        <div className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h3 className="font-headline font-bold text-lg text-on-surface mb-1">
+              {modal.action === 'revision_needed' ? 'Request Revision' : 'Reject Listing'}
+            </h3>
+            <p className="text-sm text-on-surface/60 mb-4">{modal.title}</p>
+            <label className="block text-sm font-medium text-on-surface mb-1">
+              {modal.action === 'revision_needed' ? 'Requested changes' : 'Reason'}{' '}
+              <span className="text-on-surface/40">(optional — sent to seller)</span>
+            </label>
+            <textarea
+              value={modalReason}
+              onChange={e => setModalReason(e.target.value)}
+              placeholder={modal.action === 'revision_needed'
+                ? 'e.g. Please add clearer photos and property description…'
+                : 'e.g. Missing property details, outside our service area…'}
+              className="w-full border border-outline-variant rounded-xl px-3 py-2 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-primary/30 mb-4"
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setModal(null); setModalReason(''); }}
+                className="px-4 py-2 text-sm rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleStatus(modal.id, modal.action, modalReason || undefined)}
+                disabled={actionLoading === modal.id}
+                className={`px-4 py-2 text-sm rounded-xl text-white transition-colors disabled:opacity-50 ${
+                  modal.action === 'revision_needed' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                {actionLoading === modal.id ? 'Saving…' : modal.action === 'revision_needed' ? 'Send Revision Request' : 'Reject Listing'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -283,295 +268,223 @@ export default function AdminListingsPage() {
       {buyerRejectModal && (
         <div className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h3 className="font-headline font-bold text-lg text-on-surface mb-1">Reject Buyer Request</h3>
-            <label className="block text-sm font-medium text-on-surface mb-1 mt-3">
-              Reason <span className="text-on-surface/40">(optional — sent to buyer)</span>
+            <h3 className="font-headline font-bold text-lg text-on-surface mb-4">Reject Buyer Request</h3>
+            <label className="block text-sm font-medium text-on-surface mb-1">
+              Reason <span className="text-on-surface/40">(optional)</span>
             </label>
             <textarea
               value={buyerRejectReason}
               onChange={e => setBuyerRejectReason(e.target.value)}
-              placeholder="e.g. Criteria too broad, missing contact preference..."
+              placeholder="e.g. Criteria too broad…"
               className="w-full border border-outline-variant rounded-xl px-3 py-2 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-primary/30 mb-4"
             />
             <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => { setBuyerRejectModal(null); setBuyerRejectReason(''); }}
-                className="px-4 py-2 text-sm rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors"
-              >
+              <button onClick={() => { setBuyerRejectModal(null); setBuyerRejectReason(''); }}
+                className="px-4 py-2 text-sm rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors">
                 Cancel
               </button>
-              <button
-                onClick={handleRejectBuyer}
-                disabled={buyerActionLoading === buyerRejectModal.id}
-                className="px-4 py-2 text-sm rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {buyerActionLoading === buyerRejectModal.id ? 'Rejecting…' : 'Reject Request'}
+              <button onClick={handleRejectBuyer} disabled={buyerActionLoading === buyerRejectModal.id}
+                className="px-4 py-2 text-sm rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
+                {buyerActionLoading === buyerRejectModal.id ? 'Rejecting…' : 'Reject'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Reject Modal */}
-      {rejectModal && (
-        <div className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h3 className="font-headline font-bold text-lg text-on-surface mb-1">Reject Listing</h3>
-            <p className="text-sm text-on-surface/60 mb-4">
-              <span className="font-medium text-on-surface">{rejectModal.title}</span>
-            </p>
-            <label className="block text-sm font-medium text-on-surface mb-1">
-              Reason <span className="text-on-surface/40">(optional — sent to seller)</span>
-            </label>
-            <textarea
-              value={rejectReason}
-              onChange={e => setRejectReason(e.target.value)}
-              placeholder="e.g. Missing property details, incomplete photos..."
-              className="w-full border border-outline-variant rounded-xl px-3 py-2 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-primary/30 mb-4"
-            />
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => { setRejectModal(null); setRejectReason(''); }}
-                className="px-4 py-2 text-sm rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleReject}
-                disabled={actionLoading === rejectModal.id}
-                className="px-4 py-2 text-sm rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {actionLoading === rejectModal.id ? 'Rejecting…' : 'Reject Listing'}
-              </button>
-            </div>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="font-headline text-3xl font-extrabold text-on-surface tracking-tight">Listings Queue</h1>
+        <p className="text-on-surface/50 mt-1 text-sm">Review, approve, or request revisions for submitted listings.</p>
+      </div>
+
+      {/* Status filter tabs */}
+      <div className="flex items-center gap-1 mb-6 bg-surface-container-low rounded-xl p-1 self-start w-fit">
+        {STATUS_FILTERS.map(s => (
+          <button
+            key={s}
+            onClick={() => setStatusFilter(s)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
+              statusFilter === s
+                ? 'bg-white text-primary shadow-sm'
+                : 'text-on-surface/50 hover:text-on-surface'
+            }`}
+          >
+            {STATUS_LABEL[s]}
+          </button>
+        ))}
+      </div>
+
+      {/* Listings table */}
+      {loading ? (
+        <div className="bg-white border border-outline-variant/10 rounded-2xl p-12 text-center text-on-surface/40 text-sm">
+          Loading listings…
+        </div>
+      ) : listings.length === 0 ? (
+        <div className="bg-white border border-outline-variant/10 rounded-2xl p-12 text-center text-on-surface/40 text-sm">
+          No listings found for this filter.
+        </div>
+      ) : (
+        <div className="bg-white border border-outline-variant/10 rounded-2xl overflow-hidden shadow-sm mb-12">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-outline-variant/20 bg-surface-container-low">
+                  <th className="text-left px-5 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Title</th>
+                  <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Seller</th>
+                  <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Location</th>
+                  <th className="text-right px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Size</th>
+                  <th className="text-right px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Price</th>
+                  <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Date</th>
+                  <th className="px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant/10">
+                {listings.map(l => (
+                  <tr key={l.id} className="hover:bg-surface-container-low/40 transition-colors">
+                    <td className="px-5 py-4">
+                      <span className="font-medium text-on-surface line-clamp-1 max-w-[200px] block">{l.title || '—'}</span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="font-medium text-on-surface">{l.profiles?.full_name || '—'}</div>
+                      <div className="text-on-surface/50 text-xs">{l.profiles?.email || '—'}</div>
+                    </td>
+                    <td className="px-4 py-4 text-on-surface/70">
+                      {[l.county, l.state].filter(Boolean).join(', ') || '—'}
+                    </td>
+                    <td className="px-4 py-4 text-right text-on-surface/70">{fmtAc(l.lot_size_acres, l.lot_size_sqft)}</td>
+                    <td className="px-4 py-4 text-right font-medium text-primary">{fmt$(l.asking_price)}</td>
+                    <td className="px-4 py-4"><StatusBadge status={l.status} /></td>
+                    <td className="px-4 py-4 text-on-surface/60">{fmtDate(l.created_at)}</td>
+                    <td className="px-4 py-4">
+                      {l.status === 'pending_review' || l.status === 'revision_needed' ? (
+                        <div className="flex items-center gap-2 justify-end">
+                          <button
+                            onClick={() => handleStatus(l.id, 'active')}
+                            disabled={actionLoading === l.id}
+                            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {actionLoading === l.id ? '…' : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => setModal({ id: l.id, title: l.title, action: 'revision_needed' })}
+                            disabled={actionLoading === l.id}
+                            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors disabled:opacity-50 whitespace-nowrap"
+                          >
+                            Revise
+                          </button>
+                          <button
+                            onClick={() => setModal({ id: l.id, title: l.title, action: 'rejected' })}
+                            disabled={actionLoading === l.id}
+                            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 justify-end">
+                          {l.status === 'active' && (
+                            <button
+                              onClick={() => setModal({ id: l.id, title: l.title, action: 'rejected' })}
+                              disabled={actionLoading === l.id}
+                              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                            >
+                              Unpublish
+                            </button>
+                          )}
+                          {l.status === 'rejected' && (
+                            <button
+                              onClick={() => handleStatus(l.id, 'active')}
+                              disabled={actionLoading === l.id}
+                              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors disabled:opacity-50 whitespace-nowrap"
+                            >
+                              Re-approve
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-headline text-3xl font-extrabold text-primary tracking-tight">Admin — Listing Review</h1>
-          <p className="text-on-surface/60 mt-1 text-sm">Review and approve or reject submitted listings.</p>
+      {/* Pending Buyer Requests */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="font-headline font-bold text-xl text-on-surface">Pending Buyer Requests</h2>
+          {pendingBuyers.length > 0 && (
+            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{pendingBuyers.length}</span>
+          )}
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-24 text-on-surface/40 text-sm">Loading listings…</div>
+        {pendingBuyers.length === 0 ? (
+          <div className="bg-white border border-outline-variant/10 rounded-2xl p-10 text-center text-on-surface/40 text-sm">
+            No buyer requests pending review. ✅
+          </div>
         ) : (
-          <>
-            {/* Pending Review */}
-            <section className="mb-12">
-              <div className="flex items-center gap-2 mb-4">
-                <h2 className="font-headline font-bold text-xl text-on-surface">Pending Review</h2>
-                {pending.length > 0 && (
-                  <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                    {pending.length}
-                  </span>
-                )}
-              </div>
-
-              {pending.length === 0 ? (
-                <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-10 text-center text-on-surface/40 text-sm">
-                  No listings pending review. All caught up! ✅
-                </div>
-              ) : (
-                <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-outline-variant/20 bg-surface-container-low">
-                          <th className="text-left px-5 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Title</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Seller</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Location</th>
-                          <th className="text-right px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Acreage</th>
-                          <th className="text-right px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Price</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Submitted</th>
-                          <th className="px-4 py-3"></th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-outline-variant/10">
-                        {pending.map(listing => (
-                          <tr key={listing.id} className="hover:bg-surface-container-low/50 transition-colors">
-                            <td className="px-5 py-4">
-                              <span className="font-medium text-on-surface line-clamp-1">{listing.title || '—'}</span>
-                            </td>
-                            <td className="px-4 py-4">
-                              <div className="text-on-surface font-medium">{listing.profiles?.full_name || '—'}</div>
-                              <div className="text-on-surface/50 text-xs">{listing.profiles?.email || '—'}</div>
-                            </td>
-                            <td className="px-4 py-4 text-on-surface/70">
-                              {[listing.county, listing.state].filter(Boolean).join(', ') || '—'}
-                            </td>
-                            <td className="px-4 py-4 text-right text-on-surface/70">
-                              {formatAcreage(listing.lot_size_acres, listing.lot_size_sqft)}
-                            </td>
-                            <td className="px-4 py-4 text-right font-medium text-primary">
-                              {formatPrice(listing.asking_price)}
-                            </td>
-                            <td className="px-4 py-4 text-on-surface/60">
-                              {formatDate(listing.created_at)}
-                            </td>
-                            <td className="px-4 py-4">
-                              <div className="flex items-center gap-2 justify-end">
-                                <button
-                                  onClick={() => handleApprove(listing.id)}
-                                  disabled={actionLoading === listing.id}
-                                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 whitespace-nowrap"
-                                >
-                                  {actionLoading === listing.id ? '…' : 'Approve'}
-                                </button>
-                                <button
-                                  onClick={() => setRejectModal({ id: listing.id, title: listing.title })}
-                                  disabled={actionLoading === listing.id}
-                                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
-                                >
-                                  Reject
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {/* Pending Buyer Requests */}
-            <section className="mb-12">
-              <div className="flex items-center gap-2 mb-4">
-                <h2 className="font-headline font-bold text-xl text-on-surface">Pending Buyer Requests</h2>
-                {pendingBuyers.length > 0 && (
-                  <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                    {pendingBuyers.length}
-                  </span>
-                )}
-              </div>
-
-              {pendingBuyers.length === 0 ? (
-                <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-10 text-center text-on-surface/40 text-sm">
-                  No buyer requests pending review. ✅
-                </div>
-              ) : (
-                <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-outline-variant/20 bg-surface-container-low">
-                          <th className="text-left px-5 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Buyer</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Regions</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Budget</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Acreage</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Use Case</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Submitted</th>
-                          <th className="px-4 py-3"></th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-outline-variant/10">
-                        {pendingBuyers.map(buyer => (
-                          <tr key={buyer.id} className="hover:bg-surface-container-low/50 transition-colors">
-                            <td className="px-5 py-4">
-                              <div className="text-on-surface font-medium">{buyer.profiles?.full_name || '—'}</div>
-                              <div className="text-on-surface/50 text-xs">{buyer.profiles?.email || '—'}</div>
-                            </td>
-                            <td className="px-4 py-4 text-on-surface/70">
-                              {(buyer.target_regions ?? []).join(', ') || '—'}
-                            </td>
-                            <td className="px-4 py-4 text-on-surface/70 whitespace-nowrap">
-                              {buyer.budget_min || buyer.budget_max
-                                ? `$${Number(buyer.budget_min ?? 0).toLocaleString()} – $${Number(buyer.budget_max ?? 0).toLocaleString()}`
-                                : '—'}
-                            </td>
-                            <td className="px-4 py-4 text-on-surface/70 whitespace-nowrap">
-                              {buyer.min_acreage || buyer.max_acreage
-                                ? `${buyer.min_acreage ?? '?'} – ${buyer.max_acreage ?? '?'} ac`
-                                : '—'}
-                            </td>
-                            <td className="px-4 py-4 text-on-surface/70">{buyer.use_case || '—'}</td>
-                            <td className="px-4 py-4 text-on-surface/60">{formatDate(buyer.created_at)}</td>
-                            <td className="px-4 py-4">
-                              <div className="flex items-center gap-2 justify-end">
-                                <button
-                                  onClick={() => handleApproveBuyer(buyer.id)}
-                                  disabled={buyerActionLoading === buyer.id}
-                                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 whitespace-nowrap"
-                                >
-                                  {buyerActionLoading === buyer.id ? '…' : 'Approve'}
-                                </button>
-                                <button
-                                  onClick={() => setBuyerRejectModal({ id: buyer.id })}
-                                  disabled={buyerActionLoading === buyer.id}
-                                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
-                                >
-                                  Reject
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {/* Recently Reviewed */}
-            <section>
-              <h2 className="font-headline font-bold text-xl text-on-surface mb-4">Recently Reviewed (Last 30 Days)</h2>
-
-              {recent.length === 0 ? (
-                <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-10 text-center text-on-surface/40 text-sm">
-                  No recently reviewed listings.
-                </div>
-              ) : (
-                <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-outline-variant/20 bg-surface-container-low">
-                          <th className="text-left px-5 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Title</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Seller</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Location</th>
-                          <th className="text-right px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Price</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Status</th>
-                          <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Reviewed</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-outline-variant/10">
-                        {recent.map(listing => (
-                          <tr key={listing.id} className="hover:bg-surface-container-low/50 transition-colors">
-                            <td className="px-5 py-4">
-                              <span className="font-medium text-on-surface line-clamp-1">{listing.title || '—'}</span>
-                            </td>
-                            <td className="px-4 py-4">
-                              <div className="text-on-surface font-medium">{listing.profiles?.full_name || '—'}</div>
-                              <div className="text-on-surface/50 text-xs">{listing.profiles?.email || '—'}</div>
-                            </td>
-                            <td className="px-4 py-4 text-on-surface/70">
-                              {[listing.county, listing.state].filter(Boolean).join(', ') || '—'}
-                            </td>
-                            <td className="px-4 py-4 text-right font-medium text-primary">
-                              {formatPrice(listing.asking_price)}
-                            </td>
-                            <td className="px-4 py-4">
-                              <StatusBadge status={listing.status} />
-                            </td>
-                            <td className="px-4 py-4 text-on-surface/60">
-                              {formatDate(listing.updated_at)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </section>
-          </>
+          <div className="bg-white border border-outline-variant/10 rounded-2xl overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-outline-variant/20 bg-surface-container-low">
+                    <th className="text-left px-5 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Buyer</th>
+                    <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Regions</th>
+                    <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Budget</th>
+                    <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Acreage</th>
+                    <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Use Case</th>
+                    <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Submitted</th>
+                    <th className="px-4 py-3" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {pendingBuyers.map(b => (
+                    <tr key={b.id} className="hover:bg-surface-container-low/40 transition-colors">
+                      <td className="px-5 py-4">
+                        <div className="font-medium text-on-surface">{b.profiles?.full_name || '—'}</div>
+                        <div className="text-on-surface/50 text-xs">{b.profiles?.email || '—'}</div>
+                      </td>
+                      <td className="px-4 py-4 text-on-surface/70">{(b.target_regions ?? []).join(', ') || '—'}</td>
+                      <td className="px-4 py-4 text-on-surface/70 whitespace-nowrap">
+                        {b.budget_min || b.budget_max
+                          ? `$${Number(b.budget_min ?? 0).toLocaleString()} – $${Number(b.budget_max ?? 0).toLocaleString()}`
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-on-surface/70 whitespace-nowrap">
+                        {b.min_acreage || b.max_acreage ? `${b.min_acreage ?? '?'} – ${b.max_acreage ?? '?'} ac` : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-on-surface/70">{b.use_case || '—'}</td>
+                      <td className="px-4 py-4 text-on-surface/60">{fmtDate(b.created_at)}</td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2 justify-end">
+                          <button
+                            onClick={() => handleApproveBuyer(b.id)}
+                            disabled={buyerActionLoading === b.id}
+                            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {buyerActionLoading === b.id ? '…' : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => setBuyerRejectModal({ id: b.id })}
+                            disabled={buyerActionLoading === b.id}
+                            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
-      </main>
+      </section>
     </div>
   );
 }
