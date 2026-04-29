@@ -1,5 +1,9 @@
 // -- Run this in Supabase SQL editor before testing:
 // -- create table buyer_requests (id uuid primary key default gen_random_uuid(), user_id uuid references auth.users, status text default 'pending_review', target_regions text[], budget_min numeric, budget_max numeric, min_acreage numeric, max_acreage numeric, use_case text, zoning_preference text[], timeline text, additional_notes text, contact_preference text[], created_at timestamptz default now(), updated_at timestamptz default now());
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_states text[] DEFAULT '{}';
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_counties text[] DEFAULT '{}';
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_cities text[] DEFAULT '{}';
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_zips text[] DEFAULT '{}';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -39,6 +43,10 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         status: 'pending_review',
         target_regions: body.target_regions ?? [],
+        target_states: body.target_states ?? [],
+        target_counties: body.target_counties ?? [],
+        target_cities: body.target_cities ?? [],
+        target_zips: body.target_zips ?? [],
         budget_min: body.budget_min ? Number(body.budget_min) : null,
         budget_max: body.budget_max ? Number(body.budget_max) : null,
         min_acreage: body.min_acreage ? Number(body.min_acreage) : null,
@@ -67,7 +75,11 @@ export async function POST(request: NextRequest) {
     const buyerEmail = profile?.email || user.email;
     const submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 
-    const regionsList = (body.target_regions ?? []).join(', ') || '—';
+    const statesList = (body.target_states ?? []).join(', ') || null;
+    const countiesList = (body.target_counties ?? []).join(', ') || null;
+    const citiesList = (body.target_cities ?? []).join(', ') || null;
+    const zipsList = (body.target_zips ?? []).join(', ') || null;
+    const regionsList = [statesList, countiesList, citiesList, zipsList].filter(Boolean).join(' | ') || '—';
     const budgetRange = body.budget_min || body.budget_max
       ? `$${Number(body.budget_min || 0).toLocaleString()} – $${Number(body.budget_max || 0).toLocaleString()}`
       : '—';

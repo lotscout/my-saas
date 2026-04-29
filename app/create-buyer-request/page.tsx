@@ -1,5 +1,9 @@
 // -- Run this in Supabase SQL editor before testing:
 // -- create table buyer_requests (id uuid primary key default gen_random_uuid(), user_id uuid references auth.users, state text, county text, zip_code text, city text, location_notes text, zoning text[], area_unit text default 'acres', min_acreage numeric, max_acreage numeric, road_access text[], utilities text[], min_budget numeric, max_budget numeric, price_per_acre numeric, financing text[], primary_use_case text, use_case_description text, specific_requirements text, target_close_date date, timeline_urgency text, working_with_agent boolean default false, contact_methods text[], additional_notes text, created_at timestamptz default now());
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_states text[] DEFAULT '{}';
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_counties text[] DEFAULT '{}';
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_cities text[] DEFAULT '{}';
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_zips text[] DEFAULT '{}';
 
 'use client'
 
@@ -15,6 +19,73 @@ type Profile = {
   first_name: string | null
   last_name: string | null
   tier: string | null
+}
+
+const US_STATES = [
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
+  'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
+  'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
+  'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
+  'New Hampshire','New Jersey','New Mexico','New York','North Carolina',
+  'North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island',
+  'South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+  'Virginia','Washington','West Virginia','Wisconsin','Wyoming',
+]
+
+function Tag({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold">
+      {label}
+      <button type="button" onClick={onRemove} className="ml-0.5 hover:text-red-500 transition-colors leading-none">
+        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>close</span>
+      </button>
+    </span>
+  )
+}
+
+function MultiTextInput({
+  label, placeholder, values, onAdd, onRemove,
+}: {
+  label: string
+  placeholder: string
+  values: string[]
+  onAdd: (v: string) => void
+  onRemove: (v: string) => void
+}) {
+  const [input, setInput] = useState('')
+  function add() {
+    const v = input.trim()
+    if (v && !values.includes(v)) onAdd(v)
+    setInput('')
+  }
+  return (
+    <div className="space-y-2">
+      <label className="text-[10px] uppercase tracking-wider font-bold text-secondary">{label}</label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
+          placeholder={placeholder}
+          className="flex-1 bg-surface border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2 px-3"
+        />
+        <button
+          type="button"
+          onClick={add}
+          disabled={!input.trim()}
+          className="px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm font-semibold hover:bg-primary/20 transition-colors disabled:opacity-40"
+        >
+          Add
+        </button>
+      </div>
+      {values.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {values.map(v => <Tag key={v} label={v} onRemove={() => onRemove(v)} />)}
+        </div>
+      )}
+    </div>
+  )
 }
 
 const ZONING_OPTIONS = [
@@ -55,10 +126,10 @@ export default function CreateBuyerRequestPage() {
   const router = useRouter()
 
   const [formData, setFormData] = useState<Record<string, any>>({
-    state: '',
-    county: '',
-    zip_code: '',
-    city: '',
+    states: [] as string[],
+    counties: [] as string[],
+    cities: [] as string[],
+    zips: [] as string[],
     location_notes: '',
     zoning: [] as string[],
     area_unit: 'acres',
@@ -159,8 +230,8 @@ export default function CreateBuyerRequestPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          state: formData.state,
-          county: formData.county,
+          state: (formData.states as string[]).join(', '),
+          county: (formData.counties as string[]).join(', '),
           lotSize: formData.min_acreage,
           lotSizeUnit: formData.area_unit,
           zoning: (formData.zoning as string[]).join(', '),
@@ -206,8 +277,16 @@ export default function CreateBuyerRequestPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          // Map form fields to the buyer_requests DB schema
-          target_regions: [formData.state, formData.county, formData.city].filter(Boolean),
+          target_states: formData.states,
+          target_counties: formData.counties,
+          target_cities: formData.cities,
+          target_zips: formData.zips,
+          target_regions: [
+            ...(formData.states as string[]),
+            ...(formData.counties as string[]),
+            ...(formData.cities as string[]),
+            ...(formData.zips as string[]),
+          ],
           budget_min: formData.min_budget ? Number(String(formData.min_budget).replace(/,/g, '')) : null,
           budget_max: formData.max_budget ? Number(String(formData.max_budget).replace(/,/g, '')) : null,
           min_acreage: formData.min_acreage ? Number(formData.min_acreage) : null,
@@ -304,28 +383,68 @@ export default function CreateBuyerRequestPage() {
                 </div>
                 <div className="space-y-10">
 
-                  {/* Target Regions */}
-                  <div>
-                    <label className="block text-sm font-semibold text-primary mb-4">Target Regions</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                      {[
-                        { key: 'state', label: 'State', placeholder: 'e.g. Montana' },
-                        { key: 'county', label: 'County', placeholder: 'e.g. Missoula' },
-                        { key: 'zip_code', label: 'Zip Code', placeholder: 'e.g. 59801' },
-                        { key: 'city', label: 'City', placeholder: 'e.g. Seeley Lake' },
-                      ].map(({ key, label, placeholder }) => (
-                        <div key={key} className="space-y-1">
-                          <label className="text-[10px] uppercase tracking-wider font-bold text-secondary">{label}</label>
-                          <input
-                            type="text"
-                            value={formData[key]}
-                            onChange={e => set(key, e.target.value)}
-                            placeholder={placeholder}
-                            className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5 px-4"
-                          />
+                  {/* Target Location */}
+                  <div className="space-y-5">
+                    <label className="block text-sm font-semibold text-primary">Target Location</label>
+
+                    {/* State — dropdown multi-select */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-wider font-bold text-secondary">State</label>
+                      <select
+                        value=""
+                        onChange={e => {
+                          const v = e.target.value
+                          if (v && !(formData.states as string[]).includes(v))
+                            set('states', [...(formData.states as string[]), v])
+                        }}
+                        className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5 px-4"
+                      >
+                        <option value="">+ Add a state…</option>
+                        {US_STATES.map(s => (
+                          <option
+                            key={s}
+                            value={s}
+                            disabled={(formData.states as string[]).includes(s)}
+                          >
+                            {s}{(formData.states as string[]).includes(s) ? ' ✓' : ''}
+                          </option>
+                        ))}
+                      </select>
+                      {(formData.states as string[]).length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {(formData.states as string[]).map(s => (
+                            <Tag key={s} label={s} onRemove={() => set('states', (formData.states as string[]).filter(x => x !== s))} />
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
+
+                    {/* County, City, Zip — multi-text inputs */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <MultiTextInput
+                        label="County"
+                        placeholder="e.g. Missoula"
+                        values={formData.counties as string[]}
+                        onAdd={v => set('counties', [...(formData.counties as string[]), v])}
+                        onRemove={v => set('counties', (formData.counties as string[]).filter(x => x !== v))}
+                      />
+                      <MultiTextInput
+                        label="City"
+                        placeholder="e.g. Seeley Lake"
+                        values={formData.cities as string[]}
+                        onAdd={v => set('cities', [...(formData.cities as string[]), v])}
+                        onRemove={v => set('cities', (formData.cities as string[]).filter(x => x !== v))}
+                      />
+                      <MultiTextInput
+                        label="Zip Code"
+                        placeholder="e.g. 59801"
+                        values={formData.zips as string[]}
+                        onAdd={v => set('zips', [...(formData.zips as string[]), v])}
+                        onRemove={v => set('zips', (formData.zips as string[]).filter(x => x !== v))}
+                      />
+                    </div>
+
+                    {/* Notes */}
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase tracking-wider font-bold text-secondary">Specifics / Notes</label>
                       <textarea
