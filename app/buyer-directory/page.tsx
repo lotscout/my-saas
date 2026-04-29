@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import { useUserTier } from '@/hooks/useUserTier';
@@ -254,9 +255,9 @@ export default function BuyerDirectoryPage() {
                     </div>
                   </div>
 
-                  <button className="shrink-0 self-center md:self-start bg-[#1B4332] text-white p-4 rounded-full hover:scale-105 transition-transform shadow-md">
+                  <Link href={`/buyer-requests/${buyer.id}`} className="shrink-0 self-center md:self-start bg-[#1B4332] text-white p-4 rounded-full hover:scale-105 transition-transform shadow-md">
                     <span className="material-symbols-outlined">arrow_forward</span>
-                  </button>
+                  </Link>
                 </div>
               ))}
 
