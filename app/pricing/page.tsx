@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Header from '@/components/Header';
+import { useUserTier } from '@/hooks/useUserTier';
 
 const GRID = { display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr' } as const;
 
@@ -57,6 +58,7 @@ function Dash() {
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
+  const { tier: userTier } = useUserTier();
 
   const prices = {
     standard: isAnnual ? 81  : 97,
@@ -98,7 +100,6 @@ export default function PricingPage() {
       <main className="flex-grow pt-24 pb-20 px-6 max-w-7xl mx-auto w-full">
         {/* Page heading */}
         <header className="mb-8">
-          <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Plans</p>
           <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">Platform <span className="text-emerald-600">Pricing</span></h1>
         </header>
 
@@ -135,7 +136,12 @@ export default function PricingPage() {
 
             {/* Standard */}
             <div className="p-5 flex flex-col border-l border-outline-variant/10">
-              <span className="text-secondary font-bold text-sm tracking-widest mb-2">STANDARD</span>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-secondary font-bold text-sm tracking-widest uppercase">Standard</span>
+                {userTier === 'standard' && (
+                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight leading-none">Current Plan</span>
+                )}
+              </div>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
@@ -154,10 +160,13 @@ export default function PricingPage() {
             <div className="p-5 flex flex-col bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container relative">
               <div className="absolute -top-px left-0 right-0 h-1 bg-primary-container" />
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-primary-container font-bold text-sm tracking-widest">PRIORITY</span>
+                <span className="text-primary-container font-bold text-sm tracking-widest uppercase">Priority</span>
                 <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">
                   Most Popular
                 </span>
+                {userTier === 'priority' && (
+                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight leading-none">Current Plan</span>
+                )}
               </div>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.priority}</span>
@@ -175,7 +184,12 @@ export default function PricingPage() {
 
             {/* Exclusive */}
             <div className="p-5 flex flex-col border-l border-outline-variant/10">
-              <span className="text-secondary font-bold text-sm tracking-widest mb-2">EXCLUSIVE</span>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-secondary font-bold text-sm tracking-widest uppercase">Exclusive</span>
+                {userTier === 'exclusive' && (
+                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight leading-none">Current Plan</span>
+                )}
+              </div>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
@@ -195,12 +209,15 @@ export default function PricingPage() {
           {SECTIONS.map((section, si) => (
             <div key={si}>
               {/* Section header */}
-              <div style={GRID} className="bg-surface-container-low border-t border-outline-variant/10">
-                <div className="py-1.5 pl-8 pr-4 col-span-4 flex items-center">
-                  <span className="text-[10px] font-bold text-secondary tracking-widest uppercase">
+              <div style={GRID} className="border-t border-outline-variant/10 pt-3 pb-1">
+                <div className="pl-6 pr-4 flex items-center">
+                  <span className="border-l-2 border-primary pl-2 text-xs font-bold text-primary uppercase">
                     {section.label}
                   </span>
                 </div>
+                <div className="border-l border-outline-variant/10" />
+                <div className="bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20" />
+                <div className="border-l border-outline-variant/10" />
               </div>
 
               {/* Feature rows */}

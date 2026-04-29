@@ -51,6 +51,7 @@ export default function EditProfilePage() {
 
     const { error } = await supabase.from('profiles').upsert({
       id: user.id,
+      email: user.email,
       first_name: firstName || null,
       last_name: lastName || null,
       phone: phone || null,

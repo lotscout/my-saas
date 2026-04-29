@@ -268,9 +268,9 @@ export default function CreateBuyerRequestPage() {
             <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
               <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
-            <h2 className="font-headline text-xl font-bold text-primary mb-2">Post Buying Criteria</h2>
+            <h2 className="font-headline text-xl font-bold text-primary mb-2">Find a Property</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">
-              Posting buying criteria requires a paid LotScout account. Choose a plan to get started and get matched with the right properties.
+              Finding a property requires a paid LotScout account. Choose a plan to get started and get matched with the right properties.
             </p>
             <div className="flex gap-3">
               <Link href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">
@@ -696,7 +696,7 @@ export default function CreateBuyerRequestPage() {
                     disabled={submitting}
                     className="flex items-center gap-2 px-10 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-60"
                   >
-                    {submitting ? 'Posting…' : 'Post Buying Criteria'}
+                    {submitting ? 'Posting…' : 'Find a Property'}
                     <span className="material-symbols-outlined">arrow_forward</span>
                   </button>
                 </div>

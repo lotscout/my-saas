@@ -215,14 +215,14 @@ export default function MessagingPage() {
 
           {/* Contextual Sidebar */}
           <aside className="w-72 bg-white border-l border-outline-variant/15 flex flex-col">
-            {canViewContactDetails ? null : (
+            {!loading && !canViewContactDetails && (
               <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 text-xs text-amber-800 font-semibold flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-sm text-amber-500">lock</span>
                 Upgrade to Priority to view contact &amp; deal details
               </div>
             )}
             {/* Lot Details (Active) */}
-            {canViewContactDetails ? (
+            {(loading || canViewContactDetails) ? (
             <div className="flex-1 flex flex-col">
               <div className="p-6 border-b border-outline-variant/5">
                 <h3 className="font-headline font-extrabold text-primary text-lg tracking-tight mb-1">Lot Details <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Seller Context</span></h3>
@@ -307,7 +307,7 @@ export default function MessagingPage() {
               </div>
             </div>
 
-            ) : (
+            ) : !loading ? (
               <LockedFeature
                 requiredTier="priority"
                 message="Upgrade to Priority to view contact details and deal context"
@@ -320,7 +320,7 @@ export default function MessagingPage() {
                   <div className="h-24 bg-surface-container-high rounded-xl" />
                 </div>
               </LockedFeature>
-            )}
+            ) : null}
             {/* Buyer Requirements (Hidden) */}
             <div className="hidden flex-1 flex-col">
               <div className="p-6 border-b border-outline-variant/5">

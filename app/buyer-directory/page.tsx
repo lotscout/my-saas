@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import { useUserTier } from '@/hooks/useUserTier';
@@ -69,12 +71,38 @@ function ContactDetails({ buyer }: { buyer: typeof BUYERS[0] }) {
 }
 
 export default function BuyerDirectoryPage() {
-  const { isAtLeast, loading } = useUserTier();
+  const { isAtLeast, tier, loading } = useUserTier();
+  const router = useRouter();
   const canViewContact = !loading && isAtLeast('priority');
+  const [showFreeModal, setShowFreeModal] = useState(false);
+
+  function handleFindProperty() {
+    if (loading) return;
+    if (!tier) { setShowFreeModal(true); return; }
+    router.push('/create-buyer-request');
+  }
 
   return (
     <div className="bg-surface text-on-surface selection:bg-emerald-100 selection:text-emerald-900">
       <Header />
+
+      {showFreeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowFreeModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
+            <button onClick={() => setShowFreeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
+            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            </div>
+            <h2 className="font-headline text-xl font-bold text-primary mb-2">Find a Property</h2>
+            <p className="text-secondary text-sm mb-6 leading-relaxed">Posting buyer criteria requires a paid LotScout account. Choose a plan to get started.</p>
+            <div className="flex gap-3">
+              <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
+              <button onClick={() => setShowFreeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="pt-16 min-h-screen">
         <div className="max-w-7xl mx-auto px-8 py-12">
@@ -87,11 +115,18 @@ export default function BuyerDirectoryPage() {
                 Navigate our curated network of active land acquisition firms and private investors seeking their next high-value opportunity.
               </p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
               <div className="bg-white border border-slate-100 px-8 py-5 rounded-2xl shadow-sm text-center">
                 <div className="text-3xl font-black text-[#1B4332]">1,284</div>
                 <div className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1">Active Buyers</div>
               </div>
+              <button
+                onClick={handleFindProperty}
+                className="flex items-center gap-2 bg-[#1B4332] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-emerald-800 transition-colors shadow-lg"
+              >
+                <span className="material-symbols-outlined text-lg">search</span>
+                Find a Property
+              </button>
             </div>
           </header>
 
@@ -170,8 +205,14 @@ export default function BuyerDirectoryPage() {
 
                   <div className="flex-1 space-y-4 min-w-0">
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                      {/* Contact details — locked for standard */}
-                      {canViewContact ? (
+                      {/* Contact details — locked for standard/free */}
+                      {loading ? (
+                        <div className="space-y-2 flex-1">
+                          <div className="h-6 bg-slate-100 animate-pulse rounded w-48" />
+                          <div className="h-4 bg-slate-100 animate-pulse rounded w-36" />
+                          <div className="h-4 bg-slate-100 animate-pulse rounded w-56" />
+                        </div>
+                      ) : canViewContact ? (
                         <ContactDetails buyer={buyer} />
                       ) : (
                         <LockedFeature

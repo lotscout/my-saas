@@ -129,6 +129,12 @@ export default function MarketplacePage() {
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
   const [buyerRequestsLoading, setBuyerRequestsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [buyerSearchQuery, setBuyerSearchQuery] = useState('');
+  const [filterBudget, setFilterBudget] = useState('');
+  const [filterAcreage, setFilterAcreage] = useState('');
+  const [filterZoning, setFilterZoning] = useState('');
+  const [filterUseCase, setFilterUseCase] = useState('');
+  const [filterTimeline, setFilterTimeline] = useState('');
   const router = useRouter();
 
   const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
@@ -156,6 +162,48 @@ export default function MarketplacePage() {
       l.location.toLowerCase().includes(q) || l.title.toLowerCase().includes(q)
     );
   }, [searchQuery]);
+
+  const filteredBuyerRequests = useMemo(() => {
+    return buyerRequests.filter(req => {
+      if (buyerSearchQuery.trim()) {
+        const q = buyerSearchQuery.toLowerCase();
+        const regionsText = (req.target_regions ?? []).join(' ').toLowerCase();
+        const useCaseText = (req.use_case ?? '').toLowerCase();
+        if (!regionsText.includes(q) && !useCaseText.includes(q)) return false;
+      }
+      if (filterBudget) {
+        const min = req.budget_min ?? 0;
+        const max = req.budget_max ?? Infinity;
+        if (filterBudget === 'under50k' && max >= 50000) return false;
+        if (filterBudget === '50k-100k' && (min > 100000 || max < 50000)) return false;
+        if (filterBudget === '100k-500k' && (min > 500000 || max < 100000)) return false;
+        if (filterBudget === '500k-1m' && (min > 1000000 || max < 500000)) return false;
+        if (filterBudget === '1m-5m' && (min > 5000000 || max < 1000000)) return false;
+        if (filterBudget === '5m+' && max < 5000000) return false;
+      }
+      if (filterAcreage) {
+        const minAc = req.min_acreage ?? 0;
+        const maxAc = req.max_acreage ?? Infinity;
+        if (filterAcreage === 'under5' && maxAc >= 5) return false;
+        if (filterAcreage === '5-25' && (minAc > 25 || maxAc < 5)) return false;
+        if (filterAcreage === '25-100' && (minAc > 100 || maxAc < 25)) return false;
+        if (filterAcreage === '100-500' && (minAc > 500 || maxAc < 100)) return false;
+        if (filterAcreage === '500+' && maxAc < 500) return false;
+      }
+      if (filterZoning) {
+        const zones = (req.zoning_preference ?? []).map((z: string) => z.toLowerCase());
+        if (!zones.some((z: string) => z.includes(filterZoning.toLowerCase()))) return false;
+      }
+      if (filterUseCase) {
+        const uc = (req.use_case ?? '').toLowerCase();
+        if (!uc.includes(filterUseCase.toLowerCase())) return false;
+      }
+      if (filterTimeline) {
+        if ((req.timeline ?? '').toLowerCase() !== filterTimeline.toLowerCase()) return false;
+      }
+      return true;
+    });
+  }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoning, filterUseCase, filterTimeline]);
 
   function handleCreateListing() {
     if (loading) return;
@@ -204,8 +252,8 @@ export default function MarketplacePage() {
             <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
               <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
-            <h2 className="font-headline text-xl font-bold text-primary mb-2">Post Buying Criteria</h2>
-            <p className="text-secondary text-sm mb-6 leading-relaxed">Posting buyer requests requires a paid LotScout account. Choose a plan to get started.</p>
+            <h2 className="font-headline text-xl font-bold text-primary mb-2">Find a Property</h2>
+            <p className="text-secondary text-sm mb-6 leading-relaxed">Finding a property requires a paid LotScout account. Choose a plan to get started.</p>
             <div className="flex gap-3">
               <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
               <button onClick={() => setShowBuyerFreeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
@@ -353,7 +401,13 @@ export default function MarketplacePage() {
                           <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
                         ))}
                       </div>
-                      {canViewContact ? (
+                      {loading ? (
+                        <div className="mt-3 pt-3 border-t border-surface-container space-y-2">
+                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-24" />
+                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-40" />
+                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-36" />
+                        </div>
+                      ) : canViewContact ? (
                         <SellerContact seller={listing.seller} />
                       ) : (
                         <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
@@ -371,7 +425,7 @@ export default function MarketplacePage() {
         {/* ── BUYER REQUESTS TAB ── */}
         {activeTab === 'buyer-requests' && (
           <>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-slate-500 text-sm">Active buyers looking for land that matches your listings</p>
               </div>
@@ -380,8 +434,106 @@ export default function MarketplacePage() {
                 className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/10"
               >
                 <span className="material-symbols-outlined text-lg">add</span>
-                Post Buying Criteria
+                Find a Property
               </button>
+            </div>
+
+            {/* Search bar */}
+            <div className="mb-4">
+              <div className="relative max-w-xl">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
+                <input
+                  type="text"
+                  value={buyerSearchQuery}
+                  onChange={e => setBuyerSearchQuery(e.target.value)}
+                  placeholder="Search by state, county, or zip code..."
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-4 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                />
+                {buyerSearchQuery && (
+                  <button onClick={() => setBuyerSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
+                    <span className="material-symbols-outlined text-lg">close</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-3 py-4 border-y border-outline-variant/20 mb-8">
+              <select
+                value={filterBudget}
+                onChange={e => setFilterBudget(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Budget Range</option>
+                <option value="under50k">Under $50K</option>
+                <option value="50k-100k">$50K–$100K</option>
+                <option value="100k-500k">$100K–$500K</option>
+                <option value="500k-1m">$500K–$1M</option>
+                <option value="1m-5m">$1M–$5M</option>
+                <option value="5m+">$5M+</option>
+              </select>
+              <select
+                value={filterAcreage}
+                onChange={e => setFilterAcreage(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Acreage Range</option>
+                <option value="under5">Under 5 acres</option>
+                <option value="5-25">5–25 acres</option>
+                <option value="25-100">25–100 acres</option>
+                <option value="100-500">100–500 acres</option>
+                <option value="500+">500+ acres</option>
+              </select>
+              <select
+                value={filterZoning}
+                onChange={e => setFilterZoning(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Zoning Type</option>
+                <option value="agricultural">Agricultural</option>
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="industrial">Industrial</option>
+                <option value="mixed use">Mixed Use</option>
+                <option value="recreational">Recreational</option>
+                <option value="timber">Timber</option>
+                <option value="other">Other</option>
+              </select>
+              <select
+                value={filterUseCase}
+                onChange={e => setFilterUseCase(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Use Case</option>
+                <option value="row crop">Row Crop</option>
+                <option value="livestock">Livestock/Ranching</option>
+                <option value="timber">Timber</option>
+                <option value="recreational">Recreational</option>
+                <option value="residential development">Residential Development</option>
+                <option value="commercial development">Commercial Development</option>
+                <option value="conservation">Conservation</option>
+                <option value="investment">Investment</option>
+              </select>
+              <select
+                value={filterTimeline}
+                onChange={e => setFilterTimeline(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Timeline</option>
+                <option value="Immediately">Immediately</option>
+                <option value="1-3 months">1–3 months</option>
+                <option value="3-6 months">3–6 months</option>
+                <option value="6+ months">6+ months</option>
+              </select>
+              {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || buyerSearchQuery) && (
+                <button
+                  onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterUseCase(''); setFilterTimeline(''); setBuyerSearchQuery(''); }}
+                  className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-sm">close</span>
+                  Clear filters
+                </button>
+              )}
             </div>
 
             {buyerRequestsLoading ? (
@@ -406,17 +558,23 @@ export default function MarketplacePage() {
                 <p className="font-headline text-2xl font-bold text-primary mb-2">No buyer requests yet</p>
                 <p className="text-sm mb-6">Be the first to post your buying criteria and connect with sellers</p>
                 <button onClick={handlePostBuyerRequest} className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
-                  Post Buying Criteria
+                  Find a Property
                 </button>
+              </div>
+            ) : filteredBuyerRequests.length === 0 ? (
+              <div className="text-center py-16 text-secondary">
+                <span className="material-symbols-outlined text-5xl mb-4 block text-primary/20">filter_list_off</span>
+                <p className="font-headline text-xl font-bold text-primary mb-2">No results match your filters</p>
+                <p className="text-sm">Try adjusting your search or clearing filters</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {buyerRequests.map(req => {
+                {filteredBuyerRequests.map(req => {
                   const firstName = req.profiles?.first_name ?? '';
                   const lastName = req.profiles?.last_name ?? '';
                   const displayName = [firstName, lastName].filter(Boolean).join(' ') || 'Anonymous Buyer';
                   const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || 'AB';
-                  const blurIdentity = !canViewContact;
+                  const blurIdentity = !loading && !canViewContact;
 
                   return (
                     <div key={req.id} className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">

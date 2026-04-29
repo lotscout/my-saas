@@ -283,9 +283,12 @@ export default function DashboardPage() {
               </h1>
             )}
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end gap-2">
             <p className="text-secondary font-semibold font-body">{today}</p>
             <p className="text-on-surface-variant text-sm">Central Texas Market • Open</p>
+            {!loading && tier && (
+              <span className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full capitalize">{tier} Plan</span>
+            )}
           </div>
         </header>
 
@@ -309,6 +312,25 @@ export default function DashboardPage() {
             <span className="material-symbols-outlined text-primary">add_circle</span>
             <span className="text-sm font-semibold text-primary">Create Listing</span>
           </CreateListingGate>
+          {!loading && (
+            tier ? (
+              <a
+                href="/create-buyer-request"
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group border border-outline-variant/10"
+              >
+                <span className="material-symbols-outlined text-primary">search</span>
+                <span className="text-sm font-semibold text-primary">Find a Property</span>
+              </a>
+            ) : (
+              <a
+                href="/pricing"
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group border border-outline-variant/10"
+              >
+                <span className="material-symbols-outlined text-primary">search</span>
+                <span className="text-sm font-semibold text-primary">Find a Property</span>
+              </a>
+            )
+          )}
         </section>
 
         {/* Profile Completeness */}
