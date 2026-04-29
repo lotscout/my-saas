@@ -39,8 +39,6 @@ export default function MessagingPage() {
         {/* SideNavBar */}
         <aside className="flex-none w-64 h-full flex flex-col border-r border-outline-variant/20 bg-white shadow-none font-['Inter'] text-sm font-medium">
           <div className="px-6 pt-6 pb-2">
-            <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Messaging</p>
-            <h1 className="font-headline text-2xl font-extrabold text-primary tracking-tighter leading-tight">Deal <span className="text-emerald-600">Conversations</span></h1>
           </div>
           <nav className="flex-1 py-4 space-y-1">
             <a className="flex items-center gap-3 bg-primary/5 text-primary border-r-4 border-primary px-6 py-3 transition-colors" href="#">
@@ -48,8 +46,8 @@ export default function MessagingPage() {
               Messages
             </a>
             <a className="flex items-center gap-3 text-secondary px-6 py-3 hover:bg-surface-container transition-colors" href="#">
-              <span className="material-symbols-outlined">inbox</span>
-              Inbox
+              <span className="material-symbols-outlined">mark_email_unread</span>
+              Unread
             </a>
             <a className="flex items-center gap-3 text-secondary px-6 py-3 hover:bg-surface-container transition-colors" href="#">
               <span className="material-symbols-outlined">archive</span>
