@@ -8,8 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-
-const ADMIN_EMAILS = ['bobby@lotscout.com', 'bobby.r.oliver@gmail.com'];
+import { isAdminEmail } from '@/lib/admin';
 
 const NAV = [
   { href: '/admin/dashboard', label: 'Overview',         icon: 'dashboard' },
@@ -38,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           .eq('id', user.id)
           .single();
 
-        const isAdmin = profile?.is_admin === true || ADMIN_EMAILS.includes(user.email ?? '');
+        const isAdmin = profile?.is_admin === true || isAdminEmail(user.email);
         if (!isAdmin) { router.replace('/dashboard'); return; }
 
         if (profile?.first_name) setAdminName(profile.first_name);

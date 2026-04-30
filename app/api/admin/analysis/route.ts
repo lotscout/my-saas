@@ -1,21 +1,20 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { isAdminEmail } from '@/lib/admin';
 
-const ADMIN_EMAILS = ['bobby@lotscout.com', 'bobby.r.oliver@gmail.com'];
-
-async function isAdmin(): Promise<boolean> {
+async function checkIsAdmin(): Promise<boolean> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
-  if (ADMIN_EMAILS.includes(user.email ?? '')) return true;
+  if (isAdminEmail(user.email)) return true;
   const service = createServiceClient();
   const { data } = await service.from('profiles').select('is_admin').eq('id', user.id).single();
   return data?.is_admin === true;
 }
 
 export async function GET() {
-  if (!(await isAdmin())) {
+  if (!(await checkIsAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 

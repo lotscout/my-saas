@@ -23,6 +23,7 @@ export interface Permissions {
   loading: boolean;
   profile: UserProfile | null;
   tier: Tier | null;
+  isAdmin: boolean;
 
   // Listing quota
   listingsThisPeriod: number;
@@ -43,6 +44,7 @@ const DEFAULT: Permissions = {
   loading: true,
   profile: null,
   tier: null,
+  isAdmin: false,
   listingsThisPeriod: 0,
   listingStatus: null,
   reportDeliveryTime: null,
@@ -53,6 +55,21 @@ const DEFAULT: Permissions = {
   whiteGloveOnboarding: false,
   support24x7: false,
   promotedBoostPrice: null,
+};
+
+const ADMIN_PERMISSIONS: Omit<Permissions, 'loading' | 'profile'> = {
+  tier: 'exclusive',
+  isAdmin: true,
+  listingsThisPeriod: 0,
+  listingStatus: 'allowed',
+  reportDeliveryTime: '15min',
+  financingAccess: true,
+  accountManager: true,
+  earlyAccess: true,
+  quarterlyReports: true,
+  whiteGloveOnboarding: true,
+  support24x7: true,
+  promotedBoostPrice: 5.80,
 };
 
 export function usePermissions(): Permissions {
@@ -72,6 +89,12 @@ export function usePermissions(): Permissions {
         return;
       }
 
+      // Admins bypass all tier gates
+      if (profile.is_admin) {
+        setPermissions({ loading: false, profile, ...ADMIN_PERMISSIONS });
+        return;
+      }
+
       const tier = profile.tier;
       const listingsThisPeriod = await getListingsThisPeriod(
         supabase,
@@ -85,6 +108,7 @@ export function usePermissions(): Permissions {
         loading: false,
         profile,
         tier,
+        isAdmin: false,
         listingsThisPeriod,
         listingStatus: canCreateListing(tier, listingsThisPeriod),
         reportDeliveryTime: getReportDeliveryTime(tier),

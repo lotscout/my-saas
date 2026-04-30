@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { isAdminEmail } from '@/lib/admin';
 
-const ADMIN_EMAILS = ['bobby@lotscout.com', 'bobby.r.oliver@gmail.com'];
-
-async function isAdmin(): Promise<boolean> {
+async function checkIsAdmin(): Promise<boolean> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
-  if (ADMIN_EMAILS.includes(user.email ?? '')) return true;
+  if (isAdminEmail(user.email)) return true;
   const service = createServiceClient();
   const { data } = await service.from('profiles').select('is_admin').eq('id', user.id).single();
   return data?.is_admin === true;
@@ -17,7 +16,7 @@ async function isAdmin(): Promise<boolean> {
 // GET /api/admin/messages?listing_id=X&sender_id=Y  → thread
 // GET /api/admin/messages?listing_id=X              → all messages for listing
 export async function GET(request: NextRequest) {
-  if (!(await isAdmin())) {
+  if (!(await checkIsAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
@@ -80,7 +79,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/messages  → send message as impersonated user
 export async function POST(request: NextRequest) {
-  if (!(await isAdmin())) {
+  if (!(await checkIsAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 

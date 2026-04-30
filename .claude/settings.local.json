@@ -16,7 +16,19 @@
       "Bash(curl *)",
       "Bash(npx vercel *)",
       "Bash(node *)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(supabase --version)",
+      "Bash(SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4aW9ja3VvYnB0dGx3emljbGRvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjAxNjk2NCwiZXhwIjoyMDkxNTkyOTY0fQ.PLW0Zjnu-KmlT6fE57j1EzkEj3a2fnHaFEUVyiwUTukI\" node *)",
+      "Bash(echo \"PID $!\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(kill 1289)",
+      "Bash(kill 1331)",
+      "Bash(kill 1357)",
+      "Bash(kill 1391)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,v\\) for k,v in d.get\\('dependencies',{}\\).items\\(\\) if 'anthropic' in k.lower\\(\\) or 'supabase' in k.lower\\(\\)]\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(npx supabase *)",
+      "Read(//c/Users/bobby/**)"
     ]
   }
 }

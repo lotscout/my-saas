@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Tier } from './permissions';
+import { isAdminEmail } from './admin';
 
 export interface UserProfile {
   id: string;
@@ -8,6 +9,7 @@ export interface UserProfile {
   first_name: string | null;
   last_name: string | null;
   email: string | null;
+  is_admin: boolean;
 }
 
 export async function getUserProfile(
@@ -32,8 +34,12 @@ export async function getUserProfile(
     .eq('status', 'active')
     .single();
 
+  // Admin: email-based check (works without DB column; DB column checked after migration)
+  const is_admin = isAdminEmail(user.email);
+
   return {
     ...data,
     tier: (sub?.tier ?? null) as Tier,
+    is_admin,
   } as UserProfile;
 }
