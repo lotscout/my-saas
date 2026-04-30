@@ -27,21 +27,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     (async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.replace('/sign-in'); return; }
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { router.replace('/sign-in'); return; }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, is_admin')
-        .eq('id', user.id)
-        .single();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, is_admin')
+          .eq('id', user.id)
+          .single();
 
-      const isAdmin = profile?.is_admin === true || ADMIN_EMAILS.includes(user.email ?? '');
-      if (!isAdmin) { router.replace('/dashboard'); return; }
+        const isAdmin = profile?.is_admin === true || ADMIN_EMAILS.includes(user.email ?? '');
+        if (!isAdmin) { router.replace('/dashboard'); return; }
 
-      if (profile?.first_name) setAdminName(profile.first_name);
-      setAuthorized(true);
+        if (profile?.first_name) setAdminName(profile.first_name);
+        setAuthorized(true);
+      } catch {
+        router.replace('/sign-in');
+      }
     })();
   }, [router]);
 
