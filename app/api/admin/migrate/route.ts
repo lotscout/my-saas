@@ -19,11 +19,12 @@ export async function POST(request: Request) {
   try {
     // Try using pg directly (Vercel has full network access)
     // Use pooler URL for Vercel (direct DB host requires IPv6 / allowlisting)
-    const dbUrl = process.env.DATABASE_URL || 
-      `postgresql://postgres.axiockuobpttlwzicldo:${encodeURIComponent('Spring2026!')}@aws-1-us-east-2.pooler.supabase.com:5432/postgres`;
-    
     const client = new Client({
-      connectionString: dbUrl,
+      host: 'aws-1-us-east-2.pooler.supabase.com',
+      port: 5432,
+      database: 'postgres',
+      user: 'postgres.axiockuobpttlwzicldo',
+      password: 'Spring2026!',
       ssl: { rejectUnauthorized: false }
     });
 
