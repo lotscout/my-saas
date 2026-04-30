@@ -217,16 +217,21 @@ export default function CreateBuyerRequestPage() {
           target_regions: [formData.state, formData.county, formData.city].filter(Boolean),
           budget_min: formData.min_budget ? Number(String(formData.min_budget).replace(/,/g, '')) : null,
           budget_max: formData.max_budget ? Number(String(formData.max_budget).replace(/,/g, '')) : null,
+          price_per_acre: formData.price_per_acre ? Number(String(formData.price_per_acre).replace(/,/g, '')) : null,
           min_acreage: formData.min_acreage ? Number(formData.min_acreage) : null,
           max_acreage: formData.max_acreage ? Number(formData.max_acreage) : null,
-          use_case: [formData.primary_use_case, formData.use_case_description].filter(Boolean).join(' — ') || null,
+          area_unit: formData.area_unit || 'acres',
           zoning_preference: formData.zoning,
+          road_access: formData.road_access,
+          utilities: formData.utilities,
+          financing: formData.financing,
+          use_case: [formData.primary_use_case, formData.use_case_description].filter(Boolean).join(' — ') || null,
+          use_case_description: formData.use_case_description || null,
+          specific_requirements: formData.specific_requirements || null,
           timeline: formData.timeline_urgency || null,
-          additional_notes: [
-            formData.location_notes,
-            formData.specific_requirements,
-            formData.additional_notes,
-          ].filter(Boolean).join('\n\n') || null,
+          target_close_date: formData.target_close_date || null,
+          working_with_agent: formData.working_with_agent,
+          additional_notes: formData.additional_notes || null,
           contact_preference: formData.contact_methods,
         }),
       })
@@ -241,6 +246,15 @@ export default function CreateBuyerRequestPage() {
       setSubmitting(false)
     }
   }
+
+  const isFormReady =
+    Number(String(formData.min_budget || '').replace(/,/g, '')) > 0 &&
+    Number(String(formData.max_budget || '').replace(/,/g, '')) > 0 &&
+    Number(formData.min_acreage) > 0 &&
+    !!formData.target_close_date &&
+    (formData.contact_methods as string[]).length > 0 &&
+    (formData.zoning as string[]).length > 0 &&
+    !Object.values(profanityErrors).some(Boolean)
 
   if (!tierChecked) {
     return (
@@ -703,8 +717,8 @@ export default function CreateBuyerRequestPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={submitting}
-                    className="flex items-center gap-2 px-10 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-60"
+                    disabled={submitting || !isFormReady}
+                    className="flex items-center gap-2 px-10 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {submitting ? 'Posting…' : 'Find a Property'}
                     <span className="material-symbols-outlined">arrow_forward</span>

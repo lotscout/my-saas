@@ -4,6 +4,15 @@
 // -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_county text;
 // -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_city text;
 // -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_zip text;
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS price_per_acre numeric;
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS area_unit text DEFAULT 'acres';
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS road_access text[];
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS utilities text[];
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS financing text[];
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS use_case_description text;
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS specific_requirements text;
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS working_with_agent boolean DEFAULT false;
+// -- ALTER TABLE buyer_requests ADD COLUMN IF NOT EXISTS target_close_date date;
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -22,11 +31,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const textFields: [string, string][] = [
-      ['use_case', body.use_case],
-      ['additional_notes', body.additional_notes],
+    const textFields: string[] = [
+      body.use_case_description,
+      body.specific_requirements,
+      body.additional_notes,
+      body.use_case,
     ];
-    for (const [, value] of textFields) {
+    for (const value of textFields) {
       if (value && containsProfanity(value)) {
         return NextResponse.json(
           { error: 'Your submission contains inappropriate language. Please review and resubmit.' },
@@ -49,11 +60,20 @@ export async function POST(request: NextRequest) {
         target_zip: body.target_zip ?? null,
         budget_min: body.budget_min ? Number(body.budget_min) : null,
         budget_max: body.budget_max ? Number(body.budget_max) : null,
+        price_per_acre: body.price_per_acre ? Number(body.price_per_acre) : null,
         min_acreage: body.min_acreage ? Number(body.min_acreage) : null,
         max_acreage: body.max_acreage ? Number(body.max_acreage) : null,
-        use_case: body.use_case ?? null,
+        area_unit: body.area_unit ?? 'acres',
         zoning_preference: body.zoning_preference ?? [],
+        road_access: body.road_access ?? [],
+        utilities: body.utilities ?? [],
+        financing: body.financing ?? [],
+        use_case: body.use_case ?? null,
+        use_case_description: body.use_case_description ?? null,
+        specific_requirements: body.specific_requirements ?? null,
         timeline: body.timeline ?? null,
+        target_close_date: body.target_close_date ?? null,
+        working_with_agent: body.working_with_agent ?? false,
         additional_notes: body.additional_notes ?? null,
         contact_preference: body.contact_preference ?? [],
       })
