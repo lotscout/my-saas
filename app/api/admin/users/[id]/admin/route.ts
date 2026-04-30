@@ -26,12 +26,19 @@ export async function PATCH(
 
   const service = createServiceClient();
 
+  // profiles.is_admin column requires the migration in lib/admin.ts to be run first.
+  // If the column doesn't exist yet, the update is silently skipped (admin status
+  // is still determined by ADMIN_EMAILS in lib/admin.ts).
   const { error } = await service
     .from('profiles')
     .update({ is_admin: body.is_admin })
     .eq('id', id);
 
   if (error) {
+    // PGRST204 = column not found — migration not run yet, non-fatal
+    if (error.code === 'PGRST204' || error.message?.includes('is_admin')) {
+      return NextResponse.json({ success: true, warning: 'Run is_admin migration to persist this change.' });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

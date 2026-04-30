@@ -32,13 +32,22 @@ export async function PATCH(
 
   const service = createServiceClient();
 
-  const { error } = await service
-    .from('profiles')
-    .update({ tier })
-    .eq('id', id);
+  // Tier lives in the subscriptions table, not profiles
+  // Deactivate any existing active subscriptions first
+  await service
+    .from('subscriptions')
+    .update({ status: 'inactive' })
+    .eq('user_id', id)
+    .eq('status', 'active');
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (tier !== 'free') {
+    const { error } = await service
+      .from('subscriptions')
+      .insert({ user_id: id, tier, status: 'active' });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ success: true });
