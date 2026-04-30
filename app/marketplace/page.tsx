@@ -78,11 +78,15 @@ const LISTINGS = [
   },
 ];
 
-function SellerContact({ seller }: { seller: typeof LISTINGS[0]['seller'] }) {
+function SellerContact({ seller, userId }: { seller: typeof LISTINGS[0]['seller']; userId?: string }) {
   return (
     <div className="pt-3 mt-3 border-t border-surface-container">
       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Listed By</p>
-      <p className="text-sm font-bold text-primary mb-1">{seller.name}</p>
+      {userId ? (
+        <Link href={`/sellers/${userId}`} className="text-sm font-bold text-primary mb-1 hover:underline block">{seller.name}</Link>
+      ) : (
+        <p className="text-sm font-bold text-primary mb-1">{seller.name}</p>
+      )}
       <div className="space-y-0.5">
         <p className="text-xs text-slate-500 flex items-center gap-1">
           <span className="material-symbols-outlined text-xs">mail</span>{seller.email}
