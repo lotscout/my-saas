@@ -51,6 +51,7 @@ export async function GET() {
     company_name: p.company_name,
     created_at: p.created_at,
     tier: tierByUser[p.id as string] ?? null,
+    is_test_profile: Boolean(p.is_test_profile),
     // Use DB value when column exists; fall back to email list until migration runs
     is_admin: p.is_admin !== undefined
       ? Boolean(p.is_admin)
