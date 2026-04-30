@@ -31,11 +31,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { router.replace('/sign-in'); return; }
 
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('first_name, is_admin')
           .eq('id', user.id)
           .single();
+
+        console.log('[AdminLayout] user:', user.email, '| is_admin:', profile?.is_admin, '| profileError:', profileError?.message ?? null);
 
         const isAdmin = profile?.is_admin === true || isAdminEmail(user.email);
         if (!isAdmin) { router.replace('/dashboard'); return; }
