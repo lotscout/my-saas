@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     // Use pooler URL for Vercel (direct DB host requires IPv6 / allowlisting)
     const client = new Client({
       host: 'aws-1-us-east-2.pooler.supabase.com',
-      port: 5432,
+      port: 6543,
       database: 'postgres',
       user: 'postgres.axiockuobpttlwzicldo',
       password: 'Spring2026!',
