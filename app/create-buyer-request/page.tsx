@@ -561,7 +561,8 @@ export default function CreateBuyerRequestPage() {
                       rows={4}
                       maxLength={500}
                       value={formData.use_case_description}
-                      onChange={e => { set('use_case_description', e.target.value); checkProfanity('use_case_description', e.target.value) }}
+                      onChange={e => set('use_case_description', e.target.value)}
+                      onBlur={e => checkProfanity('use_case_description', e.target.value)}
                       placeholder="Describe what you plan to do with the land..."
                       className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
                     />
@@ -578,7 +579,8 @@ export default function CreateBuyerRequestPage() {
                       rows={3}
                       maxLength={500}
                       value={formData.specific_requirements}
-                      onChange={e => { set('specific_requirements', e.target.value); checkProfanity('specific_requirements', e.target.value) }}
+                      onChange={e => set('specific_requirements', e.target.value)}
+                      onBlur={e => checkProfanity('specific_requirements', e.target.value)}
                       placeholder="Water rights, specific soil types, topographic needs..."
                       className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
                     />
@@ -679,7 +681,8 @@ export default function CreateBuyerRequestPage() {
                     <textarea
                       rows={2}
                       value={formData.additional_notes}
-                      onChange={e => { set('additional_notes', e.target.value); checkProfanity('additional_notes', e.target.value) }}
+                      onChange={e => set('additional_notes', e.target.value)}
+                      onBlur={e => checkProfanity('additional_notes', e.target.value)}
                       placeholder="Anything else sellers should know?"
                       className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
                     />

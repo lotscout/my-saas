@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       .from('buyer_requests')
       .insert({
         user_id: user.id,
-        status: 'pending_review',
+        status: 'active',
         target_regions: body.target_regions ?? [],
         target_state: body.target_state ?? null,
         target_county: body.target_county ?? null,
@@ -90,9 +90,9 @@ export async function POST(request: NextRequest) {
       await resend.emails.send({
         from: 'support@lotscout.com',
         to: 'support@lotscout.com',
-        subject: 'New Buyer Request Posted',
+        subject: 'New Buyer Request (Auto-Published)',
         html: `
-          <h2 style="color:#1B4332">New Buyer Request Posted</h2>
+          <h2 style="color:#1B4332">New Buyer Request (Auto-Published)</h2>
           <table cellpadding="8" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
             <tr><td style="font-weight:bold;color:#666">Buyer Name</td><td>${buyerName}</td></tr>
             <tr><td style="font-weight:bold;color:#666">Email</td><td>${buyerEmail}</td></tr>
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
             <tr><td style="font-weight:bold;color:#666">Timeline</td><td>${body.timeline || '—'}</td></tr>
             <tr><td style="font-weight:bold;color:#666">Submitted</td><td>${submittedAt} CT</td></tr>
           </table>
-          <p style="color:#d97706;font-weight:bold;margin-top:16px">⚠ Review at <a href="https://lotscout.com/admin/buyer-requests">lotscout.com/admin/buyer-requests</a></p>
+          <p style="color:#6b7280;margin-top:16px">View at <a href="https://lotscout.com/admin/listings">lotscout.com/admin/listings</a></p>
         `,
       });
 
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
               <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
                 <h2 style="color:#1B4332;margin-top:0">Request Submitted!</h2>
                 <p>Hi ${buyerName},</p>
-                <p>Your buying criteria has been successfully submitted. Our team will review it and your profile will go live within <strong>24 hours</strong>.</p>
+                <p>Your buying criteria has been successfully submitted and is <strong>now live</strong> in the buyer directory.</p>
                 <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin:24px 0">
                   <p style="margin:0 0 12px;color:#666;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Your Criteria</p>
                   <table cellpadding="4" style="font-size:14px;width:100%">
