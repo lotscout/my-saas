@@ -9,7 +9,7 @@ async function checkIsAdmin(): Promise<boolean> {
   if (!user) return false;
   if (isAdminEmail(user.email)) return true;
   const service = createServiceClient();
-  const { data } = await service.from('profiles').select('is_admin').eq('id', user.id).single();
+  const { data } = await service.from('profiles').select('*').eq('id', user.id).single();
   return data?.is_admin === true;
 }
 
@@ -20,10 +20,11 @@ export async function GET() {
 
   const service = createServiceClient();
 
-  // Fetch profiles — only columns that exist in the table
+  // select('*') so the query never fails due to a missing column
+  // (is_admin will appear here once the migration has been run)
   const { data: profiles, error } = await service
     .from('profiles')
-    .select('id, email, first_name, last_name, full_name, company_name, created_at')
+    .select('*')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -41,11 +42,19 @@ export async function GET() {
     tierByUser[s.user_id] = s.tier;
   }
 
-  const users = (profiles ?? []).map(p => ({
-    ...p,
-    tier: tierByUser[p.id] ?? null,
-    // is_admin derived from email until profiles.is_admin column migration runs
-    is_admin: ADMIN_EMAILS.includes(p.email ?? ''),
+  const users = (profiles ?? []).map((p: Record<string, unknown>) => ({
+    id: p.id,
+    email: p.email,
+    first_name: p.first_name,
+    last_name: p.last_name,
+    full_name: p.full_name,
+    company_name: p.company_name,
+    created_at: p.created_at,
+    tier: tierByUser[p.id as string] ?? null,
+    // Use DB value when column exists; fall back to email list until migration runs
+    is_admin: p.is_admin !== undefined
+      ? Boolean(p.is_admin)
+      : ADMIN_EMAILS.includes((p.email as string) ?? ''),
   }));
 
   return NextResponse.json({ users });

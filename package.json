@@ -14,16 +14,16 @@
     "@supabase/supabase-js": "^2.103.0",
     "bad-words": "^4.0.0",
     "next": "16.2.1",
+    "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.12.2",
-    "stripe": "^22.0.1",
-    "pg": "^8.20.0",
-    "@types/pg": "^8.11.0"
+    "stripe": "^22.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",

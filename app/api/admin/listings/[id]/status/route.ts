@@ -10,7 +10,7 @@ async function checkIsAdmin(): Promise<boolean> {
   if (!user) return false;
   if (isAdminEmail(user.email)) return true;
   const service = createServiceClient();
-  const { data } = await service.from('profiles').select('is_admin').eq('id', user.id).single();
+  const { data } = await service.from('profiles').select('*').eq('id', user.id).single();
   return data?.is_admin === true;
 }
 

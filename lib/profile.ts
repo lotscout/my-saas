@@ -18,9 +18,11 @@ export async function getUserProfile(
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return null;
 
+  // select('*') so this never fails due to missing columns
+  // (is_admin will be present once the migration has run)
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, created_at, first_name, last_name, email')
+    .select('*')
     .eq('id', user.id)
     .single();
 
@@ -34,12 +36,18 @@ export async function getUserProfile(
     .eq('status', 'active')
     .single();
 
-  // Admin: email-based check (works without DB column; DB column checked after migration)
-  const is_admin = isAdminEmail(user.email);
+  // Use DB column when it exists; fall back to email list until migration runs
+  const is_admin = data.is_admin !== undefined && data.is_admin !== null
+    ? Boolean(data.is_admin)
+    : isAdminEmail(user.email);
 
   return {
-    ...data,
+    id: data.id,
+    created_at: data.created_at,
+    first_name: data.first_name ?? null,
+    last_name: data.last_name ?? null,
+    email: data.email ?? user.email ?? null,
     tier: (sub?.tier ?? null) as Tier,
     is_admin,
-  } as UserProfile;
+  };
 }
