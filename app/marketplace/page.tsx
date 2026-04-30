@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import ListingLimitBanner from '@/components/ListingLimitBanner';
@@ -666,8 +667,15 @@ export default function MarketplacePage() {
                         )}
                       </div>
 
-                      {/* Contact button */}
-                      <div className="pt-2 mt-auto border-t border-outline-variant/20">
+                      {/* Actions */}
+                      <div className="pt-2 mt-auto border-t border-outline-variant/20 flex flex-col gap-2">
+                        <Link
+                          href={`/buyer-requests/${req.id}`}
+                          className="w-full flex items-center justify-center gap-2 border border-outline-variant/40 text-secondary py-2 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
+                        >
+                          View Buying Criteria
+                          <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                        </Link>
                         {canViewContact ? (
                           <button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
                             <span className="material-symbols-outlined text-base">mail</span>
