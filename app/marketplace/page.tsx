@@ -10,6 +10,19 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
+const STATE_NAMES: Record<string, string> = {
+  'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
+  'colorado':'CO','connecticut':'CT','delaware':'DE','florida':'FL','georgia':'GA',
+  'hawaii':'HI','idaho':'ID','illinois':'IL','indiana':'IN','iowa':'IA','kansas':'KS',
+  'kentucky':'KY','louisiana':'LA','maine':'ME','maryland':'MD','massachusetts':'MA',
+  'michigan':'MI','minnesota':'MN','mississippi':'MS','missouri':'MO','montana':'MT',
+  'nebraska':'NE','nevada':'NV','new hampshire':'NH','new jersey':'NJ','new mexico':'NM',
+  'new york':'NY','north carolina':'NC','north dakota':'ND','ohio':'OH','oklahoma':'OK',
+  'oregon':'OR','pennsylvania':'PA','rhode island':'RI','south carolina':'SC',
+  'south dakota':'SD','tennessee':'TN','texas':'TX','utah':'UT','vermont':'VT',
+  'virginia':'VA','washington':'WA','west virginia':'WV','wisconsin':'WI','wyoming':'WY',
+};
+
 interface Listing {
   id: string;
   title: string | null;
@@ -175,9 +188,20 @@ export default function MarketplacePage() {
   const [filterBudget, setFilterBudget] = useState('');
   const [filterAcreage, setFilterAcreage] = useState('');
   const [filterZoning, setFilterZoning] = useState('');
+  const [filterUtilities, setFilterUtilities] = useState('');
   const [filterUseCase, setFilterUseCase] = useState('');
   const [filterTimeline, setFilterTimeline] = useState('');
+  const [openFilter, setOpenFilter] = useState<string | null>(null);
   const router = useRouter();
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (!(e.target as Element).closest('[data-filter-dropdown]')) setOpenFilter(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
   const isFreeUser = !loading && !tier;
@@ -211,15 +235,60 @@ export default function MarketplacePage() {
   }, [activeTab]);
 
   const filteredListings = useMemo(() => {
-    if (!searchQuery.trim()) return listings;
-    const q = searchQuery.toLowerCase();
-    return listings.filter(l =>
-      (l.title ?? '').toLowerCase().includes(q) ||
-      (l.state ?? '').toLowerCase().includes(q) ||
-      (l.county ?? '').toLowerCase().includes(q) ||
-      (l.zip_code ?? '').includes(q)
-    );
-  }, [listings, searchQuery]);
+    let result = listings;
+
+    // Search — resolves full state names to abbreviations
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const stateAbbrev = STATE_NAMES[q] ??
+        STATE_NAMES[Object.keys(STATE_NAMES).find(k => k.startsWith(q)) ?? ''] ?? '';
+      result = result.filter(l =>
+        (l.title ?? '').toLowerCase().includes(q) ||
+        (l.state ?? '').toLowerCase() === q ||
+        (stateAbbrev && (l.state ?? '').toUpperCase() === stateAbbrev.toUpperCase()) ||
+        (l.county ?? '').toLowerCase().includes(q) ||
+        (l.zip_code ?? '').includes(q)
+      );
+    }
+
+    // Acreage filter
+    if (filterAcreage) {
+      result = result.filter(l => {
+        const acres = l.lot_size_acres ?? (l.lot_size_sqft ? l.lot_size_sqft / 43560 : null);
+        if (acres === null) return true;
+        if (filterAcreage === 'under5') return acres < 5;
+        if (filterAcreage === '5-25') return acres >= 5 && acres <= 25;
+        if (filterAcreage === '25-100') return acres > 25 && acres <= 100;
+        if (filterAcreage === '100-500') return acres > 100 && acres <= 500;
+        if (filterAcreage === '500+') return acres > 500;
+        return true;
+      });
+    }
+
+    // Zoning filter
+    if (filterZoning) {
+      result = result.filter(l => {
+        const z = (l.zoning ?? '').toLowerCase();
+        if (filterZoning === 'agricultural') return /ag|a-1|a-d|ae-|a_1|agricultural/.test(z);
+        if (filterZoning === 'recreational') return z.includes('rec');
+        if (filterZoning === 'residential') return z.includes('res') || z === 'rr' || /rr-/.test(z);
+        if (filterZoning === 'commercial') return z.includes('com');
+        if (filterZoning === 'mixed') return z.includes('mix');
+        if (filterZoning === 'unrestricted') return z.includes('unrest') || z === 'any';
+        return z.includes(filterZoning.toLowerCase());
+      });
+    }
+
+    // Utilities filter
+    if (filterUtilities) {
+      result = result.filter(l => {
+        const utils = (l.utilities ?? []).map((u: string) => u.toLowerCase());
+        return utils.some((u: string) => u.includes(filterUtilities.toLowerCase()));
+      });
+    }
+
+    return result;
+  }, [listings, searchQuery, filterAcreage, filterZoning, filterUtilities]);
 
   const filteredBuyerRequests = useMemo(() => {
     return buyerRequests.filter(req => {
@@ -396,7 +465,7 @@ export default function MarketplacePage() {
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search by zip code, city, county, or state..."
+                  placeholder="Search by zip, city, county, state name or abbreviation..."
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-4 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
                 />
                 {searchQuery && (
@@ -409,14 +478,84 @@ export default function MarketplacePage() {
 
             <div className="grid grid-cols-12 gap-8 mb-12">
               <div className="col-span-12 flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
-                {['Acreage Range', 'Zoning Type', 'Utilities Access'].map(filter => (
-                  <div key={filter} className="group relative">
-                    <button className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary">
-                      {filter}
-                      <span className="material-symbols-outlined text-sm">expand_more</span>
-                    </button>
-                  </div>
-                ))}
+                {/* Acreage Range */}
+                <div className="relative" data-filter-dropdown>
+                  <button
+                    onClick={() => setOpenFilter(openFilter === 'acreage' ? null : 'acreage')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
+                      filterAcreage ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                    }`}
+                  >
+                    {filterAcreage ? { under5: '< 5 Acres', '5-25': '5–25 Acres', '25-100': '25–100 Acres', '100-500': '100–500 Acres', '500+': '500+ Acres' }[filterAcreage] : 'Acreage Range'}
+                    <span className="material-symbols-outlined text-sm">{openFilter === 'acreage' ? 'expand_less' : 'expand_more'}</span>
+                  </button>
+                  {openFilter === 'acreage' && (
+                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-44 py-1 overflow-hidden">
+                      {[['', 'Any Acreage'], ['under5', '< 5 Acres'], ['5-25', '5–25 Acres'], ['25-100', '25–100 Acres'], ['100-500', '100–500 Acres'], ['500+', '500+ Acres']].map(([val, label]) => (
+                        <button key={val} onClick={() => { setFilterAcreage(val); setOpenFilter(null); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors ${
+                            filterAcreage === val ? 'text-primary font-bold' : 'text-on-surface'
+                          }`}>{label}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Zoning Type */}
+                <div className="relative" data-filter-dropdown>
+                  <button
+                    onClick={() => setOpenFilter(openFilter === 'zoning' ? null : 'zoning')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
+                      filterZoning ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                    }`}
+                  >
+                    {filterZoning ? { agricultural: 'Agricultural', recreational: 'Recreational', residential: 'Residential', commercial: 'Commercial', mixed: 'Mixed Use', unrestricted: 'Unrestricted' }[filterZoning] ?? filterZoning : 'Zoning Type'}
+                    <span className="material-symbols-outlined text-sm">{openFilter === 'zoning' ? 'expand_less' : 'expand_more'}</span>
+                  </button>
+                  {openFilter === 'zoning' && (
+                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-44 py-1 overflow-hidden">
+                      {[['', 'Any Zoning'], ['agricultural', 'Agricultural'], ['recreational', 'Recreational'], ['residential', 'Residential'], ['commercial', 'Commercial'], ['mixed', 'Mixed Use'], ['unrestricted', 'Unrestricted']].map(([val, label]) => (
+                        <button key={val} onClick={() => { setFilterZoning(val); setOpenFilter(null); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors ${
+                            filterZoning === val ? 'text-primary font-bold' : 'text-on-surface'
+                          }`}>{label}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Utilities Access */}
+                <div className="relative" data-filter-dropdown>
+                  <button
+                    onClick={() => setOpenFilter(openFilter === 'utilities' ? null : 'utilities')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
+                      filterUtilities ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                    }`}
+                  >
+                    {filterUtilities || 'Utilities Access'}
+                    <span className="material-symbols-outlined text-sm">{openFilter === 'utilities' ? 'expand_less' : 'expand_more'}</span>
+                  </button>
+                  {openFilter === 'utilities' && (
+                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-44 py-1 overflow-hidden">
+                      {[['', 'Any Utilities'], ['Water', 'Water'], ['Electric', 'Electric'], ['Gas', 'Gas'], ['Septic', 'Septic'], ['Sewer', 'Sewer']].map(([val, label]) => (
+                        <button key={val} onClick={() => { setFilterUtilities(val); setOpenFilter(null); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors ${
+                            filterUtilities === val ? 'text-primary font-bold' : 'text-on-surface'
+                          }`}>{label}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {(filterAcreage || filterZoning || filterUtilities) && (
+                  <button
+                    onClick={() => { setFilterAcreage(''); setFilterZoning(''); setFilterUtilities(''); }}
+                    className="flex items-center gap-1 text-xs font-bold text-secondary hover:text-primary transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-sm">close</span>
+                    Clear filters
+                  </button>
+                )}
                 <div className="ml-auto flex items-center gap-3">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort By:</span>
                   <select
