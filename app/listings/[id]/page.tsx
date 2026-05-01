@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import { useUserTier } from '@/hooks/useUserTier';
 
 interface Listing {
@@ -84,12 +83,13 @@ export default function ListingDetailPage() {
         (data.contact_methods as string[]).every((m: string) => m === 'LotScout Messaging');
 
       if (!isMessagingOnly && data.user_id) {
-        const { data: prof } = await supabase
-          .from('profiles')
-          .select('email, phone')
-          .eq('id', data.user_id)
-          .single();
-        if (prof) setSellerContact({ email: prof.email ?? null, phone: (prof as Record<string, unknown>).phone as string ?? null });
+        try {
+          const profRes = await fetch(`/api/profiles/${data.user_id}`);
+          if (profRes.ok) {
+            const prof = await profRes.json();
+            if (prof) setSellerContact({ email: prof.email ?? null, phone: prof.phone ?? null });
+          }
+        } catch { /* no seller contact available */ }
       }
 
       setLoading(false);
