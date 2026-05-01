@@ -70,15 +70,11 @@ export default function ListingDetailPage() {
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const supabase = createClient();
-
-      const { data, error } = await supabase
-        .from('listings')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      // Use service-role API route to bypass RLS for published listings
+      const res = await fetch(`/api/listings/${id}`);
+      if (!res.ok) { setNotFound(true); setLoading(false); return; }
+      const data = await res.json() as Listing;
+      if (!data || !data.id) { setNotFound(true); setLoading(false); return; }
       setListing(data as Listing);
 
       // Only fetch seller contact info for non-test listings with real contact methods
