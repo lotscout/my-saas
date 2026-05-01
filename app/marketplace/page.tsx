@@ -421,11 +421,18 @@ export default function MarketplacePage() {
                         <span className="text-3xl font-black text-primary">{listing.price}</span>
                       </div>
                       <p className="text-slate-500 text-sm mb-4">{listing.location} • {listing.acreage}</p>
-                      <div className="flex flex-wrap gap-2 mb-auto">
+                      <div className="flex flex-wrap gap-2 mb-4">
                         {listing.tags.map(tag => (
                           <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
                         ))}
                       </div>
+                      <Link
+                        href={`/listings/${listing.id}`}
+                        className="mb-3 w-full flex items-center justify-center gap-2 border border-outline-variant/40 text-secondary py-2 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
+                      >
+                        View Listing
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                      </Link>
                       {loading ? (
                         <div className="mt-3 pt-3 border-t border-surface-container space-y-2">
                           <div className="h-3 bg-surface-container-high animate-pulse rounded w-24" />
