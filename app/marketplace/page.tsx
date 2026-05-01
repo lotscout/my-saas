@@ -197,6 +197,12 @@ export default function MarketplacePage() {
   const [filterUtilities, setFilterUtilities] = useState('');
   const [filterUseCase, setFilterUseCase] = useState('');
   const [filterTimeline, setFilterTimeline] = useState('');
+  const [filterLotSizeUnit, setFilterLotSizeUnit] = useState<'acres' | 'sqft'>('acres');
+  const [filterLotSizeAcres, setFilterLotSizeAcres] = useState('');
+  const [filterSqFtMin, setFilterSqFtMin] = useState('');
+  const [filterSqFtMax, setFilterSqFtMax] = useState('');
+  const [filterRoadAccessProps, setFilterRoadAccessProps] = useState('');
+  const [filterRoadAccessBR, setFilterRoadAccessBR] = useState('');
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const router = useRouter();
 
@@ -266,18 +272,36 @@ export default function MarketplacePage() {
       );
     }
 
-    // Acreage filter
-    if (filterAcreage) {
+    // Lot size filter
+    if (filterLotSizeUnit === 'acres' && filterLotSizeAcres) {
       result = result.filter(l => {
         const acres = l.lot_size_acres ?? (l.lot_size_sqft ? l.lot_size_sqft / 43560 : null);
         if (acres === null) return true;
-        if (filterAcreage === 'under5') return acres < 5;
-        if (filterAcreage === '5-25') return acres >= 5 && acres <= 25;
-        if (filterAcreage === '25-100') return acres > 25 && acres <= 100;
-        if (filterAcreage === '100-500') return acres > 100 && acres <= 500;
-        if (filterAcreage === '500+') return acres > 500;
+        if (filterLotSizeAcres === 'under1') return acres < 1;
+        if (filterLotSizeAcres === '1-5') return acres >= 1 && acres < 5;
+        if (filterLotSizeAcres === '5-25') return acres >= 5 && acres <= 25;
+        if (filterLotSizeAcres === '25-100') return acres > 25 && acres <= 100;
+        if (filterLotSizeAcres === '100-500') return acres > 100 && acres <= 500;
+        if (filterLotSizeAcres === '500+') return acres > 500;
         return true;
       });
+    } else if (filterLotSizeUnit === 'sqft' && (filterSqFtMin || filterSqFtMax)) {
+      const minSqft = filterSqFtMin ? Number(filterSqFtMin) : null;
+      const maxSqft = filterSqFtMax ? Number(filterSqFtMax) : null;
+      result = result.filter(l => {
+        const sqft = l.lot_size_sqft ?? (l.lot_size_acres ? Math.round(l.lot_size_acres * 43560) : null);
+        if (sqft === null) return true;
+        if (minSqft && sqft < minSqft) return false;
+        if (maxSqft && sqft > maxSqft) return false;
+        return true;
+      });
+    }
+
+    // Road access filter
+    if (filterRoadAccessProps) {
+      result = result.filter(l =>
+        (l.road_access ?? []).some((r: string) => r.toLowerCase().includes(filterRoadAccessProps.toLowerCase()))
+      );
     }
 
     // Zoning filter
@@ -303,7 +327,7 @@ export default function MarketplacePage() {
     }
 
     return result;
-  }, [listings, searchQuery, filterAcreage, filterZoning, filterUtilities]);
+  }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeAcres, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities]);
 
   const filteredBuyerRequests = useMemo(() => {
     return buyerRequests.filter(req => {
@@ -343,9 +367,13 @@ export default function MarketplacePage() {
       if (filterTimeline) {
         if ((req.timeline ?? '').toLowerCase() !== filterTimeline.toLowerCase()) return false;
       }
+      if (filterRoadAccessBR) {
+        const roads = ((req as unknown as Record<string, unknown>).road_access ?? []) as string[];
+        if (!roads.some((r: string) => r.toLowerCase().includes(filterRoadAccessBR.toLowerCase()))) return false;
+      }
       return true;
     });
-  }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoning, filterUseCase, filterTimeline]);
+  }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoning, filterUseCase, filterTimeline, filterRoadAccessBR]);
 
   function handleCreateListing() {
     if (loading) return;
@@ -507,28 +535,81 @@ export default function MarketplacePage() {
 
             <div className="grid grid-cols-12 gap-8 mb-12">
               <div className="col-span-12 flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
-                {/* Acreage Range */}
-                <div className="relative" data-filter-dropdown>
-                  <button
-                    onClick={() => setOpenFilter(openFilter === 'acreage' ? null : 'acreage')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
-                      filterAcreage ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
-                    }`}
-                  >
-                    {filterAcreage ? { under5: '< 5 Acres', '5-25': '5–25 Acres', '25-100': '25–100 Acres', '100-500': '100–500 Acres', '500+': '500+ Acres' }[filterAcreage] : 'Acreage Range'}
-                    <span className="material-symbols-outlined text-sm">{openFilter === 'acreage' ? 'expand_less' : 'expand_more'}</span>
-                  </button>
-                  {openFilter === 'acreage' && (
-                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-44 py-1 overflow-hidden">
-                      {[['', 'Any Acreage'], ['under5', '< 5 Acres'], ['5-25', '5–25 Acres'], ['25-100', '25–100 Acres'], ['100-500', '100–500 Acres'], ['500+', '500+ Acres']].map(([val, label]) => (
-                        <button key={val} onClick={() => { setFilterAcreage(val); setOpenFilter(null); }}
-                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors ${
-                            filterAcreage === val ? 'text-primary font-bold' : 'text-on-surface'
-                          }`}>{label}</button>
-                      ))}
+                {/* Lot Size */}
+                {(() => {
+                  const lotSizeActive = filterLotSizeAcres || (filterLotSizeUnit === 'sqft' && (filterSqFtMin || filterSqFtMax));
+                  const acresLabels: Record<string, string> = { under1: '< 1 Acre', '1-5': '1–5 Acres', '5-25': '5–25 Acres', '25-100': '25–100 Acres', '100-500': '100–500 Acres', '500+': '500+ Acres' };
+                  const btnLabel = lotSizeActive
+                    ? (filterLotSizeUnit === 'acres' ? acresLabels[filterLotSizeAcres] : 'Lot Size (Sq Ft)')
+                    : 'Lot Size';
+                  return (
+                    <div className="relative" data-filter-dropdown>
+                      <button
+                        onClick={() => setOpenFilter(openFilter === 'lotsize' ? null : 'lotsize')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
+                          lotSizeActive ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                        }`}
+                      >
+                        {btnLabel}
+                        <span className="material-symbols-outlined text-sm">{openFilter === 'lotsize' ? 'expand_less' : 'expand_more'}</span>
+                      </button>
+                      {openFilter === 'lotsize' && (
+                        <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 w-64 p-4 overflow-hidden">
+                          {/* Unit toggle */}
+                          <div className="flex gap-1 bg-surface-container-low rounded-lg p-1 mb-4">
+                            {(['acres', 'sqft'] as const).map(u => (
+                              <button
+                                key={u}
+                                onClick={() => { setFilterLotSizeUnit(u); setFilterLotSizeAcres(''); setFilterSqFtMin(''); setFilterSqFtMax(''); }}
+                                className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all ${filterLotSizeUnit === u ? 'bg-white text-primary shadow-sm' : 'text-secondary hover:text-on-surface'}`}
+                              >
+                                {u === 'acres' ? 'Acres' : 'Sq Ft'}
+                              </button>
+                            ))}
+                          </div>
+                          {filterLotSizeUnit === 'acres' ? (
+                            <div className="space-y-0.5">
+                              {[['', 'Any Size'], ['under1', 'Under 1 Acre'], ['1-5', '1–5 Acres'], ['5-25', '5–25 Acres'], ['25-100', '25–100 Acres'], ['100-500', '100–500 Acres'], ['500+', '500+ Acres']].map(([val, label]) => (
+                                <button key={val} onClick={() => { setFilterLotSizeAcres(val); setOpenFilter(null); }}
+                                  className={`w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-surface-container-low transition-colors ${filterLotSizeAcres === val ? 'text-primary font-bold' : 'text-on-surface'}`}
+                                >{label}</button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <div>
+                                <label className="text-xs font-semibold text-secondary block mb-1">Min Sq Ft</label>
+                                <input
+                                  type="number"
+                                  placeholder="e.g. 5000"
+                                  value={filterSqFtMin}
+                                  onChange={e => setFilterSqFtMin(e.target.value)}
+                                  className="w-full border border-outline-variant/25 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs font-semibold text-secondary block mb-1">Max Sq Ft</label>
+                                <input
+                                  type="number"
+                                  placeholder="e.g. 50000"
+                                  value={filterSqFtMax}
+                                  onChange={e => setFilterSqFtMax(e.target.value)}
+                                  className="w-full border border-outline-variant/25 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                              </div>
+                              <button
+                                onClick={() => setOpenFilter(null)}
+                                className="w-full bg-primary text-white py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors"
+                              >
+                                Apply
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  );
+                })()}
 
                 {/* Zoning Type */}
                 <div className="relative" data-filter-dropdown>
@@ -576,9 +657,32 @@ export default function MarketplacePage() {
                   )}
                 </div>
 
-                {(filterAcreage || filterZoning || filterUtilities) && (
+                {/* Road Access */}
+                <div className="relative" data-filter-dropdown>
                   <button
-                    onClick={() => { setFilterAcreage(''); setFilterZoning(''); setFilterUtilities(''); }}
+                    onClick={() => setOpenFilter(openFilter === 'roadaccess' ? null : 'roadaccess')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
+                      filterRoadAccessProps ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                    }`}
+                  >
+                    {filterRoadAccessProps || 'Road Access'}
+                    <span className="material-symbols-outlined text-sm">{openFilter === 'roadaccess' ? 'expand_less' : 'expand_more'}</span>
+                  </button>
+                  {openFilter === 'roadaccess' && (
+                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-48 py-1 overflow-hidden">
+                      {[['', 'Any Road Access'], ['Paved Road', 'Paved Road'], ['Gravel Road', 'Gravel Road'], ['Dirt Road', 'Dirt Road'], ['Private Road', 'Private Road'], ['Easement', 'Easement'], ['No Road Access', 'No Road Access']].map(([val, label]) => (
+                        <button key={val} onClick={() => { setFilterRoadAccessProps(val); setOpenFilter(null); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors ${
+                            filterRoadAccessProps === val ? 'text-primary font-bold' : 'text-on-surface'
+                          }`}>{label}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {(filterLotSizeAcres || filterSqFtMin || filterSqFtMax || filterZoning || filterUtilities || filterRoadAccessProps) && (
+                  <button
+                    onClick={() => { setFilterLotSizeAcres(''); setFilterSqFtMin(''); setFilterSqFtMax(''); setFilterZoning(''); setFilterUtilities(''); setFilterRoadAccessProps(''); }}
                     className="flex items-center gap-1 text-xs font-bold text-secondary hover:text-primary transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">close</span>
@@ -806,9 +910,22 @@ export default function MarketplacePage() {
                 <option value="3-6 months">3–6 months</option>
                 <option value="6+ months">6+ months</option>
               </select>
-              {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || buyerSearchQuery) && (
+              <select
+                value={filterRoadAccessBR}
+                onChange={e => setFilterRoadAccessBR(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Road Access</option>
+                <option value="Paved Road">Paved Road</option>
+                <option value="Gravel Road">Gravel Road</option>
+                <option value="Dirt Road">Dirt Road</option>
+                <option value="Private Road">Private Road</option>
+                <option value="Easement">Easement</option>
+                <option value="No Road Access">No Road Access</option>
+              </select>
+              {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || filterRoadAccessBR || buyerSearchQuery) && (
                 <button
-                  onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterUseCase(''); setFilterTimeline(''); setBuyerSearchQuery(''); }}
+                  onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterUseCase(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBuyerSearchQuery(''); }}
                   className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-sm">close</span>

@@ -332,18 +332,21 @@ export default function BuyerDirectoryPage() {
   const [nationalBuyers, setNationalBuyers] = useState<BuyerRequest[]>([]);
   const [nationalLoading, setNationalLoading] = useState(false);
   const [nationalUseCase, setNationalUseCase] = useState('');
+  const [nationalRoadAccess, setNationalRoadAccess] = useState('');
 
   // ── By-state buyers ──
   const [selectedState, setSelectedState] = useState('');
   const [stateBuyers, setStateBuyers] = useState<BuyerRequest[]>([]);
   const [stateLoading, setStateLoading] = useState(false);
   const [stateSearched, setStateSearched] = useState('');
+  const [stateRoadAccess, setStateRoadAccess] = useState('');
 
   // ── Active buyers ──
   const [activeBuyers, setActiveBuyers] = useState<BuyerRequest[]>([]);
   const [activeLoading, setActiveLoading] = useState(false);
   const [activeStateFilter, setActiveStateFilter] = useState('');
   const [activeUseCaseFilter, setActiveUseCaseFilter] = useState('');
+  const [activeRoadAccess, setActiveRoadAccess] = useState('');
 
   // ── Buyer requests tab ──
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
@@ -354,6 +357,7 @@ export default function BuyerDirectoryPage() {
   const [filterZoning, setFilterZoning] = useState('');
   const [filterUseCase, setFilterUseCase] = useState('');
   const [filterTimeline, setFilterTimeline] = useState('');
+  const [filterRoadAccessBR, setFilterRoadAccessBR] = useState('');
 
   // ── Data fetching ──
 
@@ -417,9 +421,11 @@ export default function BuyerDirectoryPage() {
       const uc = (r.use_case ?? '').toLowerCase();
       const matchSearch = !q || name.includes(q) || co.includes(q) || state.includes(q) || uc.includes(q);
       const matchUC = !nationalUseCase || uc.includes(nationalUseCase.toLowerCase());
-      return matchSearch && matchUC;
+      const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
+      const matchRoad = !nationalRoadAccess || roads.some(rd => rd.toLowerCase().includes(nationalRoadAccess.toLowerCase()));
+      return matchSearch && matchUC && matchRoad;
     });
-  }, [nationalBuyers, globalSearch, nationalUseCase]);
+  }, [nationalBuyers, globalSearch, nationalUseCase, nationalRoadAccess]);
 
   const filteredActive = useMemo(() => {
     const q = globalSearch.toLowerCase();
@@ -431,9 +437,11 @@ export default function BuyerDirectoryPage() {
       const matchSearch = !q || name.includes(q) || co.includes(q) || state.includes(q) || uc.includes(q);
       const matchState = !activeStateFilter || state === activeStateFilter.toLowerCase();
       const matchUC = !activeUseCaseFilter || uc.includes(activeUseCaseFilter.toLowerCase());
-      return matchSearch && matchState && matchUC;
+      const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
+      const matchRoad = !activeRoadAccess || roads.some(rd => rd.toLowerCase().includes(activeRoadAccess.toLowerCase()));
+      return matchSearch && matchState && matchUC && matchRoad;
     });
-  }, [activeBuyers, globalSearch, activeStateFilter, activeUseCaseFilter]);
+  }, [activeBuyers, globalSearch, activeStateFilter, activeUseCaseFilter, activeRoadAccess]);
 
   const filteredBR = useMemo(() => {
     return buyerRequests.filter(r => {
@@ -447,9 +455,11 @@ export default function BuyerDirectoryPage() {
       const matchZoning = !filterZoning || (r.zoning_preference ?? []).some(z => z.toLowerCase().includes(filterZoning));
       const matchUC = !filterUseCase || uc.includes(filterUseCase);
       const matchTimeline = !filterTimeline || (r.timeline ?? '').includes(filterTimeline);
-      return matchSearch && matchBudget && matchAcreage && matchZoning && matchUC && matchTimeline;
+      const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
+      const matchRoad = !filterRoadAccessBR || roads.some(rd => rd.toLowerCase().includes(filterRoadAccessBR.toLowerCase()));
+      return matchSearch && matchBudget && matchAcreage && matchZoning && matchUC && matchTimeline && matchRoad;
     });
-  }, [buyerRequests, brSearch, filterBudget, filterAcreage, filterZoning, filterUseCase, filterTimeline]);
+  }, [buyerRequests, brSearch, filterBudget, filterAcreage, filterZoning, filterUseCase, filterTimeline, filterRoadAccessBR]);
 
   // ── Helpers ──
 
@@ -642,8 +652,17 @@ export default function BuyerDirectoryPage() {
                       <option value="conservation">Conservation</option>
                       <option value="investment">Investment</option>
                     </select>
-                    {nationalUseCase && (
-                      <button onClick={() => setNationalUseCase('')} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
+                    <select value={nationalRoadAccess} onChange={e => setNationalRoadAccess(e.target.value)} className={SELECT_CLS}>
+                      <option value="">Road Access</option>
+                      <option value="Paved Road">Paved Road</option>
+                      <option value="Gravel Road">Gravel Road</option>
+                      <option value="Dirt Road">Dirt Road</option>
+                      <option value="Private Road">Private Road</option>
+                      <option value="Easement">Easement</option>
+                      <option value="No Road Access">No Road Access</option>
+                    </select>
+                    {(nationalUseCase || nationalRoadAccess) && (
+                      <button onClick={() => { setNationalUseCase(''); setNationalRoadAccess(''); }} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
                         <span className="material-symbols-outlined text-sm">close</span> Clear
                       </button>
                     )}
@@ -717,31 +736,55 @@ export default function BuyerDirectoryPage() {
                     </div>
                   </div>
 
-                  {stateSearched && !stateLoading && (
-                    <>
-                      <p className="text-sm text-secondary mb-4">
-                        Showing top {stateBuyers.length} buyer{stateBuyers.length !== 1 ? 's' : ''} in <strong className="text-on-surface">{stateSearched}</strong>
-                      </p>
-                      {stateBuyers.length === 0 ? (
-                        <div className="text-center py-16 text-secondary">
-                          <span className="material-symbols-outlined text-5xl mb-3 block text-primary/20">location_off</span>
-                          <p className="font-semibold">No buyers found in {stateSearched}</p>
-                          <p className="text-sm mt-1">Try searching a different state</p>
+                  {stateSearched && !stateLoading && (() => {
+                    const filteredState = stateRoadAccess
+                      ? stateBuyers.filter(r => {
+                          const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
+                          return roads.some(rd => rd.toLowerCase().includes(stateRoadAccess.toLowerCase()));
+                        })
+                      : stateBuyers;
+                    return (
+                      <>
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                          <p className="text-sm text-secondary">
+                            Showing top {filteredState.length} buyer{filteredState.length !== 1 ? 's' : ''} in <strong className="text-on-surface">{stateSearched}</strong>
+                          </p>
+                          <select value={stateRoadAccess} onChange={e => setStateRoadAccess(e.target.value)} className={SELECT_CLS}>
+                            <option value="">Road Access</option>
+                            <option value="Paved Road">Paved Road</option>
+                            <option value="Gravel Road">Gravel Road</option>
+                            <option value="Dirt Road">Dirt Road</option>
+                            <option value="Private Road">Private Road</option>
+                            <option value="Easement">Easement</option>
+                            <option value="No Road Access">No Road Access</option>
+                          </select>
+                          {stateRoadAccess && (
+                            <button onClick={() => setStateRoadAccess('')} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
+                              <span className="material-symbols-outlined text-sm">close</span> Clear
+                            </button>
+                          )}
                         </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {stateBuyers.map((req, i) => (
-                            <div key={req.id} className="flex items-center gap-3">
-                              <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
-                              <div className="flex-1">
-                                <BuyerRow req={req} canViewContact={canViewContact} onUpgrade={() => setShowUpgradeModal(true)} showTimeline />
+                        {filteredState.length === 0 ? (
+                          <div className="text-center py-16 text-secondary">
+                            <span className="material-symbols-outlined text-5xl mb-3 block text-primary/20">location_off</span>
+                            <p className="font-semibold">{stateBuyers.length === 0 ? `No buyers found in ${stateSearched}` : 'No buyers match these filters'}</p>
+                            <p className="text-sm mt-1">Try a different state or clear your filters</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {filteredState.map((req, i) => (
+                              <div key={req.id} className="flex items-center gap-3">
+                                <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
+                                <div className="flex-1">
+                                  <BuyerRow req={req} canViewContact={canViewContact} onUpgrade={() => setShowUpgradeModal(true)} showTimeline />
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               )}
 
@@ -772,8 +815,17 @@ export default function BuyerDirectoryPage() {
                       <option value="conservation">Conservation</option>
                       <option value="investment">Investment</option>
                     </select>
-                    {(activeStateFilter || activeUseCaseFilter) && (
-                      <button onClick={() => { setActiveStateFilter(''); setActiveUseCaseFilter(''); }} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
+                    <select value={activeRoadAccess} onChange={e => setActiveRoadAccess(e.target.value)} className={SELECT_CLS}>
+                      <option value="">Road Access</option>
+                      <option value="Paved Road">Paved Road</option>
+                      <option value="Gravel Road">Gravel Road</option>
+                      <option value="Dirt Road">Dirt Road</option>
+                      <option value="Private Road">Private Road</option>
+                      <option value="Easement">Easement</option>
+                      <option value="No Road Access">No Road Access</option>
+                    </select>
+                    {(activeStateFilter || activeUseCaseFilter || activeRoadAccess) && (
+                      <button onClick={() => { setActiveStateFilter(''); setActiveUseCaseFilter(''); setActiveRoadAccess(''); }} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
                         <span className="material-symbols-outlined text-sm">close</span> Clear filters
                       </button>
                     )}
@@ -871,9 +923,18 @@ export default function BuyerDirectoryPage() {
                   <option value="3-6 months">3–6 months</option>
                   <option value="6+ months">6+ months</option>
                 </select>
-                {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || brSearch) && (
+                <select value={filterRoadAccessBR} onChange={e => setFilterRoadAccessBR(e.target.value)} className={SELECT_CLS}>
+                  <option value="">Road Access</option>
+                  <option value="Paved Road">Paved Road</option>
+                  <option value="Gravel Road">Gravel Road</option>
+                  <option value="Dirt Road">Dirt Road</option>
+                  <option value="Private Road">Private Road</option>
+                  <option value="Easement">Easement</option>
+                  <option value="No Road Access">No Road Access</option>
+                </select>
+                {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || filterRoadAccessBR || brSearch) && (
                   <button
-                    onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterUseCase(''); setFilterTimeline(''); setBrSearch(''); setGlobalSearch(''); }}
+                    onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterUseCase(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBrSearch(''); setGlobalSearch(''); }}
                     className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">close</span>
