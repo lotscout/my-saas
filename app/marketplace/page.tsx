@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import dynamic from 'next/dynamic';
+
+const ListingsMap = dynamic(() => import('@/components/ListingsMap'), { ssr: false, loading: () => <div className="w-full rounded-2xl bg-surface-container-low animate-pulse" style={{height:'600px'}} /> });
 import Link from 'next/link';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
@@ -181,6 +184,9 @@ export default function MarketplacePage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsSort, setListingsSort] = useState('newest');
+  const [viewMode, setViewMode] = useState<'grid'|'map'>('grid');
+  const [mapListings, setMapListings] = useState<unknown[]>([]);
+  const [mapLoading, setMapLoading] = useState(false);
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
   const [buyerRequestsLoading, setBuyerRequestsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -206,6 +212,15 @@ export default function MarketplacePage() {
   const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
   const isFreeUser = !loading && !tier;
   const isPaidUser = !loading && !!tier;
+
+  useEffect(() => {
+    if (viewMode !== 'map' || mapListings.length > 0) return;
+    setMapLoading(true);
+    fetch('/api/listings/map')
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setMapListings(data); setMapLoading(false); })
+      .catch(() => setMapLoading(false));
+  }, [viewMode, mapListings.length]);
 
   useEffect(() => {
     setListingsLoading(true);
@@ -419,8 +434,22 @@ export default function MarketplacePage() {
             </p>
           </div>
           <div className="flex gap-2 bg-surface-container p-1 rounded-xl">
-            <button className="px-6 py-2 bg-surface-container-lowest shadow-sm rounded-lg text-sm font-bold text-primary">Grid</button>
-            <button className="px-6 py-2 text-slate-500 text-sm font-medium hover:text-primary transition-colors">Map View</button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                viewMode === 'grid' ? 'bg-surface-container-lowest shadow-sm text-primary' : 'text-slate-500 hover:text-primary'
+              }`}
+            >
+              <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">grid_view</span>Grid</span>
+            </button>
+            <button
+              onClick={() => setViewMode('map')}
+              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                viewMode === 'map' ? 'bg-surface-container-lowest shadow-sm text-primary' : 'text-slate-500 hover:text-primary'
+              }`}
+            >
+              <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">map</span>Map View</span>
+            </button>
           </div>
         </section>
 
@@ -572,7 +601,14 @@ export default function MarketplacePage() {
               </div>
             </div>
 
-            {listingsLoading ? (
+            {viewMode === 'map' ? (
+              mapLoading ? (
+                <div className="w-full rounded-2xl bg-surface-container-low animate-pulse" style={{height:'600px'}} />
+              ) : (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                <ListingsMap listings={mapListings as any} />
+              )
+            ) : listingsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                 {[1,2,3,4,5,6].map(i => (
                   <div key={i} className="flex flex-col animate-pulse">
