@@ -10,7 +10,45 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-const LISTINGS = [
+interface Listing {
+  id: string;
+  title: string | null;
+  property_description: string | null;
+  state: string | null;
+  county: string | null;
+  zip_code: string | null;
+  street_address: string | null;
+  lot_size_acres: number | null;
+  lot_size_sqft: number | null;
+  zoning: string | null;
+  road_access: string[];
+  utilities: string[];
+  asking_price: number | null;
+  price_negotiable: boolean;
+  ownership_type: string | null;
+  contact_methods: string[];
+  status: string;
+  photos_urls: string[] | null;
+  digital_signature: string | null;
+  created_at: string;
+}
+
+function formatPrice(n: number | null): string {
+  if (!n) return 'Price on Request';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`;
+  if (n >= 1_000) return `$${Math.round(n / 1_000)}k`;
+  return `$${n.toLocaleString()}`;
+}
+
+function formatAcreage(acres: number | null, sqft: number | null): string {
+  if (acres) return `${acres.toLocaleString()} Acres`;
+  if (sqft) return `${sqft.toLocaleString()} Sq Ft`;
+  return '';
+}
+
+const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80';
+
+const _LISTINGS_LEGACY = [
   {
     id: 1,
     title: 'Elderwood Peak Estates',
@@ -78,23 +116,18 @@ const LISTINGS = [
   },
 ];
 
-function SellerContact({ seller, userId }: { seller: typeof LISTINGS[0]['seller']; userId?: string }) {
+function SellerContact({ name, listingId }: { name: string | null; listingId: string }) {
   return (
     <div className="pt-3 mt-3 border-t border-surface-container">
       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Listed By</p>
-      {userId ? (
-        <Link href={`/sellers/${userId}`} className="text-sm font-bold text-primary mb-1 hover:underline block">{seller.name}</Link>
-      ) : (
-        <p className="text-sm font-bold text-primary mb-1">{seller.name}</p>
-      )}
-      <div className="space-y-0.5">
-        <p className="text-xs text-slate-500 flex items-center gap-1">
-          <span className="material-symbols-outlined text-xs">mail</span>{seller.email}
-        </p>
-        <p className="text-xs text-slate-500 flex items-center gap-1">
-          <span className="material-symbols-outlined text-xs">phone</span>{seller.phone}
-        </p>
-      </div>
+      <p className="text-sm font-bold text-primary mb-2">{name || 'Private Seller'}</p>
+      <Link
+        href={`/listings/${listingId}`}
+        className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2 rounded-xl font-bold text-xs hover:bg-primary/90 transition-colors"
+      >
+        <span className="material-symbols-outlined text-sm">forum</span>
+        Contact via LotScout
+      </Link>
     </div>
   );
 }
@@ -132,6 +165,9 @@ export default function MarketplacePage() {
   const [showBuyerFreeModal, setShowBuyerFreeModal] = useState(false);
   const [showContactUpgradeModal, setShowContactUpgradeModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'properties' | 'buyer-requests'>('properties');
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [listingsSort, setListingsSort] = useState('newest');
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
   const [buyerRequestsLoading, setBuyerRequestsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -146,6 +182,26 @@ export default function MarketplacePage() {
   const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
   const isFreeUser = !loading && !tier;
   const isPaidUser = !loading && !!tier;
+
+  useEffect(() => {
+    setListingsLoading(true);
+    const supabase = createClient();
+    const orderCol = listingsSort === 'price_desc' ? 'asking_price'
+      : listingsSort === 'price_asc' ? 'asking_price'
+      : listingsSort === 'acres_desc' ? 'lot_size_acres'
+      : 'created_at';
+    const ascending = listingsSort === 'price_asc';
+    supabase
+      .from('listings')
+      .select('id,title,property_description,state,county,zip_code,street_address,lot_size_acres,lot_size_sqft,zoning,road_access,utilities,asking_price,price_negotiable,ownership_type,contact_methods,status,photos_urls,digital_signature,created_at')
+      .eq('status', 'published')
+      .order(orderCol, { ascending })
+      .limit(200)
+      .then(({ data, error }) => {
+        if (!error) setListings((data as Listing[]) ?? []);
+        setListingsLoading(false);
+      });
+  }, [listingsSort]);
 
   useEffect(() => {
     if (activeTab !== 'buyer-requests') return;
@@ -163,12 +219,15 @@ export default function MarketplacePage() {
   }, [activeTab]);
 
   const filteredListings = useMemo(() => {
-    if (!searchQuery.trim()) return LISTINGS;
+    if (!searchQuery.trim()) return listings;
     const q = searchQuery.toLowerCase();
-    return LISTINGS.filter(l =>
-      l.location.toLowerCase().includes(q) || l.title.toLowerCase().includes(q)
+    return listings.filter(l =>
+      (l.title ?? '').toLowerCase().includes(q) ||
+      (l.state ?? '').toLowerCase().includes(q) ||
+      (l.county ?? '').toLowerCase().includes(q) ||
+      (l.zip_code ?? '').includes(q)
     );
-  }, [searchQuery]);
+  }, [listings, searchQuery]);
 
   const filteredBuyerRequests = useMemo(() => {
     return buyerRequests.filter(req => {
@@ -368,16 +427,37 @@ export default function MarketplacePage() {
                 ))}
                 <div className="ml-auto flex items-center gap-3">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort By:</span>
-                  <select className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer">
-                    <option>Newest First</option>
-                    <option>Price: High to Low</option>
-                    <option>Acreage: Largest</option>
+                  <select
+                    value={listingsSort}
+                    onChange={e => setListingsSort(e.target.value)}
+                    className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="price_desc">Price: High to Low</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="acres_desc">Acreage: Largest</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            {filteredListings.length === 0 ? (
+            {listingsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} className="flex flex-col animate-pulse">
+                    <div className="rounded-2xl bg-surface-container-low aspect-video mb-6" />
+                    <div className="px-2 space-y-3">
+                      <div className="flex justify-between">
+                        <div className="h-5 bg-surface-container-high rounded w-40" />
+                        <div className="h-5 bg-surface-container-high rounded w-20" />
+                      </div>
+                      <div className="h-3 bg-surface-container-high rounded w-32" />
+                      <div className="h-3 bg-surface-container-high rounded w-24" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredListings.length === 0 ? (
               <div className="text-center py-20 text-secondary">
                 <span className="material-symbols-outlined text-5xl mb-4 block">search_off</span>
                 <p className="font-headline text-xl font-bold text-primary mb-2">No listings found</p>
@@ -385,80 +465,72 @@ export default function MarketplacePage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {filteredListings.map(listing => (
-                  <div key={listing.id} className="flex flex-col group">
-                    <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img alt={listing.imgAlt} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src={listing.img} />
-                      {listing.promoted && (
+                {filteredListings.map(listing => {
+                  const imgSrc = listing.photos_urls?.[0] ?? PLACEHOLDER_IMG;
+                  const location = [listing.county, listing.state].filter(Boolean).join(', ');
+                  const acreage = formatAcreage(listing.lot_size_acres, listing.lot_size_sqft);
+                  const price = formatPrice(listing.asking_price);
+                  const tags = [listing.zoning, ...(listing.road_access ?? []).slice(0,1)].filter(Boolean) as string[];
+                  return (
+                    <div key={listing.id} className="flex flex-col group">
+                      <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img alt={listing.title ?? 'Land listing'} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src={imgSrc} />
+                        {listing.zoning && (
+                          <div className="absolute top-4 right-4">
+                            <span className="bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.zoning}</span>
+                          </div>
+                        )}
                         <div className="absolute top-4 left-4">
-                          <span className="bg-amber-400 text-amber-950 px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[12px]">workspace_premium</span>Promoted
-                          </span>
-                        </div>
-                      )}
-                      {listing.badge?.position === 'top-right' && (
-                        <div className="absolute top-4 right-4">
-                          <span className="bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.badge.label}</span>
-                        </div>
-                      )}
-                      {listing.badge?.position === 'bottom-left' && (
-                        <div className="absolute bottom-4 left-4">
-                          <span className="bg-primary/90 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.badge.label}</span>
-                        </div>
-                      )}
-                      {!listing.promoted && !listing.badge && (
-                        <div className="absolute top-4 right-4">
                           <button className="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm text-primary hover:scale-110 transition-transform">
                             <span className="material-symbols-outlined text-lg">favorite</span>
                           </button>
                         </div>
-                      )}
-                    </div>
-                    <div className="px-2 flex-1 flex flex-col">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-2xl font-black text-primary">{listing.title}</h3>
-                        <span className="text-3xl font-black text-primary">{listing.price}</span>
                       </div>
-                      <p className="text-slate-500 text-sm mb-4">{listing.location} • {listing.acreage}</p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {listing.tags.map(tag => (
-                          <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
-                        ))}
+                      <div className="px-2 flex-1 flex flex-col">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-xl font-black text-primary leading-tight pr-2">{listing.title}</h3>
+                          <span className="text-2xl font-black text-primary whitespace-nowrap">{price}</span>
+                        </div>
+                        <p className="text-slate-500 text-sm mb-4">{location}{acreage ? ` • ${acreage}` : ''}</p>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {tags.map(tag => (
+                            <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
+                          ))}
+                        </div>
+                        <Link
+                          href={`/listings/${listing.id}`}
+                          className="mb-3 w-full flex items-center justify-center gap-2 border border-outline-variant/40 text-secondary py-2 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
+                        >
+                          View Listing
+                          <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                        </Link>
+                        {loading ? (
+                          <div className="mt-3 pt-3 border-t border-surface-container space-y-2">
+                            <div className="h-3 bg-surface-container-high animate-pulse rounded w-24" />
+                            <div className="h-3 bg-surface-container-high animate-pulse rounded w-40" />
+                          </div>
+                        ) : canViewContact ? (
+                          <SellerContact name={listing.digital_signature} listingId={listing.id} />
+                        ) : isFreeUser ? (
+                          <div className="pt-3 mt-3 border-t border-surface-container">
+                            <button
+                              onClick={() => setShowContactUpgradeModal(true)}
+                              className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-base">lock</span>
+                              Upgrade to Contact Seller
+                            </button>
+                          </div>
+                        ) : (
+                          <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
+                            <SellerContact name={listing.digital_signature} listingId={listing.id} />
+                          </LockedFeature>
+                        )}
                       </div>
-                      <Link
-                        href={`/listings/${listing.id}`}
-                        className="mb-3 w-full flex items-center justify-center gap-2 border border-outline-variant/40 text-secondary py-2 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
-                      >
-                        View Listing
-                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                      </Link>
-                      {loading ? (
-                        <div className="mt-3 pt-3 border-t border-surface-container space-y-2">
-                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-24" />
-                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-40" />
-                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-36" />
-                        </div>
-                      ) : canViewContact ? (
-                        <SellerContact seller={listing.seller} />
-                      ) : isFreeUser ? (
-                        <div className="pt-3 mt-3 border-t border-surface-container">
-                          <button
-                            onClick={() => setShowContactUpgradeModal(true)}
-                            className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-base">lock</span>
-                            Upgrade to Contact Seller
-                          </button>
-                        </div>
-                      ) : (
-                        <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
-                          <SellerContact seller={listing.seller} />
-                        </LockedFeature>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>
