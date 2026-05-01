@@ -2,7 +2,8 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { NextResponse } from 'next/server';
 import COUNTY_CENTROIDS from '@/lib/county-centroids.json';
 
-const centroids = COUNTY_CENTROIDS as Record<string, [number, number] | null>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const centroids = COUNTY_CENTROIDS as Record<string, any>;
 
 export async function GET() {
   const supabase = createServiceClient();
