@@ -185,22 +185,14 @@ export default function MarketplacePage() {
 
   useEffect(() => {
     setListingsLoading(true);
-    const supabase = createClient();
-    const orderCol = listingsSort === 'price_desc' ? 'asking_price'
-      : listingsSort === 'price_asc' ? 'asking_price'
-      : listingsSort === 'acres_desc' ? 'lot_size_acres'
-      : 'created_at';
-    const ascending = listingsSort === 'price_asc';
-    supabase
-      .from('listings')
-      .select('id,title,property_description,state,county,zip_code,street_address,lot_size_acres,lot_size_sqft,zoning,road_access,utilities,asking_price,price_negotiable,ownership_type,contact_methods,status,photos_urls,digital_signature,created_at')
-      .eq('status', 'published')
-      .order(orderCol, { ascending })
-      .limit(200)
-      .then(({ data, error }) => {
-        if (!error) setListings((data as Listing[]) ?? []);
+    const params = new URLSearchParams({ sort: listingsSort, limit: '200' });
+    fetch(`/api/listings?${params}`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setListings(data as Listing[]);
         setListingsLoading(false);
-      });
+      })
+      .catch(() => setListingsLoading(false));
   }, [listingsSort]);
 
   useEffect(() => {
