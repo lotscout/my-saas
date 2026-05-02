@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('listings')
-      .select('id,title,state,county,zip_code,lot_size_acres,asking_price,zoning,road_access,utilities,photos_urls,user_id,created_at,status,lat,lng,promoted')
+      .select('id,title,state,county,zip_code,lot_size_acres,asking_price,zoning,road_access,utilities,photos_urls,user_id,created_at,status,lat,lng')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(limit);
