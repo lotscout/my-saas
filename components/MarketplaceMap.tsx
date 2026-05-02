@@ -36,14 +36,16 @@ function FitBounds({ listings }: { listings: MapListing[] }) {
 
 const promotedIcon = new L.DivIcon({
   className: '',
-  html: `<div style="background:#d97706;color:#fff;font-size:10px;font-weight:900;padding:4px 8px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.25);border:2px solid #fff;">★ PROMOTED</div>`,
-  iconAnchor: [30, 14],
+  html: `<div style="width:10px;height:10px;background:#d97706;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [10, 10],
+  iconAnchor: [5, 5],
 });
 
 const normalIcon = new L.DivIcon({
   className: '',
-  html: `<div style="background:#1a5c38;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);border:2px solid #fff;">$</div>`,
-  iconAnchor: [16, 14],
+  html: `<div style="width:8px;height:8px;background:#1a5c38;border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.25);"></div>`,
+  iconSize: [8, 8],
+  iconAnchor: [4, 4],
 });
 
 export default function MarketplaceMap({ listings, selectedId, onSelect }: {
