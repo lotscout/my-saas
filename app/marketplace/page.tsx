@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
@@ -9,99 +10,63 @@ import UpgradeModal from '@/components/UpgradeModal';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import type { MapListing } from '@/components/MarketplaceMap';
 
-const LISTINGS = [
-  {
-    id: 1,
-    title: 'Elderwood Peak Estates',
-    location: 'Aspen Ridge, CO',
-    acreage: '420.5 Acres',
-    price: '$4.25M',
-    promoted: true,
-    badge: { label: 'Residential-A1', position: 'top-right' },
-    tags: ['R-1 Agricultural', 'Well, Solar-Ready'],
-    seller: { name: 'Hargrove Land Co.', email: 'deals@hargrove.com', phone: '+1 (970) 555-0142' },
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBxJzpl7PtPZ3P9-BbZWEnnurDCh6iCuzDzxd8ZqqT8JD-uoS6-tQYgI_5g7BnCOd1fs3CLCNTBes6QTw5XNx3DYg00cXSRnCDOV-ZtJM9W4SpVL9aDpq3c-K3x7DHVcOaQzcGxY23ECyKHXOCa9XhyhCMPPI_X5zQB49vCbRWK9mw81BYCTcpT41Tixw8YTyPaCHGElLbCoI2F7Ibp7h4rhUYZ6t3kCUX6-hXPN0VSjjTo3gKOFBoTlscbAUd9I2zokdmW_oU__CKd',
-    imgAlt: 'Aerial mountain vista',
-  },
-  {
-    id: 2,
-    title: 'Sutter Basin Flats',
-    location: 'Sacramento Valley, CA',
-    acreage: '64 Acres',
-    price: '$890k',
-    promoted: false,
-    badge: { label: 'Utility Ready', position: 'bottom-left' },
-    tags: ['Prime Soil', 'Water Rights'],
-    seller: { name: 'Basin Properties LLC', email: 'info@basinprops.com', phone: '+1 (916) 555-0278' },
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4r8Hu0cQUcXuWX0WzV_2H0XqwnqPBMB2Fca9iPIFQXepEoRpS7nvtdqueP7eKmXCCpLpVbOoMXZAw0y3EUYLrYQgzam2dLiwITqadNzN_VqADUyY5_rZZ0nrwHcQbWCNUvqozu5VPXXJNMSu8bQxKsOkaWrpOetGX4J5YePqJyv013HCe5gyz6sakET7TkLMvrdeX5S4KHoiMziudlXEMOWm3WOKmrg1cYfTmrwfG2a1YP7q8n8g9nQDOWoR2j6yETU4PFUd46Ylq',
-    imgAlt: 'Verdant plains',
-  },
-  {
-    id: 3,
-    title: 'Crystal Lake Ridge',
-    location: 'Boundary Waters, MN',
-    acreage: '12 Acres',
-    price: '$1.2M',
-    promoted: false,
-    badge: null,
-    tags: ['Lakefront', 'Dense Timber'],
-    seller: { name: 'Northwoods Realty', email: 'listings@northwoodsrealty.com', phone: '+1 (218) 555-0391' },
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCJgD76eTifmmVKsF6SKPMw5sl_2i-NBS2SYmw1MVN0Ek0JNspDy1hmu6WwFi8BiXHSoUOnbdytJbBTi0ya5yYZqKnvCL27J0iSnXUF8qfFBhhVmTnlDLP51Ku3X96FjFoIJEqp82xY17mK3iUAwH2LXk81xF0UeDp8DxsuxCfj3oteXz-N4RWMsBlIVJpW9--ORcBEbgHDAxRpbizysUp_31kt2qNwAw7MDa_i3YxraxgJg_rEPvjFB213dKRX7dVCWWZloPV2zZN4',
-    imgAlt: 'Alpine lake',
-  },
-  {
-    id: 4,
-    title: 'Red Rock Plateau',
-    location: 'Sedona Outskirts, AZ',
-    acreage: '120 Acres',
-    price: '$340k',
-    promoted: false,
-    badge: null,
-    tags: ['Zoned Commercial'],
-    seller: { name: 'Desert Land Group', email: 'contact@desertland.com', phone: '+1 (928) 555-0456' },
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAyf9G08S4V2FIgyV6ti9nSFXGqTOVLsmyHIQnc3htRd4FnzJmkfw70GUKVvqpYTKRed0tJGRZTCxscIC_rkhYQ8l5yxEWkB102mkOdmtcWGnuE9wFMgg13nv295YGLVkBmy6dQU6fWAiD0IoW_rqPWn3DsAzUoSa95_yff57-MtbAzpPEkFrTj-cuYDfKp0H5ivVubg-U5S-O-KVkdO4bsAy3jVR7b6mZdwUlpA4Wy4u7_D8aJn0ZBdwNMuRofdiRpMou6scDkdPQa',
-    imgAlt: 'Desert mesa',
-  },
-  {
-    id: 5,
-    title: 'Old Growth Sanctuary',
-    location: 'Olympic Peninsula, WA',
-    acreage: '215 Acres',
-    price: '$2.8M',
-    promoted: false,
-    badge: null,
-    tags: ['Conservation Easement'],
-    seller: { name: 'Pacific Timberland Trust', email: 'info@pttrust.org', phone: '+1 (360) 555-0512' },
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDD-JzenLAuzwTyCM7r1lUolp3DE8j14_kDPQUYsrUPhcEihB-rfJUzfxvEavG__Ewz8h2zZlExQPGau_aYWRABPj_AvykNIraOyfsnuO2pYdvvd3azQ2I1RkjyxKsfeMdUlkHqB62r_8IwqxiVIc904u82VsxkrNMO7givq8WAaGULWDIGDsNEjlHvaQS8Clev7pxsv-9yRMgffR6A9d5mzxx6EXhPoDiHH9upjQVbaVWpQPoUkHpfWk4b437Jr1UPSANF7oeRayxn',
-    imgAlt: 'Foggy forest',
-  },
-];
+// Dynamically import map (Leaflet is client-only, no SSR)
+const MarketplaceMap = dynamic(() => import('@/components/MarketplaceMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-surface-container-low rounded-2xl">
+      <span className="material-symbols-outlined text-4xl text-secondary animate-pulse">map</span>
+    </div>
+  ),
+});
 
-function SellerContact({ seller, userId }: { seller: typeof LISTINGS[0]['seller']; userId?: string }) {
+interface Listing {
+  id: string;
+  title: string;
+  state: string | null;
+  county: string | null;
+  zip_code: string | null;
+  lot_size_acres: number | null;
+  asking_price: number | null;
+  zoning: string | null;
+  road_access: string | null;
+  utilities: string[] | null;
+  photos_urls: string[] | null;
+  user_id: string | null;
+  created_at: string;
+  status: string;
+  promoted?: boolean;
+  lat: number | null;
+  lng: number | null;
+}
+
+function formatPrice(n: number | null): string {
+  if (!n) return 'Price TBD';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`;
+  if (n >= 1000) return `$${(n / 1000).toFixed(0)}k`;
+  return `$${n.toLocaleString()}`;
+}
+
+function formatAcreage(acres: number | null): string {
+  if (!acres) return 'Acreage TBD';
+  return `${acres.toLocaleString()} Acres`;
+}
+
+function SellerContact({ userId }: { userId: string | null }) {
+  if (!userId) return null;
   return (
     <div className="pt-3 mt-3 border-t border-surface-container">
       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Listed By</p>
-      {userId ? (
-        <Link href={`/sellers/${userId}`} className="text-sm font-bold text-primary mb-1 hover:underline block">{seller.name}</Link>
-      ) : (
-        <p className="text-sm font-bold text-primary mb-1">{seller.name}</p>
-      )}
-      <div className="space-y-0.5">
-        <p className="text-xs text-slate-500 flex items-center gap-1">
-          <span className="material-symbols-outlined text-xs">mail</span>{seller.email}
-        </p>
-        <p className="text-xs text-slate-500 flex items-center gap-1">
-          <span className="material-symbols-outlined text-xs">phone</span>{seller.phone}
-        </p>
-      </div>
+      <Link href={`/sellers/${userId}`} className="text-sm font-bold text-primary mb-1 hover:underline block">View Seller Profile</Link>
     </div>
   );
 }
 
 function formatBudget(min: number | null, max: number | null): string {
   const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${(n / 1000).toFixed(0)}k`;
-  if (min && max) return `${fmt(min)} – ${fmt(max)}`;
+  if (min && max) return `${fmt(min)} - ${fmt(max)}`;
   if (min) return `${fmt(min)}+`;
   if (max) return `Up to ${fmt(max)}`;
   return 'Flexible';
@@ -134,8 +99,14 @@ export default function MarketplacePage() {
   const [activeTab, setActiveTab] = useState<'properties' | 'buyer-requests'>('properties');
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
   const [buyerRequestsLoading, setBuyerRequestsLoading] = useState(false);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [selectedListing, setSelectedListing] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [buyerSearchQuery, setBuyerSearchQuery] = useState('');
+  const [filterPropAcreage, setFilterPropAcreage] = useState('');
+  const [filterPropZoning, setFilterPropZoning] = useState('');
+  const [filterPropUtilities, setFilterPropUtilities] = useState('');
   const [filterBudget, setFilterBudget] = useState('');
   const [filterAcreage, setFilterAcreage] = useState('');
   const [filterZoning, setFilterZoning] = useState('');
@@ -146,6 +117,16 @@ export default function MarketplacePage() {
   const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
   const isFreeUser = !loading && !tier;
   const isPaidUser = !loading && !!tier;
+
+  useEffect(() => {
+    fetch('/api/listings')
+      .then(r => r.json())
+      .then(({ listings: data }) => {
+        setListings((data as Listing[]) ?? []);
+        setListingsLoading(false);
+      })
+      .catch(() => setListingsLoading(false));
+  }, []);
 
   useEffect(() => {
     if (activeTab !== 'buyer-requests') return;
@@ -163,12 +144,57 @@ export default function MarketplacePage() {
   }, [activeTab]);
 
   const filteredListings = useMemo(() => {
-    if (!searchQuery.trim()) return LISTINGS;
-    const q = searchQuery.toLowerCase();
-    return LISTINGS.filter(l =>
-      l.location.toLowerCase().includes(q) || l.title.toLowerCase().includes(q)
-    );
-  }, [searchQuery]);
+    return listings.filter(l => {
+      // Text search
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesSearch =
+          (l.state ?? '').toLowerCase().includes(q) ||
+          (l.county ?? '').toLowerCase().includes(q) ||
+          (l.zip_code ?? '').toLowerCase().includes(q) ||
+          (l.title ?? '').toLowerCase().includes(q);
+        if (!matchesSearch) return false;
+      }
+      // Acreage filter
+      if (filterPropAcreage) {
+        const acres = l.lot_size_acres ?? 0;
+        if (filterPropAcreage === 'under5' && acres >= 5) return false;
+        if (filterPropAcreage === '5-25' && (acres < 5 || acres > 25)) return false;
+        if (filterPropAcreage === '25-100' && (acres < 25 || acres > 100)) return false;
+        if (filterPropAcreage === '100-500' && (acres < 100 || acres > 500)) return false;
+        if (filterPropAcreage === '500+' && acres < 500) return false;
+      }
+      // Zoning filter
+      if (filterPropZoning) {
+        const zoning = (l.zoning ?? '').toLowerCase();
+        if (!zoning.includes(filterPropZoning.toLowerCase())) return false;
+      }
+      // Utilities filter
+      if (filterPropUtilities) {
+        const utilities = (l.utilities ?? []).map((u: string) => u.toLowerCase());
+        if (!utilities.some((u: string) => u.includes(filterPropUtilities.toLowerCase()))) return false;
+      }
+      return true;
+    });
+  }, [listings, searchQuery, filterPropAcreage, filterPropZoning, filterPropUtilities]);
+
+  const mapListings = useMemo<MapListing[]>(() => {
+    return filteredListings
+      .map(l => {
+        if (!l.lat || !l.lng) return null;
+        return {
+          id: l.id as unknown as number,
+          title: l.title,
+          location: [l.county, l.state].filter(Boolean).join(', '),
+          acreage: formatAcreage(l.lot_size_acres),
+          price: formatPrice(l.asking_price),
+          lat: l.lat,
+          lng: l.lng,
+          promoted: l.promoted,
+        } as MapListing;
+      })
+      .filter((x): x is MapListing => x !== null);
+  }, [filteredListings]);
 
   const filteredBuyerRequests = useMemo(() => {
     return buyerRequests.filter(req => {
@@ -287,173 +313,244 @@ export default function MarketplacePage() {
         </div>
       )}
 
-      <main className="pt-24 px-10 pb-20 min-h-screen max-w-[1400px] mx-auto">
+      <main className="pt-20 min-h-screen">
         {/* Header */}
-        <section className="mb-8 flex flex-col md:flex-row justify-between items-end gap-6">
-          <div className="max-w-2xl">
-            <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
+        <section className="px-6 md:px-10 py-6 flex flex-col md:flex-row justify-between items-end gap-4">
+          <div>
+            <h1 className="font-headline text-3xl md:text-5xl font-extrabold text-primary tracking-tighter leading-tight mb-2">
               Scout Your <span className="text-emerald-600">Next Deal</span>
             </h1>
-            <p className="text-slate-500 font-body text-lg leading-relaxed">
-              Advanced land acquisition powered by cartographic precision. Browse 2,400+ off-market listings throughout the U.S
+            <p className="text-slate-500 font-body text-base leading-relaxed">
+              Browse 2,400+ off-market listings throughout the U.S.
             </p>
-          </div>
-          <div className="flex gap-2 bg-surface-container p-1 rounded-xl">
-            <button className="px-6 py-2 bg-surface-container-lowest shadow-sm rounded-lg text-sm font-bold text-primary">Grid</button>
-            <button className="px-6 py-2 text-slate-500 text-sm font-medium hover:text-primary transition-colors">Map View</button>
           </div>
         </section>
 
-        {/* Tab toggle */}
-        <div className="mb-8 flex items-center gap-1 bg-surface-container-low p-1 rounded-full w-fit">
-          <button
-            onClick={() => setActiveTab('properties')}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-              activeTab === 'properties'
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-secondary hover:text-on-surface'
-            }`}
-          >
-            Properties
-          </button>
-          <button
-            onClick={() => setActiveTab('buyer-requests')}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-              activeTab === 'buyer-requests'
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-secondary hover:text-on-surface'
-            }`}
-          >
-            Buyer Requests
-          </button>
+        {/* Tab toggle + search bar */}
+        <div className="px-6 md:px-10 pb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-full">
+            <button
+              onClick={() => setActiveTab('properties')}
+              className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                activeTab === 'properties'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-secondary hover:text-on-surface'
+              }`}
+            >
+              Properties
+            </button>
+            <button
+              onClick={() => setActiveTab('buyer-requests')}
+              className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                activeTab === 'buyer-requests'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-secondary hover:text-on-surface'
+              }`}
+            >
+              Buyer Requests
+            </button>
+          </div>
+
+          {activeTab === 'properties' && (
+            <div className="relative flex-1 max-w-lg">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search by zip code, city, county, or state..."
+                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-4 py-2.5 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── PROPERTIES TAB ── */}
         {activeTab === 'properties' && (
           <>
+            {/* Filter bar */}
+            <div className="px-6 md:px-10 flex flex-wrap items-center gap-3 py-3 border-y border-outline-variant/20 mb-0">
+              <select
+                value={filterPropAcreage}
+                onChange={e => setFilterPropAcreage(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Acreage Range</option>
+                <option value="under5">Under 5 acres</option>
+                <option value="5-25">5–25 acres</option>
+                <option value="25-100">25–100 acres</option>
+                <option value="100-500">100–500 acres</option>
+                <option value="500+">500+ acres</option>
+              </select>
+              <select
+                value={filterPropZoning}
+                onChange={e => setFilterPropZoning(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Zoning Type</option>
+                <option value="ag">Agricultural</option>
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="recreational">Recreational</option>
+                <option value="timber">Timber</option>
+              </select>
+              <select
+                value={filterPropUtilities}
+                onChange={e => setFilterPropUtilities(e.target.value)}
+                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <option value="">Utilities Access</option>
+                <option value="electric">Electric</option>
+                <option value="water well">Water Well</option>
+                <option value="septic">Septic System</option>
+                <option value="none">No Utilities</option>
+              </select>
+              {(filterPropAcreage || filterPropZoning || filterPropUtilities || searchQuery) && (
+                <button
+                  onClick={() => { setFilterPropAcreage(''); setFilterPropZoning(''); setFilterPropUtilities(''); setSearchQuery(''); }}
+                  className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-sm">close</span>
+                  Clear filters
+                </button>
+              )}
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort:</span>
+                <select className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer">
+                  <option>Newest First</option>
+                  <option>Price: High to Low</option>
+                  <option>Acreage: Largest</option>
+                </select>
+              </div>
+            </div>
+
             {!loading && tier === 'standard' && listingsThisPeriod >= 2 && (
-              <div className="mb-6">
+              <div className="px-6 md:px-10 mt-4">
                 <ListingLimitBanner listingsUsed={listingsThisPeriod} tier="standard" />
               </div>
             )}
 
-            {/* Search bar */}
-            <div className="mb-6">
-              <div className="relative max-w-xl">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search by zip code, city, county, or state..."
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-4 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
-                    <span className="material-symbols-outlined text-lg">close</span>
-                  </button>
+            {/* Split layout: listings (left) + map (right) */}
+            <div className="flex flex-col lg:flex-row h-[calc(100vh-260px)] min-h-[500px]">
+              {/* Listings panel */}
+              <div className="lg:w-[52%] xl:w-[55%] overflow-y-auto px-6 md:px-10 py-6 flex-shrink-0">
+                {listingsLoading ? (
+                  <div className="col-span-full flex items-center justify-center py-20">
+                    <span className="material-symbols-outlined text-5xl text-secondary animate-spin">progress_activity</span>
+                  </div>
+                ) : filteredListings.length === 0 ? (
+                  <div className="col-span-full text-center py-20 text-secondary">
+                    <span className="material-symbols-outlined text-5xl mb-4 block">search_off</span>
+                    <p className="font-headline text-xl font-bold text-primary mb-2">No listings found</p>
+                    <p className="text-sm">Try a different search term</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    {filteredListings.map(listing => (
+                      <div
+                        key={listing.id}
+                        className={`bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm border transition-all cursor-pointer ${
+                          selectedListing === (listing.id as unknown as number)
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'border-outline-variant/20 hover:shadow-md hover:border-primary/20'
+                        }`}
+                        onClick={() => setSelectedListing(listing.id as unknown as number)}
+                      >
+                        {/* Image */}
+                        <div className="relative h-44 overflow-hidden bg-surface-container-low">
+                          {listing.photos_urls && listing.photos_urls.length > 0 ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={listing.photos_urls[0]}
+                              alt={listing.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="material-symbols-outlined text-5xl text-secondary/30">landscape</span>
+                            </div>
+                          )}
+                          {listing.promoted && (
+                            <div className="absolute top-3 right-3 bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full tracking-wide">
+                              ★ FEATURED
+                            </div>
+                          )}
+                          <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+                            {formatAcreage(listing.lot_size_acres)}
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4">
+                          <p className="font-headline font-bold text-base text-primary leading-snug mb-1 line-clamp-2">{listing.title}</p>
+                          <p className="text-xs text-secondary mb-3 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">location_on</span>
+                            {[listing.county, listing.state].filter(Boolean).join(', ') || listing.zip_code || 'Location TBD'}
+                          </p>
+
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-xl font-black text-emerald-700">{formatPrice(listing.asking_price)}</p>
+                            {listing.zoning && (
+                              <span className="bg-surface-container text-secondary text-[10px] font-bold px-2 py-0.5 rounded-full">{listing.zoning}</span>
+                            )}
+                          </div>
+
+                          {/* Tags */}
+                          {(listing.road_access || (listing.utilities && listing.utilities.length > 0)) && (
+                            <div className="flex flex-wrap gap-1.5 mb-3">
+                              {listing.road_access && (
+                                <span className="bg-surface-container text-secondary text-[10px] font-semibold px-2 py-0.5 rounded-full">{listing.road_access}</span>
+                              )}
+                              {(listing.utilities ?? []).slice(0, 2).map((u: string) => (
+                                <span key={u} className="bg-surface-container text-secondary text-[10px] font-semibold px-2 py-0.5 rounded-full">{u}</span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Seller */}
+                          {loading ? (
+                            <div className="mt-3 pt-3 border-t border-surface-container space-y-2">
+                              <div className="h-3 bg-surface-container-high animate-pulse rounded w-24" />
+                              <div className="h-3 bg-surface-container-high animate-pulse rounded w-40" />
+                            </div>
+                          ) : canViewContact ? (
+                            <SellerContact userId={listing.user_id} />
+                          ) : isFreeUser ? (
+                            <div className="pt-3 mt-3 border-t border-surface-container">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setShowContactUpgradeModal(true); }}
+                                className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-base">lock</span>
+                                Upgrade to Contact Seller
+                              </button>
+                            </div>
+                          ) : (
+                            <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
+                              <SellerContact userId={listing.user_id} />
+                            </LockedFeature>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </div>
-            </div>
+              </div>{/* end listings panel */}
 
-            <div className="grid grid-cols-12 gap-8 mb-12">
-              <div className="col-span-12 flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
-                {['Acreage Range', 'Zoning Type', 'Utilities Access'].map(filter => (
-                  <div key={filter} className="group relative">
-                    <button className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary">
-                      {filter}
-                      <span className="material-symbols-outlined text-sm">expand_more</span>
-                    </button>
-                  </div>
-                ))}
-                <div className="ml-auto flex items-center gap-3">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort By:</span>
-                  <select className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer">
-                    <option>Newest First</option>
-                    <option>Price: High to Low</option>
-                    <option>Acreage: Largest</option>
-                  </select>
-                </div>
+              {/* Map panel — sticky */}
+              <div className="hidden lg:block flex-1 sticky top-20 self-start" style={{ height: 'calc(100vh - 260px)', padding: '12px 16px 12px 0' }}>
+                <MarketplaceMap
+                  listings={mapListings}
+                  selectedId={selectedListing}
+                  onSelect={setSelectedListing}
+                />
               </div>
-            </div>
-
-            {filteredListings.length === 0 ? (
-              <div className="text-center py-20 text-secondary">
-                <span className="material-symbols-outlined text-5xl mb-4 block">search_off</span>
-                <p className="font-headline text-xl font-bold text-primary mb-2">No listings found</p>
-                <p className="text-sm">Try a different search term</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {filteredListings.map(listing => (
-                  <div key={listing.id} className="flex flex-col group">
-                    <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img alt={listing.imgAlt} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src={listing.img} />
-                      {listing.promoted && (
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-amber-400 text-amber-950 px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[12px]">workspace_premium</span>Promoted
-                          </span>
-                        </div>
-                      )}
-                      {listing.badge?.position === 'top-right' && (
-                        <div className="absolute top-4 right-4">
-                          <span className="bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.badge.label}</span>
-                        </div>
-                      )}
-                      {listing.badge?.position === 'bottom-left' && (
-                        <div className="absolute bottom-4 left-4">
-                          <span className="bg-primary/90 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.badge.label}</span>
-                        </div>
-                      )}
-                      {!listing.promoted && !listing.badge && (
-                        <div className="absolute top-4 right-4">
-                          <button className="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm text-primary hover:scale-110 transition-transform">
-                            <span className="material-symbols-outlined text-lg">favorite</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <div className="px-2 flex-1 flex flex-col">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-2xl font-black text-primary">{listing.title}</h3>
-                        <span className="text-3xl font-black text-primary">{listing.price}</span>
-                      </div>
-                      <p className="text-slate-500 text-sm mb-4">{listing.location} • {listing.acreage}</p>
-                      <div className="flex flex-wrap gap-2 mb-auto">
-                        {listing.tags.map(tag => (
-                          <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
-                        ))}
-                      </div>
-                      {loading ? (
-                        <div className="mt-3 pt-3 border-t border-surface-container space-y-2">
-                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-24" />
-                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-40" />
-                          <div className="h-3 bg-surface-container-high animate-pulse rounded w-36" />
-                        </div>
-                      ) : canViewContact ? (
-                        <SellerContact seller={listing.seller} />
-                      ) : isFreeUser ? (
-                        <div className="pt-3 mt-3 border-t border-surface-container">
-                          <button
-                            onClick={() => setShowContactUpgradeModal(true)}
-                            className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-base">lock</span>
-                            Upgrade to Contact Seller
-                          </button>
-                        </div>
-                      ) : (
-                        <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
-                          <SellerContact seller={listing.seller} />
-                        </LockedFeature>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            </div>{/* end split layout */}
           </>
         )}
 
@@ -501,10 +598,10 @@ export default function MarketplacePage() {
               >
                 <option value="">Budget Range</option>
                 <option value="under50k">Under $50K</option>
-                <option value="50k-100k">$50K–$100K</option>
-                <option value="100k-500k">$100K–$500K</option>
-                <option value="500k-1m">$500K–$1M</option>
-                <option value="1m-5m">$1M–$5M</option>
+                <option value="50k-100k">$50K-$100K</option>
+                <option value="100k-500k">$100K-$500K</option>
+                <option value="500k-1m">$500K-$1M</option>
+                <option value="1m-5m">$1M-$5M</option>
                 <option value="5m+">$5M+</option>
               </select>
               <select
@@ -514,9 +611,9 @@ export default function MarketplacePage() {
               >
                 <option value="">Acreage Range</option>
                 <option value="under5">Under 5 acres</option>
-                <option value="5-25">5–25 acres</option>
-                <option value="25-100">25–100 acres</option>
-                <option value="100-500">100–500 acres</option>
+                <option value="5-25">5-25 acres</option>
+                <option value="25-100">25-100 acres</option>
+                <option value="100-500">100-500 acres</option>
                 <option value="500+">500+ acres</option>
               </select>
               <select
@@ -556,8 +653,8 @@ export default function MarketplacePage() {
               >
                 <option value="">Timeline</option>
                 <option value="Immediately">Immediately</option>
-                <option value="1-3 months">1–3 months</option>
-                <option value="3-6 months">3–6 months</option>
+                <option value="1-3 months">1-3 months</option>
+                <option value="3-6 months">3-6 months</option>
                 <option value="6+ months">6+ months</option>
               </select>
               {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || buyerSearchQuery) && (
@@ -653,7 +750,7 @@ export default function MarketplacePage() {
                           <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-secondary text-base">landscape</span>
                             <span className="text-on-surface-variant">
-                              {req.min_acreage}{req.max_acreage ? ` – ${req.max_acreage}` : '+'} acres
+                              {req.min_acreage}{req.max_acreage ? ` - ${req.max_acreage}` : '+'} acres
                             </span>
                           </div>
                         )}

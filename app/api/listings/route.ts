@@ -1,7 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { containsProfanity } from '@/lib/profanity-filter';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search') ?? '';
+    const limit = Math.min(Number(searchParams.get('limit') ?? '550'), 550);
+
+    const supabase = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    let query = supabase
+      .from('listings')
+      .select('id,title,state,county,zip_code,lot_size_acres,asking_price,zoning,road_access,utilities,photos_urls,user_id,created_at,status,lat,lng,promoted')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (search.trim()) {
+      const q = search.trim();
+      query = query.or(`title.ilike.%${q}%,state.ilike.%${q}%,county.ilike.%${q}%,zip_code.ilike.%${q}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ listings: data ?? [] });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
