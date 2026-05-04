@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const isFastTier = profile?.tier === 'priority' || profile?.tier === 'exclusive';
     const turnaround = isFastTier
       ? 'Your report will be ready within <strong>15 minutes</strong>.'
-      : 'Your report will be ready within standard turnaround time (typically same business day).';
+      : 'Your report will be ready within <strong>24 hours</strong>.';
 
     await resend.emails.send({
       from: 'support@lotscout.com',

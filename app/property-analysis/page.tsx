@@ -465,7 +465,7 @@ export default function PropertyAnalysisPage() {
                 <h3 className="font-headline text-xl font-bold text-primary mb-2">Request Submitted!</h3>
                 <p className="text-secondary text-sm leading-relaxed mb-6">
                   Your request has been submitted. You&apos;ll receive your analysis report via email
-                  {tier === 'priority' || tier === 'exclusive' ? ' within 15 minutes.' : ' within standard turnaround time.'}
+                  {tier === 'priority' || tier === 'exclusive' ? ' within 15 minutes.' : ' within 24 hours.'}
                 </p>
                 <button
                   onClick={() => setSubmitSuccess(false)}

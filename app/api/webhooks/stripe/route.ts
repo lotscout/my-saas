@@ -32,8 +32,47 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
+      const metadata = session.metadata ?? {};
+
+      // --- Listing Boost payment ---
+      if (metadata.type === 'listing_boost') {
+        const { listing_id, user_id, weeks, weekly_rate_cents } = metadata;
+        if (!listing_id || !user_id || !weeks) {
+          console.error('listing_boost: missing metadata', metadata);
+          break;
+        }
+
+        const weeksNum = parseInt(weeks, 10);
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + weeksNum * 7 * 24 * 60 * 60 * 1000);
+
+        // Activate boost record
+        const { error: boostErr } = await supabase
+          .from('listing_boosts')
+          .update({
+            status: 'active',
+            boost_starts_at: now,
+            boost_expires_at: expiresAt,
+            stripe_payment_intent_id: session.payment_intent as string ?? null,
+            updated_at: now,
+          })
+          .eq('stripe_session_id', session.id);
+
+        if (boostErr) console.error('Failed to activate boost:', boostErr);
+
+        // Mark listing as promoted
+        const { error: listingErr } = await supabase
+          .from('listings')
+          .update({ promoted: true, boost_expires_at: expiresAt })
+          .eq('id', listing_id);
+
+        if (listingErr) console.error('Failed to promote listing:', listingErr);
+        break;
+      }
+
+      // --- Subscription checkout ---
       const userId = session.client_reference_id;
-      const tier = session.metadata?.tier;
+      const tier = metadata.tier;
       const stripeCustomerId = session.customer as string;
       const stripeSubscriptionId = session.subscription as string;
 
@@ -59,7 +98,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Upsert into subscriptions table (keyed on user_id)
+      // Upsert into subscriptions table
       const { error: subError } = await supabase
         .from('subscriptions')
         .upsert({
@@ -77,7 +116,7 @@ export async function POST(request: NextRequest) {
 
       if (subError) console.error('Failed to upsert subscription on checkout:', subError);
 
-      // Sync tier to profiles table so all reads stay consistent
+      // Sync tier to profiles table
       const { error: profileTierError } = await supabase
         .from('profiles')
         .upsert({ id: userId, tier }, { onConflict: 'id' });

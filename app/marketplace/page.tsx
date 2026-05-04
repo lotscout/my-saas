@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import ListingLimitBanner from '@/components/ListingLimitBanner';
 import UpgradeModal from '@/components/UpgradeModal';
+import BoostModal from '@/components/BoostModal';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -38,6 +39,7 @@ interface Listing {
   created_at: string;
   status: string;
   promoted?: boolean;
+  boost_expires_at?: string | null;
   lat: number | null;
   lng: number | null;
 }
@@ -96,6 +98,7 @@ export default function MarketplacePage() {
   const [showFreeModal, setShowFreeModal] = useState(false);
   const [showBuyerFreeModal, setShowBuyerFreeModal] = useState(false);
   const [showContactUpgradeModal, setShowContactUpgradeModal] = useState(false);
+  const [boostModal, setBoostModal] = useState<{ listingId: string; listingTitle: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'properties' | 'buyer-requests'>('properties');
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
   const [buyerRequestsLoading, setBuyerRequestsLoading] = useState(false);
@@ -122,7 +125,15 @@ export default function MarketplacePage() {
     fetch('/api/listings')
       .then(r => r.json())
       .then(({ listings: data }) => {
-        setListings((data as Listing[]) ?? []);
+        const now = new Date();
+        const sorted = ((data as Listing[]) ?? []).sort((a, b) => {
+          const aPromoted = a.promoted && a.boost_expires_at && new Date(a.boost_expires_at) > now;
+          const bPromoted = b.promoted && b.boost_expires_at && new Date(b.boost_expires_at) > now;
+          if (aPromoted && !bPromoted) return -1;
+          if (!aPromoted && bPromoted) return 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+        setListings(sorted);
         setListingsLoading(false);
       })
       .catch(() => setListingsLoading(false));
@@ -254,6 +265,15 @@ export default function MarketplacePage() {
   return (
     <div className="bg-surface text-on-surface">
       <Header />
+
+      {boostModal && (
+        <BoostModal
+          listingId={boostModal.listingId}
+          listingTitle={boostModal.listingTitle}
+          tier={tier ?? 'standard'}
+          onClose={() => setBoostModal(null)}
+        />
+      )}
 
       {showBlockedModal && (
         <UpgradeModal featureName="Unlimited Listings" requiredTier="priority" onDismiss={() => setShowBlockedModal(false)} />
@@ -475,10 +495,10 @@ export default function MarketplacePage() {
                               <span className="material-symbols-outlined text-5xl text-secondary/30">landscape</span>
                             </div>
                           )}
-                          {listing.promoted && (
-                            <div className="absolute top-3 right-3 bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full tracking-wide">
-                              ★ FEATURED
-                            </div>
+                          {listing.promoted && (!listing.boost_expires_at || new Date(listing.boost_expires_at) > new Date()) && (
+                            <span className="absolute top-3 left-3 z-10 bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest flex items-center gap-1">
+                              <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>Featured
+                            </span>
                           )}
                           <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-lg">
                             {formatAcreage(listing.lot_size_acres)}
@@ -513,14 +533,25 @@ export default function MarketplacePage() {
                           )}
 
                           {/* Seller */}
-                          {loading ? (
+                          {listing.user_id === profile?.id && (
+                            <div className="pt-3 mt-3 border-t border-surface-container">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setBoostModal({ listingId: listing.id, listingTitle: listing.title }); }}
+                                className="w-full flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-100 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
+                                Boost Listing
+                              </button>
+                            </div>
+                          )}
+                          {listing.user_id !== profile?.id && loading ? (
                             <div className="mt-3 pt-3 border-t border-surface-container space-y-2">
                               <div className="h-3 bg-surface-container-high animate-pulse rounded w-24" />
                               <div className="h-3 bg-surface-container-high animate-pulse rounded w-40" />
                             </div>
-                          ) : canViewContact ? (
+                          ) : listing.user_id !== profile?.id && canViewContact ? (
                             <SellerContact userId={listing.user_id} />
-                          ) : isFreeUser ? (
+                          ) : listing.user_id !== profile?.id && isFreeUser ? (
                             <div className="pt-3 mt-3 border-t border-surface-container">
                               <button
                                 onClick={(e) => { e.stopPropagation(); setShowContactUpgradeModal(true); }}
@@ -530,11 +561,11 @@ export default function MarketplacePage() {
                                 Upgrade to Contact Seller
                               </button>
                             </div>
-                          ) : (
+                          ) : listing.user_id !== profile?.id ? (
                             <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
                               <SellerContact userId={listing.user_id} />
                             </LockedFeature>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     ))}
