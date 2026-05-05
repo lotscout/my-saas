@@ -763,7 +763,7 @@ export default function MarketplacePage() {
                   const price = formatPrice(listing.asking_price);
                   const tags = [listing.zoning, ...(listing.road_access ?? []).slice(0,1)].filter(Boolean) as string[];
                   return (
-                    <div key={listing.id} className="flex flex-col group">
+                    <Link key={listing.id} href={`/listings/${listing.id}`} className="flex flex-col group">
                       <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
                         {listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() && (
                           <div className="absolute top-3 left-3 z-10">
@@ -781,14 +781,17 @@ export default function MarketplacePage() {
                           </div>
                         )}
                         <div className="absolute top-4 left-4">
-                          <button className="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm text-primary hover:scale-110 transition-transform">
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm text-primary hover:scale-110 transition-transform"
+                          >
                             <span className="material-symbols-outlined text-lg">favorite</span>
                           </button>
                         </div>
                       </div>
                       <div className="px-2 flex-1 flex flex-col">
                         <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-xl font-black text-primary leading-tight pr-2">{listing.title}</h3>
+                          <h3 className="text-xl font-black text-primary leading-tight pr-2 line-clamp-2 overflow-hidden min-h-[3.5rem]">{listing.title}</h3>
                           <span className="text-2xl font-black text-primary whitespace-nowrap">{price}</span>
                         </div>
                         <p className="text-slate-500 text-sm mb-4">{location}{acreage ? ` • ${acreage}` : ''}</p>
@@ -797,46 +800,17 @@ export default function MarketplacePage() {
                             <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
                           ))}
                         </div>
-                        <Link
-                          href={`/listings/${listing.id}`}
-                          className="mb-3 w-full flex items-center justify-center gap-2 border border-outline-variant/40 text-secondary py-2 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
-                        >
-                          View Listing
-                          <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                        </Link>
                         {profile?.id && listing.user_id === profile.id && (
                           <button
-                            onClick={() => setBoostModal({ listingId: listing.id, title: listing.title ?? 'Your Listing' })}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoostModal({ listingId: listing.id, title: listing.title ?? 'Your Listing' }); }}
                             className="mb-3 w-full flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 py-2 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors"
                           >
                             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
                             {listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() ? 'Boosted ✓' : 'Boost Listing'}
                           </button>
                         )}
-                        {loading ? (
-                          <div className="mt-3 pt-3 border-t border-surface-container space-y-2">
-                            <div className="h-3 bg-surface-container-high animate-pulse rounded w-24" />
-                            <div className="h-3 bg-surface-container-high animate-pulse rounded w-40" />
-                          </div>
-                        ) : canViewContact ? (
-                          <SellerContact name={listing.digital_signature} listingId={listing.id} />
-                        ) : isFreeUser ? (
-                          <div className="pt-3 mt-3 border-t border-surface-container">
-                            <button
-                              onClick={() => setShowContactUpgradeModal(true)}
-                              className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
-                            >
-                              <span className="material-symbols-outlined text-base">lock</span>
-                              Upgrade to Contact Seller
-                            </button>
-                          </div>
-                        ) : (
-                          <LockedFeature requiredTier="priority" message="Upgrade to Priority to contact this seller" className="rounded-xl mt-3">
-                            <SellerContact name={listing.digital_signature} listingId={listing.id} />
-                          </LockedFeature>
-                        )}
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
