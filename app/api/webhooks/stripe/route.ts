@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       // Sync tier to profiles table
       const { error: profileTierError } = await supabase
         .from('profiles')
-        .upsert({ id: userId, tier }, { onConflict: 'id' });
+        .upsert({ id: userId, subscription_tier: tier }, { onConflict: 'id' });
 
       if (profileTierError) console.error('Failed to sync tier to profiles on checkout:', profileTierError);
       break;
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
       // Sync downgrade to profiles table
       const { error: profileDowngradeError } = await supabase
         .from('profiles')
-        .update({ tier: 'standard' })
+        .update({ subscription_tier: 'standard' })
         .eq('id', subRow.user_id);
 
       if (profileDowngradeError) console.error('Failed to sync tier downgrade to profiles:', profileDowngradeError);
