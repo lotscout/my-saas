@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       timeStyle: 'short',
     });
 
-    const isFastTier = tier === 'priority' || tier === 'exclusive';
+    const isFastTier = tier === 'exclusive';
     const turnaround = isFastTier ? '15 minutes' : '24 hours';
 
     const supabaseDashboardUrl = `https://supabase.com/dashboard/project/axiockuobpttlwzicldo/editor`;

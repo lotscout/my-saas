@@ -36,7 +36,7 @@ export default function DealAnalysisPage() {
   const [errorMsg, setErrorMsg] = useState('');
 
   const deliveryTime =
-    tier === 'priority' || tier === 'exclusive' ? '15 minutes' : '24 hours';
+    tier === 'exclusive' ? '15 minutes' : '24 hours';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -474,7 +474,7 @@ export default function PropertyAnalysisPage() {
                 <span className="text-amber-500 text-2xl shrink-0">⚡</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-amber-900 text-sm">Want faster results?</p>
-                  <p className="text-amber-700 text-xs mt-0.5">Upgrade your account to receive your deal analysis within 15 minutes.</p>
+                  <p className="text-amber-700 text-xs mt-0.5">Upgrade to Exclusive to receive your deal analysis within 15 minutes.</p>
                 </div>
                 <a href="/pricing" className="shrink-0 bg-amber-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-amber-600 transition-colors whitespace-nowrap">
                   Upgrade →
@@ -502,7 +502,7 @@ export default function PropertyAnalysisPage() {
                 <h3 className="font-headline text-xl font-bold text-primary mb-2">Request Submitted!</h3>
                 <p className="text-secondary text-sm leading-relaxed mb-6">
                   Your request has been submitted. You&apos;ll receive your analysis report via email
-                  {tier === 'priority' || tier === 'exclusive' ? ' within 15 minutes.' : ' within 24 hours.'}
+                  {tier === 'exclusive' ? ' within 15 minutes.' : ' within 24 hours.'}
                 </p>
                 <button
                   onClick={() => setSubmitSuccess(false)}

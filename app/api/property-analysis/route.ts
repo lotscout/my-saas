@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       ? `${body.streetAddress}, ${body.city}, ${body.state} ${body.zipCode}${body.county ? ` (${body.county} County)` : ''}`
       : `APN ${body.apn} · ${body.county} County, ${body.state}`;
 
-    const isFastTier = profile?.subscription_tier === 'priority' || profile?.subscription_tier === 'exclusive';
+    const isFastTier = profile?.subscription_tier === 'exclusive';
     const turnaround = isFastTier
       ? 'Your report will be ready within <strong>15 minutes</strong>.'
       : 'Your report will be ready within <strong>24 hours</strong>.';
@@ -146,6 +146,6 @@ export async function POST(request: NextRequest) {
     console.error('Email error:', emailErr);
   }
 
-  const isFastTier = profile?.subscription_tier === 'priority' || profile?.subscription_tier === 'exclusive';
+  const isFastTier = profile?.subscription_tier === 'exclusive';
   return NextResponse.json({ success: true, requestId: req.id, turnaround: isFastTier ? '15 minutes' : '24 hours' });
 }

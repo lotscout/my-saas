@@ -564,8 +564,8 @@ export default function HomePage() {
                   'Promoted Lot Requests',
                   'Financing Partners Access',
                   '24/7 Support',
-                  'Property Analysis Reports (15 min delivery)',
-                  'Lot Analysis Reports (15 min delivery)',
+                  'Property Analysis Reports (24hr delivery)',
+                  'Lot Analysis Reports (24hr delivery)',
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-3 text-on-surface font-semibold text-sm">
                     <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
@@ -584,6 +584,8 @@ export default function HomePage() {
               <ul className="space-y-3 mb-8 flex-grow">
                 {[
                   'Everything in Priority',
+                  'Property Analysis Reports (15 min delivery)',
+                  'Lot Analysis Reports (15 min delivery)',
                   'Dedicated Full-Time Account Manager',
                   'Early Access to New Listings Before Anyone Else',
                   'Early Access to New Buyers Before Anyone Else',
