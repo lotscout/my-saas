@@ -9,9 +9,9 @@ export async function GET(request: NextRequest) {
 
   const orderCol =
     sort === 'price_desc' || sort === 'price_asc' ? 'asking_price'
-    : sort === 'acres_desc' ? 'lot_size_acres'
+    : sort === 'acres_desc' || sort === 'acres_asc' ? 'lot_size_acres'
     : 'created_at';
-  const ascending = sort === 'price_asc';
+  const ascending = sort === 'price_asc' || sort === 'acres_asc';
 
   const supabase = createServiceClient();
 

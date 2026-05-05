@@ -716,9 +716,11 @@ export default function MarketplacePage() {
                     onChange={e => setListingsSort(e.target.value)}
                     className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer"
                   >
-                    <option value="newest">Newest First</option>
-                    <option value="price_desc">Price: High to Low</option>
+                    <option value="newest">Newest</option>
                     <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                    <option value="acres_asc">Lot Size: Low to High</option>
+                    <option value="acres_desc">Lot Size: High to Low</option>
                     <option value="acres_desc">Acreage: Largest</option>
                   </select>
                 </div>
