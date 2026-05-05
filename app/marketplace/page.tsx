@@ -189,7 +189,7 @@ export default function MarketplacePage() {
   const [activeTab, setActiveTab] = useState<'properties' | 'buyer-requests'>('properties');
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
-  const [listingsSort, setListingsSort] = useState('newest');
+  const [listingsSort, setListingsSort] = useState('recommended');
   const [viewMode, setViewMode] = useState<'grid'|'map'>('grid');
   const [mapListings, setMapListings] = useState<unknown[]>([]);
   const [mapLoading, setMapLoading] = useState(false);
@@ -716,6 +716,7 @@ export default function MarketplacePage() {
                     onChange={e => setListingsSort(e.target.value)}
                     className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer"
                   >
+                    <option value="recommended">Recommended</option>
                     <option value="newest">Newest</option>
                     <option value="price_asc">Price: Low to High</option>
                     <option value="price_desc">Price: High to Low</option>

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const orderCol =
     sort === 'price_desc' || sort === 'price_asc' ? 'asking_price'
     : sort === 'acres_desc' || sort === 'acres_asc' ? 'lot_size_acres'
-    : 'created_at';
+    : 'created_at'; // recommended + newest both sort by created_at (promoted float to top client-side)
   const ascending = sort === 'price_asc' || sort === 'acres_asc';
 
   const supabase = createServiceClient();
