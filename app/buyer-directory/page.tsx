@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { useUserTier } from '@/hooks/useUserTier';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -364,50 +363,38 @@ export default function BuyerDirectoryPage() {
   useEffect(() => {
     if (view !== 'national') return;
     setNationalLoading(true);
-    createClient()
-      .from('buyer_requests')
-      .select('*, profiles(first_name, last_name, company_name, avatar_url)')
-      .eq('status', 'active')
-      .order('budget_max', { ascending: false })
-      .limit(50)
-      .then(({ data }) => { setNationalBuyers((data ?? []) as BuyerRequest[]); setNationalLoading(false); });
+    fetch('/api/buyer-directory?status=active&limit=200')
+      .then(r => r.json())
+      .then(({ requests }) => { setNationalBuyers((requests ?? []) as BuyerRequest[]); setNationalLoading(false); })
+      .catch(() => setNationalLoading(false));
   }, [view]);
 
   function loadStateBuyers(state: string) {
     if (!state) return;
     setStateLoading(true);
     setStateSearched(state);
-    createClient()
-      .from('buyer_requests')
-      .select('*, profiles(first_name, last_name, company_name, avatar_url)')
-      .eq('status', 'active')
-      .ilike('target_state', state)
-      .order('budget_max', { ascending: false })
-      .limit(10)
-      .then(({ data }) => { setStateBuyers((data ?? []) as BuyerRequest[]); setStateLoading(false); });
+    fetch(`/api/buyer-directory?status=active&state=${encodeURIComponent(state)}&limit=50`)
+      .then(r => r.json())
+      .then(({ requests }) => { setStateBuyers((requests ?? []) as BuyerRequest[]); setStateLoading(false); })
+      .catch(() => setStateLoading(false));
   }
 
   useEffect(() => {
     if (view !== 'active') return;
     setActiveLoading(true);
-    createClient()
-      .from('buyer_requests')
-      .select('*, profiles(first_name, last_name, company_name, avatar_url)')
-      .eq('status', 'active')
-      .eq('timeline', 'Actively Buying (0–30 days)')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => { setActiveBuyers((data ?? []) as BuyerRequest[]); setActiveLoading(false); });
+    fetch(`/api/buyer-directory?status=active&timeline=${encodeURIComponent('Actively Buying (0–30 days)')}`)
+      .then(r => r.json())
+      .then(({ requests }) => { setActiveBuyers((requests ?? []) as BuyerRequest[]); setActiveLoading(false); })
+      .catch(() => setActiveLoading(false));
   }, [view]);
 
   useEffect(() => {
     if (tab !== 'requests') return;
     setBrLoading(true);
-    createClient()
-      .from('buyer_requests')
-      .select('*, profiles(first_name, last_name, company_name, avatar_url)')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => { setBuyerRequests((data ?? []) as BuyerRequest[]); setBrLoading(false); });
+    fetch('/api/buyer-directory?status=active&limit=200')
+      .then(r => r.json())
+      .then(({ requests }) => { setBuyerRequests((requests ?? []) as BuyerRequest[]); setBrLoading(false); })
+      .catch(() => setBrLoading(false));
   }, [tab]);
 
   // ── Filtered lists ──
