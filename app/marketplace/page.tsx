@@ -212,6 +212,8 @@ export default function MarketplacePage() {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [boostModal, setBoostModal] = useState<{ listingId: string; title: string } | null>(null);
   const [userCriteria, setUserCriteria] = useState<any | null>(null);
+  const [savedListingIds, setSavedListingIds] = useState<Set<string>>(new Set());
+  const [savingId, setSavingId] = useState<string | null>(null);
   const router = useRouter();
 
   // Close dropdowns when clicking outside
@@ -222,6 +224,36 @@ export default function MarketplacePage() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Load user's saved/favorited listings
+  useEffect(() => {
+    if (!profile?.id) return;
+    fetch('/api/favorites')
+      .then(r => r.json())
+      .then(({ favorites }) => { if (favorites) setSavedListingIds(new Set(favorites)); })
+      .catch(() => {});
+  }, [profile?.id]);
+
+  async function toggleFavorite(e: React.MouseEvent, listingId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!profile?.id) { router.push('/login'); return; }
+    setSavingId(listingId);
+    try {
+      const res = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_id: listingId }),
+      });
+      const { saved } = await res.json();
+      setSavedListingIds(prev => {
+        const next = new Set(prev);
+        if (saved) next.add(listingId); else next.delete(listingId);
+        return next;
+      });
+    } catch {}
+    finally { setSavingId(null); }
+  }
 
   // Load user's buyer criteria for Recommended sort
   useEffect(() => {
@@ -835,10 +867,18 @@ export default function MarketplacePage() {
                         )}
                         <div className="absolute top-4 left-4">
                           <button
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm text-primary hover:scale-110 transition-transform"
+                            onClick={(e) => toggleFavorite(e, listing.id)}
+                            disabled={savingId === listing.id}
+                            className={`bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm transition-transform hover:scale-110 disabled:opacity-60 ${
+                              savedListingIds.has(listing.id) ? 'text-red-500' : 'text-primary'
+                            }`}
                           >
-                            <span className="material-symbols-outlined text-lg">favorite</span>
+                            <span
+                              className="material-symbols-outlined text-lg"
+                              style={{ fontVariationSettings: savedListingIds.has(listing.id) ? "'FILL' 1" : "'FILL' 0" }}
+                            >
+                              favorite
+                            </span>
                           </button>
                         </div>
                       </div>
