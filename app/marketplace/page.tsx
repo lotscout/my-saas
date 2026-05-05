@@ -199,16 +199,21 @@ export default function MarketplacePage() {
   const [buyerSearchQuery, setBuyerSearchQuery] = useState('');
   const [filterBudget, setFilterBudget] = useState('');
   const [filterAcreage, setFilterAcreage] = useState('');
-  const [filterZoning, setFilterZoning] = useState('');
-  const [filterUtilities, setFilterUtilities] = useState('');
+  const [filterZoning, setFilterZoning] = useState<string[]>([]);
+  const [filterUtilities, setFilterUtilities] = useState<string[]>([]);
   const [filterUseCase, setFilterUseCase] = useState('');
   const [filterTimeline, setFilterTimeline] = useState('');
+  const [filterZoningBR, setFilterZoningBR] = useState('');
   const [filterLotSizeUnit, setFilterLotSizeUnit] = useState<'acres' | 'sqft'>('acres');
   const [filterLotSizeAcres, setFilterLotSizeAcres] = useState('');
   const [filterSqFtMin, setFilterSqFtMin] = useState('');
   const [filterSqFtMax, setFilterSqFtMax] = useState('');
-  const [filterRoadAccessProps, setFilterRoadAccessProps] = useState('');
+  const [filterRoadAccessProps, setFilterRoadAccessProps] = useState<string[]>([]);
   const [filterRoadAccessBR, setFilterRoadAccessBR] = useState('');
+
+  function toggleMultiFilter<T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, val: T) {
+    setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]);
+  }
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [boostModal, setBoostModal] = useState<{ listingId: string; title: string } | null>(null);
   const [userCriteria, setUserCriteria] = useState<any | null>(null);
@@ -394,32 +399,36 @@ export default function MarketplacePage() {
       });
     }
 
-    // Road access filter
-    if (filterRoadAccessProps) {
+    // Road access filter (multi-select — OR logic)
+    if (filterRoadAccessProps.length > 0) {
       result = result.filter(l =>
-        (l.road_access ?? []).some((r: string) => r.toLowerCase().includes(filterRoadAccessProps.toLowerCase()))
+        filterRoadAccessProps.some(f =>
+          (l.road_access ?? []).some((r: string) => r.toLowerCase().includes(f.toLowerCase()))
+        )
       );
     }
 
-    // Zoning filter
-    if (filterZoning) {
+    // Zoning filter (multi-select — OR logic)
+    if (filterZoning.length > 0) {
       result = result.filter(l => {
         const z = (l.zoning ?? '').toLowerCase();
-        if (filterZoning === 'agricultural') return /ag|a-1|a-d|ae-|a_1|agricultural/.test(z);
-        if (filterZoning === 'recreational') return z.includes('rec');
-        if (filterZoning === 'residential') return z.includes('res') || z === 'rr' || /rr-/.test(z);
-        if (filterZoning === 'commercial') return z.includes('com');
-        if (filterZoning === 'mixed') return z.includes('mix');
-        if (filterZoning === 'unrestricted') return z.includes('unrest') || z === 'any';
-        return z.includes(filterZoning.toLowerCase());
+        return filterZoning.some(fz => {
+          if (fz === 'agricultural') return /ag|a-1|a-d|ae-|a_1|agricultural/.test(z);
+          if (fz === 'recreational') return z.includes('rec');
+          if (fz === 'residential') return z.includes('res') || z === 'rr' || /rr-/.test(z);
+          if (fz === 'commercial') return z.includes('com');
+          if (fz === 'mixed') return z.includes('mix');
+          if (fz === 'unrestricted') return z.includes('unrest') || z === 'any';
+          return z.includes(fz.toLowerCase());
+        });
       });
     }
 
-    // Utilities filter
-    if (filterUtilities) {
+    // Utilities filter (multi-select — OR logic)
+    if (filterUtilities.length > 0) {
       result = result.filter(l => {
         const utils = (l.utilities ?? []).map((u: string) => u.toLowerCase());
-        return utils.some((u: string) => u.includes(filterUtilities.toLowerCase()));
+        return filterUtilities.some(f => utils.some((u: string) => u.includes(f.toLowerCase())));
       });
     }
 
@@ -429,7 +438,7 @@ export default function MarketplacePage() {
     }
 
     return result;
-  }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeAcres, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]);
+  }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeAcres, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredBuyerRequests = useMemo(() => {
     return buyerRequests.filter(req => {
@@ -458,9 +467,9 @@ export default function MarketplacePage() {
         if (filterAcreage === '100-500' && (minAc > 500 || maxAc < 100)) return false;
         if (filterAcreage === '500+' && maxAc < 500) return false;
       }
-      if (filterZoning) {
+      if (filterZoningBR) {
         const zones = (req.zoning_preference ?? []).map((z: string) => z.toLowerCase());
-        if (!zones.some((z: string) => z.includes(filterZoning.toLowerCase()))) return false;
+        if (!zones.some((z: string) => z.includes(filterZoningBR.toLowerCase()))) return false;
       }
       if (filterUseCase) {
         const uc = (req.use_case ?? '').toLowerCase();
@@ -713,78 +722,111 @@ export default function MarketplacePage() {
                   );
                 })()}
 
-                {/* Zoning Type */}
+                {/* Zoning Type — multi-select */}
                 <div className="relative" data-filter-dropdown>
                   <button
                     onClick={() => setOpenFilter(openFilter === 'zoning' ? null : 'zoning')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
-                      filterZoning ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                      filterZoning.length > 0 ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
                     }`}
                   >
-                    {filterZoning ? { agricultural: 'Agricultural', recreational: 'Recreational', residential: 'Residential', commercial: 'Commercial', mixed: 'Mixed Use', unrestricted: 'Unrestricted' }[filterZoning] ?? filterZoning : 'Zoning Type'}
+                    {filterZoning.length > 0 ? `Zoning (${filterZoning.length})` : 'Zoning Type'}
                     <span className="material-symbols-outlined text-sm">{openFilter === 'zoning' ? 'expand_less' : 'expand_more'}</span>
                   </button>
                   {openFilter === 'zoning' && (
-                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-44 py-1 overflow-hidden">
-                      {[['', 'Any Zoning'], ['agricultural', 'Agricultural'], ['recreational', 'Recreational'], ['residential', 'Residential'], ['commercial', 'Commercial'], ['mixed', 'Mixed Use'], ['unrestricted', 'Unrestricted']].map(([val, label]) => (
-                        <button key={val} onClick={() => { setFilterZoning(val); setOpenFilter(null); }}
-                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors ${
-                            filterZoning === val ? 'text-primary font-bold' : 'text-on-surface'
-                          }`}>{label}</button>
+                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-48 py-2 overflow-hidden">
+                      {[['agricultural', 'Agricultural'], ['recreational', 'Recreational'], ['residential', 'Residential'], ['commercial', 'Commercial'], ['mixed', 'Mixed Use'], ['unrestricted', 'Unrestricted']].map(([val, label]) => (
+                        <button key={val} onClick={() => toggleMultiFilter(setFilterZoning, val)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors text-on-surface"
+                        >
+                          <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                            filterZoning.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'
+                          }`}>
+                            {filterZoning.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'12px'}}>check</span>}
+                          </span>
+                          {label}
+                        </button>
                       ))}
+                      {filterZoning.length > 0 && (
+                        <button onClick={() => setFilterZoning([])} className="w-full text-xs text-secondary hover:text-primary px-4 py-2 border-t border-outline-variant/20 mt-1 transition-colors">
+                          Clear
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
 
-                {/* Utilities Access */}
+                {/* Utilities Access — multi-select */}
                 <div className="relative" data-filter-dropdown>
                   <button
                     onClick={() => setOpenFilter(openFilter === 'utilities' ? null : 'utilities')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
-                      filterUtilities ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                      filterUtilities.length > 0 ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
                     }`}
                   >
-                    {filterUtilities || 'Utilities Access'}
+                    {filterUtilities.length > 0 ? `Utilities (${filterUtilities.length})` : 'Utilities Access'}
                     <span className="material-symbols-outlined text-sm">{openFilter === 'utilities' ? 'expand_less' : 'expand_more'}</span>
                   </button>
                   {openFilter === 'utilities' && (
-                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-44 py-1 overflow-hidden">
-                      {[['', 'Any Utilities'], ['Water', 'Water'], ['Electric', 'Electric'], ['Gas', 'Gas'], ['Septic', 'Septic'], ['Sewer', 'Sewer']].map(([val, label]) => (
-                        <button key={val} onClick={() => { setFilterUtilities(val); setOpenFilter(null); }}
-                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors ${
-                            filterUtilities === val ? 'text-primary font-bold' : 'text-on-surface'
-                          }`}>{label}</button>
+                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-44 py-2 overflow-hidden">
+                      {['Water', 'Electric', 'Gas', 'Septic', 'Sewer'].map((val) => (
+                        <button key={val} onClick={() => toggleMultiFilter(setFilterUtilities, val)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors text-on-surface"
+                        >
+                          <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                            filterUtilities.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'
+                          }`}>
+                            {filterUtilities.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'12px'}}>check</span>}
+                          </span>
+                          {val}
+                        </button>
                       ))}
+                      {filterUtilities.length > 0 && (
+                        <button onClick={() => setFilterUtilities([])} className="w-full text-xs text-secondary hover:text-primary px-4 py-2 border-t border-outline-variant/20 mt-1 transition-colors">
+                          Clear
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
 
-                {/* Road Access */}
+                {/* Road Access — multi-select */}
                 <div className="relative" data-filter-dropdown>
                   <button
                     onClick={() => setOpenFilter(openFilter === 'roadaccess' ? null : 'roadaccess')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
-                      filterRoadAccessProps ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                      filterRoadAccessProps.length > 0 ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
                     }`}
                   >
-                    {filterRoadAccessProps || 'Road Access'}
+                    {filterRoadAccessProps.length > 0 ? `Road Access (${filterRoadAccessProps.length})` : 'Road Access'}
                     <span className="material-symbols-outlined text-sm">{openFilter === 'roadaccess' ? 'expand_less' : 'expand_more'}</span>
                   </button>
                   {openFilter === 'roadaccess' && (
-                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-48 py-1 overflow-hidden">
-                      {[['', 'Any Road Access'], ['Paved Road', 'Paved Road'], ['Gravel Road', 'Gravel Road'], ['Dirt Road', 'Dirt Road'], ['Private Road', 'Private Road'], ['Easement', 'Easement'], ['No Road Access', 'No Road Access']].map(([val, label]) => (
-                        <button key={val} onClick={() => { setFilterRoadAccessProps(val); setOpenFilter(null); }}
-                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors ${
-                            filterRoadAccessProps === val ? 'text-primary font-bold' : 'text-on-surface'
-                          }`}>{label}</button>
+                    <div className="absolute top-full left-0 mt-1 bg-white shadow-xl rounded-xl border border-outline-variant/20 z-50 min-w-48 py-2 overflow-hidden">
+                      {['Paved Road', 'Gravel Road', 'Dirt Road', 'Private Road', 'Easement', 'No Road Access'].map((val) => (
+                        <button key={val} onClick={() => toggleMultiFilter(setFilterRoadAccessProps, val)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors text-on-surface"
+                        >
+                          <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                            filterRoadAccessProps.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'
+                          }`}>
+                            {filterRoadAccessProps.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'12px'}}>check</span>}
+                          </span>
+                          {val}
+                        </button>
                       ))}
+                      {filterRoadAccessProps.length > 0 && (
+                        <button onClick={() => setFilterRoadAccessProps([])} className="w-full text-xs text-secondary hover:text-primary px-4 py-2 border-t border-outline-variant/20 mt-1 transition-colors">
+                          Clear
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
 
-                {(filterLotSizeAcres || filterSqFtMin || filterSqFtMax || filterZoning || filterUtilities || filterRoadAccessProps) && (
+                {(filterLotSizeAcres || filterSqFtMin || filterSqFtMax || filterZoning.length > 0 || filterUtilities.length > 0 || filterRoadAccessProps.length > 0) && (
                   <button
-                    onClick={() => { setFilterLotSizeAcres(''); setFilterSqFtMin(''); setFilterSqFtMax(''); setFilterZoning(''); setFilterUtilities(''); setFilterRoadAccessProps(''); }}
+                    onClick={() => { setFilterLotSizeAcres(''); setFilterSqFtMin(''); setFilterSqFtMax(''); setFilterZoning([]); setFilterUtilities([]); setFilterRoadAccessProps([]); }}
                     className="flex items-center gap-1 text-xs font-bold text-secondary hover:text-primary transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">close</span>
@@ -974,8 +1016,8 @@ export default function MarketplacePage() {
                 <option value="500+">500+ acres</option>
               </select>
               <select
-                value={filterZoning}
-                onChange={e => setFilterZoning(e.target.value)}
+                value={filterZoningBR}
+                onChange={e => setFilterZoningBR(e.target.value)}
                 className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
               >
                 <option value="">Zoning Type</option>
@@ -1027,9 +1069,9 @@ export default function MarketplacePage() {
                 <option value="Easement">Easement</option>
                 <option value="No Road Access">No Road Access</option>
               </select>
-              {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || filterRoadAccessBR || buyerSearchQuery) && (
+              {(filterBudget || filterAcreage || filterZoningBR || filterUseCase || filterTimeline || filterRoadAccessBR || buyerSearchQuery) && (
                 <button
-                  onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterUseCase(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBuyerSearchQuery(''); }}
+                  onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoningBR(''); setFilterUseCase(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBuyerSearchQuery(''); }}
                   className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-sm">close</span>
