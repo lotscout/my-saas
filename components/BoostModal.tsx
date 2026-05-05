@@ -12,7 +12,7 @@ interface Props {
 const WEEKLY_RATES: Record<string, number> = {
   standard: 29,
   priority: 29,
-  exclusive: 5.80,
+  exclusive: 2.90,
 };
 
 export default function BoostModal({ listingId, listingTitle, tier, onClose }: Props) {
@@ -88,7 +88,7 @@ export default function BoostModal({ listingId, listingTitle, tier, onClose }: P
             </div>
             {isExclusive && (
               <div className="bg-emerald-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest">
-                80% off
+                90% off
               </div>
             )}
           </div>

@@ -6,7 +6,7 @@ import { createServiceClient } from '@/lib/supabase/service';
 const WEEKLY_RATES: Record<string, number> = {
   standard: 2900,   // $29.00
   priority: 2900,   // $29.00
-  exclusive: 580,   // $5.80 (80% off)
+  exclusive: 290,   // $2.90 (90% off)
 };
 
 export async function POST(request: NextRequest) {
