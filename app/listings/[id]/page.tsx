@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUserTier } from '@/hooks/useUserTier';
+import { createClient } from '@/lib/supabase/client';
 
 interface Listing {
   id: string;
@@ -64,11 +65,25 @@ export default function ListingDetailPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
   const { tier, isAdmin, loading: tierLoading } = useUserTier();
 
+  // Auth gate — redirect unauthenticated visitors to /login
   useEffect(() => {
-    if (!id) return;
+    (async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace(`/login?next=/listings/${id}`);
+      } else {
+        setAuthed(true);
+      }
+    })();
+  }, [id, router]);
+
+  useEffect(() => {
+    if (!id || authed !== true) return;
     (async () => {
       // Use service-role API route to bypass RLS for published listings
       const res = await fetch(`/api/listings/${id}`);
@@ -95,7 +110,7 @@ export default function ListingDetailPage() {
 
       setLoading(false);
     })();
-  }, [id]);
+  }, [id, authed]);
 
   function handleMessage() {
     if (tierLoading) return;
@@ -103,7 +118,8 @@ export default function ListingDetailPage() {
     router.push(`/messaging?recipient=${listing?.user_id}`);
   }
 
-  if (loading) {
+  // Still checking auth or awaiting redirect
+  if (authed === null || (authed && loading)) {
     return (
       <div className="pt-32 pb-24 max-w-7xl mx-auto px-8 flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
