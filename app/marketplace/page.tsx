@@ -211,6 +211,7 @@ export default function MarketplacePage() {
   const [filterRoadAccessBR, setFilterRoadAccessBR] = useState('');
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [boostModal, setBoostModal] = useState<{ listingId: string; title: string } | null>(null);
+  const [userCriteria, setUserCriteria] = useState<any | null>(null);
   const router = useRouter();
 
   // Close dropdowns when clicking outside
@@ -221,6 +222,50 @@ export default function MarketplacePage() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Load user's buyer criteria for Recommended sort
+  useEffect(() => {
+    if (!profile?.id) return;
+    const supabase = createClient();
+    supabase
+      .from('buyer_requests')
+      .select('target_regions,budget_min,budget_max,min_acreage,max_acreage,zoning_preference,use_case')
+      .eq('user_id', profile.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+      .then(({ data }) => { if (data) setUserCriteria(data); });
+  }, [profile?.id]);
+
+  function scoreListingForUser(listing: Listing, criteria: any): number {
+    let score = 0;
+    // Promoted boost
+    if (listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date()) score += 40;
+    if (!criteria) return score;
+    // Region match
+    if (criteria.target_regions?.length > 0) {
+      const s = (listing.state ?? '').toLowerCase();
+      const match = criteria.target_regions.some((r: string) => r.toLowerCase().includes(s) || s.includes(r.toLowerCase()));
+      if (match) score += 30;
+    }
+    // Budget match
+    if (listing.asking_price) {
+      if (criteria.budget_max && listing.asking_price <= criteria.budget_max) score += 15;
+      if (criteria.budget_min && listing.asking_price >= criteria.budget_min) score += 5;
+    }
+    // Acreage match
+    if (listing.lot_size_acres) {
+      if (criteria.min_acreage && listing.lot_size_acres >= criteria.min_acreage) score += 10;
+      if (criteria.max_acreage && listing.lot_size_acres <= criteria.max_acreage) score += 5;
+    }
+    // Zoning match
+    if (criteria.zoning_preference?.length > 0 && listing.zoning) {
+      const z = listing.zoning.toLowerCase();
+      if (criteria.zoning_preference.some((p: string) => z.includes(p.toLowerCase()))) score += 10;
+    }
+    return score;
+  }
 
   const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
   const isFreeUser = !loading && !tier;
@@ -346,8 +391,13 @@ export default function MarketplacePage() {
       });
     }
 
+    // Recommended sort — score against user's saved criteria
+    if (listingsSort === 'recommended') {
+      result = [...result].sort((a, b) => scoreListingForUser(b, userCriteria) - scoreListingForUser(a, userCriteria));
+    }
+
     return result;
-  }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeAcres, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities]);
+  }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeAcres, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]);
 
   const filteredBuyerRequests = useMemo(() => {
     return buyerRequests.filter(req => {
