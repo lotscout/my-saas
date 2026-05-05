@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       'id,title,property_description,state,county,zip_code,street_address,' +
       'lot_size_acres,lot_size_sqft,zoning,road_access,utilities,asking_price,' +
       'price_negotiable,ownership_type,contact_methods,status,photos_urls,' +
-      'digital_signature,created_at,user_id,lat,lng'
+      'digital_signature,created_at,user_id,promoted,boost_expires_at,lat,lng'
     )
     .eq('status', 'published')
     .order(orderCol, { ascending })
