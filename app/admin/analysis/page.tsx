@@ -235,6 +235,15 @@ export default function AdminAnalysisPage() {
                       <td className="px-5 py-4">
                         <span className="font-medium text-on-surface line-clamp-1 max-w-[200px] block">{location}</span>
                         {r.apn && <span className="text-xs text-on-surface/40">APN: {r.apn}</span>}
+                        <a
+                          href={`https://app.land.id/maps?q=${encodeURIComponent(location)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 mt-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          <span className="material-symbols-outlined text-xs">map</span>
+                          Search land.id →
+                        </a>
                       </td>
                       <td className="px-4 py-4">
                         <div className="font-medium text-on-surface">{r.user.name}</div>

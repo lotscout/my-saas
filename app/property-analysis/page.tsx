@@ -64,6 +64,7 @@ export default function PropertyAnalysisPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [deliveryPopup, setDeliveryPopup] = useState<{ turnaround: string; property: string } | null>(null);
 
   // Past requests
   const [requests, setRequests] = useState<AnalysisRequest[]>([]);
@@ -154,6 +155,12 @@ export default function PropertyAnalysisPage() {
         throw new Error(err.error || 'Submission failed');
       }
 
+      const result = await res.json();
+      const propertyLabel = inputMode === 'address'
+        ? [streetAddress, city, addrState].filter(Boolean).join(', ')
+        : `APN ${apn} · ${apnCounty} County, ${apnState}`;
+
+      setDeliveryPopup({ turnaround: result.turnaround ?? '24 hours', property: propertyLabel });
       setSubmitSuccess(true);
       setStreetAddress(''); setCity(''); setAddrState(''); setZipCode('');
       setApn(''); setApnCounty(''); setApnState('');
@@ -190,6 +197,36 @@ export default function PropertyAnalysisPage() {
 
   return (
     <div className="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-primary">
+
+      {/* Delivery confirmation popup */}
+      {deliveryPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-emerald-600 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            </div>
+            <h2 className="font-headline text-2xl font-extrabold text-on-surface mb-2">Request Submitted!</h2>
+            <p className="text-secondary text-sm mb-4 leading-relaxed">
+              Your analysis request for <span className="font-semibold text-on-surface">{deliveryPopup.property}</span> has been received.
+            </p>
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-6 py-4 mb-6">
+              <p className="text-emerald-800 font-semibold text-sm">
+                {deliveryPopup.turnaround === '15 minutes'
+                  ? '⚡ Your report will be ready within 15 minutes'
+                  : '⏱ Your report will be ready within 24 hours'}
+              </p>
+              <p className="text-emerald-700 text-xs mt-1">We\'ll email you when it\'s ready.</p>
+            </div>
+            <button
+              onClick={() => setDeliveryPopup(null)}
+              className="w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:opacity-90 transition-opacity"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
       <Header />
 
       <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-8">
