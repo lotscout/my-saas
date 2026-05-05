@@ -592,7 +592,7 @@ export default function MarketplacePage() {
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search by zip, city, county, state name or abbreviation..."
+                  placeholder="Search by zip, city, county, or state..."
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-4 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
                 />
                 {searchQuery && (
