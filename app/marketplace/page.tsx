@@ -244,13 +244,16 @@ export default function MarketplacePage() {
         if (Array.isArray(data)) {
           const now = new Date();
           const sorted = [...(data as Listing[])].sort((a, b) => {
-            const aActive = a.promoted && a.boost_expires_at && new Date(a.boost_expires_at) > now;
-            const bActive = b.promoted && b.boost_expires_at && new Date(b.boost_expires_at) > now;
+            const aActive = !!(a.promoted && a.boost_expires_at && new Date(a.boost_expires_at) > now);
+            const bActive = !!(b.promoted && b.boost_expires_at && new Date(b.boost_expires_at) > now);
             if (aActive && !bActive) return -1;
             if (!aActive && bActive) return 1;
             return 0;
           });
           setListings(sorted);
+        } else if (data && typeof data === 'object' && 'error' in data) {
+          console.error('[marketplace] listings API error:', (data as any).error);
+          setListings([]);
         }
         setListingsLoading(false);
       })
