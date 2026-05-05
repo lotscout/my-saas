@@ -55,18 +55,21 @@ function Dash() {
   return <span className="text-outline-variant text-base">—</span>;
 }
 
+const ANNUAL_PRICES  = { standard: 97,  priority: 329, exclusive: 579 };
+const MONTHLY_PRICES = { standard: 113, priority: 384, exclusive: 675 };
+const ANNUAL_TOTALS  = { standard: 970, priority: 3290, exclusive: 5790 };
+
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(false);
+  const [isAnnual, setIsAnnual] = useState(true);
   const [loading, setLoading] = useState<string | null>(null);
   const { tier: userTier } = useUserTier();
 
-  const prices = {
-    standard: isAnnual ? 81  : 97,
-    priority: isAnnual ? 274 : 329,
-    exclusive: isAnnual ? 665 : 799,
-  };
+  const prices = isAnnual ? ANNUAL_PRICES : MONTHLY_PRICES;
 
-  const billingLabel = isAnnual ? 'Billed annually' : 'Billed monthly';
+  function billingSubtext(t: keyof typeof ANNUAL_TOTALS) {
+    if (isAnnual) return `Billed annually · $${ANNUAL_TOTALS[t].toLocaleString()}/year`;
+    return 'Billed monthly · no commitment';
+  }
 
   function getPriceKey(tier: string) {
     return `${tier}${isAnnual ? 'Annual' : 'Monthly'}`;
@@ -110,27 +113,28 @@ export default function PricingPage() {
 
             {/* Top-left: billing toggle */}
             <div className="p-5 flex flex-col justify-center gap-3">
-              <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full self-start">
-                <button
-                  onClick={() => setIsAnnual(false)}
-                  className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${
-                    !isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setIsAnnual(true)}
-                  className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${
-                    isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
-                  }`}
-                >
-                  Annual
-                </button>
-              </div>
-              <div className="bg-on-primary-container/20 text-primary-container px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 self-start">
-                <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                Get 2 months free with annual billing
+              <div className="inline-flex items-center gap-2 self-start">
+                <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full">
+                  <button
+                    onClick={() => setIsAnnual(false)}
+                    className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${
+                      !isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setIsAnnual(true)}
+                    className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${
+                      isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
+                    }`}
+                  >
+                    Annual
+                  </button>
+                </div>
+                <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">
+                  2 Months Free
+                </span>
               </div>
             </div>
 
@@ -146,7 +150,7 @@ export default function PricingPage() {
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('standard')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading || userTier === 'standard'}
@@ -171,7 +175,7 @@ export default function PricingPage() {
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.priority}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('priority')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
@@ -193,7 +197,7 @@ export default function PricingPage() {
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingLabel}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('exclusive')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading || userTier === 'exclusive'}
