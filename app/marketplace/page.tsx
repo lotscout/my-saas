@@ -36,6 +36,7 @@ interface Listing {
   county: string | null;
   zip_code: string | null;
   street_address: string | null;
+  apn: string | null;
   lot_size_acres: number | null;
   lot_size_sqft: number | null;
   zoning: string | null;
@@ -952,13 +953,21 @@ export default function MarketplacePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                 {filteredListings.map(listing => {
                   const imgSrc = listing.photos_urls?.[0] ?? PLACEHOLDER_IMG;
-                  const location = [listing.county, listing.state].filter(Boolean).join(', ');
                   const acreage = formatAcreage(listing.lot_size_acres, listing.lot_size_sqft);
                   const price = formatPrice(listing.asking_price);
-                  const tags = [listing.zoning, ...(listing.road_access ?? []).slice(0,1)].filter(Boolean) as string[];
+                  const addressLine = listing.street_address?.trim()
+                    ? listing.street_address
+                    : listing.apn
+                    ? `APN ${listing.apn}`
+                    : 'Undisclosed Address';
+                  const countyState = [
+                    listing.county ? `${listing.county} County` : null,
+                    listing.state,
+                  ].filter(Boolean).join(', ');
                   return (
-                    <Link key={listing.id} href={`/listings/${listing.id}`} className="flex flex-col group">
-                      <div className="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-video mb-6">
+                    <Link key={listing.id} href={`/listings/${listing.id}`} className="flex flex-col group rounded-2xl overflow-hidden border border-outline-variant/15 bg-white hover:shadow-lg hover:border-outline-variant/30 transition-all">
+                      {/* Image */}
+                      <div className="relative overflow-hidden bg-surface-container-low aspect-video">
                         {listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() && (
                           <div className="absolute top-3 left-3 z-10">
                             <span className="bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-lg">
@@ -968,22 +977,17 @@ export default function MarketplacePage() {
                           </div>
                         )}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt={listing.title ?? 'Land listing'} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src={imgSrc} />
-                        {listing.zoning && (
-                          <div className="absolute top-4 right-4">
-                            <span className="bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">{listing.zoning}</span>
-                          </div>
-                        )}
-                        <div className="absolute top-4 left-4">
+                        <img alt="Land listing" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={imgSrc} />
+                        <div className="absolute top-3 right-3 z-10">
                           <button
                             onClick={(e) => toggleFavorite(e, listing.id)}
                             disabled={savingId === listing.id}
-                            className={`bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm transition-transform hover:scale-110 disabled:opacity-60 ${
-                              savedListingIds.has(listing.id) ? 'text-red-500' : 'text-primary'
+                            className={`bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-sm transition-transform hover:scale-110 disabled:opacity-60 ${
+                              savedListingIds.has(listing.id) ? 'text-red-500' : 'text-slate-500'
                             }`}
                           >
                             <span
-                              className="material-symbols-outlined text-lg"
+                              className="material-symbols-outlined text-base"
                               style={{ fontVariationSettings: savedListingIds.has(listing.id) ? "'FILL' 1" : "'FILL' 0" }}
                             >
                               favorite
@@ -991,21 +995,22 @@ export default function MarketplacePage() {
                           </button>
                         </div>
                       </div>
-                      <div className="px-2 flex-1 flex flex-col">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-xl font-black text-primary leading-tight pr-2 line-clamp-2 overflow-hidden min-h-[3.5rem]">{listing.title}</h3>
-                          <span className="text-2xl font-black text-primary whitespace-nowrap">{price}</span>
-                        </div>
-                        <p className="text-slate-500 text-sm mb-4">{location}{acreage ? ` • ${acreage}` : ''}</p>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {tags.map(tag => (
-                            <span key={tag} className="bg-surface-container-high px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{tag}</span>
-                          ))}
-                        </div>
+
+                      {/* Card body */}
+                      <div className="p-4 flex-1 flex flex-col">
+                        <p className="text-2xl font-extrabold text-primary leading-tight">{price}</p>
+                        {acreage && <p className="text-sm font-bold text-on-surface mt-0.5">{acreage}</p>}
+                        <p className="text-sm text-secondary mt-1.5 truncate">{addressLine}</p>
+                        {countyState && <p className="text-xs text-secondary/70 mt-0.5">{countyState}</p>}
+                        {listing.zoning && (
+                          <div className="mt-3">
+                            <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
+                          </div>
+                        )}
                         {profile?.id && listing.user_id === profile.id && (
                           <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoostModal({ listingId: listing.id, title: listing.title ?? 'Your Listing' }); }}
-                            className="mb-3 w-full flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 py-2 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors"
+                            className="mt-3 w-full flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 py-2 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors"
                           >
                             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
                             {listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() ? 'Boosted ✓' : 'Boost Listing'}
