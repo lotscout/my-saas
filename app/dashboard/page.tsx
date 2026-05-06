@@ -128,8 +128,10 @@ function criteriaLabel(b: any): string {
 export default function DashboardPage() {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [tier, setTier] = useState<Tier | null>(null);
-  const [profileTodos, setProfileTodos] = useState<{ label: string; href: string }[]>([]);
-  const [profileComplete, setProfileComplete] = useState(false);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [hasAnalysisReady, setHasAnalysisReady] = useState(false);
+  const [hasDraftListing, setHasDraftListing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [matchedBuyers, setMatchedBuyers] = useState<any[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -156,7 +158,7 @@ export default function DashboardPage() {
 
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-      const [profileRes, subRes, messagesRes, reportsRes, userListingsRes, userCriteriaRes] = await Promise.all([
+      const [profileRes, subRes, messagesRes, reportsRes, userListingsRes, userCriteriaRes, unreadRes, analysisRes, draftListingsRes] = await Promise.all([
         supabase.from('profiles').select('first_name, last_name, avatar_url, bio, phone, company_name').eq('id', user.id).single(),
         supabase.from('subscriptions').select('tier').eq('user_id', user.id).eq('status', 'active').single(),
         supabase.from('messages')
@@ -178,6 +180,9 @@ export default function DashboardPage() {
           .select('id, location, min_acreage, max_acreage, min_budget, max_budget, land_type')
           .eq('user_id', user.id)
           .eq('active', true),
+        supabase.from('messages').select('id', { count: 'exact', head: true }).eq('recipient_id', user.id).is('read_at', null),
+        supabase.from('property_analysis_requests').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'complete'),
+        supabase.from('listings').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'draft'),
       ]);
 
       setFirstName(
@@ -187,15 +192,11 @@ export default function DashboardPage() {
       );
       setTier((subRes?.data?.tier as Tier) ?? null);
 
-      // Profile completeness checklist
       const p = profileRes.data;
-      const todos: { label: string; href: string }[] = [];
-      if (!p?.avatar_url) todos.push({ label: 'Add a profile photo', href: '/edit-profile' });
-      if (!p?.bio) todos.push({ label: 'Write an about/bio section', href: '/edit-profile' });
-      if (!p?.phone) todos.push({ label: 'Add your phone number', href: '/edit-profile' });
-      if (!p?.company_name) todos.push({ label: 'Add your company name', href: '/edit-profile' });
-      setProfileTodos(todos);
-      setProfileComplete(todos.length === 0);
+      setProfileIncomplete(!p?.first_name || !p?.last_name || !p?.avatar_url);
+      setUnreadCount(unreadRes.count ?? 0);
+      setHasAnalysisReady((analysisRes.count ?? 0) > 0);
+      setHasDraftListing((draftListingsRes.count ?? 0) > 0);
       setMessages((messagesRes.data as any[]) ?? []);
       setReports((reportsRes.data as any[]) ?? []);
 
@@ -333,37 +334,48 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Profile Completeness */}
-        {!loading && (
-          profileComplete ? (
-            <section className="flex items-center gap-3 mb-8 px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-2xl w-fit">
-              <span className="material-symbols-outlined text-emerald-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-              <span className="text-sm font-semibold text-emerald-800">Profile complete — great work!</span>
-            </section>
-          ) : (
+        {/* To-Do */}
+        {!loading && (() => {
+          const allClear = !profileIncomplete && unreadCount === 0 && !hasAnalysisReady && !hasDraftListing;
+          if (allClear) {
+            return (
+              <section className="flex items-center gap-3 mb-8 px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-2xl w-fit">
+                <span className="material-symbols-outlined text-emerald-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                <span className="text-sm font-semibold text-emerald-800">You are all caught up!</span>
+              </section>
+            );
+          }
+          const items: { label: string; href: string; done: boolean }[] = [
+            { label: 'Complete your profile', href: '/edit-profile', done: !profileIncomplete },
+            ...(unreadCount > 0 ? [{ label: `You have ${unreadCount} unread message${unreadCount !== 1 ? 's' : ''}`, href: '/messaging', done: false }] : []),
+            ...(hasAnalysisReady ? [{ label: 'Your property analysis is ready', href: '/property-analysis', done: false }] : []),
+            ...(hasDraftListing ? [{ label: 'You have a listing draft to complete', href: '/create-listing', done: false }] : []),
+          ];
+          return (
             <section className="mb-10 bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-primary text-xl">account_circle</span>
-                <h2 className="font-headline font-bold text-primary text-lg">Complete your profile</h2>
-                <span className="ml-auto text-xs font-bold text-secondary">{4 - profileTodos.length}/4 done</span>
+                <span className="material-symbols-outlined text-primary text-xl">checklist</span>
+                <h2 className="font-headline font-bold text-primary text-lg">To-Do</h2>
               </div>
               <ul className="space-y-2">
-                {profileTodos.map(todo => (
-                  <li key={todo.label}>
-                    <a
-                      href={todo.href}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-colors group"
-                    >
-                      <span className="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary transition-colors shrink-0" />
-                      <span className="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">{todo.label}</span>
+                {items.map(item => (
+                  <li key={item.label}>
+                    <a href={item.href} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-colors group">
+                      <span
+                        className={`material-symbols-outlined text-xl shrink-0 ${item.done ? 'text-emerald-500' : 'text-amber-500'}`}
+                        style={item.done ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                      >
+                        {item.done ? 'check_circle' : 'radio_button_unchecked'}
+                      </span>
+                      <span className="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">{item.label}</span>
                       <span className="material-symbols-outlined text-secondary group-hover:text-primary ml-auto text-base transition-colors">arrow_forward</span>
                     </a>
                   </li>
                 ))}
               </ul>
             </section>
-          )
-        )}
+          );
+        })()}
 
         {/* Action Required: Hero Section */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
