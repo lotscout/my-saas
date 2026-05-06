@@ -19,20 +19,18 @@
     "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-leaflet": "^5.0.0",
+    "react-leaflet": "^4.2.1",
     "resend": "^6.12.2",
-    "stripe": "^22.0.1",
-    "leaflet": "^1.9.4",
-    "react-leaflet": "^4.2.1"
+    "stripe": "^22.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "^1.9.14",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "@types/leaflet": "^1.9.14"
+    "typescript": "^5"
   }
 }

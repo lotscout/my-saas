@@ -106,7 +106,6 @@ export default function BuyerRequestPage() {
 
   const profile = request.profiles;
   const buyerName = request.display_name ||
-    profile?.full_name ||
     [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
     request.display_company ||
     'Anonymous Buyer';
