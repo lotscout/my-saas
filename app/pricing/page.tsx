@@ -18,10 +18,11 @@ const SECTIONS = [
   {
     label: 'Analysis Tools',
     features: [
-      { name: 'Lot Analysis Reports',      standard: true,        priority: true,        exclusive: true        },
-      { name: 'Property Analysis Reports', standard: true,        priority: true,        exclusive: true        },
-      { name: 'Lot to Buyer Match AI',     standard: true,        priority: true,        exclusive: true        },
-      { name: 'Report Delivery',           standard: '24 hours',  priority: '24 hours',  exclusive: '15 min'    },
+      { name: 'Lot Analysis Reports',            standard: true,           priority: true,            exclusive: true           },
+      { name: 'Property Analysis Reports',       standard: '5/month',      priority: '15/month',      exclusive: 'Unlimited'    },
+      { name: 'Additional Analysis Reports',     standard: '$4.99 each',   priority: '$4.99 each',    exclusive: '$4.99 each'   },
+      { name: 'Lot to Buyer Match AI',           standard: true,           priority: true,            exclusive: true           },
+      { name: 'Report Delivery',                 standard: '24 hours',     priority: '24 hours',      exclusive: '15 min'       },
     ],
   },
   {

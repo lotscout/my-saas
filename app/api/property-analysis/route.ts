@@ -63,6 +63,46 @@ export async function POST(request: NextRequest) {
     .eq('id', user.id)
     .single();
 
+  // Enforce monthly limits
+  const TIER_LIMITS: Record<string, number | null> = { standard: 5, priority: 15, exclusive: null };
+  const tierKey = profile?.subscription_tier ?? '';
+  const monthlyLimit = TIER_LIMITS[tierKey] ?? 0;
+
+  if (monthlyLimit !== null) {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    const { count } = await supabase
+      .from('property_analysis_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('submitted_at', startOfMonth.toISOString());
+    if ((count ?? 0) >= monthlyLimit) {
+      return NextResponse.json({ error: 'Monthly limit reached', code: 'MONTHLY_LIMIT_REACHED' }, { status: 429 });
+    }
+  }
+
+  // Duplicate detection
+  if (body.inputType === 'address' && body.streetAddress) {
+    const { data: dup } = await supabase
+      .from('property_analysis_requests')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('street_address', body.streetAddress)
+      .limit(1)
+      .maybeSingle();
+    if (dup) return NextResponse.json({ error: 'Duplicate request', code: 'DUPLICATE_REQUEST' }, { status: 409 });
+  } else if (body.inputType === 'apn' && body.apn) {
+    const { data: dup } = await supabase
+      .from('property_analysis_requests')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('apn', body.apn)
+      .limit(1)
+      .maybeSingle();
+    if (dup) return NextResponse.json({ error: 'Duplicate request', code: 'DUPLICATE_REQUEST' }, { status: 409 });
+  }
+
   const userName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email || 'LotScout User';
 
   const { data: req, error } = await supabase

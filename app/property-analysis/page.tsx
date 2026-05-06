@@ -70,10 +70,21 @@ export default function PropertyAnalysisPage() {
   const [requests, setRequests] = useState<AnalysisRequest[]>([]);
   const [requestsLoading, setRequestsLoading] = useState(false);
 
+  // Monthly limit & duplicate detection
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [purchasingAdditional, setPurchasingAdditional] = useState(false);
+
   const isFree = !loading && !tier;
   const isPaid = !loading && !!tier;
   const showInputGate = isFree && inputFocused && !overlayDismissed;
   const showSpeedBanner = !loading && (tier === 'standard' || tier === 'priority');
+
+  const MONTHLY_LIMITS: Record<string, number | null> = { standard: 5, priority: 15, exclusive: null };
+  const monthlyLimit = tier ? (MONTHLY_LIMITS[tier] ?? null) : null;
+  const startOfCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const monthlyUsed = requests.filter(r => new Date(r.submitted_at) >= startOfCurrentMonth).length;
+  const atLimit = monthlyLimit !== null && monthlyUsed >= monthlyLimit;
 
   // Always start at the top of the page
   useEffect(() => {
@@ -140,8 +151,32 @@ export default function PropertyAnalysisPage() {
   const addrFieldsFilled = streetAddress.trim() !== '' && city.trim() !== '' && addrState !== '' && zipCode.trim() !== '';
   const canSubmit = inputMode === 'address' ? addrFieldsFilled : apnValid;
 
+  async function purchaseAdditionalReport() {
+    setPurchasingAdditional(true);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceKey: 'additionalReport' }),
+      });
+      const data = await res.json();
+      if (data.url) window.open(data.url, '_blank');
+    } catch {}
+    setPurchasingAdditional(false);
+  }
+
   async function handleSubmit() {
     if (!canSubmit || submitting) return;
+
+    // Monthly limit check
+    if (atLimit) { setShowLimitModal(true); return; }
+
+    // Duplicate detection (check against loaded requests list)
+    const isDuplicate = inputMode === 'address'
+      ? requests.some(r => r.street_address?.toLowerCase().trim() === streetAddress.toLowerCase().trim())
+      : requests.some(r => r.apn?.toLowerCase().trim() === apn.toLowerCase().trim());
+    if (isDuplicate) { setShowDuplicateModal(true); return; }
+
     setSubmitting(true);
     setSubmitError('');
     // Clear any address validation state so it never shows alongside the submit result
@@ -231,6 +266,62 @@ export default function PropertyAnalysisPage() {
             >
               Got it
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Duplicate detection modal */}
+      {showDuplicateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+            <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-amber-600 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>content_copy</span>
+            </div>
+            <h2 className="font-headline text-xl font-extrabold text-on-surface mb-2">Already Submitted</h2>
+            <p className="text-secondary text-sm leading-relaxed mb-6">
+              You have already submitted an analysis request for this property. View your existing report in the requests history below.
+            </p>
+            <button
+              onClick={() => { setShowDuplicateModal(false); document.getElementById('past-requests')?.scrollIntoView({ behavior: 'smooth' }); }}
+              className="w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:opacity-90 transition-opacity"
+            >
+              View My Requests
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Monthly limit modal */}
+      {showLimitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+            <button onClick={() => setShowLimitModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors">
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+            <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-amber-600 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
+            </div>
+            <h2 className="font-headline text-xl font-extrabold text-on-surface mb-2">Monthly Limit Reached</h2>
+            <p className="text-secondary text-sm leading-relaxed mb-6">
+              You have used all {monthlyLimit} reports included in your{' '}
+              <span className="font-semibold text-on-surface capitalize">{tier}</span> plan this month.
+              Additional reports are $4.99 each.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={purchaseAdditionalReport}
+                disabled={purchasingAdditional}
+                className="w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {purchasingAdditional ? 'Loading…' : 'Purchase Additional Report ($4.99)'}
+              </button>
+              <a href="/pricing" className="w-full bg-surface-container-high text-secondary font-bold py-3 rounded-xl text-center hover:bg-surface-container-highest transition-colors text-sm block">
+                Upgrade Plan
+              </a>
+              <button onClick={() => setShowLimitModal(false)} className="w-full text-secondary text-sm py-2 hover:text-on-surface transition-colors">
+                Dismiss
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -427,6 +518,12 @@ export default function PropertyAnalysisPage() {
                       <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
                       {submitError}
                     </div>
+                  )}
+
+                  {monthlyLimit !== null && (
+                    <p className="text-xs text-secondary text-center">
+                      {monthlyUsed} of {monthlyLimit} analysis report{monthlyLimit !== 1 ? 's' : ''} used this month
+                    </p>
                   )}
 
                   <button
@@ -697,7 +794,7 @@ export default function PropertyAnalysisPage() {
 
         {/* ── Past Requests Table (paid users only) ── */}
         {isPaid && (
-          <section className="mt-16">
+          <section id="past-requests" className="mt-16">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Your Past Requests</h2>
               <button onClick={loadRequests} className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">

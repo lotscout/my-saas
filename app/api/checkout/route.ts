@@ -16,15 +16,17 @@ const priceMap: Record<string, string | undefined> = {
   priorityAnnual: process.env.STRIPE_PRIORITY_ANNUAL_PRICE_ID,
   exclusiveMonthly: process.env.STRIPE_EXCLUSIVE_MONTHLY_PRICE_ID,
   exclusiveAnnual: process.env.STRIPE_EXCLUSIVE_ANNUAL_PRICE_ID,
+  additionalReport: process.env.STRIPE_ADDITIONAL_REPORT_PRICE_ID,
 };
 
-const tierFromPriceKey: Record<string, string> = {
+const tierFromPriceKey: Record<string, string | undefined> = {
   standardMonthly: 'standard',
   standardAnnual: 'standard',
   priorityMonthly: 'priority',
   priorityAnnual: 'priority',
   exclusiveMonthly: 'exclusive',
   exclusiveAnnual: 'exclusive',
+  additionalReport: undefined,
 };
 
 export async function POST(request: NextRequest) {
@@ -40,8 +42,9 @@ export async function POST(request: NextRequest) {
     const { priceKey } = await request.json();
     const priceId = priceMap[priceKey];
     const tier = tierFromPriceKey[priceKey];
+    const isOneTime = priceKey === 'additionalReport';
 
-    if (!priceId || !tier) {
+    if (!priceId || (!isOneTime && !tier)) {
       return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
     }
 
@@ -55,13 +58,13 @@ export async function POST(request: NextRequest) {
     const existingCustomerId = existingSub?.stripe_customer_id ?? undefined;
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+      mode: isOneTime ? 'payment' : 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: user.id,
       ...(existingCustomerId ? { customer: existingCustomerId } : {}),
-      metadata: { tier },
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
+      ...(isOneTime ? {} : { metadata: { tier } }),
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/property-analysis`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/property-analysis`,
     });
 
     return NextResponse.json({ url: session.url });
