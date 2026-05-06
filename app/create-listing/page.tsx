@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { containsProfanity } from '@/lib/profanity-filter'
+import Header from '@/components/Header'
 
 const STEPS = [
   { label: 'Ownership Type',       sub: 'Verify your legal authority' },
@@ -278,6 +279,7 @@ export default function CreateListingPage() {
 
   return (
     <>
+    <Header />
     {/* Tier gate modal */}
     {tierChecked && !hasTier && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">

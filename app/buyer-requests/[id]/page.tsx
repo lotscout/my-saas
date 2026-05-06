@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useUserTier } from '@/hooks/useUserTier';
+import Header from '@/components/Header';
 
 interface BuyerRequest {
   id: string;
@@ -148,6 +149,7 @@ export default function BuyerRequestPage() {
 
   return (
     <div className="bg-surface text-on-surface">
+      <Header />
       {/* Upgrade modal */}
       {showUpgradeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">

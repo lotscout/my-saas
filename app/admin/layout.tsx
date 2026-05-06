@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { isAdminEmail } from '@/lib/admin';
+import Header from '@/components/Header';
 
 const NAV = [
   { href: '/admin/dashboard', label: 'Overview',         icon: 'dashboard' },
@@ -61,7 +62,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen bg-surface-container-low overflow-hidden font-body">
+    <div className="flex flex-col h-screen bg-surface-container-low overflow-hidden font-body">
+      <Header />
+      <div className="flex flex-1 overflow-hidden">
       {/* Sidebar */}
       <aside className="w-60 flex-none flex flex-col bg-[#012d1d] text-white">
         {/* Logo */}
@@ -121,6 +124,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
+      </div>
     </div>
   );
 }
