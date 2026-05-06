@@ -30,7 +30,6 @@ interface BuyerRequest {
   profiles: {
     first_name: string | null;
     last_name: string | null;
-    full_name: string | null;
     company_name: string | null;
   } | null;
 }
@@ -68,11 +67,12 @@ export default function BuyerRequestPage() {
 
       const { data: req, error } = await supabase
         .from('buyer_requests')
-        .select('*, profiles(first_name, last_name, full_name, company_name)')
+        .select('*, profiles(first_name, last_name, company_name)')
         .eq('id', id)
         .single();
 
-      if (error || !req) { setNotFound(true); setLoading(false); return; }
+      if (error) { console.error('buyer_requests fetch error:', error); setNotFound(true); setLoading(false); return; }
+      if (!req) { setNotFound(true); setLoading(false); return; }
       setRequest(req as BuyerRequest);
       setLoading(false);
     })();
