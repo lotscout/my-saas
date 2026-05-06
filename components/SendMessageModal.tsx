@@ -22,58 +22,80 @@ export default function SendMessageModal({
 }: Props) {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSend() {
     const body = message.trim();
-    if (!body || sending || !currentUserId) return;
+    console.log('[SendMessageModal] handleSend called', { body, currentUserId, recipientId, currentUserIsBuyer });
+
+    if (!body) { setError('Please enter a message.'); return; }
+    if (!currentUserId) { setError('Not signed in. Please refresh and try again.'); return; }
+    if (sending) return;
+
+    setError(null);
     setSending(true);
 
     const supabase = createClient();
 
-    const buyerId = currentUserIsBuyer ? currentUserId : recipientId;
-    const sellerId = currentUserIsBuyer ? recipientId : currentUserId;
+    const buyerId  = currentUserIsBuyer ? currentUserId : recipientId;
+    const sellerId = currentUserIsBuyer ? recipientId   : currentUserId;
 
-    // Find any existing conversation with this recipient (RLS already scopes to current user)
-    const { data: existing } = await supabase
+    // Find existing conversation between exactly these two participants (either role order)
+    const { data: existing, error: findErr } = await supabase
       .from('conversations')
       .select('id')
-      .or(`buyer_id.eq.${recipientId},seller_id.eq.${recipientId}`)
+      .or(
+        `and(buyer_id.eq.${currentUserId},seller_id.eq.${recipientId}),` +
+        `and(buyer_id.eq.${recipientId},seller_id.eq.${currentUserId})`
+      )
       .limit(1)
       .maybeSingle();
 
-    let conversationId: string | undefined = existing?.id;
+    console.log('[SendMessageModal] find existing conversation', { existing, findErr });
+
+    let conversationId: string | null = existing?.id ?? null;
 
     if (!conversationId) {
       const { data: newConv, error: convErr } = await supabase
         .from('conversations')
-        .insert({
-          buyer_id: buyerId,
-          seller_id: sellerId,
-          status: 'active',
-          updated_at: new Date().toISOString(),
-        })
+        .insert({ buyer_id: buyerId, seller_id: sellerId, status: 'active' })
         .select('id')
         .single();
-      if (convErr || !newConv) { setSending(false); return; }
+
+      console.log('[SendMessageModal] create conversation', { newConv, convErr });
+
+      if (convErr || !newConv) {
+        setError(convErr?.message ?? 'Failed to create conversation. Please try again.');
+        setSending(false);
+        return;
+      }
       conversationId = newConv.id;
     }
 
-    const now = new Date().toISOString();
     const { error: msgErr } = await supabase
       .from('messages')
       .insert({ conversation_id: conversationId, sender_id: currentUserId, body });
 
-    if (!msgErr) {
-      await supabase
-        .from('conversations')
-        .update({
-          last_message_at: now,
-          last_message_preview: body.length > 100 ? body.slice(0, 100) + '…' : body,
-        })
-        .eq('id', conversationId);
-      onSent();
+    console.log('[SendMessageModal] insert message', { conversationId, msgErr });
+
+    if (msgErr) {
+      setError(msgErr.message ?? 'Failed to send message. Please try again.');
+      setSending(false);
+      return;
     }
+
+    // Best-effort update to conversation preview (non-blocking)
+    const preview = body.length > 100 ? body.slice(0, 100) + '…' : body;
+    supabase
+      .from('conversations')
+      .update({ last_message_at: new Date().toISOString(), last_message_preview: preview })
+      .eq('id', conversationId)
+      .then(({ error: updErr }) => {
+        if (updErr) console.warn('[SendMessageModal] conversation preview update failed', updErr);
+      });
+
     setSending(false);
+    onSent();
   }
 
   return (
@@ -92,11 +114,18 @@ export default function SendMessageModal({
 
         <textarea
           rows={4}
-          className="w-full border border-outline-variant rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none mb-6"
+          className="w-full border border-outline-variant rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none mb-4"
           placeholder="Hi, I have a property that matches your criteria. Interested in learning more?"
           value={message}
-          onChange={e => setMessage(e.target.value)}
+          onChange={e => { setMessage(e.target.value); if (error) setError(null); }}
         />
+
+        {error && (
+          <div className="mb-4 flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <span className="material-symbols-outlined text-base shrink-0 mt-0.5">error</span>
+            <span>{error}</span>
+          </div>
+        )}
 
         <div className="flex gap-3">
           <button
