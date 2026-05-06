@@ -24,14 +24,15 @@ interface BuyerRequest {
   timeline: string | null;
   additional_notes: string | null;
   contact_preference: string[] | null;
+  display_name: string | null;
+  display_company: string | null;
   created_at: string;
-}
-
-interface Profile {
-  first_name: string | null;
-  last_name: string | null;
-  full_name: string | null;
-  company_name: string | null;
+  profiles: {
+    first_name: string | null;
+    last_name: string | null;
+    full_name: string | null;
+    company_name: string | null;
+  } | null;
 }
 
 const TIMELINE_LABELS: Record<string, string> = {
@@ -54,7 +55,6 @@ export default function BuyerRequestPage() {
   const id = params.id as string;
 
   const [request, setRequest] = useState<BuyerRequest | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -68,20 +68,12 @@ export default function BuyerRequestPage() {
 
       const { data: req, error } = await supabase
         .from('buyer_requests')
-        .select('*')
+        .select('*, profiles(first_name, last_name, full_name, company_name)')
         .eq('id', id)
         .single();
 
       if (error || !req) { setNotFound(true); setLoading(false); return; }
-      setRequest(req);
-
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, full_name, company_name')
-        .eq('id', req.user_id)
-        .single();
-
-      setProfile(prof);
+      setRequest(req as BuyerRequest);
       setLoading(false);
     })();
   }, [id]);
@@ -111,10 +103,13 @@ export default function BuyerRequestPage() {
     );
   }
 
-  const buyerName = profile?.full_name ||
+  const profile = request.profiles;
+  const buyerName = request.display_name ||
+    profile?.full_name ||
     [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
+    request.display_company ||
     'Anonymous Buyer';
-  const companyName = profile?.company_name?.trim() || null;
+  const companyName = request.display_company || profile?.company_name?.trim() || null;
 
   const timelineLabel = request.timeline
     ? (TIMELINE_LABELS[request.timeline] ?? request.timeline)
