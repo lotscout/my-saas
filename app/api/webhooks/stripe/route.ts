@@ -141,11 +141,25 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      // Derive tier from price ID
+      const priceId = subscription.items.data[0]?.price?.id ?? null;
+      const priceToTier: Record<string, string> = {
+        [process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID!]: 'standard',
+        [process.env.STRIPE_STANDARD_ANNUAL_PRICE_ID!]: 'standard',
+        [process.env.STRIPE_PRIORITY_MONTHLY_PRICE_ID!]: 'priority',
+        [process.env.STRIPE_PRIORITY_ANNUAL_PRICE_ID!]: 'priority',
+        [process.env.STRIPE_EXCLUSIVE_MONTHLY_PRICE_ID!]: 'exclusive',
+        [process.env.STRIPE_EXCLUSIVE_ANNUAL_PRICE_ID!]: 'exclusive',
+      };
+      const newTier = priceId ? priceToTier[priceId] : undefined;
+
       const { error } = await supabase
         .from('subscriptions')
         .update({
           status: subscription.status,
           cancel_at_period_end: subscription.cancel_at_period_end,
+          stripe_price_id: priceId,
+          ...(newTier ? { tier: newTier } : {}),
           current_period_start: new Date((subscription as any).current_period_start * 1000),
           current_period_end: new Date((subscription as any).current_period_end * 1000),
           updated_at: new Date(),
@@ -153,6 +167,15 @@ export async function POST(request: NextRequest) {
         .eq('user_id', subRow.user_id);
 
       if (error) console.error('Failed to update subscription on subscription.updated:', error);
+
+      // Sync tier change to profiles
+      if (newTier) {
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .update({ subscription_tier: newTier })
+          .eq('id', subRow.user_id);
+        if (profileErr) console.error('Failed to sync tier to profiles on subscription.updated:', profileErr);
+      }
       break;
     }
 

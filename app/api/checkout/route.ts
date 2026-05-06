@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
+
+function adminSupabase() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 const priceMap: Record<string, string | undefined> = {
   standardMonthly: process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
@@ -37,10 +45,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
     }
 
+    // Reuse existing Stripe customer if available
+    const supabaseAdmin = adminSupabase();
+    const { data: existingSub } = await supabaseAdmin
+      .from('subscriptions')
+      .select('stripe_customer_id')
+      .eq('user_id', user.id)
+      .single();
+    const existingCustomerId = existingSub?.stripe_customer_id ?? undefined;
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: user.id,
+      ...(existingCustomerId ? { customer: existingCustomerId } : {}),
       metadata: { tier },
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
