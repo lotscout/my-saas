@@ -66,6 +66,24 @@ function fmtBudget(min: number | null, max: number | null): string {
   return 'Flexible';
 }
 
+function fmtPerAcre(budgetMax: number | null, minAcreage: number | null, budgetMin: number | null): string {
+  const budget = budgetMax ?? budgetMin;
+  if (!budget || !minAcreage || minAcreage <= 0) return fmtBudget(budgetMin, budgetMax);
+  if (minAcreage < 10000 / 43560) {
+    const perSqFt = budget / (minAcreage * 43560);
+    return `$${Math.round(perSqFt).toLocaleString()}/sq ft`;
+  }
+  return `$${Math.round(budget / minAcreage).toLocaleString()}/acre`;
+}
+
+function fmtTimeline(t: string): string {
+  if (/actively buying|0.30 days/i.test(t)) return 'Under 30 days';
+  if (/1.3 month/i.test(t)) return '1–3 months';
+  if (/3.6 month/i.test(t)) return '3–6 months';
+  if (/flexible|6\+/i.test(t)) return 'Flexible';
+  return t;
+}
+
 function getBuyerName(req: BuyerRequest) {
   if (req.display_name) return req.display_name;
   const p = req.profiles;
@@ -176,7 +194,7 @@ function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }:
           <span className="bg-primary/8 text-primary px-2 py-0.5 rounded-full font-bold capitalize">{req.use_case.split(' — ')[0]}</span>
         )}
         {showTimeline && req.timeline && (
-          <span className="text-secondary hidden md:inline">{req.timeline}</span>
+          <span className="text-secondary hidden md:inline">{fmtTimeline(req.timeline)}</span>
         )}
       </div>
     </Link>
@@ -197,33 +215,46 @@ function BuyerRequestCard({ req, canViewContact }: BuyerCardProps) {
   const secondaryName = company ? personName : null;
   const blur = !canViewContact;
 
-  const locationParts = [req.target_state, req.target_county || req.target_city].filter(Boolean);
-  const location = locationParts.length > 0 ? locationParts.join(' · ') : null;
-  const acreage = req.min_acreage
-    ? `${req.min_acreage.toLocaleString()}${req.max_acreage ? ` – ${req.max_acreage.toLocaleString()}` : '+'} acres`
-    : null;
+  const city = req.target_city || req.target_county || null;
+  const location = city && req.target_state
+    ? `${city}, ${req.target_state}`
+    : req.target_state || null;
+  const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
+  const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
 
   return (
     <Link
       href={`/buyer-requests/${req.id}`}
-      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-5 hover:shadow-lg hover:border-primary/25 transition-all"
+      className="aspect-square bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex flex-col justify-between hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
     >
       {/* Name block */}
       <div className={blur ? 'blur-sm select-none' : ''}>
         {primaryName && (
-          <p className="font-extrabold text-primary text-lg leading-tight">{primaryName}</p>
+          <p className="font-extrabold text-primary text-base leading-snug">{primaryName}</p>
         )}
         {secondaryName && (
-          <p className="text-sm text-secondary font-medium mt-0.5">{secondaryName}</p>
+          <p className="text-xs text-secondary font-medium mt-0.5 line-clamp-1">{secondaryName}</p>
         )}
       </div>
 
-      {/* Fields — values only, no labels */}
-      <div className="space-y-1.5">
-        {location && <p className="text-sm font-semibold text-on-surface">{location}</p>}
-        <p className="text-sm font-semibold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</p>
-        {acreage && <p className="text-sm text-secondary">{acreage}</p>}
-        {req.timeline && <p className="text-sm text-secondary">{req.timeline}</p>}
+      {/* Labeled fields */}
+      <div className="space-y-2">
+        {location && (
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p>
+            <p className="text-sm font-bold text-on-surface">{location}</p>
+          </div>
+        )}
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Budget</p>
+          <p className="text-sm font-bold text-on-surface">{perAcre}</p>
+        </div>
+        {timeline && (
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Timeline</p>
+            <p className="text-sm font-bold text-on-surface">{timeline}</p>
+          </div>
+        )}
       </div>
     </Link>
   );

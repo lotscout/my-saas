@@ -167,6 +167,11 @@ interface BuyerRequest {
   user_id: string;
   status: string;
   target_regions: string[];
+  target_state: string | null;
+  target_city: string | null;
+  target_county: string | null;
+  display_name: string | null;
+  display_company: string | null;
   budget_min: number | null;
   budget_max: number | null;
   min_acreage: number | null;
@@ -178,6 +183,30 @@ interface BuyerRequest {
   contact_preference: string[];
   created_at: string;
   profiles: { first_name: string | null; last_name: string | null; avatar_url: string | null } | null;
+}
+
+function fmtPerAcreMkt(budgetMax: number | null, minAcreage: number | null, budgetMin: number | null): string {
+  const budget = budgetMax ?? budgetMin;
+  if (!budget || !minAcreage || minAcreage <= 0) {
+    const f = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${Math.round(n / 1000)}K`;
+    if (budgetMin && budgetMax) return `${f(budgetMin)} – ${f(budgetMax)}`;
+    if (budgetMin) return `${f(budgetMin)}+`;
+    if (budgetMax) return `Up to ${f(budgetMax)}`;
+    return 'Flexible';
+  }
+  if (minAcreage < 10000 / 43560) {
+    const perSqFt = budget / (minAcreage * 43560);
+    return `$${Math.round(perSqFt).toLocaleString()}/sq ft`;
+  }
+  return `$${Math.round(budget / minAcreage).toLocaleString()}/acre`;
+}
+
+function fmtTimelineMkt(t: string): string {
+  if (/actively buying|0.30 days/i.test(t)) return 'Under 30 days';
+  if (/1.3 month/i.test(t)) return '1–3 months';
+  if (/3.6 month/i.test(t)) return '3–6 months';
+  if (/flexible|6\+/i.test(t)) return 'Flexible';
+  return t;
 }
 
 export default function MarketplacePage() {
@@ -1109,90 +1138,71 @@ export default function MarketplacePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBuyerRequests.map(req => {
-                  const firstName = req.profiles?.first_name ?? '';
-                  const lastName = req.profiles?.last_name ?? '';
-                  const displayName = [firstName, lastName].filter(Boolean).join(' ') || 'Anonymous Buyer';
-                  const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || 'AB';
+                  const primaryName = req.display_company || req.display_name ||
+                    [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || 'Anonymous Buyer';
                   const blurIdentity = !loading && !canViewContact;
+                  const city = req.target_city || req.target_county || null;
+                  const location = city && req.target_state
+                    ? `${city}, ${req.target_state}`
+                    : req.target_state || null;
+                  const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
+                  const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
 
                   return (
-                    <div key={req.id} className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
-                      {/* Header: avatar + name + badge */}
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${blurIdentity ? 'blur-sm' : ''}`}>
-                            {req.profiles?.avatar_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={req.profiles.avatar_url} alt="Buyer" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                                <span className="text-primary font-bold text-sm">{initials}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <p className={`font-bold text-primary text-sm ${blurIdentity ? 'blur-sm select-none' : ''}`}>{displayName}</p>
-                            <p className="text-[10px] text-secondary uppercase tracking-widest font-bold">Verified Buyer</p>
-                          </div>
-                        </div>
-                      </div>
+                    <div key={req.id} className="aspect-square bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex flex-col justify-between hover:shadow-md transition-shadow overflow-hidden">
+                      {/* Name */}
+                      <p className={`font-extrabold text-primary text-base leading-snug line-clamp-2 ${blurIdentity ? 'blur-sm select-none' : ''}`}>
+                        {primaryName}
+                      </p>
 
-                      {/* Details */}
-                      <div className="space-y-2.5 text-sm">
-                        {req.target_regions?.length > 0 && (
-                          <div className="flex items-start gap-2">
-                            <span className="material-symbols-outlined text-secondary text-base mt-0.5">location_on</span>
-                            <span className="text-on-surface-variant">{req.target_regions.join(', ')}</span>
+                      {/* Labeled fields */}
+                      <div className="space-y-2">
+                        {location && (
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p>
+                            <p className="text-sm font-bold text-on-surface">{location}</p>
                           </div>
                         )}
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-secondary text-base">payments</span>
-                          <span className="text-on-surface-variant">{formatBudget(req.budget_min, req.budget_max)}</span>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Budget</p>
+                          <p className="text-sm font-bold text-on-surface">{perAcre}</p>
                         </div>
-                        {req.min_acreage && (
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-secondary text-base">landscape</span>
-                            <span className="text-on-surface-variant">
-                              {req.min_acreage}{req.max_acreage ? ` – ${req.max_acreage}` : '+'} acres
-                            </span>
-                          </div>
-                        )}
-                        {req.timeline && (
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-secondary text-base">schedule</span>
-                            <span className="text-on-surface-variant text-xs">{req.timeline}</span>
+                        {timeline && (
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Timeline</p>
+                            <p className="text-sm font-bold text-on-surface">{timeline}</p>
                           </div>
                         )}
                       </div>
 
                       {/* Actions */}
-                      <div className="pt-2 mt-auto border-t border-outline-variant/20 flex flex-col gap-2">
+                      <div className="border-t border-outline-variant/20 pt-2 flex flex-col gap-1.5">
                         <Link
                           href={`/buyer-requests/${req.id}`}
-                          className="w-full flex items-center justify-center gap-2 border border-outline-variant/40 text-secondary py-2 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
+                          className="w-full flex items-center justify-center gap-1.5 border border-outline-variant/40 text-secondary py-1.5 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
                         >
-                          View Buying Criteria
+                          View Criteria
                           <span className="material-symbols-outlined text-sm">arrow_forward</span>
                         </Link>
                         {canViewContact ? (
-                          <button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
-                            <span className="material-symbols-outlined text-base">mail</span>
+                          <button className="w-full flex items-center justify-center gap-1.5 bg-primary text-white py-1.5 rounded-xl font-bold text-xs hover:bg-primary/90 transition-colors">
+                            <span className="material-symbols-outlined text-sm">mail</span>
                             Contact Buyer
                           </button>
                         ) : isFreeUser ? (
                           <button
                             onClick={() => setShowContactUpgradeModal(true)}
-                            className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
+                            className="w-full flex items-center justify-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-800 py-1.5 rounded-xl font-bold text-xs hover:bg-amber-100 transition-colors"
                           >
-                            <span className="material-symbols-outlined text-base">lock</span>
-                            Upgrade to Contact Buyer
+                            <span className="material-symbols-outlined text-sm">lock</span>
+                            Upgrade to Contact
                           </button>
                         ) : (
                           <button
                             onClick={() => router.push('/pricing')}
-                            className="w-full flex items-center justify-center gap-2 bg-surface-container-high text-secondary py-2.5 rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-colors"
+                            className="w-full flex items-center justify-center gap-1.5 bg-surface-container-high text-secondary py-1.5 rounded-xl font-bold text-xs hover:bg-surface-container-highest transition-colors"
                           >
-                            <span className="material-symbols-outlined text-base">lock</span>
+                            <span className="material-symbols-outlined text-sm">lock</span>
                             Upgrade to Contact
                           </button>
                         )}
