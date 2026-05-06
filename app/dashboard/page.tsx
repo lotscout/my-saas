@@ -377,242 +377,132 @@ export default function DashboardPage() {
           );
         })()}
 
-        {/* Action Required: Hero Section */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {/* Stats Row */}
+        <section className="grid grid-cols-3 gap-6 mb-12">
 
           {/* New Messages */}
-          <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm flex flex-col">
-            <div className="bg-primary px-6 py-4 flex justify-between items-center">
-              <h3 className="text-white font-bold tracking-tight text-lg">
-                New Messages{!loading && messages.length > 0 && ` (${messages.length})`}
-              </h3>
-              <span className="material-symbols-outlined text-white/70">mail</span>
-            </div>
-            <div className="divide-y divide-surface-container">
-              {loading ? (
-                [0, 1, 2].map(i => (
-                  <div key={i} className="p-6 flex items-start gap-4">
-                    <Skeleton className="w-12 h-12 shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-full" />
-                    </div>
-                  </div>
-                ))
-              ) : messages.length === 0 ? (
-                <div className="p-12 flex flex-col items-center justify-center text-center gap-3">
-                  <span className="material-symbols-outlined text-4xl text-on-surface-variant">mail</span>
-                  <p className="text-secondary text-sm">No new messages</p>
-                </div>
-              ) : (
-                messages.map(msg => (
-                  <div key={msg.id} className="p-6 flex items-start gap-4 hover:bg-surface-container-low transition-colors cursor-pointer group">
-                    <div className="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-secondary">person</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center mb-1">
-                        <h4 className="font-bold text-on-surface">{senderName(msg)}</h4>
-                        <span className="text-xs text-on-surface-variant shrink-0 ml-2">{relativeTime(msg.created_at)}</span>
-                      </div>
-                      {msg.listing && (
-                        <div className="flex gap-2 mb-2">
-                          <span className="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider truncate max-w-[160px]">
-                            {msg.listing.title}
-                          </span>
-                        </div>
-                      )}
-                      <p className="text-sm text-secondary line-clamp-1">{msg.body}</p>
-                    </div>
-                    <a href="/messaging" className="self-center opacity-0 group-hover:opacity-100 bg-primary text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0">Reply</a>
-                  </div>
-                ))
-              )}
-            </div>
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-8 text-center min-h-[220px]">
+            <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>mail</span>
+            {loading ? (
+              <>
+                <Skeleton className="h-10 w-16 mb-2" />
+                <Skeleton className="h-4 w-28" />
+              </>
+            ) : unreadCount === 0 ? (
+              <>
+                <p className="text-3xl font-extrabold text-on-surface font-headline">0</p>
+                <p className="text-sm font-semibold text-secondary mt-1 mb-3">New Messages</p>
+                <p className="text-xs text-secondary/70">No new messages</p>
+              </>
+            ) : (
+              <>
+                <p className="text-5xl font-extrabold text-primary font-headline">{unreadCount}</p>
+                <p className="text-sm font-semibold text-secondary mt-1 mb-4">New Messages</p>
+                <a href="/messaging" className="text-xs font-bold text-primary hover:underline">View all →</a>
+              </>
+            )}
+          </div>
+
+          {/* Completed Reports */}
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-8 text-center min-h-[220px]">
+            <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+            {loading ? (
+              <>
+                <Skeleton className="h-10 w-16 mb-2" />
+                <Skeleton className="h-4 w-32" />
+              </>
+            ) : reports.length === 0 ? (
+              <>
+                <p className="text-3xl font-extrabold text-on-surface font-headline">0</p>
+                <p className="text-sm font-semibold text-secondary mt-1 mb-3">Completed Reports</p>
+                <p className="text-xs text-secondary/70">No completed reports in the last 7 days.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-5xl font-extrabold text-primary font-headline">{reports.length}</p>
+                <p className="text-sm font-semibold text-secondary mt-1 mb-4">Completed Reports</p>
+                <a href="/property-analysis" className="text-xs font-bold text-primary hover:underline">View reports →</a>
+              </>
+            )}
           </div>
 
           {/* Matched Buyers */}
-          <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm flex flex-col border border-outline-variant/10">
-            <div className="px-6 py-4 flex justify-between items-center border-b border-outline-variant/5">
-              <h3 className="text-primary font-bold tracking-tight text-lg">
-                Matched Buyers{!loading && matchedBuyers.length > 0 && ` (${matchedBuyers.length})`}
-              </h3>
-              <span className="material-symbols-outlined text-primary">hub</span>
-            </div>
-            <div className="p-6 space-y-6 flex-1">
-              {loading ? (
-                [0, 1].map(i => (
-                  <div key={i} className="flex items-center gap-6">
-                    <Skeleton className="w-16 h-16 rounded-full shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-5 w-40" />
-                      <Skeleton className="h-3 w-56" />
-                    </div>
-                  </div>
-                ))
-              ) : matchedBuyers.length === 0 ? (
-                <div className="flex flex-col items-center justify-center text-center gap-3 py-8">
-                  <span className="material-symbols-outlined text-4xl text-on-surface-variant">hub</span>
-                  <p className="text-secondary text-sm">No matched buyers yet.<br />Add an active listing to start matching.</p>
-                </div>
-              ) : (
-                matchedBuyers.map(({ criteria, score }) => (
-                  <div key={criteria.id} className="relative group">
-                    <div className="absolute -inset-2 rounded-2xl bg-surface-container-low scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200" />
-                    <div className="relative flex items-center gap-6">
-                      <div className="w-16 h-16 rounded-full border-[3px] border-primary-fixed-dim p-1 shrink-0">
-                        <div className="w-full h-full bg-primary flex items-center justify-center rounded-full text-white font-bold text-xl">{score}</div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        {!loading && tier === 'standard' ? (
-                          <LockedFeature
-                            requiredTier="priority"
-                            message="Upgrade to Priority to view buyer contact details"
-                            className="rounded-xl mb-2"
-                          >
-                            <div className="p-1">
-                              <h4 className="font-bold text-on-surface text-lg truncate">{buyerName(criteria)}</h4>
-                              <p className="text-sm text-secondary truncate">Seeking: {criteriaLabel(criteria)}</p>
-                            </div>
-                          </LockedFeature>
-                        ) : (
-                          <>
-                            <h4 className="font-bold text-on-surface text-lg truncate">{buyerName(criteria)}</h4>
-                            <p className="text-sm text-secondary mb-2 truncate">Seeking: {criteriaLabel(criteria)}</p>
-                          </>
-                        )}
-                        <div className="flex gap-2 flex-wrap">
-                          {criteria.max_budget && (
-                            <span className="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase">
-                              Up to {formatPrice(criteria.max_budget)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <a href="/buyer-directory" className="bg-surface-container-high text-primary px-4 py-2 rounded-xl text-xs font-bold hover:bg-primary hover:text-white transition-all shrink-0">View Profile</a>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-            {!loading && (
-              <div className="px-6 py-4 bg-surface-container-low/50">
-                <p className="text-xs text-secondary italic">
-                  {matchedBuyers.length > 0
-                    ? `${matchedBuyers.length} buyer${matchedBuyers.length > 1 ? 's' : ''} matched to your active listings.`
-                    : 'Matches update automatically when new buyers register criteria.'}
-                </p>
-              </div>
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-8 text-center min-h-[220px]">
+            <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
+            {loading ? (
+              <>
+                <Skeleton className="h-10 w-16 mb-2" />
+                <Skeleton className="h-4 w-28" />
+              </>
+            ) : matchedBuyers.length === 0 ? (
+              <>
+                <p className="text-3xl font-extrabold text-on-surface font-headline">0</p>
+                <p className="text-sm font-semibold text-secondary mt-1 mb-3">Matched Buyers</p>
+                <p className="text-xs text-secondary/70">No matched buyers yet.<br />Add an active listing to start matching.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-5xl font-extrabold text-primary font-headline">{matchedBuyers.length}</p>
+                <p className="text-sm font-semibold text-secondary mt-1 mb-4">Matched Buyers</p>
+                <a href="/buyer-directory" className="text-xs font-bold text-primary hover:underline">View buyers →</a>
+              </>
             )}
           </div>
 
         </section>
 
-        {/* Secondary Row */}
-        <section className="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-12">
-
-          {/* Completed Reports */}
-          <div className="xl:col-span-5 bg-surface-container-lowest rounded-2xl p-8 shadow-sm">
-            <h3 className="text-primary font-bold tracking-tight text-xl mb-6 font-headline">Completed Reports</h3>
-            <div className="space-y-4">
+        {/* New Listings For You */}
+        {(loading || hasBuyerCriteria) && (
+          <section className="mb-12">
+            <div className="flex justify-between items-center mb-6 px-2">
+              <h3 className="text-primary font-bold tracking-tight text-xl font-headline">New Listings For You</h3>
+              <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/marketplace">See all matches</a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {loading ? (
-                [0, 1, 2].map(i => (
-                  <div key={i} className="flex items-center gap-4 p-4">
-                    <Skeleton className="w-14 h-14 rounded-full shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-40" />
+                [0, 1].map(i => (
+                  <div key={i} className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm">
+                    <Skeleton className="h-48 rounded-none" />
+                    <div className="p-5 space-y-2">
+                      <Skeleton className="h-4 w-36" />
                       <Skeleton className="h-3 w-24" />
                     </div>
                   </div>
                 ))
-              ) : reports.length === 0 ? (
-                <div className="flex flex-col items-center justify-center text-center gap-3 py-8">
-                  <span className="material-symbols-outlined text-4xl text-on-surface-variant">analytics</span>
-                  <p className="text-secondary text-sm">No completed reports in the last 7 days.</p>
+              ) : newListings.length === 0 ? (
+                <div className="md:col-span-2 flex flex-col items-center justify-center text-center gap-3 py-12 bg-surface-container-lowest rounded-2xl">
+                  <span className="material-symbols-outlined text-4xl text-on-surface-variant">explore</span>
+                  <p className="text-secondary text-sm">No matching listings right now.<br />Check back soon or <a href="/marketplace" className="text-primary font-semibold hover:underline">browse the marketplace</a>.</p>
                 </div>
               ) : (
-                reports.map(report => (
-                  <div key={report.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container-low transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-full border-4 border-emerald-100 flex items-center justify-center shrink-0">
-                        <span className="text-primary font-bold text-lg">{report.score ?? '—'}</span>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-on-surface">{report.title}</h4>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-xs text-secondary">Analyzed: {relativeTime(report.created_at)}</p>
-                          {!loading && tier && (
-                            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${tier === 'standard' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                              {tier === 'standard' ? '24hr delivery' : '15min delivery'}
-                            </span>
-                          )}
+                newListings.map(listing => (
+                  <div key={listing.id} className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
+                    <div className="relative h-48 overflow-hidden bg-surface-container-high flex items-center justify-center">
+                      <span className="material-symbols-outlined text-6xl text-on-surface-variant/30">landscape</span>
+                      {listing.price && (
+                        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-primary font-bold text-sm">
+                          {formatPrice(listing.price)}
                         </div>
+                      )}
+                    </div>
+                    <div className="p-5">
+                      <h4 className="font-bold text-on-surface mb-1">{listing.title}</h4>
+                      <p className="text-xs text-secondary mb-4">{listing.location ?? listing.county ?? 'Location TBD'}</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {listing.acreage != null && (
+                          <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-1 rounded-md text-[10px] font-bold uppercase">{listing.acreage} Acres</span>
+                        )}
+                        {listing.land_type && (
+                          <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-1 rounded-md text-[10px] font-bold uppercase">{listing.land_type}</span>
+                        )}
                       </div>
                     </div>
-                    <a href="/property-analysis" className="flex items-center gap-1 text-primary font-bold text-sm hover:underline shrink-0">
-                      View Report
-                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>arrow_forward</span>
-                    </a>
                   </div>
                 ))
               )}
             </div>
-          </div>
-
-          {/* New Listings For You */}
-          {(loading || hasBuyerCriteria) && (
-            <div className="xl:col-span-7">
-              <div className="flex justify-between items-center mb-6 px-2">
-                <h3 className="text-primary font-bold tracking-tight text-xl font-headline">New Listings For You</h3>
-                <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/marketplace">See all matches</a>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {loading ? (
-                  [0, 1].map(i => (
-                    <div key={i} className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm">
-                      <Skeleton className="h-48 rounded-none" />
-                      <div className="p-5 space-y-2">
-                        <Skeleton className="h-4 w-36" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                    </div>
-                  ))
-                ) : newListings.length === 0 ? (
-                  <div className="md:col-span-2 flex flex-col items-center justify-center text-center gap-3 py-12 bg-surface-container-lowest rounded-2xl">
-                    <span className="material-symbols-outlined text-4xl text-on-surface-variant">explore</span>
-                    <p className="text-secondary text-sm">No matching listings right now.<br />Check back soon or <a href="/marketplace" className="text-primary font-semibold hover:underline">browse the marketplace</a>.</p>
-                  </div>
-                ) : (
-                  newListings.map(listing => (
-                    <div key={listing.id} className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
-                      <div className="relative h-48 overflow-hidden bg-surface-container-high flex items-center justify-center">
-                        <span className="material-symbols-outlined text-6xl text-on-surface-variant/30">landscape</span>
-                        {listing.price && (
-                          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-primary font-bold text-sm">
-                            {formatPrice(listing.price)}
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-5">
-                        <h4 className="font-bold text-on-surface mb-1">{listing.title}</h4>
-                        <p className="text-xs text-secondary mb-4">{listing.location ?? listing.county ?? 'Location TBD'}</p>
-                        <div className="flex gap-2 flex-wrap">
-                          {listing.acreage != null && (
-                            <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-1 rounded-md text-[10px] font-bold uppercase">{listing.acreage} Acres</span>
-                          )}
-                          {listing.land_type && (
-                            <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-1 rounded-md text-[10px] font-bold uppercase">{listing.land_type}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-
-        </section>
+          </section>
+        )}
 
         {/* Upgrade Banner — standard tier only, dismissible */}
         {!loading && tier === 'standard' && !bannerDismissed && (
