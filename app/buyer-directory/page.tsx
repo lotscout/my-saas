@@ -106,13 +106,30 @@ interface BuyerRowProps {
   req: BuyerRequest;
   canViewContact: boolean;
   showTimeline?: boolean;
+  minimal?: boolean;
 }
 
-function BuyerRow({ req, canViewContact, showTimeline = true }: BuyerRowProps) {
+function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }: BuyerRowProps) {
   const name = getBuyerName(req);
   const initials = getInitials(req);
-  const company = req.profiles?.company_name || null;
+  const company = req.display_company || req.profiles?.company_name || null;
   const blur = !canViewContact;
+
+  if (minimal) {
+    return (
+      <Link
+        href={`/buyer-requests/${req.id}`}
+        className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 px-4 py-3 flex items-center hover:shadow-md hover:border-primary/20 transition-all"
+      >
+        <div className="min-w-0">
+          <p className={`font-bold text-primary text-sm truncate ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
+          {company && (
+            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{company}</p>
+          )}
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link
@@ -131,8 +148,8 @@ function BuyerRow({ req, canViewContact, showTimeline = true }: BuyerRowProps) {
         </div>
         <div className="min-w-0">
           <p className={`font-bold text-primary text-sm truncate ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
-          {(req.display_company || company) && (
-            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{req.display_company || company}</p>
+          {company && (
+            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{company}</p>
           )}
           {req.contact_website && (
             <a href={`https://${req.contact_website}`} target="_blank" rel="noopener noreferrer"
@@ -607,13 +624,6 @@ export default function BuyerDirectoryPage() {
                     )}
                   </div>
 
-                  {/* Table header */}
-                  <div className="hidden sm:grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">
-                    <span>Buyer</span>
-                    <span className="w-24 text-right">State</span>
-                    <span className="w-32 text-right">Budget</span>
-                    <span className="w-28 text-right hidden lg:block">Use Case</span>
-                  </div>
 
                   {nationalLoading ? (
                     <div className="space-y-3">
@@ -629,13 +639,8 @@ export default function BuyerDirectoryPage() {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {filteredNational.map((req, i) => (
-                        <div key={req.id} className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
-                          <div className="flex-1">
-                            <BuyerRow req={req} canViewContact={canViewContact} />
-                          </div>
-                        </div>
+                      {filteredNational.map(req => (
+                        <BuyerRow key={req.id} req={req} canViewContact={canViewContact} minimal />
                       ))}
                     </div>
                   )}
