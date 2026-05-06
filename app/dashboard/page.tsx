@@ -451,6 +451,26 @@ export default function DashboardPage() {
 
         </section>
 
+        {/* Market Insights */}
+        <section className="mb-12">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-emerald-700 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-headline font-bold text-primary text-sm mb-0.5">April 2026 Market Report</p>
+              <p className="text-secondary text-xs leading-relaxed">U.S. farmland averaged $4,350/acre in 2025, up 4.3%. Texas and Iowa lead activity heading into spring.</p>
+            </div>
+            <a
+              href="/market-report/april-2026"
+              className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-white border border-emerald-200 px-4 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors whitespace-nowrap"
+            >
+              Read Full Market Analysis
+              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+          </div>
+        </section>
+
         {/* New Listings For You */}
         {(loading || hasBuyerCriteria) && (
           <section className="mb-12">
