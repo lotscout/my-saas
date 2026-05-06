@@ -205,7 +205,8 @@ export default function MarketplacePage() {
   const [filterTimeline, setFilterTimeline] = useState('');
   const [filterZoningBR, setFilterZoningBR] = useState('');
   const [filterLotSizeUnit, setFilterLotSizeUnit] = useState<'acres' | 'sqft'>('acres');
-  const [filterLotSizeAcres, setFilterLotSizeAcres] = useState('');
+  const [filterLotSizeMin, setFilterLotSizeMin] = useState('');
+  const [filterLotSizeMax, setFilterLotSizeMax] = useState('');
   const [filterSqFtMin, setFilterSqFtMin] = useState('');
   const [filterSqFtMax, setFilterSqFtMax] = useState('');
   const [filterRoadAccessProps, setFilterRoadAccessProps] = useState<string[]>([]);
@@ -372,16 +373,14 @@ export default function MarketplacePage() {
     }
 
     // Lot size filter
-    if (filterLotSizeUnit === 'acres' && filterLotSizeAcres) {
+    if (filterLotSizeUnit === 'acres' && (filterLotSizeMin || filterLotSizeMax)) {
+      const minAc = filterLotSizeMin ? Number(filterLotSizeMin) : null;
+      const maxAc = filterLotSizeMax ? Number(filterLotSizeMax) : null;
       result = result.filter(l => {
         const acres = l.lot_size_acres ?? (l.lot_size_sqft ? l.lot_size_sqft / 43560 : null);
         if (acres === null) return true;
-        if (filterLotSizeAcres === 'under1') return acres < 1;
-        if (filterLotSizeAcres === '1-5') return acres >= 1 && acres < 5;
-        if (filterLotSizeAcres === '5-25') return acres >= 5 && acres <= 25;
-        if (filterLotSizeAcres === '25-100') return acres > 25 && acres <= 100;
-        if (filterLotSizeAcres === '100-500') return acres > 100 && acres <= 500;
-        if (filterLotSizeAcres === '500+') return acres > 500;
+        if (minAc !== null && acres < minAc) return false;
+        if (maxAc !== null && acres > maxAc) return false;
         return true;
       });
     } else if (filterLotSizeUnit === 'sqft' && (filterSqFtMin || filterSqFtMax)) {
@@ -435,7 +434,7 @@ export default function MarketplacePage() {
     }
 
     return result;
-  }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeAcres, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeMin, filterLotSizeMax, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredBuyerRequests = useMemo(() => {
     return buyerRequests.filter(req => {
@@ -645,10 +644,9 @@ export default function MarketplacePage() {
               <div className="col-span-12 flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
                 {/* Lot Size */}
                 {(() => {
-                  const lotSizeActive = filterLotSizeAcres || (filterLotSizeUnit === 'sqft' && (filterSqFtMin || filterSqFtMax));
-                  const acresLabels: Record<string, string> = { under1: '< 1 Acre', '1-5': '1–5 Acres', '5-25': '5–25 Acres', '25-100': '25–100 Acres', '100-500': '100–500 Acres', '500+': '500+ Acres' };
+                  const lotSizeActive = filterLotSizeMin || filterLotSizeMax || filterSqFtMin || filterSqFtMax;
                   const btnLabel = lotSizeActive
-                    ? (filterLotSizeUnit === 'acres' ? acresLabels[filterLotSizeAcres] : 'Lot Size (Sq Ft)')
+                    ? (filterLotSizeUnit === 'acres' ? 'Lot Size (Acres)' : 'Lot Size (Sq Ft)')
                     : 'Lot Size';
                   return (
                     <div className="relative" data-filter-dropdown>
@@ -668,7 +666,7 @@ export default function MarketplacePage() {
                             {(['acres', 'sqft'] as const).map(u => (
                               <button
                                 key={u}
-                                onClick={() => { setFilterLotSizeUnit(u); setFilterLotSizeAcres(''); setFilterSqFtMin(''); setFilterSqFtMax(''); }}
+                                onClick={() => { setFilterLotSizeUnit(u); setFilterLotSizeMin(''); setFilterLotSizeMax(''); setFilterSqFtMin(''); setFilterSqFtMax(''); }}
                                 className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all ${filterLotSizeUnit === u ? 'bg-white text-primary shadow-sm' : 'text-secondary hover:text-on-surface'}`}
                               >
                                 {u === 'acres' ? 'Acres' : 'Sq Ft'}
@@ -676,12 +674,33 @@ export default function MarketplacePage() {
                             ))}
                           </div>
                           {filterLotSizeUnit === 'acres' ? (
-                            <div className="space-y-0.5">
-                              {[['', 'Any Size'], ['under1', 'Under 1 Acre'], ['1-5', '1–5 Acres'], ['5-25', '5–25 Acres'], ['25-100', '25–100 Acres'], ['100-500', '100–500 Acres'], ['500+', '500+ Acres']].map(([val, label]) => (
-                                <button key={val} onClick={() => { setFilterLotSizeAcres(val); setOpenFilter(null); }}
-                                  className={`w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-surface-container-low transition-colors ${filterLotSizeAcres === val ? 'text-primary font-bold' : 'text-on-surface'}`}
-                                >{label}</button>
-                              ))}
+                            <div className="space-y-3">
+                              <div>
+                                <label className="text-xs font-semibold text-secondary block mb-1">Min Acres</label>
+                                <input
+                                  type="number"
+                                  placeholder="e.g. 5"
+                                  value={filterLotSizeMin}
+                                  onChange={e => setFilterLotSizeMin(e.target.value)}
+                                  className="w-full border border-outline-variant/25 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs font-semibold text-secondary block mb-1">Max Acres</label>
+                                <input
+                                  type="number"
+                                  placeholder="e.g. 500"
+                                  value={filterLotSizeMax}
+                                  onChange={e => setFilterLotSizeMax(e.target.value)}
+                                  className="w-full border border-outline-variant/25 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                              </div>
+                              <button
+                                onClick={() => setOpenFilter(null)}
+                                className="w-full bg-primary text-white py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors"
+                              >
+                                Apply
+                              </button>
                             </div>
                           ) : (
                             <div className="space-y-3">
@@ -821,9 +840,9 @@ export default function MarketplacePage() {
                   )}
                 </div>
 
-                {(filterLotSizeAcres || filterSqFtMin || filterSqFtMax || filterZoning.length > 0 || filterUtilities.length > 0 || filterRoadAccessProps.length > 0) && (
+                {(filterLotSizeMin || filterLotSizeMax || filterSqFtMin || filterSqFtMax || filterZoning.length > 0 || filterUtilities.length > 0 || filterRoadAccessProps.length > 0) && (
                   <button
-                    onClick={() => { setFilterLotSizeAcres(''); setFilterSqFtMin(''); setFilterSqFtMax(''); setFilterZoning([]); setFilterUtilities([]); setFilterRoadAccessProps([]); }}
+                    onClick={() => { setFilterLotSizeMin(''); setFilterLotSizeMax(''); setFilterSqFtMin(''); setFilterSqFtMax(''); setFilterZoning([]); setFilterUtilities([]); setFilterRoadAccessProps([]); }}
                     className="flex items-center gap-1 text-xs font-bold text-secondary hover:text-primary transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">close</span>

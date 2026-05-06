@@ -30,7 +30,10 @@
       "Bash(npx supabase *)",
       "Read(//c/Users/bobby/**)",
       "Bash(2>&1)",
-      "Bash(xargs sed *)"
+      "Bash(xargs sed *)",
+      "mcp__plugin_supabase_supabase__list_projects",
+      "mcp__plugin_supabase_supabase__execute_sql",
+      "mcp__plugin_supabase_supabase__apply_migration"
     ]
   }
 }

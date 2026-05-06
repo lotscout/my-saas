@@ -105,18 +105,20 @@ function applyAcreageFilter(req: BuyerRequest, f: string): boolean {
 interface BuyerRowProps {
   req: BuyerRequest;
   canViewContact: boolean;
-  onUpgrade: () => void;
   showTimeline?: boolean;
 }
 
-function BuyerRow({ req, canViewContact, onUpgrade, showTimeline = true }: BuyerRowProps) {
+function BuyerRow({ req, canViewContact, showTimeline = true }: BuyerRowProps) {
   const name = getBuyerName(req);
   const initials = getInitials(req);
   const company = req.profiles?.company_name || null;
   const blur = !canViewContact;
 
   return (
-    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-sm transition-shadow">
+    <Link
+      href={`/buyer-requests/${req.id}`}
+      className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-md hover:border-primary/20 transition-all"
+    >
       {/* Avatar + identity */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 ${blur ? 'blur-sm' : ''}`}>
@@ -158,33 +160,7 @@ function BuyerRow({ req, canViewContact, onUpgrade, showTimeline = true }: Buyer
           <span className="text-secondary hidden md:inline">{req.timeline}</span>
         )}
       </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 shrink-0">
-        <Link
-          href={`/buyer-requests/${req.id}`}
-          className="text-xs font-semibold text-secondary border border-outline-variant/40 px-3 py-1.5 rounded-lg hover:bg-surface-container-low transition-colors"
-        >
-          View
-        </Link>
-        {canViewContact ? (
-          <Link
-            href={`/messaging?recipient=${req.user_id}`}
-            className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors"
-          >
-            Contact
-          </Link>
-        ) : (
-          <button
-            onClick={onUpgrade}
-            className="flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-100 transition-colors"
-          >
-            <span className="material-symbols-outlined text-xs">lock</span>
-            Upgrade
-          </button>
-        )}
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -193,17 +169,18 @@ function BuyerRow({ req, canViewContact, onUpgrade, showTimeline = true }: Buyer
 interface BuyerCardProps {
   req: BuyerRequest;
   canViewContact: boolean;
-  isFreeUser: boolean;
-  onUpgrade: () => void;
 }
 
-function BuyerRequestCard({ req, canViewContact, isFreeUser, onUpgrade }: BuyerCardProps) {
+function BuyerRequestCard({ req, canViewContact }: BuyerCardProps) {
   const name = getBuyerName(req);
   const initials = getInitials(req);
   const blur = !canViewContact;
 
   return (
-    <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
+    <Link
+      href={`/buyer-requests/${req.id}`}
+      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 hover:shadow-lg hover:border-primary/25 transition-all"
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${blur ? 'blur-sm' : ''}`}>
@@ -259,70 +236,7 @@ function BuyerRequestCard({ req, canViewContact, isFreeUser, onUpgrade }: BuyerC
           </div>
         )}
       </div>
-
-      <div className="pt-2 mt-auto border-t border-outline-variant/20 flex flex-col gap-2">
-        {/* Contact info for institutional/seeded buyers */}
-        {(req.contact_phone || req.contact_email || req.contact_website) && (
-          <div className="bg-surface-container-low rounded-xl px-4 py-3 space-y-1.5 text-xs">
-            {req.contact_phone && (
-              <div className="flex items-center gap-2 text-on-surface">
-                <span className="material-symbols-outlined text-secondary" style={{fontSize:'14px'}}>call</span>
-                <a href={`tel:${req.contact_phone}`} className="hover:text-primary transition-colors">
-                  {req.contact_phone}
-                </a>
-                {req.contact_phone_type && (
-                  <span className="text-secondary">({req.contact_phone_type})</span>
-                )}
-              </div>
-            )}
-            {req.contact_email && (
-              <div className="flex items-center gap-2 text-on-surface">
-                <span className="material-symbols-outlined text-secondary" style={{fontSize:'14px'}}>mail</span>
-                <a href={`mailto:${req.contact_email}`} className="hover:text-primary transition-colors truncate">{req.contact_email}</a>
-              </div>
-            )}
-            {req.contact_website && (
-              <div className="flex items-center gap-2 text-on-surface">
-                <span className="material-symbols-outlined text-secondary" style={{fontSize:'14px'}}>language</span>
-                <a href={`https://${req.contact_website}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors font-medium">{req.contact_website}</a>
-              </div>
-            )}
-          </div>
-        )}
-        <Link
-          href={`/buyer-requests/${req.id}`}
-          className="w-full flex items-center justify-center gap-2 border border-outline-variant/40 text-secondary py-2 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
-        >
-          View Buying Criteria
-          <span className="material-symbols-outlined text-sm">arrow_forward</span>
-        </Link>
-        {canViewContact ? (
-          <Link
-            href={`/messaging?recipient=${req.user_id}`}
-            className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">mail</span>
-            Contact Buyer
-          </Link>
-        ) : isFreeUser ? (
-          <button
-            onClick={onUpgrade}
-            className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">lock</span>
-            Upgrade to Contact Buyer
-          </button>
-        ) : (
-          <button
-            onClick={onUpgrade}
-            className="w-full flex items-center justify-center gap-2 bg-surface-container-high text-secondary py-2.5 rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">lock</span>
-            Upgrade to Contact
-          </button>
-        )}
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -358,7 +272,6 @@ export default function BuyerDirectoryPage() {
   const router = useRouter();
 
   const canViewContact = !permLoading && (isAtLeast('priority') || !!isAdmin);
-  const isFreeUser = !permLoading && !tier && !isAdmin;
 
   // ── Navigation state ──
   const [tab, setTab] = useState<MainTab>('directory');
@@ -699,12 +612,11 @@ export default function BuyerDirectoryPage() {
                   </div>
 
                   {/* Table header */}
-                  <div className="hidden sm:grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-4 py-2 text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">
+                  <div className="hidden sm:grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">
                     <span>Buyer</span>
                     <span className="w-24 text-right">State</span>
                     <span className="w-32 text-right">Budget</span>
                     <span className="w-28 text-right hidden lg:block">Use Case</span>
-                    <span className="w-24 text-right">Actions</span>
                   </div>
 
                   {nationalLoading ? (
@@ -725,7 +637,7 @@ export default function BuyerDirectoryPage() {
                         <div key={req.id} className="flex items-center gap-3">
                           <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
                           <div className="flex-1">
-                            <BuyerRow req={req} canViewContact={canViewContact} onUpgrade={() => setShowUpgradeModal(true)} />
+                            <BuyerRow req={req} canViewContact={canViewContact} />
                           </div>
                         </div>
                       ))}
@@ -806,7 +718,7 @@ export default function BuyerDirectoryPage() {
                               <div key={req.id} className="flex items-center gap-3">
                                 <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
                                 <div className="flex-1">
-                                  <BuyerRow req={req} canViewContact={canViewContact} onUpgrade={() => setShowUpgradeModal(true)} showTimeline />
+                                  <BuyerRow req={req} canViewContact={canViewContact} showTimeline />
                                 </div>
                               </div>
                             ))}
@@ -880,7 +792,6 @@ export default function BuyerDirectoryPage() {
                           key={req.id}
                           req={req}
                           canViewContact={canViewContact}
-                          onUpgrade={() => setShowUpgradeModal(true)}
                           showTimeline={false}
                         />
                       ))}
@@ -1014,8 +925,6 @@ export default function BuyerDirectoryPage() {
                       key={req.id}
                       req={req}
                       canViewContact={canViewContact}
-                      isFreeUser={isFreeUser}
-                      onUpgrade={() => setShowUpgradeModal(true)}
                     />
                   ))}
                 </div>
