@@ -73,7 +73,7 @@ export default function PropertyAnalysisPage() {
   const isFree = !loading && !tier;
   const isPaid = !loading && !!tier;
   const showInputGate = isFree && inputFocused && !overlayDismissed;
-  const showSpeedBanner = !loading && tier === 'standard';
+  const showSpeedBanner = !loading && (tier === 'standard' || tier === 'priority');
 
   // Always start at the top of the page
   useEffect(() => {
@@ -144,6 +144,9 @@ export default function PropertyAnalysisPage() {
     if (!canSubmit || submitting) return;
     setSubmitting(true);
     setSubmitError('');
+    // Clear any address validation state so it never shows alongside the submit result
+    setAddrValidStatus('idle');
+    setAddrValidMsg('');
     try {
       const body = inputMode === 'address'
         ? { inputType: 'address', streetAddress, city, county: resolvedCounty, state: addrState, zipCode }
@@ -217,8 +220,8 @@ export default function PropertyAnalysisPage() {
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-6 py-4 mb-6">
               <p className="text-emerald-800 font-semibold text-sm">
                 {deliveryPopup.turnaround === '15 minutes'
-                  ? '⚡ Your report will be ready within 15 minutes'
-                  : '⏱ Your report will be ready within 24 hours'}
+                  ? '⚡ Your report will be delivered within 15 minutes'
+                  : '⏱ Your report will be delivered within 24 hours'}
               </p>
               <p className="text-emerald-700 text-xs mt-1">We&apos;ll email you when it&apos;s ready.</p>
             </div>
@@ -261,8 +264,8 @@ export default function PropertyAnalysisPage() {
                 </div>
                 <h3 className="font-headline text-xl font-bold text-primary mb-2">Request Submitted!</h3>
                 <p className="text-secondary text-sm leading-relaxed mb-6">
-                  Your request has been submitted. You&apos;ll receive your analysis report via email
-                  {tier === 'exclusive' ? ' within 15 minutes.' : ' within 24 hours.'}
+                  Your request has been submitted. Your report will be delivered
+                  {tier === 'exclusive' ? ' within 15 minutes' : ' within 24 hours'} — we&apos;ll email you when it&apos;s ready.
                 </p>
                 <button
                   onClick={() => setSubmitSuccess(false)}
@@ -682,7 +685,7 @@ export default function PropertyAnalysisPage() {
                 <span className="text-amber-500 text-2xl shrink-0">⚡</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-amber-900 text-sm">Want faster results?</p>
-                  <p className="text-amber-700 text-xs mt-0.5">Upgrade to Exclusive to receive your deal analysis within 15 minutes.</p>
+                  <p className="text-amber-700 text-xs mt-0.5">Standard and Priority plans deliver within 24 hours. Exclusive delivers within 15 minutes.</p>
                 </div>
                 <a href="/pricing" className="shrink-0 bg-amber-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-amber-600 transition-colors whitespace-nowrap">
                   Upgrade →

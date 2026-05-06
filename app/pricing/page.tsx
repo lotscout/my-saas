@@ -10,17 +10,18 @@ const SECTIONS = [
   {
     label: 'Core Access',
     features: [
-      { name: 'Land Marketplace Access', standard: true,  priority: true,  exclusive: true  },
-      { name: 'Buyer Directory Access',  standard: true,  priority: true,  exclusive: true  },
-      { name: 'Custom Company Profile',  standard: true,  priority: true,  exclusive: true  },
+      { name: 'Land Marketplace Access', standard: true,        priority: true,        exclusive: true        },
+      { name: 'Buyer Directory Access',  standard: true,        priority: true,        exclusive: true        },
+      { name: 'Custom Company Profile',  standard: true,        priority: true,        exclusive: true        },
     ],
   },
   {
     label: 'Analysis Tools',
     features: [
-      { name: 'Lot Analysis Reports',      standard: true,  priority: true,  exclusive: true  },
-      { name: 'Property Analysis Reports', standard: true,  priority: true,  exclusive: true  },
-      { name: 'Lot to Buyer Match AI',     standard: true,  priority: true,  exclusive: true  },
+      { name: 'Lot Analysis Reports',      standard: true,        priority: true,        exclusive: true        },
+      { name: 'Property Analysis Reports', standard: true,        priority: true,        exclusive: true        },
+      { name: 'Lot to Buyer Match AI',     standard: true,        priority: true,        exclusive: true        },
+      { name: 'Report Delivery',           standard: '24 hours',  priority: '24 hours',  exclusive: '15 min'    },
     ],
   },
   {
@@ -224,26 +225,32 @@ export default function PricingPage() {
               </div>
 
               {/* Feature rows */}
-              {section.features.map((feature, fi) => (
-                <div
-                  key={fi}
-                  style={GRID}
-                  className={fi > 0 ? 'border-t border-outline-variant/5' : ''}
-                >
-                  <div className="py-1 pl-8 pr-4 text-sm text-secondary flex items-center">
-                    {feature.name}
+              {section.features.map((feature, fi) => {
+                const cell = (val: boolean | string, muted: boolean) =>
+                  typeof val === 'string'
+                    ? <span className={`text-xs font-bold ${muted ? 'text-on-primary-container' : 'text-primary'}`}>{val}</span>
+                    : val ? <Check muted={muted} /> : <Dash />;
+                return (
+                  <div
+                    key={fi}
+                    style={GRID}
+                    className={fi > 0 ? 'border-t border-outline-variant/5' : ''}
+                  >
+                    <div className="py-1 pl-8 pr-4 text-sm text-secondary flex items-center">
+                      {feature.name}
+                    </div>
+                    <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                      {cell(feature.standard, true)}
+                    </div>
+                    <div className="py-1 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
+                      {cell(feature.priority, false)}
+                    </div>
+                    <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                      {cell(feature.exclusive, false)}
+                    </div>
                   </div>
-                  <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
-                    {feature.standard ? <Check muted /> : <Dash />}
-                  </div>
-                  <div className="py-1 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
-                    {feature.priority ? <Check /> : <Dash />}
-                  </div>
-                  <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
-                    {feature.exclusive ? <Check /> : <Dash />}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ))}
 
