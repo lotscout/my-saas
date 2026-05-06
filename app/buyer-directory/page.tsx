@@ -24,6 +24,12 @@ interface BuyerRequest {
   zoning_preference: string[] | null;
   timeline: string | null;
   additional_notes: string | null;
+  display_name: string | null;
+  display_company: string | null;
+  contact_phone: string | null;
+  contact_phone_type: string | null;
+  contact_email: string | null;
+  contact_website: string | null;
   created_at: string;
   profiles: {
     first_name: string | null;
@@ -59,11 +65,13 @@ function fmtBudget(min: number | null, max: number | null): string {
 }
 
 function getBuyerName(req: BuyerRequest) {
+  if (req.display_name) return req.display_name;
   const p = req.profiles;
-  return [p?.first_name, p?.last_name].filter(Boolean).join(' ') || 'Anonymous Buyer';
+  return [p?.first_name, p?.last_name].filter(Boolean).join(' ') || req.display_company || 'Anonymous Buyer';
 }
 
 function getInitials(req: BuyerRequest) {
+  if (req.display_company) return req.display_company.substring(0, 2).toUpperCase();
   const p = req.profiles;
   return ([p?.first_name?.[0], p?.last_name?.[0]].filter(Boolean).join('').toUpperCase()) || 'AB';
 }
@@ -121,8 +129,15 @@ function BuyerRow({ req, canViewContact, onUpgrade, showTimeline = true }: Buyer
         </div>
         <div className="min-w-0">
           <p className={`font-bold text-primary text-sm truncate ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
-          {company && (
-            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{company}</p>
+          {(req.display_company || company) && (
+            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{req.display_company || company}</p>
+          )}
+          {req.contact_website && (
+            <a href={`https://${req.contact_website}`} target="_blank" rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="text-xs text-primary/70 hover:text-primary font-medium transition-colors">
+              {req.contact_website}
+            </a>
           )}
         </div>
       </div>
@@ -246,6 +261,34 @@ function BuyerRequestCard({ req, canViewContact, isFreeUser, onUpgrade }: BuyerC
       </div>
 
       <div className="pt-2 mt-auto border-t border-outline-variant/20 flex flex-col gap-2">
+        {/* Contact info for institutional/seeded buyers */}
+        {(req.contact_phone || req.contact_email || req.contact_website) && (
+          <div className="bg-surface-container-low rounded-xl px-4 py-3 space-y-1.5 text-xs">
+            {req.contact_phone && (
+              <div className="flex items-center gap-2 text-on-surface">
+                <span className="material-symbols-outlined text-secondary" style={{fontSize:'14px'}}>call</span>
+                <a href={`tel:${req.contact_phone}`} className="hover:text-primary transition-colors">
+                  {req.contact_phone}
+                </a>
+                {req.contact_phone_type && (
+                  <span className="text-secondary">({req.contact_phone_type})</span>
+                )}
+              </div>
+            )}
+            {req.contact_email && (
+              <div className="flex items-center gap-2 text-on-surface">
+                <span className="material-symbols-outlined text-secondary" style={{fontSize:'14px'}}>mail</span>
+                <a href={`mailto:${req.contact_email}`} className="hover:text-primary transition-colors truncate">{req.contact_email}</a>
+              </div>
+            )}
+            {req.contact_website && (
+              <div className="flex items-center gap-2 text-on-surface">
+                <span className="material-symbols-outlined text-secondary" style={{fontSize:'14px'}}>language</span>
+                <a href={`https://${req.contact_website}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors font-medium">{req.contact_website}</a>
+              </div>
+            )}
+          </div>
+        )}
         <Link
           href={`/buyer-requests/${req.id}`}
           className="w-full flex items-center justify-center gap-2 border border-outline-variant/40 text-secondary py-2 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"

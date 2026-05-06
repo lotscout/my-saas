@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
   let query = service
     .from('buyer_requests')
-    .select('*')
+    .select('*, display_name, display_company, contact_phone, contact_phone_type, contact_email, contact_website')
     .eq('status', status)
     .order('created_at', { ascending: false })
     .limit(limit);
