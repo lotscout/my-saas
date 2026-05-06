@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 const ListingsMap = dynamic(() => import('@/components/ListingsMap'), { ssr: false, loading: () => <div className="w-full rounded-2xl bg-surface-container-low animate-pulse" style={{height:'600px'}} /> });
@@ -27,6 +27,14 @@ const STATE_NAMES: Record<string, string> = {
   'south dakota':'SD','tennessee':'TN','texas':'TX','utah':'UT','vermont':'VT',
   'virginia':'VA','washington':'WA','west virginia':'WV','wisconsin':'WI','wyoming':'WY',
 };
+
+// Reverse map: abbreviation → title-cased full name
+const STATE_ABBREVS: Record<string, string> = Object.fromEntries(
+  Object.entries(STATE_NAMES).map(([name, abbrev]) => [
+    abbrev,
+    name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+  ])
+);
 
 interface Listing {
   id: string;
@@ -252,12 +260,17 @@ export default function MarketplacePage() {
   const [userCriteria, setUserCriteria] = useState<any | null>(null);
   const [savedListingIds, setSavedListingIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!(e.target as Element).closest('[data-filter-dropdown]')) setOpenFilter(null);
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -390,17 +403,22 @@ export default function MarketplacePage() {
   const filteredListings = useMemo(() => {
     let result = listings;
 
-    // Search — resolves full state names to abbreviations
+    // Search — resolves full state names and abbreviations to 2-letter code
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      const stateAbbrev = STATE_NAMES[q] ??
-        STATE_NAMES[Object.keys(STATE_NAMES).find(k => k.startsWith(q)) ?? ''] ?? '';
+      const q = searchQuery.trim();
+      const qLow = q.toLowerCase();
+      // Full name → abbreviation (e.g. "north carolina" → "NC")
+      const abbrevFromName = STATE_NAMES[qLow] ?? '';
+      // Typed abbreviation (e.g. "NC") — only if it's a known state code
+      const abbrevFromInput = (q.length === 2 && STATE_ABBREVS[q.toUpperCase()]) ? q.toUpperCase() : '';
+      const stateAbbrev = abbrevFromName || abbrevFromInput;
       result = result.filter(l =>
-        (l.title ?? '').toLowerCase().includes(q) ||
-        (l.state ?? '').toLowerCase() === q ||
-        (stateAbbrev && (l.state ?? '').toUpperCase() === stateAbbrev.toUpperCase()) ||
-        (l.county ?? '').toLowerCase().includes(q) ||
-        (l.zip_code ?? '').includes(q)
+        (stateAbbrev
+          ? (l.state ?? '').toUpperCase() === stateAbbrev
+          : (l.state ?? '').toLowerCase().includes(qLow)
+        ) ||
+        (l.county ?? '').toLowerCase().includes(qLow) ||
+        (l.zip_code ?? '').includes(qLow)
       );
     }
 
@@ -509,6 +527,34 @@ export default function MarketplacePage() {
       return true;
     });
   }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoning, filterZoningBR, filterTimeline, filterRoadAccessBR]);
+
+  // State autocomplete suggestions
+  const stateSuggestions = useMemo(() => {
+    const q = searchQuery.trim();
+    const qLow = q.toLowerCase();
+    if (q.length < 2) return [];
+    const seen = new Set<string>();
+    const results: { label: string; stateName: string; abbrev: string }[] = [];
+    // Abbreviation exact match (e.g. "NC")
+    if (q.length === 2) {
+      const abbrev = q.toUpperCase();
+      const fullName = STATE_ABBREVS[abbrev];
+      if (fullName && !seen.has(abbrev)) {
+        seen.add(abbrev);
+        results.push({ label: `${fullName} (${abbrev})`, stateName: fullName, abbrev });
+      }
+    }
+    // Full-name prefix match (e.g. "nor" → "North Carolina", "North Dakota")
+    for (const [name, abbrev] of Object.entries(STATE_NAMES)) {
+      if (name.startsWith(qLow) && !seen.has(abbrev)) {
+        seen.add(abbrev);
+        const titleName = STATE_ABBREVS[abbrev];
+        results.push({ label: `${titleName} (${abbrev})`, stateName: titleName, abbrev });
+        if (results.length >= 6) break;
+      }
+    }
+    return results.slice(0, 6);
+  }, [searchQuery]);
 
   function handleCreateListing() {
     if (loading) return;
@@ -675,19 +721,44 @@ export default function MarketplacePage() {
 
             {/* Search bar */}
             <div className="mb-6">
-              <div className="relative max-w-xl">
+              <div className="relative max-w-xl" ref={searchContainerRef}>
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search by zip, city, county, or state..."
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-4 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                  onChange={e => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
+                  onFocus={() => setShowSuggestions(true)}
+                  placeholder="Search by state, zip, county, or city..."
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-10 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
                 />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
+                  <button
+                    onClick={() => { setSearchQuery(''); setShowSuggestions(false); }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface"
+                  >
                     <span className="material-symbols-outlined text-lg">close</span>
                   </button>
+                )}
+
+                {/* State autocomplete dropdown */}
+                {showSuggestions && stateSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-outline-variant/20 rounded-xl shadow-xl z-50 overflow-hidden">
+                    <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-secondary/60">States</p>
+                    {stateSuggestions.map(({ label, stateName, abbrev }) => (
+                      <button
+                        key={abbrev}
+                        onMouseDown={e => e.preventDefault()}
+                        onClick={() => {
+                          setSearchQuery(stateName);
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-emerald-50 hover:text-primary transition-colors text-left"
+                      >
+                        <span className="material-symbols-outlined text-base text-secondary/60">location_on</span>
+                        <span className="flex-1">{label}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
