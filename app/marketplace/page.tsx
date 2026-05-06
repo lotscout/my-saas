@@ -201,7 +201,6 @@ export default function MarketplacePage() {
   const [filterAcreage, setFilterAcreage] = useState('');
   const [filterZoning, setFilterZoning] = useState<string[]>([]);
   const [filterUtilities, setFilterUtilities] = useState<string[]>([]);
-  const [filterUseCase, setFilterUseCase] = useState('');
   const [filterTimeline, setFilterTimeline] = useState('');
   const [filterZoningBR, setFilterZoningBR] = useState('');
   const [filterLotSizeUnit, setFilterLotSizeUnit] = useState<'acres' | 'sqft'>('acres');
@@ -467,10 +466,6 @@ export default function MarketplacePage() {
         const zones = (req.zoning_preference ?? []).map((z: string) => z.toLowerCase());
         if (!zones.some((z: string) => z.includes(filterZoningBR.toLowerCase()))) return false;
       }
-      if (filterUseCase) {
-        const uc = (req.use_case ?? '').toLowerCase();
-        if (!uc.includes(filterUseCase.toLowerCase())) return false;
-      }
       if (filterTimeline) {
         if ((req.timeline ?? '').toLowerCase() !== filterTimeline.toLowerCase()) return false;
       }
@@ -480,7 +475,7 @@ export default function MarketplacePage() {
       }
       return true;
     });
-  }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoning, filterUseCase, filterTimeline, filterRoadAccessBR]);
+  }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoning, filterZoningBR, filterTimeline, filterRoadAccessBR]);
 
   function handleCreateListing() {
     if (loading) return;
@@ -1043,23 +1038,7 @@ export default function MarketplacePage() {
                 <option value="industrial">Industrial</option>
                 <option value="mixed use">Mixed Use</option>
                 <option value="recreational">Recreational</option>
-                <option value="timber">Timber</option>
                 <option value="other">Other</option>
-              </select>
-              <select
-                value={filterUseCase}
-                onChange={e => setFilterUseCase(e.target.value)}
-                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              >
-                <option value="">Use Case</option>
-                <option value="row crop">Row Crop</option>
-                <option value="livestock">Livestock/Ranching</option>
-                <option value="timber">Timber</option>
-                <option value="recreational">Recreational</option>
-                <option value="residential development">Residential Development</option>
-                <option value="commercial development">Commercial Development</option>
-                <option value="conservation">Conservation</option>
-                <option value="investment">Investment</option>
               </select>
               <select
                 value={filterTimeline}
@@ -1085,9 +1064,9 @@ export default function MarketplacePage() {
                 <option value="Easement">Easement</option>
                 <option value="No Road Access">No Road Access</option>
               </select>
-              {(filterBudget || filterAcreage || filterZoningBR || filterUseCase || filterTimeline || filterRoadAccessBR || buyerSearchQuery) && (
+              {(filterBudget || filterAcreage || filterZoningBR || filterTimeline || filterRoadAccessBR || buyerSearchQuery) && (
                 <button
-                  onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoningBR(''); setFilterUseCase(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBuyerSearchQuery(''); }}
+                  onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoningBR(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBuyerSearchQuery(''); }}
                   className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-sm">close</span>
@@ -1176,12 +1155,6 @@ export default function MarketplacePage() {
                             <span className="text-on-surface-variant">
                               {req.min_acreage}{req.max_acreage ? ` – ${req.max_acreage}` : '+'} acres
                             </span>
-                          </div>
-                        )}
-                        {req.use_case && (
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-secondary text-base">agriculture</span>
-                            <span className="bg-primary/8 text-primary px-2 py-0.5 rounded-full text-xs font-bold capitalize">{req.use_case}</span>
                           </div>
                         )}
                         {req.timeline && (

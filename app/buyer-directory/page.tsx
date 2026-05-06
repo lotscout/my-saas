@@ -202,7 +202,6 @@ function BuyerRequestCard({ req, canViewContact }: BuyerCardProps) {
   const acreage = req.min_acreage
     ? `${req.min_acreage.toLocaleString()}${req.max_acreage ? ` – ${req.max_acreage.toLocaleString()}` : '+'} acres`
     : null;
-  const useCase = req.use_case ? req.use_case.split(' — ')[0] : null;
 
   return (
     <Link
@@ -219,36 +218,12 @@ function BuyerRequestCard({ req, canViewContact }: BuyerCardProps) {
         )}
       </div>
 
-      {/* Fields */}
-      <div className="space-y-3">
-        {location && (
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Location</p>
-            <p className="text-base font-semibold text-on-surface">{location}</p>
-          </div>
-        )}
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Budget</p>
-          <p className="text-base font-semibold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</p>
-        </div>
-        {acreage && (
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Acreage</p>
-            <p className="text-base font-semibold text-on-surface">{acreage}</p>
-          </div>
-        )}
-        {useCase && (
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Use Case</p>
-            <p className="text-base font-semibold text-on-surface">{useCase}</p>
-          </div>
-        )}
-        {req.timeline && (
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Timeline</p>
-            <p className="text-base font-semibold text-on-surface">{req.timeline}</p>
-          </div>
-        )}
+      {/* Fields — values only, no labels */}
+      <div className="space-y-1.5">
+        {location && <p className="text-sm font-semibold text-on-surface">{location}</p>}
+        <p className="text-sm font-semibold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</p>
+        {acreage && <p className="text-sm text-secondary">{acreage}</p>}
+        {req.timeline && <p className="text-sm text-secondary">{req.timeline}</p>}
       </div>
     </Link>
   );
@@ -323,7 +298,6 @@ export default function BuyerDirectoryPage() {
   const [filterBudget, setFilterBudget] = useState('');
   const [filterAcreage, setFilterAcreage] = useState('');
   const [filterZoning, setFilterZoning] = useState('');
-  const [filterUseCase, setFilterUseCase] = useState('');
   const [filterTimeline, setFilterTimeline] = useState('');
   const [filterRoadAccessBR, setFilterRoadAccessBR] = useState('');
 
@@ -409,13 +383,12 @@ export default function BuyerDirectoryPage() {
       const matchBudget = applyBudgetFilter(r, filterBudget);
       const matchAcreage = applyAcreageFilter(r, filterAcreage);
       const matchZoning = !filterZoning || (r.zoning_preference ?? []).some(z => z.toLowerCase().includes(filterZoning));
-      const matchUC = !filterUseCase || uc.includes(filterUseCase);
       const matchTimeline = !filterTimeline || (r.timeline ?? '').includes(filterTimeline);
       const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
       const matchRoad = !filterRoadAccessBR || roads.some(rd => rd.toLowerCase().includes(filterRoadAccessBR.toLowerCase()));
-      return matchSearch && matchBudget && matchAcreage && matchZoning && matchUC && matchTimeline && matchRoad;
+      return matchSearch && matchBudget && matchAcreage && matchZoning && matchTimeline && matchRoad;
     });
-  }, [buyerRequests, brSearch, filterBudget, filterAcreage, filterZoning, filterUseCase, filterTimeline, filterRoadAccessBR]);
+  }, [buyerRequests, brSearch, filterBudget, filterAcreage, filterZoning, filterTimeline, filterRoadAccessBR]);
 
   // ── Helpers ──
 
@@ -602,7 +575,6 @@ export default function BuyerDirectoryPage() {
                       <option value="">All Use Cases</option>
                       <option value="row crop">Row Crop</option>
                       <option value="livestock">Livestock/Ranching</option>
-                      <option value="timber">Timber</option>
                       <option value="recreational">Recreational</option>
                       <option value="residential development">Residential Development</option>
                       <option value="commercial development">Commercial Development</option>
@@ -752,7 +724,6 @@ export default function BuyerDirectoryPage() {
                       <option value="">All Use Cases</option>
                       <option value="row crop">Row Crop</option>
                       <option value="livestock">Livestock/Ranching</option>
-                      <option value="timber">Timber</option>
                       <option value="recreational">Recreational</option>
                       <option value="residential development">Residential Development</option>
                       <option value="commercial development">Commercial Development</option>
@@ -838,19 +809,7 @@ export default function BuyerDirectoryPage() {
                   <option value="industrial">Industrial</option>
                   <option value="mixed use">Mixed Use</option>
                   <option value="recreational">Recreational</option>
-                  <option value="timber">Timber</option>
                   <option value="other">Other</option>
-                </select>
-                <select value={filterUseCase} onChange={e => setFilterUseCase(e.target.value)} className={SELECT_CLS}>
-                  <option value="">Use Case</option>
-                  <option value="row crop">Row Crop</option>
-                  <option value="livestock">Livestock/Ranching</option>
-                  <option value="timber">Timber</option>
-                  <option value="recreational">Recreational</option>
-                  <option value="residential development">Residential Development</option>
-                  <option value="commercial development">Commercial Development</option>
-                  <option value="conservation">Conservation</option>
-                  <option value="investment">Investment</option>
                 </select>
                 <select value={filterTimeline} onChange={e => setFilterTimeline(e.target.value)} className={SELECT_CLS}>
                   <option value="">Timeline</option>
@@ -868,9 +827,9 @@ export default function BuyerDirectoryPage() {
                   <option value="Easement">Easement</option>
                   <option value="No Road Access">No Road Access</option>
                 </select>
-                {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || filterRoadAccessBR || brSearch) && (
+                {(filterBudget || filterAcreage || filterZoning || filterTimeline || filterRoadAccessBR || brSearch) && (
                   <button
-                    onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterUseCase(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBrSearch(''); setGlobalSearch(''); }}
+                    onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBrSearch(''); setGlobalSearch(''); }}
                     className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">close</span>
