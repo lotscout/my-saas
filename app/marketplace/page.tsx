@@ -1099,19 +1099,6 @@ export default function MarketplacePage() {
         {/* ── BUYER REQUESTS TAB ── */}
         {activeTab === 'buyer-requests' && (
           <>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <p className="text-slate-500 text-sm">Active buyers looking for land that matches your listings</p>
-              </div>
-              <button
-                onClick={handlePostBuyerRequest}
-                className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/10"
-              >
-                <span className="material-symbols-outlined text-lg">add</span>
-                Find a Property
-              </button>
-            </div>
-
             {/* Search bar */}
             <div className="mb-4">
               <div className="relative max-w-xl">
@@ -1241,79 +1228,33 @@ export default function MarketplacePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBuyerRequests.map(req => {
-                  const primaryName = req.display_company || req.display_name ||
-                    [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || 'Anonymous Buyer';
+                  const company = req.display_company || null;
+                  const personName = req.display_name ||
+                    [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || null;
+                  const primaryName = company || personName || 'Anonymous Buyer';
+                  const secondaryName = company ? personName : null;
                   const blurIdentity = !loading && !canViewContact;
                   const city = req.target_city || req.target_county || null;
-                  const location = city && req.target_state
-                    ? `${city}, ${req.target_state}`
-                    : req.target_state || null;
+                  const location = city && req.target_state ? `${city}, ${req.target_state}` : req.target_state || null;
                   const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
                   const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
 
                   return (
-                    <div key={req.id} className="aspect-square bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex flex-col justify-between hover:shadow-md transition-shadow overflow-hidden">
-                      {/* Name */}
-                      <p className={`font-extrabold text-primary text-base leading-snug line-clamp-2 ${blurIdentity ? 'blur-sm select-none' : ''}`}>
-                        {primaryName}
-                      </p>
-
-                      {/* Labeled fields */}
+                    <Link
+                      key={req.id}
+                      href={`/buyer-requests/${req.id}`}
+                      className="aspect-square bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex flex-col justify-between hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
+                    >
+                      <div className={blurIdentity ? 'blur-sm select-none' : ''}>
+                        {primaryName && <p className="font-extrabold text-primary text-base leading-snug">{primaryName}</p>}
+                        {secondaryName && <p className="text-xs text-secondary font-medium mt-0.5 line-clamp-1">{secondaryName}</p>}
+                      </div>
                       <div className="space-y-2">
-                        {location && (
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p>
-                            <p className="text-sm font-bold text-on-surface">{location}</p>
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Budget</p>
-                          <p className="text-sm font-bold text-on-surface">{perAcre}</p>
-                        </div>
-                        {timeline && (
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Timeline</p>
-                            <p className="text-sm font-bold text-on-surface">{timeline}</p>
-                          </div>
-                        )}
+                        {location && (<div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p><p className="text-sm font-bold text-on-surface">{location}</p></div>)}
+                        <div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Budget</p><p className="text-sm font-bold text-on-surface">{perAcre}</p></div>
+                        {timeline && (<div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Timeline</p><p className="text-sm font-bold text-on-surface">{timeline}</p></div>)}
                       </div>
-
-                      {/* Actions */}
-                      <div className="border-t border-outline-variant/20 pt-2 flex flex-col gap-1.5">
-                        <Link
-                          href={`/buyer-requests/${req.id}`}
-                          className="w-full flex items-center justify-center gap-1.5 border border-outline-variant/40 text-secondary py-1.5 rounded-xl font-semibold text-xs hover:bg-surface-container-low transition-colors"
-                        >
-                          View Criteria
-                          <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                        </Link>
-                        {canViewContact ? (
-                          <button
-                            onClick={() => setMessagingRecipient({ id: req.user_id, name: primaryName })}
-                            className="w-full flex items-center justify-center gap-1.5 bg-primary text-white py-1.5 rounded-xl font-bold text-xs hover:bg-primary/90 transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-sm">mail</span>
-                            Contact Buyer
-                          </button>
-                        ) : isFreeUser ? (
-                          <button
-                            onClick={() => setShowContactUpgradeModal(true)}
-                            className="w-full flex items-center justify-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-800 py-1.5 rounded-xl font-bold text-xs hover:bg-amber-100 transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-sm">lock</span>
-                            Upgrade to Contact
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => router.push('/pricing')}
-                            className="w-full flex items-center justify-center gap-1.5 bg-surface-container-high text-secondary py-1.5 rounded-xl font-bold text-xs hover:bg-surface-container-highest transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-sm">lock</span>
-                            Upgrade to Contact
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
