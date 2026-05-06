@@ -193,7 +193,7 @@ export default function DashboardPage() {
       setTier((subRes?.data?.tier as Tier) ?? null);
 
       const p = profileRes.data;
-      setProfileIncomplete(!p?.first_name || !p?.last_name || !p?.avatar_url);
+      setProfileIncomplete(!p?.first_name || !p?.last_name);
       setUnreadCount(unreadRes.count ?? 0);
       setHasAnalysisReady((analysisRes.count ?? 0) > 0);
       setHasDraftListing((draftListingsRes.count ?? 0) > 0);
