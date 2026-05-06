@@ -103,7 +103,7 @@ export default function PropertyAnalysisPage() {
       const matches = data?.result?.addressMatches;
       if (!matches || matches.length === 0) {
         setAddrValidStatus('invalid');
-        setAddrValidMsg('Address not found. Please check and try again.');
+        setAddrValidMsg('Address could not be auto-verified. You can still submit and our team will verify manually.');
       } else {
         const match = matches[0];
         const county = match?.geographies?.Counties?.[0]?.NAME ?? '';
@@ -113,7 +113,7 @@ export default function PropertyAnalysisPage() {
       }
     } catch {
       setAddrValidStatus('invalid');
-      setAddrValidMsg('Could not verify address. Please try again.');
+      setAddrValidMsg('Address could not be auto-verified. You can still submit and our team will verify manually.');
     }
   }, [streetAddress, city, addrState, zipCode]);
 
@@ -133,7 +133,8 @@ export default function PropertyAnalysisPage() {
   }
 
   const apnValid = apn.trim() !== '' && apnCounty.trim() !== '' && apnState !== '';
-  const canSubmit = inputMode === 'address' ? addrValidStatus === 'valid' : apnValid;
+  const addrFieldsFilled = streetAddress.trim() !== '' && city.trim() !== '' && addrState !== '' && zipCode.trim() !== '';
+  const canSubmit = inputMode === 'address' ? addrFieldsFilled : apnValid;
 
   async function handleSubmit() {
     if (!canSubmit || submitting) return;
@@ -601,8 +602,8 @@ export default function PropertyAnalysisPage() {
                         </div>
                       )}
                       {addrValidStatus === 'invalid' && (
-                        <div className="flex items-center gap-2 text-red-700 text-sm font-semibold bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+                        <div className="flex items-start gap-2 text-amber-800 text-sm font-semibold bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                          <span className="material-symbols-outlined text-base shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
                           {addrValidMsg}
                         </div>
                       )}
