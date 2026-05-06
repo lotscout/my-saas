@@ -30,6 +30,7 @@ export default function SendMessageModal({
 
     if (!body) { setError('Please enter a message.'); return; }
     if (!currentUserId) { setError('Not signed in. Please refresh and try again.'); return; }
+    if (!recipientId) { setError('Recipient not found. Please refresh and try again.'); return; }
     if (sending) return;
 
     setError(null);
