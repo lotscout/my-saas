@@ -1156,10 +1156,6 @@ export default function MarketplacePage() {
                             <p className="text-[10px] text-secondary uppercase tracking-widest font-bold">Verified Buyer</p>
                           </div>
                         </div>
-                        <span className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                          Active Buying
-                        </span>
                       </div>
 
                       {/* Details */}
