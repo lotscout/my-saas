@@ -13,6 +13,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import BoostModal from '@/components/BoostModal';
+import SendMessageModal from '@/components/SendMessageModal';
 
 const STATE_NAMES: Record<string, string> = {
   'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
@@ -245,6 +246,8 @@ export default function MarketplacePage() {
   }
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [boostModal, setBoostModal] = useState<{ listingId: string; title: string } | null>(null);
+  const [messagingRecipient, setMessagingRecipient] = useState<{ id: string; name: string } | null>(null);
+  const [toastMsg, setToastMsg] = useState('');
   const [userCriteria, setUserCriteria] = useState<any | null>(null);
   const [savedListingIds, setSavedListingIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -578,6 +581,30 @@ export default function MarketplacePage() {
               <button onClick={() => setShowContactUpgradeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Send message modal */}
+      {messagingRecipient && profile?.id && (
+        <SendMessageModal
+          recipientId={messagingRecipient.id}
+          recipientName={messagingRecipient.name}
+          currentUserId={profile.id}
+          currentUserIsBuyer={false}
+          onClose={() => setMessagingRecipient(null)}
+          onSent={() => {
+            setMessagingRecipient(null);
+            setToastMsg('Message sent successfully');
+            setTimeout(() => setToastMsg(''), 3000);
+          }}
+        />
+      )}
+
+      {/* Success toast */}
+      {toastMsg && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-700 text-white px-6 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2">
+          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          {toastMsg}
         </div>
       )}
 
@@ -1185,7 +1212,10 @@ export default function MarketplacePage() {
                           <span className="material-symbols-outlined text-sm">arrow_forward</span>
                         </Link>
                         {canViewContact ? (
-                          <button className="w-full flex items-center justify-center gap-1.5 bg-primary text-white py-1.5 rounded-xl font-bold text-xs hover:bg-primary/90 transition-colors">
+                          <button
+                            onClick={() => setMessagingRecipient({ id: req.user_id, name: primaryName })}
+                            className="w-full flex items-center justify-center gap-1.5 bg-primary text-white py-1.5 rounded-xl font-bold text-xs hover:bg-primary/90 transition-colors"
+                          >
                             <span className="material-symbols-outlined text-sm">mail</span>
                             Contact Buyer
                           </button>

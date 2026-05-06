@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useUserTier } from '@/hooks/useUserTier';
 import Header from '@/components/Header';
+import SendMessageModal from '@/components/SendMessageModal';
 
 interface BuyerRequest {
   id: string;
@@ -51,13 +52,15 @@ function fmt$(n: number | null) {
 
 export default function BuyerRequestPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
 
   const [request, setRequest] = useState<BuyerRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const { tier, loading: tierLoading } = useUserTier();
 
@@ -79,10 +82,15 @@ export default function BuyerRequestPage() {
     })();
   }, [id]);
 
-  function handleMessage() {
+  async function handleMessage() {
     if (tierLoading) return;
     if (!tier) { setShowUpgradeModal(true); return; }
-    router.push(`/messaging?recipient=${request?.user_id}`);
+    if (!currentUserId) {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setCurrentUserId(user.id);
+    }
+    setShowMessageModal(true);
   }
 
   if (loading) {
@@ -173,6 +181,30 @@ export default function BuyerRequestPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Send message modal */}
+      {showMessageModal && currentUserId && request && (
+        <SendMessageModal
+          recipientId={request.user_id}
+          recipientName={buyerName}
+          currentUserId={currentUserId}
+          currentUserIsBuyer={false}
+          onClose={() => setShowMessageModal(false)}
+          onSent={() => {
+            setShowMessageModal(false);
+            setToastMsg('Message sent successfully');
+            setTimeout(() => setToastMsg(''), 3000);
+          }}
+        />
+      )}
+
+      {/* Success toast */}
+      {toastMsg && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-700 text-white px-6 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2">
+          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          {toastMsg}
         </div>
       )}
 

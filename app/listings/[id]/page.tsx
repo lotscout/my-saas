@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useUserTier } from '@/hooks/useUserTier';
 import { createClient } from '@/lib/supabase/client';
 import Header from '@/components/Header';
+import SendMessageModal from '@/components/SendMessageModal';
 
 interface Listing {
   id: string;
@@ -66,6 +67,9 @@ export default function ListingDetailPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [authed, setAuthed] = useState<boolean | null>(null);
 
   const { tier, isAdmin, loading: tierLoading } = useUserTier();
@@ -78,6 +82,7 @@ export default function ListingDetailPage() {
       if (!user) {
         router.replace(`/login?next=/listings/${id}`);
       } else {
+        setCurrentUserId(user.id);
         setAuthed(true);
       }
     })();
@@ -116,7 +121,7 @@ export default function ListingDetailPage() {
   function handleMessage() {
     if (tierLoading) return;
     if (!tier && !isAdmin) { setShowUpgradeModal(true); return; }
-    router.push(`/messaging?recipient=${listing?.user_id}`);
+    setShowMessageModal(true);
   }
 
   // Still checking auth or awaiting redirect
@@ -189,6 +194,30 @@ export default function ListingDetailPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Send message modal */}
+      {showMessageModal && currentUserId && listing && (
+        <SendMessageModal
+          recipientId={listing.user_id}
+          recipientName={sellerName}
+          currentUserId={currentUserId}
+          currentUserIsBuyer={true}
+          onClose={() => setShowMessageModal(false)}
+          onSent={() => {
+            setShowMessageModal(false);
+            setToastMsg('Message sent successfully');
+            setTimeout(() => setToastMsg(''), 3000);
+          }}
+        />
+      )}
+
+      {/* Success toast */}
+      {toastMsg && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-700 text-white px-6 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2">
+          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          {toastMsg}
         </div>
       )}
 
