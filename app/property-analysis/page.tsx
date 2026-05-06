@@ -75,6 +75,11 @@ export default function PropertyAnalysisPage() {
   const showInputGate = isFree && inputFocused && !overlayDismissed;
   const showSpeedBanner = !loading && tier === 'standard';
 
+  // Always start at the top of the page
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   const loadRequests = useCallback(async () => {
     setRequestsLoading(true);
     const supabase = createClient();
@@ -123,7 +128,6 @@ export default function PropertyAnalysisPage() {
     }
   }
 
-  // Reset validation when address fields change
   function resetAddrValidation() {
     if (addrValidStatus !== 'idle') {
       setAddrValidStatus('idle');
@@ -216,7 +220,7 @@ export default function PropertyAnalysisPage() {
                   ? '⚡ Your report will be ready within 15 minutes'
                   : '⏱ Your report will be ready within 24 hours'}
               </p>
-              <p className="text-emerald-700 text-xs mt-1">We\'ll email you when it\'s ready.</p>
+              <p className="text-emerald-700 text-xs mt-1">We&apos;ll email you when it&apos;s ready.</p>
             </div>
             <button
               onClick={() => setDeliveryPopup(null)}
@@ -240,6 +244,209 @@ export default function PropertyAnalysisPage() {
           </h1>
         </header>
 
+        {/* ── Submission Form (paid users only) — first section after heading ── */}
+        {isPaid && (
+          <section className="mb-16">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
+                <h2 className="font-headline text-3xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
+              </div>
+            </div>
+
+            {submitSuccess ? (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-10 text-center max-w-2xl">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                  <span className="material-symbols-outlined text-emerald-600 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                </div>
+                <h3 className="font-headline text-xl font-bold text-primary mb-2">Request Submitted!</h3>
+                <p className="text-secondary text-sm leading-relaxed mb-6">
+                  Your request has been submitted. You&apos;ll receive your analysis report via email
+                  {tier === 'exclusive' ? ' within 15 minutes.' : ' within 24 hours.'}
+                </p>
+                <button
+                  onClick={() => setSubmitSuccess(false)}
+                  className="bg-primary text-on-primary font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-opacity text-sm"
+                >
+                  Submit Another Property
+                </button>
+              </div>
+            ) : (
+              <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
+
+                {/* Mode toggle */}
+                <div className="border-b border-outline-variant/20 p-6 flex items-center gap-4">
+                  <span className="text-sm font-semibold text-secondary">Search by:</span>
+                  <div className="flex bg-surface-container-low rounded-xl p-1 gap-1">
+                    <button
+                      onClick={() => { setInputMode('address'); resetAddrValidation(); }}
+                      className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${inputMode === 'address' ? 'bg-primary text-on-primary shadow-sm' : 'text-secondary hover:text-on-surface'}`}
+                    >
+                      Address
+                    </button>
+                    <button
+                      onClick={() => setInputMode('apn')}
+                      className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${inputMode === 'apn' ? 'bg-primary text-on-primary shadow-sm' : 'text-secondary hover:text-on-surface'}`}
+                    >
+                      APN / Parcel ID
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-8 space-y-6">
+                  {inputMode === 'address' ? (
+                    <>
+                      <div>
+                        <label className={labelClass}>Street Address</label>
+                        <input
+                          type="text"
+                          className={inputClass}
+                          placeholder="123 Main St"
+                          value={streetAddress}
+                          onChange={e => { setStreetAddress(e.target.value); resetAddrValidation(); }}
+                          onBlur={handleAddressBlur}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className={labelClass}>City</label>
+                          <input
+                            type="text"
+                            className={inputClass}
+                            placeholder="Austin"
+                            value={city}
+                            onChange={e => { setCity(e.target.value); resetAddrValidation(); }}
+                            onBlur={handleAddressBlur}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>State</label>
+                          <select
+                            className={selectClass}
+                            value={addrState}
+                            onChange={e => { setAddrState(e.target.value); resetAddrValidation(); }}
+                            onBlur={handleAddressBlur}
+                          >
+                            <option value="">Select state</option>
+                            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={labelClass}>Zip Code</label>
+                          <input
+                            type="text"
+                            className={inputClass}
+                            placeholder="78701"
+                            value={zipCode}
+                            onChange={e => { setZipCode(e.target.value); resetAddrValidation(); }}
+                            onBlur={handleAddressBlur}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Address validation feedback */}
+                      {addrValidStatus === 'validating' && (
+                        <div className="flex items-center gap-2 text-secondary text-sm">
+                          <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                          </svg>
+                          Verifying address...
+                        </div>
+                      )}
+                      {addrValidStatus === 'valid' && (
+                        <div className="flex items-center gap-2 text-emerald-700 text-sm font-semibold bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                          {addrValidMsg}
+                        </div>
+                      )}
+                      {addrValidStatus === 'invalid' && (
+                        <div className="flex items-start gap-2 text-amber-800 text-sm font-semibold bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                          <span className="material-symbols-outlined text-base shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+                          {addrValidMsg}
+                        </div>
+                      )}
+                      {addrValidStatus === 'idle' && streetAddress && city && addrState && zipCode && (
+                        <button
+                          onClick={validateAddress}
+                          className="text-primary text-sm font-semibold hover:underline"
+                        >
+                          Validate address →
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <label className={labelClass}>APN / Parcel ID</label>
+                        <input
+                          type="text"
+                          className={inputClass}
+                          placeholder="e.g. 123-456-789"
+                          value={apn}
+                          onChange={e => setApn(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className={labelClass}>County</label>
+                          <input
+                            type="text"
+                            className={inputClass}
+                            placeholder="e.g. Bastrop"
+                            value={apnCounty}
+                            onChange={e => setApnCounty(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>State</label>
+                          <select
+                            className={selectClass}
+                            value={apnState}
+                            onChange={e => setApnState(e.target.value)}
+                          >
+                            <option value="">Select state</option>
+                            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      {apnValid && (
+                        <div className="flex items-center gap-2 text-emerald-700 text-sm font-semibold bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                          Ready to submit · {apnCounty} County, {apnState}
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {submitError && (
+                    <div className="flex items-center gap-2 text-red-700 text-sm font-semibold bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                      <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+                      {submitError}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!canSubmit || submitting}
+                    className="w-full bg-primary text-on-primary font-bold py-4 rounded-xl text-base hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
+                  >
+                    {submitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Submitting...
+                      </span>
+                    ) : 'Submit for Analysis'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* Search bar */}
         <div className="w-full max-w-3xl mb-4">
           <div className="relative">
@@ -255,13 +462,13 @@ export default function PropertyAnalysisPage() {
                   readOnly={isFree}
                 />
               </div>
-              <a
+              <button
+                type="button"
                 className="bg-primary text-on-primary font-bold px-8 py-4 rounded-full transition-all flex items-center gap-2 group shadow-lg hover:opacity-95 active:scale-95"
-                href="#submit-form"
               >
                 Analyze Property
                 <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">analytics</span>
-              </a>
+              </button>
             </div>
 
             {showInputGate && (
@@ -484,209 +691,6 @@ export default function PropertyAnalysisPage() {
             )}
           </div>
         </div>
-
-        {/* ── Submission Form (paid users only) ── */}
-        {isPaid && (
-          <section id="submit-form" className="mt-20 scroll-mt-28">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
-                <h2 className="font-headline text-3xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
-              </div>
-            </div>
-
-            {submitSuccess ? (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-10 text-center max-w-2xl">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                  <span className="material-symbols-outlined text-emerald-600 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                </div>
-                <h3 className="font-headline text-xl font-bold text-primary mb-2">Request Submitted!</h3>
-                <p className="text-secondary text-sm leading-relaxed mb-6">
-                  Your request has been submitted. You&apos;ll receive your analysis report via email
-                  {tier === 'exclusive' ? ' within 15 minutes.' : ' within 24 hours.'}
-                </p>
-                <button
-                  onClick={() => setSubmitSuccess(false)}
-                  className="bg-primary text-on-primary font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-opacity text-sm"
-                >
-                  Submit Another Property
-                </button>
-              </div>
-            ) : (
-              <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
-
-                {/* Mode toggle */}
-                <div className="border-b border-outline-variant/20 p-6 flex items-center gap-4">
-                  <span className="text-sm font-semibold text-secondary">Search by:</span>
-                  <div className="flex bg-surface-container-low rounded-xl p-1 gap-1">
-                    <button
-                      onClick={() => { setInputMode('address'); resetAddrValidation(); }}
-                      className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${inputMode === 'address' ? 'bg-primary text-on-primary shadow-sm' : 'text-secondary hover:text-on-surface'}`}
-                    >
-                      Address
-                    </button>
-                    <button
-                      onClick={() => setInputMode('apn')}
-                      className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${inputMode === 'apn' ? 'bg-primary text-on-primary shadow-sm' : 'text-secondary hover:text-on-surface'}`}
-                    >
-                      APN / Parcel ID
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-8 space-y-6">
-                  {inputMode === 'address' ? (
-                    <>
-                      <div>
-                        <label className={labelClass}>Street Address</label>
-                        <input
-                          type="text"
-                          className={inputClass}
-                          placeholder="123 Main St"
-                          value={streetAddress}
-                          onChange={e => { setStreetAddress(e.target.value); resetAddrValidation(); }}
-                          onBlur={handleAddressBlur}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <label className={labelClass}>City</label>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="Austin"
-                            value={city}
-                            onChange={e => { setCity(e.target.value); resetAddrValidation(); }}
-                            onBlur={handleAddressBlur}
-                          />
-                        </div>
-                        <div>
-                          <label className={labelClass}>State</label>
-                          <select
-                            className={selectClass}
-                            value={addrState}
-                            onChange={e => { setAddrState(e.target.value); resetAddrValidation(); }}
-                            onBlur={handleAddressBlur}
-                          >
-                            <option value="">Select state</option>
-                            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className={labelClass}>Zip Code</label>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="78701"
-                            value={zipCode}
-                            onChange={e => { setZipCode(e.target.value); resetAddrValidation(); }}
-                            onBlur={handleAddressBlur}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Address validation feedback */}
-                      {addrValidStatus === 'validating' && (
-                        <div className="flex items-center gap-2 text-secondary text-sm">
-                          <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                          </svg>
-                          Verifying address...
-                        </div>
-                      )}
-                      {addrValidStatus === 'valid' && (
-                        <div className="flex items-center gap-2 text-emerald-700 text-sm font-semibold bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
-                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                          {addrValidMsg}
-                        </div>
-                      )}
-                      {addrValidStatus === 'invalid' && (
-                        <div className="flex items-start gap-2 text-amber-800 text-sm font-semibold bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                          <span className="material-symbols-outlined text-base shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
-                          {addrValidMsg}
-                        </div>
-                      )}
-                      {addrValidStatus === 'idle' && streetAddress && city && addrState && zipCode && (
-                        <button
-                          onClick={validateAddress}
-                          className="text-primary text-sm font-semibold hover:underline"
-                        >
-                          Validate address →
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <div>
-                        <label className={labelClass}>APN / Parcel ID</label>
-                        <input
-                          type="text"
-                          className={inputClass}
-                          placeholder="e.g. 123-456-789"
-                          value={apn}
-                          onChange={e => setApn(e.target.value)}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className={labelClass}>County</label>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. Bastrop"
-                            value={apnCounty}
-                            onChange={e => setApnCounty(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className={labelClass}>State</label>
-                          <select
-                            className={selectClass}
-                            value={apnState}
-                            onChange={e => setApnState(e.target.value)}
-                          >
-                            <option value="">Select state</option>
-                            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                      {apnValid && (
-                        <div className="flex items-center gap-2 text-emerald-700 text-sm font-semibold bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
-                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                          Ready to submit · {apnCounty} County, {apnState}
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {submitError && (
-                    <div className="flex items-center gap-2 text-red-700 text-sm font-semibold bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                      <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
-                      {submitError}
-                    </div>
-                  )}
-
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!canSubmit || submitting}
-                    className="w-full bg-primary text-on-primary font-bold py-4 rounded-xl text-base hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
-                  >
-                    {submitting ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                        </svg>
-                        Submitting...
-                      </span>
-                    ) : 'Submit for Analysis'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </section>
-        )}
 
         {/* ── Past Requests Table (paid users only) ── */}
         {isPaid && (
