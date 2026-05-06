@@ -345,16 +345,13 @@ export default function MarketplacePage() {
   useEffect(() => {
     if (activeTab !== 'buyer-requests') return;
     setBuyerRequestsLoading(true);
-    const supabase = createClient();
-    supabase
-      .from('buyer_requests')
-      .select('*, profiles(first_name, last_name, avatar_url)')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setBuyerRequests((data as BuyerRequest[]) ?? []);
+    fetch('/api/buyer-directory?status=active&limit=200')
+      .then(r => r.json())
+      .then(({ requests }) => {
+        setBuyerRequests((requests ?? []) as BuyerRequest[]);
         setBuyerRequestsLoading(false);
-      });
+      })
+      .catch(() => setBuyerRequestsLoading(false));
   }, [activeTab]);
 
   const filteredListings = useMemo(() => {
