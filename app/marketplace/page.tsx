@@ -219,6 +219,41 @@ function fmtTimelineMkt(t: string): string {
   return t;
 }
 
+function applyBudgetFilter(req: BuyerRequest, f: string): boolean {
+  const max = req.budget_max ?? 0;
+  const min = req.budget_min ?? 0;
+  if (!f) return true;
+  if (f === 'under50k') return max < 50_000;
+  if (f === '50k-100k') return max >= 50_000 && max < 100_000;
+  if (f === '100k-500k') return max >= 100_000 && max < 500_000;
+  if (f === '500k-1m') return max >= 500_000 && max < 1_000_000;
+  if (f === '1m-5m') return max >= 1_000_000 && max < 5_000_000;
+  if (f === '5m+') return (max || min) >= 5_000_000;
+  return true;
+}
+
+function applyAcreageFilter(req: BuyerRequest, f: string): boolean {
+  const acres = req.min_acreage ?? 0;
+  if (!f) return true;
+  if (f === 'under5') return acres < 5;
+  if (f === '5-25') return acres >= 5 && acres < 25;
+  if (f === '25-100') return acres >= 25 && acres < 100;
+  if (f === '100-500') return acres >= 100 && acres < 500;
+  if (f === '500+') return acres >= 500;
+  return true;
+}
+
+function timelineSortKey(t: string | null): number {
+  if (!t) return 999;
+  if (/actively buying|0.30 days/i.test(t)) return 0;
+  if (/1.3 month/i.test(t)) return 1;
+  if (/3.6 month/i.test(t)) return 2;
+  if (/6\+|flexible/i.test(t)) return 3;
+  return 999;
+}
+
+const BR_SELECT_CLS = 'bg-surface-container-low px-3 py-2 rounded-lg border border-transparent hover:border-primary/20 text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all';
+
 export default function MarketplacePage() {
   const { tier, profile, loading, listingsThisPeriod, listingStatus } = usePermissions();
   const [showBlockedModal, setShowBlockedModal] = useState(false);
@@ -261,6 +296,7 @@ export default function MarketplacePage() {
   const [savedListingIds, setSavedListingIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [brSort, setBrSort] = useState('newest');
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -487,46 +523,27 @@ export default function MarketplacePage() {
   }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeMin, filterLotSizeMax, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredBuyerRequests = useMemo(() => {
-    return buyerRequests.filter(req => {
-      if (buyerSearchQuery.trim()) {
-        const q = buyerSearchQuery.toLowerCase();
-        const regionsText = (req.target_regions ?? []).join(' ').toLowerCase();
-        const useCaseText = (req.use_case ?? '').toLowerCase();
-        if (!regionsText.includes(q) && !useCaseText.includes(q)) return false;
-      }
-      if (filterBudget) {
-        const min = req.budget_min ?? 0;
-        const max = req.budget_max ?? Infinity;
-        if (filterBudget === 'under50k' && max >= 50000) return false;
-        if (filterBudget === '50k-100k' && (min > 100000 || max < 50000)) return false;
-        if (filterBudget === '100k-500k' && (min > 500000 || max < 100000)) return false;
-        if (filterBudget === '500k-1m' && (min > 1000000 || max < 500000)) return false;
-        if (filterBudget === '1m-5m' && (min > 5000000 || max < 1000000)) return false;
-        if (filterBudget === '5m+' && max < 5000000) return false;
-      }
-      if (filterAcreage) {
-        const minAc = req.min_acreage ?? 0;
-        const maxAc = req.max_acreage ?? Infinity;
-        if (filterAcreage === 'under5' && maxAc >= 5) return false;
-        if (filterAcreage === '5-25' && (minAc > 25 || maxAc < 5)) return false;
-        if (filterAcreage === '25-100' && (minAc > 100 || maxAc < 25)) return false;
-        if (filterAcreage === '100-500' && (minAc > 500 || maxAc < 100)) return false;
-        if (filterAcreage === '500+' && maxAc < 500) return false;
-      }
-      if (filterZoningBR) {
-        const zones = (req.zoning_preference ?? []).map((z: string) => z.toLowerCase());
-        if (!zones.some((z: string) => z.includes(filterZoningBR.toLowerCase()))) return false;
-      }
-      if (filterTimeline) {
-        if ((req.timeline ?? '').toLowerCase() !== filterTimeline.toLowerCase()) return false;
-      }
-      if (filterRoadAccessBR) {
-        const roads = ((req as unknown as Record<string, unknown>).road_access ?? []) as string[];
-        if (!roads.some((r: string) => r.toLowerCase().includes(filterRoadAccessBR.toLowerCase()))) return false;
-      }
-      return true;
+    const filtered = buyerRequests.filter(req => {
+      const q = buyerSearchQuery.toLowerCase();
+      const state = (req.target_state ?? '').toLowerCase();
+      const regions = (req.target_regions ?? []).join(' ').toLowerCase();
+      const uc = (req.use_case ?? '').toLowerCase();
+      const matchSearch = !q || state.includes(q) || regions.includes(q) || uc.includes(q);
+      const matchBudget = applyBudgetFilter(req, filterBudget);
+      const matchAcreage = applyAcreageFilter(req, filterAcreage);
+      const matchZoning = !filterZoningBR || (req.zoning_preference ?? []).some(z => z.toLowerCase().includes(filterZoningBR));
+      const matchTimeline = !filterTimeline || (req.timeline ?? '').includes(filterTimeline);
+      const roads = ((req as unknown as Record<string, unknown>).road_access ?? []) as string[];
+      const matchRoad = !filterRoadAccessBR || roads.some(rd => rd.toLowerCase().includes(filterRoadAccessBR.toLowerCase()));
+      return matchSearch && matchBudget && matchAcreage && matchZoning && matchTimeline && matchRoad;
     });
-  }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoning, filterZoningBR, filterTimeline, filterRoadAccessBR]);
+    return [...filtered].sort((a, b) => {
+      if (brSort === 'budget_desc') return (b.budget_max ?? b.budget_min ?? 0) - (a.budget_max ?? a.budget_min ?? 0);
+      if (brSort === 'budget_asc') return (a.budget_max ?? a.budget_min ?? 0) - (b.budget_max ?? b.budget_min ?? 0);
+      if (brSort === 'timeline') return timelineSortKey(a.timeline) - timelineSortKey(b.timeline);
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoningBR, filterTimeline, filterRoadAccessBR, brSort]);
 
   // State autocomplete suggestions
   const stateSuggestions = useMemo(() => {
@@ -1119,12 +1136,8 @@ export default function MarketplacePage() {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap items-center gap-3 py-4 border-y border-outline-variant/20 mb-8">
-              <select
-                value={filterBudget}
-                onChange={e => setFilterBudget(e.target.value)}
-                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              >
+            <div className="flex flex-wrap items-center gap-3 py-4 border-y border-outline-variant/20 mb-6">
+              <select value={filterBudget} onChange={e => setFilterBudget(e.target.value)} className={BR_SELECT_CLS}>
                 <option value="">Budget Range</option>
                 <option value="under50k">Under $50K</option>
                 <option value="50k-100k">$50K–$100K</option>
@@ -1133,11 +1146,7 @@ export default function MarketplacePage() {
                 <option value="1m-5m">$1M–$5M</option>
                 <option value="5m+">$5M+</option>
               </select>
-              <select
-                value={filterAcreage}
-                onChange={e => setFilterAcreage(e.target.value)}
-                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              >
+              <select value={filterAcreage} onChange={e => setFilterAcreage(e.target.value)} className={BR_SELECT_CLS}>
                 <option value="">Acreage Range</option>
                 <option value="under5">Under 5 acres</option>
                 <option value="5-25">5–25 acres</option>
@@ -1145,11 +1154,7 @@ export default function MarketplacePage() {
                 <option value="100-500">100–500 acres</option>
                 <option value="500+">500+ acres</option>
               </select>
-              <select
-                value={filterZoningBR}
-                onChange={e => setFilterZoningBR(e.target.value)}
-                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              >
+              <select value={filterZoningBR} onChange={e => setFilterZoningBR(e.target.value)} className={BR_SELECT_CLS}>
                 <option value="">Zoning Type</option>
                 <option value="agricultural">Agricultural</option>
                 <option value="residential">Residential</option>
@@ -1159,22 +1164,14 @@ export default function MarketplacePage() {
                 <option value="recreational">Recreational</option>
                 <option value="other">Other</option>
               </select>
-              <select
-                value={filterTimeline}
-                onChange={e => setFilterTimeline(e.target.value)}
-                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              >
+              <select value={filterTimeline} onChange={e => setFilterTimeline(e.target.value)} className={BR_SELECT_CLS}>
                 <option value="">Timeline</option>
-                <option value="Immediately">Immediately</option>
+                <option value="Actively Buying">Actively Buying</option>
                 <option value="1-3 months">1–3 months</option>
                 <option value="3-6 months">3–6 months</option>
                 <option value="6+ months">6+ months</option>
               </select>
-              <select
-                value={filterRoadAccessBR}
-                onChange={e => setFilterRoadAccessBR(e.target.value)}
-                className="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-lg border border-transparent hover:border-primary/20 transition-all text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              >
+              <select value={filterRoadAccessBR} onChange={e => setFilterRoadAccessBR(e.target.value)} className={BR_SELECT_CLS}>
                 <option value="">Road Access</option>
                 <option value="Paved Road">Paved Road</option>
                 <option value="Gravel Road">Gravel Road</option>
@@ -1186,12 +1183,25 @@ export default function MarketplacePage() {
               {(filterBudget || filterAcreage || filterZoningBR || filterTimeline || filterRoadAccessBR || buyerSearchQuery) && (
                 <button
                   onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoningBR(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBuyerSearchQuery(''); }}
-                  className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1"
+                  className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
                 >
                   <span className="material-symbols-outlined text-sm">close</span>
                   Clear filters
                 </button>
               )}
+              <div className="ml-auto flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort By:</span>
+                <select
+                  value={brSort}
+                  onChange={e => setBrSort(e.target.value)}
+                  className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="budget_desc">Budget High to Low</option>
+                  <option value="budget_asc">Budget Low to High</option>
+                  <option value="timeline">Timeline Soonest First</option>
+                </select>
+              </div>
             </div>
 
             {buyerRequestsLoading ? (
