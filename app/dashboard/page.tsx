@@ -451,26 +451,6 @@ export default function DashboardPage() {
 
         </section>
 
-        {/* Market Insights */}
-        <section className="mb-12">
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-11 h-11 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-emerald-700 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-headline font-bold text-primary text-sm mb-0.5">April 2026 Market Report</p>
-              <p className="text-secondary text-xs leading-relaxed">U.S. farmland averaged $4,350/acre in 2025, up 4.3%. Texas and Iowa lead activity heading into spring.</p>
-            </div>
-            <a
-              href="/market-report/april-2026"
-              className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-white border border-emerald-200 px-4 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors whitespace-nowrap"
-            >
-              Read Full Market Analysis
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </a>
-          </div>
-        </section>
-
         {/* New Listings For You */}
         {(loading || hasBuyerCriteria) && (
           <section className="mb-12">
@@ -552,7 +532,7 @@ export default function DashboardPage() {
           </section>
         )}
 
-        {/* Weekly Market Update */}
+        {/* Monthly Market Report */}
         <section className="bg-primary rounded-[2rem] p-10 relative overflow-hidden text-white shadow-2xl">
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-10">
             <div className="w-full h-full bg-gradient-to-l from-emerald-400 to-transparent" />
@@ -560,25 +540,13 @@ export default function DashboardPage() {
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-7">
               <div className="flex items-center gap-3 mb-4">
-                <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-[0.2em] border border-emerald-500/30">Live Update</span>
-                <span className="text-emerald-100/60 text-xs font-medium italic">May 10 – May 17, 2024</span>
+                <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-[0.2em] border border-emerald-500/30">Monthly Report</span>
+                <span className="text-emerald-100/60 text-xs font-medium italic">May 2026</span>
               </div>
-              <h2 className="text-5xl font-extrabold tracking-tighter mb-6 leading-none font-headline">The Digital Cartographer Weekly</h2>
+              <h2 className="text-5xl font-extrabold tracking-tighter mb-6 leading-none font-headline">LotScout Land Market Report</h2>
               <p className="text-emerald-100/70 text-lg font-body max-w-xl mb-8 leading-relaxed">
-                Central Texas land value continues to surge, showing a 4.2% increase in industrial-zoned parcels. Discover how current infrastructure projects are shifting the buyer landscape.
+                This month's report covers national farmland values, top 5 states by market activity, and notable shifts in recreational and agricultural land demand. U.S. farmland averaged $4,350/acre in 2025, up 4.3% year over year.
               </p>
-              <div className="flex flex-wrap gap-4">
-                {[
-                  { label: 'Austin MSA', value: '+5.2%' },
-                  { label: 'San Marcos', value: '+3.8%' },
-                  { label: 'Kyle/Buda',  value: '+6.1%' },
-                ].map(({ label, value }) => (
-                  <div key={label} className="px-5 py-2.5 rounded-2xl bg-white/5 border border-white/10 flex flex-col">
-                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-1">{label}</span>
-                    <span className="text-xl font-bold">{value}</span>
-                  </div>
-                ))}
-              </div>
             </div>
             <div className="lg:col-span-5">
               <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
@@ -595,9 +563,9 @@ export default function DashboardPage() {
                     </div>
                   ))}
                 </div>
-                <button className="w-full mt-8 bg-emerald-500 hover:bg-emerald-400 text-primary font-extrabold py-4 rounded-2xl transition-all">
+                <a href="/market-report/april-2026" className="block w-full mt-8 bg-emerald-500 hover:bg-emerald-400 text-primary font-extrabold py-4 rounded-2xl transition-all text-center">
                   Read Full Market Analysis
-                </button>
+                </a>
               </div>
             </div>
           </div>
