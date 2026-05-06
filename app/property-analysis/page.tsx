@@ -62,7 +62,6 @@ export default function PropertyAnalysisPage() {
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [deliveryPopup, setDeliveryPopup] = useState<{ turnaround: string; property: string } | null>(null);
 
@@ -204,7 +203,6 @@ export default function PropertyAnalysisPage() {
         : `APN ${apn} · ${apnCounty} County, ${apnState}`;
 
       setDeliveryPopup({ turnaround: result.turnaround ?? '24 hours', property: propertyLabel });
-      setSubmitSuccess(true);
       setStreetAddress(''); setCity(''); setAddrState(''); setZipCode('');
       setApn(''); setApnCounty(''); setApnState('');
       setAddrValidStatus('idle'); setAddrValidMsg(''); setResolvedCounty('');
@@ -348,25 +346,7 @@ export default function PropertyAnalysisPage() {
               </div>
             </div>
 
-            {submitSuccess ? (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-10 text-center max-w-2xl">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                  <span className="material-symbols-outlined text-emerald-600 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                </div>
-                <h3 className="font-headline text-xl font-bold text-primary mb-2">Request Submitted!</h3>
-                <p className="text-secondary text-sm leading-relaxed mb-6">
-                  Your request has been submitted. Your report will be delivered
-                  {tier === 'exclusive' ? ' within 15 minutes' : ' within 24 hours'} — we&apos;ll email you when it&apos;s ready.
-                </p>
-                <button
-                  onClick={() => setSubmitSuccess(false)}
-                  className="bg-primary text-on-primary font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-opacity text-sm"
-                >
-                  Submit Another Property
-                </button>
-              </div>
-            ) : (
-              <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
+              <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
 
                 {/* Mode toggle */}
                 <div className="border-b border-outline-variant/20 p-6 flex items-center gap-4">
@@ -543,7 +523,6 @@ export default function PropertyAnalysisPage() {
                   </button>
                 </div>
               </div>
-            )}
           </section>
         )}
 
