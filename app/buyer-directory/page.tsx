@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useUserTier } from '@/hooks/useUserTier';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -15,6 +14,8 @@ interface BuyerRequest {
   user_id: string;
   status: string;
   target_state: string | null;
+  target_county: string | null;
+  target_city: string | null;
   target_regions: string[] | null;
   budget_min: number | null;
   budget_max: number | null;
@@ -189,63 +190,62 @@ interface BuyerCardProps {
 }
 
 function BuyerRequestCard({ req, canViewContact }: BuyerCardProps) {
-  const name = getBuyerName(req);
-  const initials = getInitials(req);
+  const company = req.display_company || req.profiles?.company_name || null;
+  const personName = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || null;
+  const primaryName = company || personName;
+  const secondaryName = company ? personName : null;
   const blur = !canViewContact;
+
+  const locationParts = [req.target_state, req.target_county || req.target_city].filter(Boolean);
+  const location = locationParts.length > 0 ? locationParts.join(' · ') : null;
+  const acreage = req.min_acreage
+    ? `${req.min_acreage.toLocaleString()}${req.max_acreage ? ` – ${req.max_acreage.toLocaleString()}` : '+'} acres`
+    : null;
+  const useCase = req.use_case ? req.use_case.split(' — ')[0] : null;
 
   return (
     <Link
       href={`/buyer-requests/${req.id}`}
-      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 hover:shadow-lg hover:border-primary/25 transition-all"
+      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-5 hover:shadow-lg hover:border-primary/25 transition-all"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${blur ? 'blur-sm' : ''}`}>
-            {req.profiles?.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={req.profiles.avatar_url} alt="Buyer" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                <span className="text-primary font-bold text-sm">{initials}</span>
-              </div>
-            )}
-          </div>
-          <div>
-            <p className={`font-bold text-primary text-sm ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
-            <p className="text-[10px] text-secondary uppercase tracking-widest font-bold">Verified Buyer</p>
-          </div>
-        </div>
+      {/* Name block */}
+      <div className={blur ? 'blur-sm select-none' : ''}>
+        {primaryName && (
+          <p className="font-extrabold text-primary text-lg leading-tight">{primaryName}</p>
+        )}
+        {secondaryName && (
+          <p className="text-sm text-secondary font-medium mt-0.5">{secondaryName}</p>
+        )}
       </div>
 
-      <div className="space-y-2.5 text-sm">
-        {(req.target_regions?.length ?? 0) > 0 && (
-          <div className="flex items-start gap-2">
-            <span className="material-symbols-outlined text-secondary text-base mt-0.5">location_on</span>
-            <span className="text-on-surface-variant">{req.target_regions!.join(', ')}</span>
+      {/* Fields */}
+      <div className="space-y-3">
+        {location && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Location</p>
+            <p className="text-base font-semibold text-on-surface">{location}</p>
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-base">payments</span>
-          <span className="text-on-surface-variant">{fmtBudget(req.budget_min, req.budget_max)}</span>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Budget</p>
+          <p className="text-base font-semibold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</p>
         </div>
-        {req.min_acreage && (
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-secondary text-base">landscape</span>
-            <span className="text-on-surface-variant">
-              {req.min_acreage}{req.max_acreage ? ` – ${req.max_acreage}` : '+'} acres
-            </span>
+        {acreage && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Acreage</p>
+            <p className="text-base font-semibold text-on-surface">{acreage}</p>
           </div>
         )}
-        {req.use_case && (
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-secondary text-base">agriculture</span>
-            <span className="bg-primary/8 text-primary px-2 py-0.5 rounded-full text-xs font-bold capitalize">{req.use_case.split(' — ')[0]}</span>
+        {useCase && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Use Case</p>
+            <p className="text-base font-semibold text-on-surface">{useCase}</p>
           </div>
         )}
         {req.timeline && (
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-secondary text-base">schedule</span>
-            <span className="text-on-surface-variant text-xs">{req.timeline}</span>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-0.5">Timeline</p>
+            <p className="text-base font-semibold text-on-surface">{req.timeline}</p>
           </div>
         )}
       </div>
@@ -281,8 +281,7 @@ function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitl
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function BuyerDirectoryPage() {
-  const { tier, isAdmin, isAtLeast, loading: permLoading } = useUserTier();
-  const router = useRouter();
+  const { isAdmin, isAtLeast, loading: permLoading } = useUserTier();
 
   const canViewContact = !permLoading && (isAtLeast('priority') || !!isAdmin);
 
@@ -806,15 +805,8 @@ export default function BuyerDirectoryPage() {
           {/* ── BUYER REQUESTS TAB ── */}
           {tab === 'requests' && (
             <>
-              <div className="flex items-center justify-between mb-6">
+              <div className="mb-6">
                 <p className="text-secondary text-sm">Active buyers looking for land that matches your listings</p>
-                <button
-                  onClick={() => { if (!tier && !isAdmin) { setShowUpgradeModal(true); return; } router.push('/create-buyer-request'); }}
-                  className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-sm"
-                >
-                  <span className="material-symbols-outlined text-base">add</span>
-                  Find a Property
-                </button>
               </div>
 
               {/* Filters */}
@@ -905,13 +897,7 @@ export default function BuyerDirectoryPage() {
                 <div className="text-center py-24 text-secondary">
                   <span className="material-symbols-outlined text-6xl mb-4 block text-primary/20">person_search</span>
                   <p className="font-headline text-2xl font-bold text-primary mb-2">No buyer requests yet</p>
-                  <p className="text-sm mb-6">Be the first to post your buying criteria and connect with sellers</p>
-                  <button
-                    onClick={() => { if (!tier && !isAdmin) { setShowUpgradeModal(true); return; } router.push('/create-buyer-request'); }}
-                    className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
-                  >
-                    Find a Property
-                  </button>
+                  <p className="text-sm">Be the first to post your buying criteria and connect with sellers</p>
                 </div>
               ) : filteredBR.length === 0 ? (
                 <div className="text-center py-16 text-secondary">
