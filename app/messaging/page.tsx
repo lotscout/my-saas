@@ -9,7 +9,16 @@ interface Profile {
   id: string;
   first_name: string | null;
   last_name: string | null;
+  company_name: string | null;
   avatar_url: string | null;
+}
+
+interface ListingContext {
+  id: string;
+  title: string | null;
+  county: string | null;
+  state: string | null;
+  lot_size_acres: number | null;
 }
 
 interface Conversation {
@@ -21,6 +30,7 @@ interface Conversation {
   listing_id: string | null;
   buyer: Profile;
   seller: Profile;
+  listing: ListingContext | null;
 }
 
 interface Message {
@@ -32,15 +42,27 @@ interface Message {
 }
 
 function participantName(p: Profile | null): string {
-  if (!p) return 'Unknown';
-  return [p.first_name, p.last_name].filter(Boolean).join(' ') || 'Unknown';
+  if (!p) return 'User';
+  if (p.company_name) return p.company_name;
+  return [p.first_name, p.last_name].filter(Boolean).join(' ') || 'User';
 }
 
 function initials(p: Profile | null): string {
   if (!p) return '?';
+  if (p.company_name) return p.company_name.substring(0, 2).toUpperCase();
   const first = p.first_name?.[0] ?? '';
   const last = p.last_name?.[0] ?? '';
   return (first + last).toUpperCase() || '?';
+}
+
+function listingSubtitle(listing: ListingContext | null): string | null {
+  if (!listing) return null;
+  if (listing.title) return `Re: ${listing.title}`;
+  const parts: string[] = [];
+  if (listing.lot_size_acres) parts.push(`${listing.lot_size_acres.toLocaleString()} Acres`);
+  if (listing.county) parts.push(`${listing.county} County`);
+  if (listing.state) parts.push(listing.state);
+  return parts.length > 0 ? `Re: ${parts.join(', ')}` : null;
 }
 
 function relativeTime(iso: string): string {
@@ -94,8 +116,9 @@ export default function MessagingPage() {
       .from('conversations')
       .select(`
         id, subject, last_message_at, last_message_preview, status, listing_id,
-        buyer:buyer_id(id, first_name, last_name, avatar_url),
-        seller:seller_id(id, first_name, last_name, avatar_url)
+        buyer:buyer_id(id, first_name, last_name, company_name, avatar_url),
+        seller:seller_id(id, first_name, last_name, company_name, avatar_url),
+        listing:listing_id(id, title, county, state, lot_size_acres)
       `)
       .or(`buyer_id.eq.${uid},seller_id.eq.${uid}`)
       .neq('status', 'blocked')
@@ -337,9 +360,10 @@ export default function MessagingPage() {
                                 <span className="text-[10px] text-secondary shrink-0 ml-2">{relativeTime(conv.last_message_at)}</span>
                               )}
                             </div>
-                            {conv.subject && (
-                              <p className="text-[11px] text-secondary font-medium truncate mb-0.5">{conv.subject}</p>
-                            )}
+                            {(() => {
+                              const sub = listingSubtitle(conv.listing) ?? (conv.subject || null);
+                              return sub ? <p className="text-[11px] text-emerald-700 font-medium truncate mb-0.5">{sub}</p> : null;
+                            })()}
                             {conv.last_message_preview && (
                               <p className="text-xs text-on-surface-variant line-clamp-1">{conv.last_message_preview}</p>
                             )}
@@ -376,9 +400,10 @@ export default function MessagingPage() {
                         <h3 className="font-headline font-extrabold text-primary text-sm leading-tight">
                           {participantName(otherParticipant)}
                         </h3>
-                        {selectedConv.subject && (
-                          <p className="text-xs text-secondary">{selectedConv.subject}</p>
-                        )}
+                        {(() => {
+                          const sub = listingSubtitle(selectedConv.listing) ?? (selectedConv.subject || null);
+                          return sub ? <p className="text-xs text-emerald-700 font-medium">{sub}</p> : null;
+                        })()}
                       </div>
                     </div>
                   </div>
