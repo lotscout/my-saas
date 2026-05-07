@@ -5,12 +5,13 @@ import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
 import { createClient } from '@/lib/supabase/client';
 
-interface Profile {
+interface Participant {
   id: string;
   first_name: string | null;
   last_name: string | null;
   company_name: string | null;
   avatar_url: string | null;
+  email?: string | null;
 }
 
 interface ListingContext {
@@ -23,13 +24,14 @@ interface ListingContext {
 
 interface Conversation {
   id: string;
+  buyer_id: string | null;
+  seller_id: string | null;
   subject: string | null;
   last_message_at: string | null;
   last_message_preview: string | null;
   status: string;
   listing_id: string | null;
-  buyer: Profile;
-  seller: Profile;
+  other_participant: Participant | null;
   listing: ListingContext | null;
 }
 
@@ -41,18 +43,23 @@ interface Message {
   is_read: boolean;
 }
 
-function participantName(p: Profile | null): string {
+function participantName(p: Participant | null): string {
   if (!p) return 'User';
   if (p.company_name) return p.company_name;
-  return [p.first_name, p.last_name].filter(Boolean).join(' ') || 'User';
+  const name = [p.first_name, p.last_name].filter(Boolean).join(' ');
+  if (name) return name;
+  if (p.email) return p.email;
+  return 'User';
 }
 
-function initials(p: Profile | null): string {
+function initials(p: Participant | null): string {
   if (!p) return '?';
   if (p.company_name) return p.company_name.substring(0, 2).toUpperCase();
   const first = p.first_name?.[0] ?? '';
   const last = p.last_name?.[0] ?? '';
-  return (first + last).toUpperCase() || '?';
+  if (first || last) return (first + last).toUpperCase();
+  if (p.email) return p.email[0].toUpperCase();
+  return '?';
 }
 
 function listingSubtitle(listing: ListingContext | null): string | null {
@@ -110,20 +117,12 @@ export default function MessagingPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null);
 
-  const loadConversations = useCallback(async (uid: string) => {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from('conversations')
-      .select(`
-        id, subject, last_message_at, last_message_preview, status, listing_id,
-        buyer:buyer_id(id, first_name, last_name, company_name, avatar_url),
-        seller:seller_id(id, first_name, last_name, company_name, avatar_url),
-        listing:listing_id(id, title, county, state, lot_size_acres)
-      `)
-      .or(`buyer_id.eq.${uid},seller_id.eq.${uid}`)
-      .neq('status', 'blocked')
-      .order('last_message_at', { ascending: false, nullsFirst: false });
-    setConversations((data as unknown as Conversation[]) ?? []);
+  const loadConversations = useCallback(async (_uid: string) => {
+    const res = await fetch('/api/conversations');
+    if (res.ok) {
+      const json = await res.json() as { conversations: Conversation[] };
+      setConversations(json.conversations ?? []);
+    }
     setLoadingConvs(false);
   }, []);
 
@@ -225,9 +224,8 @@ export default function MessagingPage() {
     }
   }
 
-  function getOtherParticipant(conv: Conversation): Profile | null {
-    if (!currentUserId) return null;
-    return conv.buyer?.id === currentUserId ? conv.seller : conv.buyer;
+  function getOtherParticipant(conv: Conversation): Participant | null {
+    return conv.other_participant ?? null;
   }
 
   const filteredConvs = conversations.filter(conv => {

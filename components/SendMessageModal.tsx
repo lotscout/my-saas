@@ -8,6 +8,7 @@ interface Props {
   recipientName: string;
   currentUserId: string;
   currentUserIsBuyer: boolean;
+  listingId?: string;
   onClose: () => void;
   onSent: () => void;
 }
@@ -17,6 +18,7 @@ export default function SendMessageModal({
   recipientName,
   currentUserId,
   currentUserIsBuyer,
+  listingId,
   onClose,
   onSent,
 }: Props) {
@@ -59,7 +61,7 @@ export default function SendMessageModal({
     if (!conversationId) {
       const { data: newConv, error: convErr } = await supabase
         .from('conversations')
-        .insert({ buyer_id: buyerId, seller_id: sellerId, status: 'active' })
+        .insert({ buyer_id: buyerId, seller_id: sellerId, status: 'active', listing_id: listingId ?? null })
         .select('id')
         .single();
 

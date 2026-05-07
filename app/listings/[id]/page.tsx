@@ -204,6 +204,7 @@ export default function ListingDetailPage() {
           recipientName={sellerName}
           currentUserId={currentUserId}
           currentUserIsBuyer={true}
+          listingId={listing.id}
           onClose={() => setShowMessageModal(false)}
           onSent={() => {
             setShowMessageModal(false);
