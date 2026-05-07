@@ -5,7 +5,13 @@ import { createServiceClient } from '@/lib/supabase/service'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/dashboard'
+  const type = searchParams.get('type')
+
+  // Password reset links carry type=recovery — send to the reset form, not the dashboard.
+  // All other flows (email confirmation, OAuth) default to /dashboard or the next param.
+  const next = type === 'recovery'
+    ? '/reset-password'
+    : (searchParams.get('next') ?? '/dashboard')
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? origin
 
@@ -37,6 +43,12 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('[auth/callback] exchangeCodeForSession error:', error.message)
       return NextResponse.redirect(`${siteUrl}/sign-in?error=auth_callback_failed`)
+    }
+
+    // For password resets, the session is now established — just redirect to the form.
+    // Skip the profile upsert; the user already exists and this isn't an OAuth sign-in.
+    if (type === 'recovery') {
+      return response
     }
 
     // Ensure a profile row exists and is populated with OAuth metadata.
