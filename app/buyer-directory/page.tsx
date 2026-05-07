@@ -335,9 +335,11 @@ export default function BuyerDirectoryPage() {
   // ── Active buyers ──
   const [activeBuyers, setActiveBuyers] = useState<BuyerRequest[]>([]);
   const [activeLoading, setActiveLoading] = useState(false);
-  const [activeStateFilter, setActiveStateFilter] = useState('');
-  const [activeUseCaseFilter, setActiveUseCaseFilter] = useState('');
-  const [activeRoadAccess, setActiveRoadAccess] = useState('');
+  const [activeBrSearch, setActiveBrSearch] = useState('');
+  const [activeBrBudget, setActiveBrBudget] = useState('');
+  const [activeBrAcreage, setActiveBrAcreage] = useState('');
+  const [activeBrZoning, setActiveBrZoning] = useState('');
+  const [activeBrRoadAccess, setActiveBrRoadAccess] = useState('');
 
   // ── Buyer requests tab ──
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
@@ -405,21 +407,22 @@ export default function BuyerDirectoryPage() {
     });
   }, [nationalBuyers, globalSearch, nationalUseCase, nationalRoadAccess]);
 
-  const filteredActive = useMemo(() => {
-    const q = globalSearch.toLowerCase();
+  const filteredActiveBR = useMemo(() => {
     return activeBuyers.filter(r => {
-      const name = getBuyerName(r).toLowerCase();
-      const co = (r.profiles?.company_name ?? '').toLowerCase();
+      const q = activeBrSearch.toLowerCase();
       const state = (r.target_state ?? '').toLowerCase();
+      const city = (r.target_city ?? '').toLowerCase();
+      const county = (r.target_county ?? '').toLowerCase();
       const uc = (r.use_case ?? '').toLowerCase();
-      const matchSearch = !q || name.includes(q) || co.includes(q) || state.includes(q) || uc.includes(q);
-      const matchState = !activeStateFilter || state === activeStateFilter.toLowerCase();
-      const matchUC = !activeUseCaseFilter || uc.includes(activeUseCaseFilter.toLowerCase());
+      const matchSearch = !q || state.includes(q) || city.includes(q) || county.includes(q) || uc.includes(q);
+      const matchBudget = applyBudgetFilter(r, activeBrBudget);
+      const matchAcreage = applyAcreageFilter(r, activeBrAcreage);
+      const matchZoning = !activeBrZoning || (r.zoning_preference ?? []).some(z => z.toLowerCase().includes(activeBrZoning));
       const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
-      const matchRoad = !activeRoadAccess || roads.some(rd => rd.toLowerCase().includes(activeRoadAccess.toLowerCase()));
-      return matchSearch && matchState && matchUC && matchRoad;
+      const matchRoad = !activeBrRoadAccess || roads.some(rd => rd.toLowerCase().includes(activeBrRoadAccess.toLowerCase()));
+      return matchSearch && matchBudget && matchAcreage && matchZoning && matchRoad;
     });
-  }, [activeBuyers, globalSearch, activeStateFilter, activeUseCaseFilter, activeRoadAccess]);
+  }, [activeBuyers, activeBrSearch, activeBrBudget, activeBrAcreage, activeBrZoning, activeBrRoadAccess]);
 
   const filteredBR = useMemo(() => {
     return buyerRequests.filter(r => {
@@ -757,29 +760,59 @@ export default function BuyerDirectoryPage() {
                 <div>
                   <ViewHeader
                     title="Active Buyers"
-                    subtitle='Buyers with a purchase timeline under 30 days — sorted by most recently posted'
-                    count={filteredActive.length}
+                    subtitle="Buyers actively seeking land with a purchase timeline under 30 days"
+                    count={filteredActiveBR.length}
                     onBack={backToGrid}
                   />
 
+                  {/* Search bar */}
+                  <div className="relative mb-5">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
+                    <input
+                      type="text"
+                      value={activeBrSearch}
+                      onChange={e => setActiveBrSearch(e.target.value)}
+                      placeholder="Search by state, county, or zip code..."
+                      className="w-full bg-white border border-outline-variant/25 rounded-2xl pl-11 pr-10 py-3.5 text-sm text-on-surface placeholder:text-secondary shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                    />
+                    {activeBrSearch && (
+                      <button onClick={() => setActiveBrSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
+                        <span className="material-symbols-outlined text-lg">close</span>
+                      </button>
+                    )}
+                  </div>
+
                   {/* Filters */}
-                  <div className="flex flex-wrap items-center gap-3 mb-5">
-                    <select value={activeStateFilter} onChange={e => setActiveStateFilter(e.target.value)} className={SELECT_CLS}>
-                      <option value="">All States</option>
-                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  <div className="flex flex-wrap items-center gap-3 py-4 border-y border-outline-variant/20 mb-6">
+                    <select value={activeBrBudget} onChange={e => setActiveBrBudget(e.target.value)} className={SELECT_CLS}>
+                      <option value="" disabled hidden>Budget Range</option>
+                      <option value="under50k">Under $50K</option>
+                      <option value="50k-100k">$50K–$100K</option>
+                      <option value="100k-500k">$100K–$500K</option>
+                      <option value="500k-1m">$500K–$1M</option>
+                      <option value="1m-5m">$1M–$5M</option>
+                      <option value="5m+">$5M+</option>
                     </select>
-                    <select value={activeUseCaseFilter} onChange={e => setActiveUseCaseFilter(e.target.value)} className={SELECT_CLS}>
-                      <option value="">All Use Cases</option>
-                      <option value="row crop">Row Crop</option>
-                      <option value="livestock">Livestock/Ranching</option>
+                    <select value={activeBrAcreage} onChange={e => setActiveBrAcreage(e.target.value)} className={SELECT_CLS}>
+                      <option value="" disabled hidden>Acreage Range</option>
+                      <option value="under5">Under 5 acres</option>
+                      <option value="5-25">5–25 acres</option>
+                      <option value="25-100">25–100 acres</option>
+                      <option value="100-500">100–500 acres</option>
+                      <option value="500+">500+ acres</option>
+                    </select>
+                    <select value={activeBrZoning} onChange={e => setActiveBrZoning(e.target.value)} className={SELECT_CLS}>
+                      <option value="" disabled hidden>Zoning Type</option>
+                      <option value="agricultural">Agricultural</option>
+                      <option value="residential">Residential</option>
+                      <option value="commercial">Commercial</option>
+                      <option value="industrial">Industrial</option>
+                      <option value="mixed use">Mixed Use</option>
                       <option value="recreational">Recreational</option>
-                      <option value="residential development">Residential Development</option>
-                      <option value="commercial development">Commercial Development</option>
-                      <option value="conservation">Conservation</option>
-                      <option value="investment">Investment</option>
+                      <option value="other">Other</option>
                     </select>
-                    <select value={activeRoadAccess} onChange={e => setActiveRoadAccess(e.target.value)} className={SELECT_CLS}>
-                      <option value="">Road Access</option>
+                    <select value={activeBrRoadAccess} onChange={e => setActiveBrRoadAccess(e.target.value)} className={SELECT_CLS}>
+                      <option value="" disabled hidden>Road Access</option>
                       <option value="Paved Road">Paved Road</option>
                       <option value="Gravel Road">Gravel Road</option>
                       <option value="Dirt Road">Dirt Road</option>
@@ -787,34 +820,40 @@ export default function BuyerDirectoryPage() {
                       <option value="Easement">Easement</option>
                       <option value="No Road Access">No Road Access</option>
                     </select>
-                    {(activeStateFilter || activeUseCaseFilter || activeRoadAccess) && (
-                      <button onClick={() => { setActiveStateFilter(''); setActiveUseCaseFilter(''); setActiveRoadAccess(''); }} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">close</span> Clear filters
+                    {(activeBrBudget || activeBrAcreage || activeBrZoning || activeBrRoadAccess || activeBrSearch) && (
+                      <button
+                        onClick={() => { setActiveBrBudget(''); setActiveBrAcreage(''); setActiveBrZoning(''); setActiveBrRoadAccess(''); setActiveBrSearch(''); }}
+                        className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-sm">close</span>
+                        Clear filters
                       </button>
                     )}
                   </div>
 
                   {activeLoading ? (
-                    <div className="space-y-3">
-                      {[1,2,3,4,5].map(i => (
-                        <div key={i} className="bg-surface-container-low rounded-xl h-16 animate-pulse" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[1,2,3].map(i => (
+                        <div key={i} className="bg-surface-container-low rounded-2xl p-5 animate-pulse space-y-4">
+                          <div className="h-4 bg-surface-container-high rounded w-32" />
+                          <div className="h-3 bg-surface-container-high rounded w-24" />
+                          <div className="mt-4 space-y-2">
+                            <div className="h-2 bg-surface-container-high rounded w-full" />
+                            <div className="h-2 bg-surface-container-high rounded w-3/4" />
+                          </div>
+                        </div>
                       ))}
                     </div>
-                  ) : filteredActive.length === 0 ? (
+                  ) : filteredActiveBR.length === 0 ? (
                     <div className="text-center py-16 text-secondary">
                       <span className="material-symbols-outlined text-5xl mb-3 block text-primary/20">hourglass_empty</span>
                       <p className="font-semibold">No active buyers match your filters</p>
                       <p className="text-sm mt-1">Try clearing your filters or check back soon</p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {filteredActive.map(req => (
-                        <BuyerRow
-                          key={req.id}
-                          req={req}
-                          canViewContact={canViewContact}
-                          showTimeline={false}
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredActiveBR.map(req => (
+                        <BuyerRequestCard key={req.id} req={req} canViewContact={canViewContact} />
                       ))}
                     </div>
                   )}
