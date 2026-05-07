@@ -1138,7 +1138,7 @@ export default function MarketplacePage() {
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-3 py-4 border-y border-outline-variant/20 mb-6">
               <select value={filterBudget} onChange={e => setFilterBudget(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="">Budget Range</option>
+                <option value="" disabled hidden>Budget Range</option>
                 <option value="under50k">Under $50K</option>
                 <option value="50k-100k">$50K–$100K</option>
                 <option value="100k-500k">$100K–$500K</option>
@@ -1147,7 +1147,7 @@ export default function MarketplacePage() {
                 <option value="5m+">$5M+</option>
               </select>
               <select value={filterAcreage} onChange={e => setFilterAcreage(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="">Acreage Range</option>
+                <option value="" disabled hidden>Acreage Range</option>
                 <option value="under5">Under 5 acres</option>
                 <option value="5-25">5–25 acres</option>
                 <option value="25-100">25–100 acres</option>
@@ -1155,7 +1155,7 @@ export default function MarketplacePage() {
                 <option value="500+">500+ acres</option>
               </select>
               <select value={filterZoningBR} onChange={e => setFilterZoningBR(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="">Zoning Type</option>
+                <option value="" disabled hidden>Zoning Type</option>
                 <option value="agricultural">Agricultural</option>
                 <option value="residential">Residential</option>
                 <option value="commercial">Commercial</option>
@@ -1165,14 +1165,14 @@ export default function MarketplacePage() {
                 <option value="other">Other</option>
               </select>
               <select value={filterTimeline} onChange={e => setFilterTimeline(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="">Timeline</option>
+                <option value="" disabled hidden>Timeline</option>
                 <option value="Actively Buying">Actively Buying</option>
                 <option value="1-3 months">1–3 months</option>
                 <option value="3-6 months">3–6 months</option>
                 <option value="6+ months">6+ months</option>
               </select>
               <select value={filterRoadAccessBR} onChange={e => setFilterRoadAccessBR(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="">Road Access</option>
+                <option value="" disabled hidden>Road Access</option>
                 <option value="Paved Road">Paved Road</option>
                 <option value="Gravel Road">Gravel Road</option>
                 <option value="Dirt Road">Dirt Road</option>
