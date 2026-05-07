@@ -109,11 +109,11 @@ function getInitials(req: BuyerRequest) {
   return ([p?.first_name?.[0], p?.last_name?.[0]].filter(Boolean).join('').toUpperCase()) || 'AB';
 }
 
-function fmtLocation(city: string | null, county: string | null, state: string | null): string | null {
+function fmtLocation(city: string | null, county: string | null, state: string | null): string {
   const abbrev = state ? (STATE_ABBREV[state.toLowerCase()] ?? null) : null;
   if (city && state) return `${city}, ${abbrev ?? state}`;
   if (county && state) return `${county} County, ${abbrev ?? state}`;
-  return state || null;
+  return state || 'Location not specified';
 }
 
 function applyBudgetFilter(req: BuyerRequest, f: string): boolean {
@@ -203,12 +203,10 @@ function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }:
 
       {/* Meta chips */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs shrink-0">
-        {req.target_state && (
-          <span className="flex items-center gap-1 text-secondary">
-            <span className="material-symbols-outlined text-sm">location_on</span>
-            {req.target_state}
-          </span>
-        )}
+        <span className="flex items-center gap-1 text-secondary">
+          <span className="material-symbols-outlined text-sm">location_on</span>
+          {fmtLocation(req.target_city, req.target_county, req.target_state)}
+        </span>
         <span className="font-semibold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</span>
         {req.use_case && (
           <span className="bg-primary/8 text-primary px-2 py-0.5 rounded-full font-bold capitalize">{req.use_case.split(' — ')[0]}</span>
@@ -256,12 +254,10 @@ function BuyerRequestCard({ req, canViewContact }: BuyerCardProps) {
 
       {/* Labeled fields */}
       <div className="mt-3 space-y-2">
-        {location && (
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p>
-            <p className="text-sm font-bold text-on-surface">{location}</p>
-          </div>
-        )}
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p>
+          <p className={`text-sm font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p>
+        </div>
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Budget</p>
           <p className="text-sm font-bold text-on-surface">{perAcre}</p>
