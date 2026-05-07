@@ -15,6 +15,16 @@ interface User {
   created_at: string;
 }
 
+interface EmailLog {
+  id: string;
+  to_email: string;
+  from_email: string;
+  subject: string;
+  email_type: string;
+  status: string;
+  created_at: string;
+}
+
 const PAGE_SIZE = 50;
 const TIERS = ['free', 'standard', 'priority', 'exclusive'];
 
@@ -39,10 +49,23 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
+  const [emailsLoading, setEmailsLoading] = useState(false);
 
   function showToast(message: string, type: 'success' | 'error') {
     setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
+  }
+
+  async function openUserEmails(user: User) {
+    setSelectedUser(user);
+    setEmailLogs([]);
+    setEmailsLoading(true);
+    const res = await fetch(`/api/admin/users/${user.id}/emails`);
+    const data = await res.json();
+    setEmailLogs(data.emails ?? []);
+    setEmailsLoading(false);
   }
 
   async function fetchUsers() {
@@ -212,7 +235,7 @@ export default function AdminUsersPage() {
                   ) : paginated.map(u => {
                     const name = u.full_name || [u.first_name, u.last_name].filter(Boolean).join(' ') || '—';
                     return (
-                      <tr key={u.id} className="hover:bg-surface-container-low/40 transition-colors">
+                      <tr key={u.id} className="hover:bg-surface-container-low/40 transition-colors cursor-pointer" onClick={() => openUserEmails(u)}>
                         <td className="px-5 py-4">
                           <div className="font-medium text-on-surface flex items-center gap-2">
                             {name}
@@ -224,7 +247,7 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-4 py-4 text-on-surface/70">{u.company_name || '—'}</td>
                         <td className="px-4 py-4 text-on-surface/60">{fmtDate(u.created_at)}</td>
-                        <td className="px-4 py-4">
+                        <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
                           <div className="flex items-center gap-2">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${TIER_COLOR[u.tier ?? 'free'] ?? 'bg-gray-100 text-gray-600'}`}>
                               {u.tier ?? 'free'}
@@ -241,7 +264,7 @@ export default function AdminUsersPage() {
                             </select>
                           </div>
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
                           <button
                             onClick={() => handleAdminToggle(u.id, u.is_admin)}
                             disabled={actionLoading === `admin-${u.id}`}
@@ -288,6 +311,72 @@ export default function AdminUsersPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Email History drawer */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black/30" onClick={() => setSelectedUser(null)} />
+          <div className="w-full max-w-xl bg-white shadow-2xl flex flex-col h-full overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/20">
+              <div>
+                <h2 className="font-headline text-lg font-bold text-on-surface">Email History</h2>
+                <p className="text-xs text-on-surface/50 mt-0.5">
+                  {selectedUser.full_name || [selectedUser.first_name, selectedUser.last_name].filter(Boolean).join(' ') || selectedUser.email}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="p-2 rounded-full hover:bg-surface-container-low transition-colors text-on-surface/50"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {emailsLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : emailLogs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-on-surface/40">
+                  <span className="material-symbols-outlined text-4xl mb-2">mail</span>
+                  <p className="text-sm">No emails sent to this user yet.</p>
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-surface-container-low border-b border-outline-variant/20">
+                    <tr>
+                      <th className="text-left px-5 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Date</th>
+                      <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Subject</th>
+                      <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Type</th>
+                      <th className="text-left px-4 py-3 font-semibold text-on-surface/60 text-xs uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/10">
+                    {emailLogs.map(log => (
+                      <tr key={log.id} className="hover:bg-surface-container-low/40">
+                        <td className="px-5 py-3 text-on-surface/60 whitespace-nowrap">{fmtDate(log.created_at)}</td>
+                        <td className="px-4 py-3 text-on-surface max-w-[200px] truncate" title={log.subject}>{log.subject}</td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-container text-on-surface/70">
+                            {log.email_type.replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            log.status === 'sent' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                            {log.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

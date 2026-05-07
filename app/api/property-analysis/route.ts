@@ -34,6 +34,7 @@ create policy "Users can insert own requests"
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { Resend } from 'resend';
+import { logEmail } from '@/lib/email-logger';
 
 export async function GET() {
   const supabase = await createClient();
@@ -157,6 +158,7 @@ export async function POST(request: NextRequest) {
         </table>
       `,
     });
+    await logEmail({ user_id: null, to_email: 'support@lotscout.com', from_email: 'support@lotscout.com', subject: 'New Property Analysis Request', email_type: 'analysis_submitted' });
 
     if (user.email) {
       await resend.emails.send({
@@ -181,6 +183,7 @@ export async function POST(request: NextRequest) {
           </div>
         `,
       });
+      await logEmail({ user_id: user.id, to_email: user.email, from_email: 'support@lotscout.com', subject: 'Your property analysis request has been received — LotScout', email_type: 'analysis_submitted' });
     }
   } catch (emailErr) {
     console.error('Email error:', emailErr);

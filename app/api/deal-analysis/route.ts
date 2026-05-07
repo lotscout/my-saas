@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { Resend } from 'resend';
+import { logEmail } from '@/lib/email-logger';
 
 // ── Supabase service role (bypasses RLS) ──────────────────────────────────────
 function getServiceSupabase() {
@@ -160,6 +161,7 @@ export async function POST(request: NextRequest) {
         </div>
       `,
     });
+    await logEmail({ user_id: user.id, to_email: 'support@lotscout.com', from_email: 'hello@lotscout.com', subject: `New Deal Analysis Request — ${fullAddress}`, email_type: 'analysis_submitted' });
   } catch (emailErr) {
     // Non-fatal — log but don't fail the request
     console.error('[deal-analysis] Email error:', emailErr);

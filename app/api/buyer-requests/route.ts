@@ -19,6 +19,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { Resend } from 'resend';
 import { containsProfanity } from '@/lib/profanity-filter';
+import { logEmail } from '@/lib/email-logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -126,6 +127,7 @@ export async function POST(request: NextRequest) {
           <p style="color:#6b7280;margin-top:16px">View at <a href="https://lotscout.com/admin/listings">lotscout.com/admin/listings</a></p>
         `,
       });
+      await logEmail({ user_id: null, to_email: 'support@lotscout.com', from_email: 'support@lotscout.com', subject: 'New Buyer Request (Auto-Published)', email_type: 'buyer_request_submitted' });
 
       if (buyerEmail) {
         await resend.emails.send({
@@ -156,6 +158,7 @@ export async function POST(request: NextRequest) {
             </div>
           `,
         });
+        await logEmail({ user_id: user.id, to_email: buyerEmail, from_email: 'support@lotscout.com', subject: 'Your buying criteria has been posted — LotScout', email_type: 'buyer_request_submitted' });
       }
     } catch (emailErr) {
       console.error('[buyer-requests] Email error:', emailErr);

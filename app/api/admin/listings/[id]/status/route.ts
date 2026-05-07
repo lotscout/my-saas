@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { Resend } from 'resend';
 import { isAdminEmail } from '@/lib/admin';
+import { logEmail } from '@/lib/email-logger';
 
 async function checkIsAdmin(): Promise<boolean> {
   const supabase = await createClient();
@@ -94,6 +95,7 @@ export async function PATCH(
             </div>
           `,
         });
+        await logEmail({ user_id: listing.user_id, to_email: sellerEmail, from_email: 'support@lotscout.com', subject: 'Your listing has been approved — LotScout', email_type: 'listing_approved' });
       } else if (status === 'revision_needed') {
         await resend.emails.send({
           from: 'LotScout <support@lotscout.com>',
@@ -127,6 +129,7 @@ export async function PATCH(
             </div>
           `,
         });
+        await logEmail({ user_id: listing.user_id, to_email: sellerEmail, from_email: 'support@lotscout.com', subject: 'Your listing needs a few updates — LotScout', email_type: 'listing_revision' });
       } else if (status === 'rejected') {
         await resend.emails.send({
           from: 'LotScout <support@lotscout.com>',
@@ -156,6 +159,7 @@ export async function PATCH(
             </div>
           `,
         });
+        await logEmail({ user_id: listing.user_id, to_email: sellerEmail, from_email: 'support@lotscout.com', subject: 'Update on your LotScout listing', email_type: 'listing_rejected' });
       }
     } catch (emailErr) {
       console.error('[listing/status] Email error:', emailErr);

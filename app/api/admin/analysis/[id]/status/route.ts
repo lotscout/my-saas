@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { Resend } from 'resend';
 import { isAdminEmail } from '@/lib/admin';
+import { logEmail } from '@/lib/email-logger';
 
 async function checkIsAdmin(): Promise<boolean> {
   const supabase = await createClient();
@@ -94,6 +95,7 @@ export async function PATCH(
             </div>
           `,
         });
+        await logEmail({ user_id: req.user_id, to_email: userEmail, from_email: 'support@lotscout.com', subject: 'Your property analysis is ready — LotScout', email_type: 'analysis_completed' });
       } else if (status === 'rejected') {
         await resend.emails.send({
           from: 'LotScout <support@lotscout.com>',
@@ -118,6 +120,7 @@ export async function PATCH(
             </div>
           `,
         });
+        await logEmail({ user_id: req.user_id, to_email: userEmail, from_email: 'support@lotscout.com', subject: 'Update on your property analysis request — LotScout', email_type: 'analysis_rejected' });
       }
     } catch (emailErr) {
       console.error('[analysis/status] Email error:', emailErr);

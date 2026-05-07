@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { Resend } from 'resend';
 import { isAdminEmail } from '@/lib/admin';
+import { logEmail } from '@/lib/email-logger';
 
 async function checkIsAdmin(): Promise<boolean> {
   const supabase = await createClient();
@@ -103,6 +104,7 @@ export async function PATCH(
             </div>
           `,
         });
+        await logEmail({ user_id: buyerRequest.user_id, to_email: buyerEmail, from_email: 'hello@lotscout.com', subject: 'Your buyer profile is now live on LotScout 🎉', email_type: 'buyer_request_approved' });
       } catch (emailErr) {
         console.error('[buyer-requests/approve] Email error:', emailErr);
       }
