@@ -329,12 +329,12 @@ export default function PropertyAnalysisPage() {
       <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-8">
 
         {/* Page heading — centered */}
-        <header className="mb-10 text-center">
+        <div className="mb-10 text-center">
           <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Tools</p>
           <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
             Deal <span className="text-emerald-600">Analysis</span>
           </h1>
-        </header>
+        </div>
 
         {/* TOP SECTION — 50/50: Submit a Property | How It Works */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">

@@ -71,6 +71,12 @@ export async function POST(request: NextRequest) {
       }
 
       // --- Subscription checkout ---
+      // Only update tier when Stripe confirms the payment is actually collected.
+      if (session.payment_status !== 'paid') {
+        console.warn('checkout.session.completed: payment_status is not paid — skipping tier update', { payment_status: session.payment_status, session_id: session.id });
+        break;
+      }
+
       const userId = session.client_reference_id;
       const tier = metadata.tier;
       const stripeCustomerId = session.customer as string;
