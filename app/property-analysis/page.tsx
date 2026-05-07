@@ -328,28 +328,28 @@ export default function PropertyAnalysisPage() {
 
       <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-8">
 
-        {/* Page heading */}
-        <header className="mb-6">
+        {/* Page heading — centered */}
+        <header className="mb-10 text-center">
           <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Tools</p>
           <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
             Deal <span className="text-emerald-600">Analysis</span>
           </h1>
         </header>
 
-        {/* ── Submission Form (paid users only) — first section after heading ── */}
-        {isPaid && (
-          <section className="mb-16">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
-                <h2 className="font-headline text-3xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
-              </div>
-            </div>
+        {/* TOP SECTION — 50/50: Submit a Property | How It Works */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
 
-              <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
+          {/* Left: Submit a Property */}
+          <div className="flex flex-col">
+            {isPaid ? (
+              <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm overflow-hidden flex flex-col h-full">
+                <div className="px-8 pt-6 pb-5 border-b border-outline-variant/15">
+                  <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
+                  <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
+                </div>
 
                 {/* Mode toggle */}
-                <div className="border-b border-outline-variant/20 p-6 flex items-center gap-4">
+                <div className="border-b border-outline-variant/20 px-6 py-4 flex items-center gap-4">
                   <span className="text-sm font-semibold text-secondary">Search by:</span>
                   <div className="flex bg-surface-container-low rounded-xl p-1 gap-1">
                     <button
@@ -367,7 +367,7 @@ export default function PropertyAnalysisPage() {
                   </div>
                 </div>
 
-                <div className="p-8 space-y-6">
+                <div className="p-8 space-y-6 flex-1">
                   {inputMode === 'address' ? (
                     <>
                       <div>
@@ -418,7 +418,6 @@ export default function PropertyAnalysisPage() {
                         </div>
                       </div>
 
-                      {/* Address validation feedback */}
                       {addrValidStatus === 'validating' && (
                         <div className="flex items-center gap-2 text-secondary text-sm">
                           <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -441,10 +440,7 @@ export default function PropertyAnalysisPage() {
                         </div>
                       )}
                       {addrValidStatus === 'idle' && streetAddress && city && addrState && zipCode && (
-                        <button
-                          onClick={validateAddress}
-                          className="text-primary text-sm font-semibold hover:underline"
-                        >
+                        <button onClick={validateAddress} className="text-primary text-sm font-semibold hover:underline">
                           Validate address →
                         </button>
                       )}
@@ -523,73 +519,76 @@ export default function PropertyAnalysisPage() {
                   </button>
                 </div>
               </div>
-          </section>
-        )}
-
-        {/* Search bar */}
-        <div className="w-full max-w-3xl mb-4">
-          <div className="relative">
-            <div className="bg-surface-container-low p-2 rounded-full border border-outline-variant/30 shadow-sm flex items-center gap-2">
-              <div className="flex-1 flex items-center px-6">
-                <span className="material-symbols-outlined text-primary mr-3">location_on</span>
-                <input
-                  className="w-full bg-transparent border-none text-on-surface placeholder-secondary/50 focus:ring-0 text-lg py-4 font-body"
-                  placeholder="Enter property address or parcel ID to begin..."
-                  type="text"
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  readOnly={isFree}
-                />
-              </div>
-              <button
-                type="button"
-                className="bg-primary text-on-primary font-bold px-8 py-4 rounded-full transition-all flex items-center gap-2 group shadow-lg hover:opacity-95 active:scale-95"
-              >
-                Analyze Property
-                <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">analytics</span>
-              </button>
-            </div>
-
-            {showInputGate && (
-              <div className="absolute inset-0 z-10 flex items-center justify-between gap-4 bg-surface-container-low/95 backdrop-blur-sm rounded-full border border-primary/20 px-8 shadow-lg">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="material-symbols-outlined text-primary shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                  <p className="text-sm font-semibold text-on-surface leading-tight truncate">
-                    Unlock Deal Analysis — create a paid account to run analysis on any property
-                  </p>
+            ) : (
+              /* Free user: search bar in a card */
+              <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm p-8 flex flex-col h-full">
+                <div className="mb-6">
+                  <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
+                  <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
-                  <a href="/pricing" className="bg-primary text-on-primary font-bold text-xs px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap">
-                    View Plans →
-                  </a>
-                  <button
-                    onMouseDown={(e) => { e.preventDefault(); setOverlayDismissed(true); }}
-                    className="text-secondary text-xs hover:text-on-surface transition-colors whitespace-nowrap"
-                  >
-                    Dismiss
-                  </button>
+                <div className="flex-1 flex flex-col justify-center gap-6">
+                  <div className="relative">
+                    <div className="bg-surface-container-low p-2 rounded-full border border-outline-variant/30 shadow-sm flex items-center gap-2">
+                      <div className="flex-1 flex items-center px-6">
+                        <span className="material-symbols-outlined text-primary mr-3">location_on</span>
+                        <input
+                          className="w-full bg-transparent border-none text-on-surface placeholder-secondary/50 focus:ring-0 text-base py-3 font-body"
+                          placeholder="Enter property address or parcel ID..."
+                          type="text"
+                          onFocus={() => setInputFocused(true)}
+                          onBlur={() => setInputFocused(false)}
+                          readOnly
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className="bg-primary text-on-primary font-bold px-6 py-3 rounded-full transition-all flex items-center gap-2 group shadow-lg hover:opacity-95 active:scale-95 text-sm"
+                      >
+                        Analyze
+                        <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-1">analytics</span>
+                      </button>
+                    </div>
+
+                    {showInputGate && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-between gap-4 bg-surface-container-low/95 backdrop-blur-sm rounded-full border border-primary/20 px-8 shadow-lg">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="material-symbols-outlined text-primary shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                          <p className="text-sm font-semibold text-on-surface leading-tight truncate">
+                            Upgrade to run analysis on any property
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4 shrink-0">
+                          <a href="/pricing" className="bg-primary text-on-primary font-bold text-xs px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap">
+                            View Plans →
+                          </a>
+                          <button
+                            onMouseDown={(e) => { e.preventDefault(); setOverlayDismissed(true); }}
+                            className="text-secondary text-xs hover:text-on-surface transition-colors whitespace-nowrap"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-6 text-secondary text-sm">
+                    <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> 150M+ Parcels</span>
+                    <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> Real-time Comps</span>
+                    <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> AI-Risk Scoring</span>
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="mt-3 flex gap-6 text-secondary text-sm">
-            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> 150M+ Parcels</span>
-            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> Real-time Comps</span>
-            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> AI-Risk Scoring</span>
-          </div>
-        </div>
-
-        {/* Two-column layout: how it works (left 40%) + sample report (right 60%) */}
-        <div className="mt-16 flex flex-col lg:flex-row gap-20 items-start">
-
-          {/* Left: How it works */}
-          <div className="w-full lg:w-[40%] lg:sticky lg:top-28">
+          {/* Right: How It Works */}
+          <div className="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/15 flex flex-col">
             <h2 className="font-headline text-3xl font-extrabold text-primary tracking-tight mb-2">How it works</h2>
             <p className="text-secondary text-sm leading-relaxed mb-8">
               LotScout uses advanced data and mapping technology to quickly analyze land, so you can confidently make smarter buying and selling decisions.
             </p>
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1">
               {[
                 { icon: 'input',        step: '01', title: 'Input Property',              body: 'Search by address, parcel ID, or simply drop a pin on our high-resolution topographic map interface.' },
                 { icon: 'auto_awesome', step: '02', title: 'AI-Powered Comparison',       body: 'Our engine instantly scans thousands of recent transactions and environmental data points to calculate true market value.' },
@@ -608,12 +607,13 @@ export default function PropertyAnalysisPage() {
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Divider */}
-          <div className="hidden lg:block w-px self-stretch bg-outline-variant/30" />
+        {/* BOTTOM SECTION — 50/50: Sample Report | Past Requests */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
-          {/* Right: Sample Report Mockup */}
-          <div className="w-full lg:w-[60%]">
+          {/* Left: Sample Analysis Report */}
+          <div className="flex flex-col">
             <div className="rounded-2xl border border-outline-variant/30 overflow-hidden shadow-xl">
 
               <div className="bg-primary px-8 py-4 flex items-center justify-between">
@@ -625,7 +625,8 @@ export default function PropertyAnalysisPage() {
                 <span className="text-white/50 text-xs">Generated Apr 12, 2026 • LotScout AI</span>
               </div>
 
-              <div className="bg-surface-container-lowest p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* White background — no green tint */}
+              <div className="bg-white p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <div className="lg:col-span-2 space-y-6">
 
@@ -756,100 +757,100 @@ export default function PropertyAnalysisPage() {
               </div>
             </div>
 
+            {/* Faster Results banner — clean, no yellow */}
             {showSpeedBanner && (
-              <div className="mt-4 flex items-center gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4">
-                <span className="text-amber-500 text-2xl shrink-0">⚡</span>
+              <div className="mt-4 flex items-center gap-4 bg-white border border-outline-variant/20 rounded-2xl px-6 py-4 shadow-sm">
+                <span className="material-symbols-outlined text-primary text-2xl shrink-0">bolt</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-amber-900 text-sm">Want faster results?</p>
-                  <p className="text-amber-700 text-xs mt-0.5">Standard and Priority plans deliver within 24 hours. Exclusive delivers within 15 minutes.</p>
+                  <p className="font-bold text-primary text-sm">Want faster results?</p>
+                  <p className="text-secondary text-xs mt-0.5">Standard and Priority plans deliver within 24 hours. Exclusive delivers within 15 minutes.</p>
                 </div>
-                <a href="/pricing" className="shrink-0 bg-amber-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-amber-600 transition-colors whitespace-nowrap">
+                <a href="/pricing" className="shrink-0 bg-primary text-on-primary font-bold text-xs px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap">
                   Upgrade →
                 </a>
               </div>
             )}
           </div>
-        </div>
 
-        {/* ── Past Requests Table (paid users only) ── */}
-        {isPaid && (
-          <section id="past-requests" className="mt-16">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Your Past Requests</h2>
-              <button onClick={loadRequests} className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
-                <span className="material-symbols-outlined text-base">refresh</span> Refresh
-              </button>
-            </div>
-
-            {requestsLoading ? (
-              <div className="text-secondary text-sm">Loading requests...</div>
-            ) : requests.length === 0 ? (
-              <div className="bg-surface-container-low border border-dashed border-outline-variant/40 rounded-2xl p-10 text-center">
-                <span className="material-symbols-outlined text-secondary/40 text-4xl mb-3 block">analytics</span>
-                <p className="text-secondary text-sm">No requests yet. Submit a property above to get started.</p>
-              </div>
-            ) : (
-              <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-outline-variant/20 bg-surface-container-lowest">
-                        <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Date Submitted</th>
-                        <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Address / APN</th>
-                        <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">County</th>
-                        <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">State</th>
-                        <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Status</th>
-                        <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Report</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {requests.map((req, i) => (
-                        <tr key={req.id} className={`border-b border-outline-variant/10 last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-container-lowest/40'}`}>
-                          <td className="px-6 py-4 text-secondary whitespace-nowrap">{formatDate(req.submitted_at)}</td>
-                          <td className="px-6 py-4 text-on-surface font-medium max-w-xs">
-                            {req.input_type === 'address'
-                              ? [req.street_address, req.city].filter(Boolean).join(', ') || '—'
-                              : `APN: ${req.apn ?? '—'}`}
-                          </td>
-                          <td className="px-6 py-4 text-on-surface">{req.county || '—'}</td>
-                          <td className="px-6 py-4 text-on-surface">{req.state}</td>
-                          <td className="px-6 py-4">{statusBadge(req.status)}</td>
-                          <td className="px-6 py-4">
-                            {req.status === 'complete' && req.report_url ? (
-                              <a
-                                href={req.report_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 bg-primary text-on-primary font-bold text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                              >
-                                <span className="material-symbols-outlined text-sm">open_in_new</span>
-                                View Report
-                              </a>
-                            ) : (
-                              <span className="text-secondary text-xs">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          {/* Right: Past Requests or Upgrade CTA */}
+          <div id="past-requests" className="flex flex-col">
+            {isPaid ? (
+              <>
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Your Past Requests</h2>
+                  <button onClick={loadRequests} className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
+                    <span className="material-symbols-outlined text-base">refresh</span> Refresh
+                  </button>
                 </div>
+
+                {requestsLoading ? (
+                  <div className="text-secondary text-sm">Loading requests...</div>
+                ) : requests.length === 0 ? (
+                  <div className="bg-surface-container-low border border-dashed border-outline-variant/40 rounded-2xl p-10 text-center">
+                    <span className="material-symbols-outlined text-secondary/40 text-4xl mb-3 block">analytics</span>
+                    <p className="text-secondary text-sm">No requests yet. Submit a property above to get started.</p>
+                  </div>
+                ) : (
+                  <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-outline-variant/20 bg-surface-container-lowest">
+                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Date Submitted</th>
+                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Address / APN</th>
+                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">County</th>
+                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">State</th>
+                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Status</th>
+                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Report</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {requests.map((req, i) => (
+                            <tr key={req.id} className={`border-b border-outline-variant/10 last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-container-lowest/40'}`}>
+                              <td className="px-6 py-4 text-secondary whitespace-nowrap">{formatDate(req.submitted_at)}</td>
+                              <td className="px-6 py-4 text-on-surface font-medium max-w-xs">
+                                {req.input_type === 'address'
+                                  ? [req.street_address, req.city].filter(Boolean).join(', ') || '—'
+                                  : `APN: ${req.apn ?? '—'}`}
+                              </td>
+                              <td className="px-6 py-4 text-on-surface">{req.county || '—'}</td>
+                              <td className="px-6 py-4 text-on-surface">{req.state}</td>
+                              <td className="px-6 py-4">{statusBadge(req.status)}</td>
+                              <td className="px-6 py-4">
+                                {req.status === 'complete' && req.report_url ? (
+                                  <a
+                                    href={req.report_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 bg-primary text-on-primary font-bold text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                    View Report
+                                  </a>
+                                ) : (
+                                  <span className="text-secondary text-xs">—</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="bg-primary/5 border border-primary/10 rounded-2xl p-10 text-center flex flex-col items-center justify-center flex-1 min-h-[320px]">
+                <span className="material-symbols-outlined text-primary text-4xl mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                <h3 className="font-headline text-2xl font-bold text-primary mb-2">Unlock Property Analysis</h3>
+                <p className="text-secondary text-sm leading-relaxed mb-6 max-w-sm">Get detailed AI-powered reports including comparable sales, zoning insights, and risk scoring for any parcel in the US.</p>
+                <a href="/pricing" className="inline-flex items-center gap-2 bg-primary text-on-primary font-bold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">
+                  View Plans <span className="material-symbols-outlined">arrow_forward</span>
+                </a>
               </div>
             )}
-          </section>
-        )}
-
-        {/* Free user upgrade CTA */}
-        {isFree && (
-          <section className="mt-20 bg-primary/5 border border-primary/10 rounded-2xl p-10 text-center max-w-2xl mx-auto">
-            <span className="material-symbols-outlined text-primary text-4xl mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-            <h3 className="font-headline text-2xl font-bold text-primary mb-2">Unlock Property Analysis</h3>
-            <p className="text-secondary text-sm leading-relaxed mb-6">Get detailed AI-powered reports including comparable sales, zoning insights, and risk scoring for any parcel in the US.</p>
-            <a href="/pricing" className="inline-flex items-center gap-2 bg-primary text-on-primary font-bold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">
-              View Plans <span className="material-symbols-outlined">arrow_forward</span>
-            </a>
-          </section>
-        )}
+          </div>
+        </div>
 
       </main>
 
