@@ -140,7 +140,7 @@ export default function PricingPage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-secondary font-bold text-sm tracking-widest uppercase">Standard</span>
                 {userTier === 'standard' && (
-                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight leading-none">Current Plan</span>
+                  <span className="text-secondary text-xs font-semibold">Current Plan</span>
                 )}
               </div>
               <div className="flex items-baseline gap-1 mb-1">
@@ -158,14 +158,13 @@ export default function PricingPage() {
             </div>
 
             {/* Priority */}
-            <div className="p-5 flex flex-col bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container relative">
-              <div className="absolute -top-px left-0 right-0 h-1 bg-primary-container" />
+            <div className="p-5 flex flex-col border-l-2 border-r-2 border-t-2 border-primary-container relative">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-primary-container font-bold text-sm tracking-widest uppercase">Priority</span>
+                <span className="text-secondary font-bold text-sm tracking-widest uppercase">Priority</span>
                 {userTier === 'priority' ? (
-                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight leading-none">Current Plan</span>
+                  <span className="text-secondary text-xs font-semibold">Current Plan</span>
                 ) : (
-                  <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none">Most Popular</span>
+                  <span className="bg-[#1B4332] text-white text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">Most Popular</span>
                 )}
               </div>
               <div className="flex items-baseline gap-1 mb-1">
@@ -187,7 +186,7 @@ export default function PricingPage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-secondary font-bold text-sm tracking-widest uppercase">Exclusive</span>
                 {userTier === 'exclusive' && (
-                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight leading-none">Current Plan</span>
+                  <span className="text-secondary text-xs font-semibold">Current Plan</span>
                 )}
               </div>
               <div className="flex items-baseline gap-1 mb-1">
@@ -216,7 +215,7 @@ export default function PricingPage() {
                   </span>
                 </div>
                 <div className="border-l border-outline-variant/10" />
-                <div className="bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20" />
+                <div className="border-l-2 border-r-2 border-primary-container/20" />
                 <div className="border-l border-outline-variant/10" />
               </div>
 
@@ -238,7 +237,7 @@ export default function PricingPage() {
                     <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
                       {cell(feature.standard, false)}
                     </div>
-                    <div className="py-1 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
+                    <div className="py-1 px-4 flex justify-center items-center border-l-2 border-r-2 border-primary-container/20">
                       {cell(feature.priority, false)}
                     </div>
                     <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
@@ -251,10 +250,10 @@ export default function PricingPage() {
           ))}
 
           {/* Priority column bottom cap */}
-          <div style={GRID} className="bg-[#f0f8f4]/30">
+          <div style={GRID}>
             <div className="p-4 pl-8" />
             <div className="p-4 border-l border-outline-variant/10" />
-            <div className="p-8 border-l-2 border-r-2 border-b-2 border-primary-container rounded-b-2xl bg-[#f0f8f4]" />
+            <div className="p-8 border-l-2 border-r-2 border-b-2 border-primary-container rounded-b-2xl" />
             <div className="p-4 border-l border-outline-variant/10" />
           </div>
 
