@@ -8,9 +8,9 @@ const NAV_LINKS = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Buyer Directory', href: '/buyer-directory' },
-  { label: 'Funding Partners', href: '/funding-partners' },
   { label: 'Deal Analysis', href: '/property-analysis' },
   { label: 'Messaging', href: '/messaging' },
+  { label: 'Funding', href: '/funding-partners' },
 ];
 
 export default function Header() {
