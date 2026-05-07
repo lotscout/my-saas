@@ -20,7 +20,7 @@ const SECTIONS = [
     features: [
       { name: 'Lot Analysis Reports',            standard: true,           priority: true,            exclusive: true           },
       { name: 'Property Analysis Reports',       standard: '5/month',      priority: '15/month',      exclusive: 'Unlimited'    },
-      { name: 'Additional Analysis Reports',     standard: '$4.99 each',   priority: '$4.99 each',    exclusive: '$4.99 each'   },
+      { name: 'Additional Analysis Reports',     standard: '$4.99 each',   priority: '$4.99 each',    exclusive: false          },
       { name: 'Lot to Buyer Match AI',           standard: true,           priority: true,            exclusive: true           },
       { name: 'Report Delivery',                 standard: '24 hours',     priority: '24 hours',      exclusive: '15 min'       },
     ],
@@ -59,8 +59,6 @@ function Dash() {
 
 const ANNUAL_PRICES  = { standard: 97,  priority: 329, exclusive: 579 };
 const MONTHLY_PRICES = { standard: 113, priority: 384, exclusive: 675 };
-const ANNUAL_TOTALS  = { standard: 970, priority: 3290, exclusive: 5790 };
-
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [loading, setLoading] = useState<string | null>(null);
@@ -68,9 +66,8 @@ export default function PricingPage() {
 
   const prices = isAnnual ? ANNUAL_PRICES : MONTHLY_PRICES;
 
-  function billingSubtext(t: keyof typeof ANNUAL_TOTALS) {
-    if (isAnnual) return `Billed annually · $${ANNUAL_TOTALS[t].toLocaleString()}/year`;
-    return 'Billed monthly · no commitment';
+  function billingSubtext() {
+    return isAnnual ? 'Billed annually' : 'Billed monthly · no commitment';
   }
 
   function getPriceKey(tier: string) {
@@ -115,8 +112,8 @@ export default function PricingPage() {
 
             {/* Top-left: billing toggle */}
             <div className="p-5 flex flex-col justify-center gap-3">
-              <div className="inline-flex items-center gap-2 self-start">
-                <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full">
+              <div className="flex flex-col gap-1.5 self-start">
+                <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full self-start">
                   <button
                     onClick={() => setIsAnnual(false)}
                     className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${
@@ -134,9 +131,7 @@ export default function PricingPage() {
                     Annual
                   </button>
                 </div>
-                <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">
-                  2 Months Free
-                </span>
+                <span className="text-emerald-700 text-xs font-bold pl-1">Get 2 months free</span>
               </div>
             </div>
 
@@ -152,7 +147,7 @@ export default function PricingPage() {
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('standard')}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading || userTier === 'standard'}
@@ -177,7 +172,7 @@ export default function PricingPage() {
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.priority}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('priority')}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
@@ -199,7 +194,7 @@ export default function PricingPage() {
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('exclusive')}</p>
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading || userTier === 'exclusive'}
@@ -241,7 +236,7 @@ export default function PricingPage() {
                       {feature.name}
                     </div>
                     <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
-                      {cell(feature.standard, true)}
+                      {cell(feature.standard, false)}
                     </div>
                     <div className="py-1 px-4 flex justify-center items-center bg-[#f0f8f4] border-l-2 border-r-2 border-primary-container/20">
                       {cell(feature.priority, false)}
