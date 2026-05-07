@@ -7,7 +7,7 @@ import { useUserTier } from '@/hooks/useUserTier';
 const ANNUAL_PRICES  = { standard: 97,  priority: 329, exclusive: 579 };
 const MONTHLY_PRICES = { standard: 113, priority: 384, exclusive: 675 };
 
-interface Feature { check: boolean; text: string; strong?: boolean; }
+interface Feature { check: boolean; text: string; }
 
 const STANDARD_FEATURES: Feature[] = [
   { check: true,  text: 'Marketplace Access' },
@@ -25,7 +25,7 @@ const PRIORITY_FEATURES: Feature[] = [
   { check: true,  text: 'Buyer Directory' },
   { check: true,  text: 'Company Profile' },
   { check: true,  text: 'Lot Analysis' },
-  { check: true,  text: '15/mo Property Analysis' },
+  { check: false, text: '15/mo Property Analysis' },
   { check: false, text: '$4.99 Additional Reports' },
   { check: true,  text: 'Lot to Buyer AI Match' },
   { check: false, text: '24hr Report Delivery' },
@@ -40,10 +40,10 @@ const EXCLUSIVE_FEATURES: Feature[] = [
   { check: true,  text: 'Buyer Directory' },
   { check: true,  text: 'Company Profile' },
   { check: true,  text: 'Lot Analysis' },
-  { check: true,  text: 'Unlimited Property Analysis', strong: true },
-  { check: true,  text: 'No Additional Report Cost',  strong: true },
+  { check: false, text: 'Unlimited Property Analysis' },
+  { check: false, text: 'No Additional Report Cost' },
   { check: true,  text: 'Lot to Buyer AI Match' },
-  { check: true,  text: '15min Report Delivery',      strong: true },
+  { check: false, text: '15min Report Delivery' },
   { check: true,  text: 'Unlimited Listings' },
   { check: true,  text: 'Promoted Lot Requests' },
   { check: true,  text: 'Financing Partners' },
@@ -51,9 +51,9 @@ const EXCLUSIVE_FEATURES: Feature[] = [
   { check: true,  text: '24/7 Support' },
 ];
 
-function FeatureRow({ check, text, strong }: Feature) {
+function FeatureRow({ check, text }: Feature) {
   return (
-    <div className="flex items-center gap-3 py-1">
+    <div className="flex items-center gap-3">
       {check ? (
         <span
           className="material-symbols-outlined shrink-0 leading-none"
@@ -62,11 +62,9 @@ function FeatureRow({ check, text, strong }: Feature) {
           check_circle
         </span>
       ) : (
-        <span className="w-5 h-5 shrink-0 flex items-center justify-center">
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-        </span>
+        <span className="shrink-0" style={{ width: '20px' }} />
       )}
-      <span className={`text-base leading-tight ${strong ? 'font-semibold' : 'text-gray-700'}`} style={strong ? { color: '#1B4332' } : {}}>
+      <span className={`text-base leading-snug ${check ? 'text-gray-800' : 'text-gray-500'}`}>
         {text}
       </span>
     </div>
@@ -79,6 +77,7 @@ export default function PricingPage() {
   const { tier: userTier } = useUserTier();
 
   const prices = isAnnual ? ANNUAL_PRICES : MONTHLY_PRICES;
+  const billingText = isAnnual ? 'Billed annually' : 'Billed monthly · no commitment';
 
   function getPriceKey(tier: string) {
     return `${tier}${isAnnual ? 'Annual' : 'Monthly'}`;
@@ -110,6 +109,7 @@ export default function PricingPage() {
       <Header />
 
       <div className="flex-1 flex flex-col min-h-0 pt-16">
+
         {/* Page header */}
         <div className="text-center py-3 flex-shrink-0">
           <h1
@@ -119,8 +119,10 @@ export default function PricingPage() {
             Pricing
           </h1>
 
-          {/* Billing toggle */}
-          <div className="inline-flex items-center p-1 rounded-full mb-1.5" style={{ background: '#e4e9ec' }}>
+          <div
+            className="inline-flex items-center p-1 rounded-full mb-1.5"
+            style={{ background: '#e2e8ec' }}
+          >
             <button
               onClick={() => setIsAnnual(false)}
               className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
@@ -144,92 +146,91 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* Cards */}
+        {/* Cards row */}
         <div className="flex flex-1 min-h-0">
 
-          {/* Standard */}
+          {/* ── Standard ── */}
           <div
-            className="flex-1 flex flex-col overflow-y-auto"
+            className="flex-1 overflow-y-auto"
             style={{
               background: '#ffffff',
               border: '1.5px solid #d1d9e0',
               borderRight: 'none',
             }}
           >
-            <div className="p-5 flex flex-col h-full">
-              <div className="mb-1 flex items-center gap-2">
-                <span className="font-headline font-black uppercase tracking-widest text-xl text-gray-800">
-                  Standard
-                </span>
+            <div className="p-5 flex flex-col gap-0">
+
+              {/* Spacer row to align tier name with Priority (which has the badge above) */}
+              <div className="flex items-center gap-2 mb-3" style={{ height: '36px' }}>
                 {userTier === 'standard' && (
                   <span className="text-gray-400 text-sm font-semibold">Current Plan</span>
                 )}
               </div>
 
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="font-headline font-black uppercase tracking-widest text-xl"
+                  style={{ color: '#1a1a1a' }}
+                >
+                  Standard
+                </span>
+              </div>
+
               <div className="flex items-baseline gap-1 mb-0.5">
-                <span className="font-headline font-black leading-none" style={{ fontSize: '3.5rem', color: '#1B4332' }}>
+                <span
+                  className="font-headline font-black leading-none"
+                  style={{ fontSize: '3rem', color: '#1B4332' }}
+                >
                   ${prices.standard}
                 </span>
-                <span className="text-lg text-gray-400 font-medium">/mo</span>
+                <span className="text-lg font-medium text-gray-400">/mo</span>
               </div>
-              <p className="text-sm text-gray-400 mb-3">
-                {isAnnual ? 'Billed annually' : 'Billed monthly · no commitment'}
-              </p>
+
+              <p className="text-sm text-gray-400 mb-3">{billingText}</p>
 
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading || userTier === 'standard'}
-                className="w-full py-3 rounded-xl font-bold text-base transition-all active:scale-95 disabled:opacity-60 mb-3"
-                style={
+                className={`w-full py-3 rounded-xl font-bold text-base transition-all active:scale-95 disabled:opacity-60 mb-3 ${
                   userTier === 'standard'
-                    ? { background: '#f0f2f4', color: '#9ca3af', cursor: 'default' }
-                    : {
-                        border: '2px solid #1B4332',
-                        color: '#1B4332',
-                        background: 'transparent',
-                      }
-                }
-                onMouseEnter={e => {
-                  if (userTier !== 'standard' && !loading) {
-                    (e.currentTarget as HTMLButtonElement).style.background = '#1B4332';
-                    (e.currentTarget as HTMLButtonElement).style.color = '#ffffff';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (userTier !== 'standard') {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                    (e.currentTarget as HTMLButtonElement).style.color = '#1B4332';
-                  }
-                }}
+                    ? 'cursor-default'
+                    : 'border-2 border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white'
+                }`}
+                style={userTier === 'standard' ? { background: '#f0f2f4', color: '#9ca3af' } : {}}
               >
-                {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
+                {userTier === 'standard'
+                  ? 'Current Plan'
+                  : loading === getPriceKey('standard')
+                  ? 'Loading…'
+                  : 'Get Started'}
               </button>
 
-              <div className="border-t border-gray-100 my-1" />
+              <div className="border-t border-gray-100 mb-3" />
 
-              <div className="flex-1 flex flex-col gap-0.5 pt-1">
+              <div className="flex flex-col gap-1">
                 {STANDARD_FEATURES.map((f, i) => <FeatureRow key={i} {...f} />)}
               </div>
             </div>
           </div>
 
-          {/* Priority */}
+          {/* ── Priority ── */}
           <div
-            className="flex-1 flex flex-col overflow-y-auto z-10"
+            className="flex-1 overflow-y-auto z-10"
             style={{
               background: '#ffffff',
               border: '2.5px solid #1B4332',
-              boxShadow: '0 8px 40px 0 rgba(27,67,50,0.18)',
+              boxShadow: '0 8px 40px rgba(27,67,50,0.18)',
             }}
           >
-            <div className="p-5 flex flex-col h-full">
-              {/* Most Popular pill */}
-              <div className="mb-3">
+            <div className="p-5 flex flex-col gap-0">
+
+              {/* Most Popular badge — centered */}
+              <div className="flex justify-center mb-3" style={{ height: '36px' }}>
                 {userTier === 'priority' ? (
-                  <span className="text-gray-400 text-sm font-semibold">Current Plan</span>
+                  <span className="text-gray-400 text-sm font-semibold self-center">Current Plan</span>
                 ) : (
                   <span
-                    className="inline-block font-bold text-base px-6 py-1.5 rounded-full text-white"
+                    className="font-bold text-base px-6 py-2 rounded-full text-white self-center"
                     style={{ background: '#1B4332' }}
                   >
                     Most Popular
@@ -237,108 +238,117 @@ export default function PricingPage() {
                 )}
               </div>
 
-              <div className="mb-1 flex items-center gap-2">
-                <span className="font-headline font-black uppercase tracking-widest text-xl text-gray-800">
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="font-headline font-black uppercase tracking-widest text-xl"
+                  style={{ color: '#1a1a1a' }}
+                >
                   Priority
                 </span>
               </div>
 
               <div className="flex items-baseline gap-1 mb-0.5">
-                <span className="font-headline font-black leading-none" style={{ fontSize: '3.5rem', color: '#1B4332' }}>
+                <span
+                  className="font-headline font-black leading-none"
+                  style={{ fontSize: '3rem', color: '#1B4332' }}
+                >
                   ${prices.priority}
                 </span>
-                <span className="text-lg text-gray-400 font-medium">/mo</span>
+                <span className="text-lg font-medium text-gray-400">/mo</span>
               </div>
-              <p className="text-sm text-gray-400 mb-3">
-                {isAnnual ? 'Billed annually' : 'Billed monthly · no commitment'}
-              </p>
+
+              <p className="text-sm text-gray-400 mb-3">{billingText}</p>
 
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
-                className="w-full py-3 rounded-xl font-bold text-base transition-all active:scale-95 disabled:opacity-60 mb-3"
+                className={`w-full py-3 rounded-xl font-bold text-base transition-all active:scale-95 disabled:opacity-60 mb-3 ${
+                  userTier === 'priority' ? 'cursor-default' : 'hover:opacity-90'
+                }`}
                 style={
                   userTier === 'priority'
-                    ? { background: '#f0f2f4', color: '#9ca3af', cursor: 'default' }
+                    ? { background: '#f0f2f4', color: '#9ca3af' }
                     : {
                         background: '#1B4332',
                         color: '#ffffff',
-                        boxShadow: '0 2px 12px 0 rgba(27,67,50,0.25)',
+                        boxShadow: '0 2px 12px rgba(27,67,50,0.25)',
                       }
                 }
               >
-                {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
+                {userTier === 'priority'
+                  ? 'Current Plan'
+                  : loading === getPriceKey('priority')
+                  ? 'Loading…'
+                  : 'Get Started'}
               </button>
 
-              <div className="border-t border-gray-100 my-1" />
+              <div className="border-t border-gray-100 mb-3" />
 
-              <div className="flex-1 flex flex-col gap-0.5 pt-1">
+              <div className="flex flex-col gap-1">
                 {PRIORITY_FEATURES.map((f, i) => <FeatureRow key={i} {...f} />)}
               </div>
             </div>
           </div>
 
-          {/* Exclusive */}
+          {/* ── Exclusive ── */}
           <div
-            className="flex-1 flex flex-col overflow-y-auto"
+            className="flex-1 overflow-y-auto"
             style={{
               background: '#ffffff',
               border: '1.5px solid #d1d9e0',
               borderLeft: 'none',
             }}
           >
-            <div className="p-5 flex flex-col h-full">
-              <div className="mb-1 flex items-center gap-2">
-                <span className="font-headline font-black uppercase tracking-widest text-xl text-gray-800">
-                  Exclusive
-                </span>
+            <div className="p-5 flex flex-col gap-0">
+
+              {/* Spacer row to align tier name with Priority */}
+              <div className="flex items-center gap-2 mb-3" style={{ height: '36px' }}>
                 {userTier === 'exclusive' && (
                   <span className="text-gray-400 text-sm font-semibold">Current Plan</span>
                 )}
               </div>
 
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="font-headline font-black uppercase tracking-widest text-xl"
+                  style={{ color: '#1a1a1a' }}
+                >
+                  Exclusive
+                </span>
+              </div>
+
               <div className="flex items-baseline gap-1 mb-0.5">
-                <span className="font-headline font-black leading-none" style={{ fontSize: '3.5rem', color: '#1B4332' }}>
+                <span
+                  className="font-headline font-black leading-none"
+                  style={{ fontSize: '3rem', color: '#1B4332' }}
+                >
                   ${prices.exclusive}
                 </span>
-                <span className="text-lg text-gray-400 font-medium">/mo</span>
+                <span className="text-lg font-medium text-gray-400">/mo</span>
               </div>
-              <p className="text-sm text-gray-400 mb-3">
-                {isAnnual ? 'Billed annually' : 'Billed monthly · no commitment'}
-              </p>
+
+              <p className="text-sm text-gray-400 mb-3">{billingText}</p>
 
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading || userTier === 'exclusive'}
-                className="w-full py-3 rounded-xl font-bold text-base transition-all active:scale-95 disabled:opacity-60 mb-3"
-                style={
+                className={`w-full py-3 rounded-xl font-bold text-base transition-all active:scale-95 disabled:opacity-60 mb-3 ${
                   userTier === 'exclusive'
-                    ? { background: '#f0f2f4', color: '#9ca3af', cursor: 'default' }
-                    : {
-                        border: '2px solid #1B4332',
-                        color: '#1B4332',
-                        background: 'transparent',
-                      }
-                }
-                onMouseEnter={e => {
-                  if (userTier !== 'exclusive' && !loading) {
-                    (e.currentTarget as HTMLButtonElement).style.background = '#1B4332';
-                    (e.currentTarget as HTMLButtonElement).style.color = '#ffffff';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (userTier !== 'exclusive') {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                    (e.currentTarget as HTMLButtonElement).style.color = '#1B4332';
-                  }
-                }}
+                    ? 'cursor-default'
+                    : 'border-2 border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white'
+                }`}
+                style={userTier === 'exclusive' ? { background: '#f0f2f4', color: '#9ca3af' } : {}}
               >
-                {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
+                {userTier === 'exclusive'
+                  ? 'Current Plan'
+                  : loading === getPriceKey('exclusive')
+                  ? 'Loading…'
+                  : 'Get Started'}
               </button>
 
-              <div className="border-t border-gray-100 my-1" />
+              <div className="border-t border-gray-100 mb-3" />
 
-              <div className="flex-1 flex flex-col gap-0.5 pt-1">
+              <div className="flex flex-col gap-1">
                 {EXCLUSIVE_FEATURES.map((f, i) => <FeatureRow key={i} {...f} />)}
               </div>
             </div>
