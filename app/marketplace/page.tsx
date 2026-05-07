@@ -1244,8 +1244,11 @@ export default function MarketplacePage() {
                   const primaryName = company || personName || 'Anonymous Buyer';
                   const secondaryName = company ? personName : null;
                   const blurIdentity = !loading && !canViewContact;
-                  const city = req.target_city || req.target_county || null;
-                  const location = city && req.target_state ? `${city}, ${req.target_state}` : req.target_state || null;
+                  const stateAbbrev = req.target_state ? (STATE_NAMES[req.target_state.toLowerCase()] ?? null) : null;
+                  let location: string | null = null;
+                  if (req.target_city && req.target_state) location = `${req.target_city}, ${stateAbbrev ?? req.target_state}`;
+                  else if (req.target_county && req.target_state) location = `${req.target_county} County, ${stateAbbrev ?? req.target_state}`;
+                  else location = req.target_state || null;
                   const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
                   const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
 
@@ -1253,13 +1256,13 @@ export default function MarketplacePage() {
                     <Link
                       key={req.id}
                       href={`/buyer-requests/${req.id}`}
-                      className="aspect-square bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex flex-col justify-between hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
+                      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
                     >
                       <div className={blurIdentity ? 'blur-sm select-none' : ''}>
                         {primaryName && <p className="font-extrabold text-primary text-base leading-snug">{primaryName}</p>}
                         {secondaryName && <p className="text-xs text-secondary font-medium mt-0.5 line-clamp-1">{secondaryName}</p>}
                       </div>
-                      <div className="space-y-2">
+                      <div className="mt-3 space-y-2">
                         {location && (<div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p><p className="text-sm font-bold text-on-surface">{location}</p></div>)}
                         <div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Budget</p><p className="text-sm font-bold text-on-surface">{perAcre}</p></div>
                         {timeline && (<div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Timeline</p><p className="text-sm font-bold text-on-surface">{timeline}</p></div>)}

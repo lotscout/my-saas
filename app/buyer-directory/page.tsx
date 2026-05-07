@@ -56,6 +56,19 @@ const US_STATES = [
 
 const SELECT_CLS = 'bg-surface-container-low px-3 py-2 rounded-lg border border-transparent hover:border-primary/20 text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all';
 
+const STATE_ABBREV: Record<string, string> = {
+  'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
+  'colorado':'CO','connecticut':'CT','delaware':'DE','florida':'FL','georgia':'GA',
+  'hawaii':'HI','idaho':'ID','illinois':'IL','indiana':'IN','iowa':'IA','kansas':'KS',
+  'kentucky':'KY','louisiana':'LA','maine':'ME','maryland':'MD','massachusetts':'MA',
+  'michigan':'MI','minnesota':'MN','mississippi':'MS','missouri':'MO','montana':'MT',
+  'nebraska':'NE','nevada':'NV','new hampshire':'NH','new jersey':'NJ','new mexico':'NM',
+  'new york':'NY','north carolina':'NC','north dakota':'ND','ohio':'OH','oklahoma':'OK',
+  'oregon':'OR','pennsylvania':'PA','rhode island':'RI','south carolina':'SC',
+  'south dakota':'SD','tennessee':'TN','texas':'TX','utah':'UT','vermont':'VT',
+  'virginia':'VA','washington':'WA','west virginia':'WV','wisconsin':'WI','wyoming':'WY',
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmtBudget(min: number | null, max: number | null): string {
@@ -94,6 +107,13 @@ function getInitials(req: BuyerRequest) {
   if (req.display_company) return req.display_company.substring(0, 2).toUpperCase();
   const p = req.profiles;
   return ([p?.first_name?.[0], p?.last_name?.[0]].filter(Boolean).join('').toUpperCase()) || 'AB';
+}
+
+function fmtLocation(city: string | null, county: string | null, state: string | null): string | null {
+  const abbrev = state ? (STATE_ABBREV[state.toLowerCase()] ?? null) : null;
+  if (city && state) return `${city}, ${abbrev ?? state}`;
+  if (county && state) return `${county} County, ${abbrev ?? state}`;
+  return state || null;
 }
 
 function applyBudgetFilter(req: BuyerRequest, f: string): boolean {
@@ -215,17 +235,14 @@ function BuyerRequestCard({ req, canViewContact }: BuyerCardProps) {
   const secondaryName = company ? personName : null;
   const blur = !canViewContact;
 
-  const city = req.target_city || req.target_county || null;
-  const location = city && req.target_state
-    ? `${city}, ${req.target_state}`
-    : req.target_state || null;
+  const location = fmtLocation(req.target_city, req.target_county, req.target_state);
   const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
 
   return (
     <Link
       href={`/buyer-requests/${req.id}`}
-      className="aspect-square bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex flex-col justify-between hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
+      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
     >
       {/* Name block */}
       <div className={blur ? 'blur-sm select-none' : ''}>
@@ -238,7 +255,7 @@ function BuyerRequestCard({ req, canViewContact }: BuyerCardProps) {
       </div>
 
       {/* Labeled fields */}
-      <div className="space-y-2">
+      <div className="mt-3 space-y-2">
         {location && (
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p>
