@@ -7,8 +7,6 @@ import CreateListingGate from '@/components/CreateListingGate';
 import { createClient } from '@/lib/supabase/client';
 import type { Tier } from '@/lib/permissions';
 
-const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
 function getGreeting() {
   const h = new Date().getHours();
   if (h < 12) return 'Good Morning';
@@ -269,28 +267,19 @@ export default function DashboardPage() {
       <main className="max-w-[1440px] mx-auto pt-24 pb-12 px-8">
 
         {/* Dashboard Header */}
-        <header className="flex justify-between items-end mb-10">
-          <div>
-            <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Overview</p>
-            {loading ? (
-              <div className="flex items-center gap-3">
-                <span className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter">{getGreeting()},</span>
-                <Skeleton className="h-12 w-40 rounded-2xl" />
-              </div>
-            ) : (
-              <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
-                {getGreeting()},{' '}
-                <span className="text-emerald-600">{firstName ?? 'there'}</span>
-              </h1>
-            )}
-          </div>
-          <div className="text-right flex flex-col items-end gap-2">
-            <p className="text-secondary font-semibold font-body">{today}</p>
-            <p className="text-on-surface-variant text-sm">Central Texas Market • Open</p>
-            {!loading && tier && (
-              <span className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full capitalize">{tier} Plan</span>
-            )}
-          </div>
+        <header className="mb-10">
+          <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Overview</p>
+          {loading ? (
+            <div className="flex items-center gap-3">
+              <span className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter">{getGreeting()},</span>
+              <Skeleton className="h-12 w-40 rounded-2xl" />
+            </div>
+          ) : (
+            <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+              {getGreeting()},{' '}
+              <span className="text-emerald-600">{firstName ?? 'there'}</span>
+            </h1>
+          )}
         </header>
 
         {/* Quick Actions */}
