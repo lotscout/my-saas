@@ -9,6 +9,42 @@ function adminSupabase() {
   );
 }
 
+// Log every webhook event to email_logs for audit trail.
+// Security: never log PII sourced from Stripe (customer email, name, etc).
+async function logWebhookEvent(
+  supabase: ReturnType<typeof adminSupabase>,
+  eventType: string,
+  userId: string | null,
+  status: 'processed' | 'skipped' | 'error',
+  detail?: string
+) {
+  try {
+    await supabase.from('email_logs').insert({
+      user_id: userId,
+      to_email: 'webhook@internal',
+      from_email: 'stripe@webhook',
+      subject: `[Webhook] ${eventType}${detail ? ' — ' + detail : ''}`,
+      email_type: 'webhook_stripe',
+      status,
+    });
+  } catch (err) {
+    console.error('[webhook] Failed to log event:', err);
+  }
+}
+
+// The ONLY profile fields this webhook is ever permitted to write.
+// If this set changes, it must be reviewed explicitly.
+const ALLOWED_PROFILE_FIELDS = new Set(['subscription_tier']);
+
+function safeProfileUpdate(fields: Record<string, unknown>): Record<string, unknown> {
+  const safe: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if (ALLOWED_PROFILE_FIELDS.has(k)) safe[k] = v;
+    else console.error(`[webhook] Blocked attempt to write disallowed profile field: ${k}`);
+  }
+  return safe;
+}
+
 export async function POST(request: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   const body = await request.text();
@@ -36,9 +72,10 @@ export async function POST(request: NextRequest) {
 
       // --- Listing Boost payment ---
       if (metadata.type === 'listing_boost') {
-        const { listing_id, user_id, weeks, weekly_rate_cents } = metadata;
+        const { listing_id, user_id, weeks } = metadata;
         if (!listing_id || !user_id || !weeks) {
           console.error('listing_boost: missing metadata', metadata);
+          await logWebhookEvent(supabase, event.type, user_id ?? null, 'error', 'missing listing_boost metadata');
           break;
         }
 
@@ -46,34 +83,43 @@ export async function POST(request: NextRequest) {
         const now = new Date();
         const expiresAt = new Date(now.getTime() + weeksNum * 7 * 24 * 60 * 60 * 1000);
 
-        // Activate boost record
         const { error: boostErr } = await supabase
           .from('listing_boosts')
           .update({
             status: 'active',
             boost_starts_at: now,
             boost_expires_at: expiresAt,
-            stripe_payment_intent_id: session.payment_intent as string ?? null,
+            stripe_payment_intent_id: (session.payment_intent as string) ?? null,
             updated_at: now,
           })
           .eq('stripe_session_id', session.id);
 
         if (boostErr) console.error('Failed to activate boost:', boostErr);
 
-        // Mark listing as promoted
         const { error: listingErr } = await supabase
           .from('listings')
           .update({ promoted: true, boost_expires_at: expiresAt })
           .eq('id', listing_id);
 
         if (listingErr) console.error('Failed to promote listing:', listingErr);
+
+        await logWebhookEvent(
+          supabase, event.type, user_id,
+          boostErr || listingErr ? 'error' : 'processed',
+          `listing_boost listing=${listing_id}`
+        );
         break;
       }
 
       // --- Subscription checkout ---
-      // Only update tier when Stripe confirms the payment is actually collected.
+      // Security: only update subscription_tier when Stripe confirms payment is collected.
+      // NEVER read or write email, name, or any personal info from/to Stripe data.
       if (session.payment_status !== 'paid') {
-        console.warn('checkout.session.completed: payment_status is not paid — skipping tier update', { payment_status: session.payment_status, session_id: session.id });
+        console.warn('checkout.session.completed: payment_status is not paid — skipping', {
+          payment_status: session.payment_status,
+          session_id: session.id,
+        });
+        await logWebhookEvent(supabase, event.type, session.client_reference_id, 'skipped', `payment_status=${session.payment_status}`);
         break;
       }
 
@@ -84,10 +130,10 @@ export async function POST(request: NextRequest) {
 
       if (!userId || !tier) {
         console.error('checkout.session.completed: missing userId or tier', { userId, tier });
+        await logWebhookEvent(supabase, event.type, userId, 'error', 'missing userId or tier');
         break;
       }
 
-      // Fetch subscription details from Stripe for period dates
       let periodStart: Date | null = null;
       let periodEnd: Date | null = null;
       let stripePriceId: string | null = null;
@@ -104,7 +150,6 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Upsert into subscriptions table
       const { error: subError } = await supabase
         .from('subscriptions')
         .upsert({
@@ -122,12 +167,20 @@ export async function POST(request: NextRequest) {
 
       if (subError) console.error('Failed to upsert subscription on checkout:', subError);
 
-      // Sync tier to profiles table
+      // Security: use .update() (not .upsert()) so we never insert a profile row from here.
+      // Only subscription_tier is written — safeProfileUpdate enforces this.
       const { error: profileTierError } = await supabase
         .from('profiles')
-        .upsert({ id: userId, subscription_tier: tier }, { onConflict: 'id' });
+        .update(safeProfileUpdate({ subscription_tier: tier }))
+        .eq('id', userId);
 
       if (profileTierError) console.error('Failed to sync tier to profiles on checkout:', profileTierError);
+
+      await logWebhookEvent(
+        supabase, event.type, userId,
+        subError || profileTierError ? 'error' : 'processed',
+        `tier=${tier}`
+      );
       break;
     }
 
@@ -135,7 +188,6 @@ export async function POST(request: NextRequest) {
       const subscription = event.data.object as Stripe.Subscription;
       const stripeCustomerId = subscription.customer as string;
 
-      // Look up user by stripe_customer_id
       const { data: subRow, error: lookupError } = await supabase
         .from('subscriptions')
         .select('user_id')
@@ -144,10 +196,10 @@ export async function POST(request: NextRequest) {
 
       if (lookupError || !subRow) {
         console.error('subscription.updated: could not find user for customer', { stripeCustomerId });
+        await logWebhookEvent(supabase, event.type, null, 'error', 'user not found for stripe_customer_id');
         break;
       }
 
-      // Derive tier from price ID
       const priceId = subscription.items.data[0]?.price?.id ?? null;
       const priceToTier: Record<string, string> = {
         [process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID!]: 'standard',
@@ -159,7 +211,7 @@ export async function POST(request: NextRequest) {
       };
       const newTier = priceId ? priceToTier[priceId] : undefined;
 
-      const { error } = await supabase
+      const { error: subUpdateError } = await supabase
         .from('subscriptions')
         .update({
           status: subscription.status,
@@ -172,16 +224,22 @@ export async function POST(request: NextRequest) {
         })
         .eq('user_id', subRow.user_id);
 
-      if (error) console.error('Failed to update subscription on subscription.updated:', error);
+      if (subUpdateError) console.error('Failed to update subscription on subscription.updated:', subUpdateError);
 
-      // Sync tier change to profiles
+      // Security: use .update() and only touch subscription_tier.
       if (newTier) {
         const { error: profileErr } = await supabase
           .from('profiles')
-          .update({ subscription_tier: newTier })
+          .update(safeProfileUpdate({ subscription_tier: newTier }))
           .eq('id', subRow.user_id);
         if (profileErr) console.error('Failed to sync tier to profiles on subscription.updated:', profileErr);
       }
+
+      await logWebhookEvent(
+        supabase, event.type, subRow.user_id,
+        subUpdateError ? 'error' : 'processed',
+        `status=${subscription.status}${newTier ? ` tier=${newTier}` : ''}`
+      );
       break;
     }
 
@@ -189,7 +247,6 @@ export async function POST(request: NextRequest) {
       const subscription = event.data.object as Stripe.Subscription;
       const stripeCustomerId = subscription.customer as string;
 
-      // Look up user by stripe_customer_id — never use email for this
       const { data: subRow, error: lookupError } = await supabase
         .from('subscriptions')
         .select('user_id')
@@ -198,10 +255,11 @@ export async function POST(request: NextRequest) {
 
       if (lookupError || !subRow) {
         console.error('subscription.deleted: could not find user for customer', { stripeCustomerId });
+        await logWebhookEvent(supabase, event.type, null, 'error', 'user not found for stripe_customer_id');
         break;
       }
 
-      const { error } = await supabase
+      const { error: subDeleteError } = await supabase
         .from('subscriptions')
         .update({
           tier: 'standard',
@@ -211,15 +269,21 @@ export async function POST(request: NextRequest) {
         })
         .eq('user_id', subRow.user_id);
 
-      if (error) console.error('Failed to downgrade tier on subscription deletion:', error);
+      if (subDeleteError) console.error('Failed to downgrade tier on subscription deletion:', subDeleteError);
 
-      // Sync downgrade to profiles table
+      // Security: use .update() and only touch subscription_tier.
       const { error: profileDowngradeError } = await supabase
         .from('profiles')
-        .update({ subscription_tier: 'standard' })
+        .update(safeProfileUpdate({ subscription_tier: 'standard' }))
         .eq('id', subRow.user_id);
 
       if (profileDowngradeError) console.error('Failed to sync tier downgrade to profiles:', profileDowngradeError);
+
+      await logWebhookEvent(
+        supabase, event.type, subRow.user_id,
+        subDeleteError || profileDowngradeError ? 'error' : 'processed',
+        'subscription canceled, tier reset to standard'
+      );
       break;
     }
 
@@ -227,27 +291,39 @@ export async function POST(request: NextRequest) {
       const invoice = event.data.object as Stripe.Invoice;
       const stripeCustomerId = invoice.customer as string;
 
+      // Security: log invoice ID and amount only — never log customer email from Stripe.
       console.error('invoice.payment_failed', {
         invoiceId: invoice.id,
         customerId: stripeCustomerId,
-        customerEmail: invoice.customer_email,
         amountDue: invoice.amount_due,
         attemptCount: invoice.attempt_count,
       });
 
-      // Mark subscription as past_due
       if (stripeCustomerId) {
+        const { data: subRow } = await supabase
+          .from('subscriptions')
+          .select('user_id')
+          .eq('stripe_customer_id', stripeCustomerId)
+          .single();
+
         const { error } = await supabase
           .from('subscriptions')
           .update({ status: 'past_due', updated_at: new Date() })
           .eq('stripe_customer_id', stripeCustomerId);
 
         if (error) console.error('Failed to mark past_due on payment failure:', error);
+
+        await logWebhookEvent(
+          supabase, event.type, subRow?.user_id ?? null,
+          error ? 'error' : 'processed',
+          `invoice=${invoice.id}`
+        );
       }
       break;
     }
 
     default:
+      console.log(`[webhook] Unhandled event type: ${event.type}`);
       break;
   }
 

@@ -13,10 +13,15 @@ export async function POST(request: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Verify the user actually exists in auth before writing
+  // Verify the user exists in auth.users and that the email in the request
+  // matches their actual auth email. This prevents anyone from writing an
+  // arbitrary email into another user's profile row.
   const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
   if (userError || !user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+  if (user.email !== email) {
+    return NextResponse.json({ error: 'Email does not match authenticated user' }, { status: 403 });
   }
 
   const { error } = await supabase.from('profiles').upsert({
