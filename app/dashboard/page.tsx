@@ -346,7 +346,7 @@ export default function DashboardPage() {
             );
           }
           const items: { label: string; href: string; done: boolean }[] = [
-            { label: 'Complete your profile', href: '/edit-profile', done: !profileIncomplete },
+            ...(profileIncomplete ? [{ label: 'Complete your profile', href: '/edit-profile', done: false }] : []),
             ...(unreadCount > 0 ? [{ label: `You have ${unreadCount} unread message${unreadCount !== 1 ? 's' : ''}`, href: '/messaging', done: false }] : []),
             ...(hasAnalysisReady ? [{ label: 'Your property analysis is ready', href: '/property-analysis', done: false }] : []),
             ...(hasDraftListing ? [{ label: 'You have a listing draft to complete', href: '/create-listing', done: false }] : []),

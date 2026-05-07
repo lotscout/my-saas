@@ -18,6 +18,7 @@ export default function EditProfilePage() {
   const [bio, setBio] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [tier, setTier] = useState('');
+  const [toastOk, setToastOk] = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -27,17 +28,18 @@ export default function EditProfilePage() {
       setEmail(user.email ?? '');
       // user_metadata holds first_name/last_name set at signup — use as fallback
       const meta = (user.user_metadata ?? {}) as Record<string, string>;
-      const { data } = await supabase
+      const { data, error: profileError } = await supabase
         .from('profiles')
-        .select('first_name, last_name, phone, bio, company_name, tier')
+        .select('first_name, last_name, phone, bio, company_name, subscription_tier')
         .eq('id', user.id)
         .single();
+      if (profileError) console.warn('[edit-profile] load error:', profileError.message);
       setFirstName(data?.first_name ?? meta.first_name ?? '');
       setLastName(data?.last_name ?? meta.last_name ?? '');
       setPhone(data?.phone ?? '');
       setBio(data?.bio ?? '');
       setCompanyName(data?.company_name ?? '');
-      setTier(data?.tier ?? '');
+      setTier(data?.subscription_tier ?? '');
       setLoading(false);
     }
     load();
@@ -47,24 +49,37 @@ export default function EditProfilePage() {
     setSaving(true);
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { setSaving(false); return; }
 
-    const { error } = await supabase.from('profiles').upsert({
+    const payload = {
       id: user.id,
       email: user.email,
-      first_name: firstName || null,
-      last_name: lastName || null,
-      phone: phone || null,
-      bio: bio || null,
-      company_name: companyName || null,
-    });
+      first_name: firstName.trim() || null,
+      last_name: lastName.trim() || null,
+      phone: phone.trim() || null,
+      bio: bio.trim() || null,
+      company_name: companyName.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    console.log('[edit-profile] upserting payload:', payload);
+
+    const { data: result, error } = await supabase
+      .from('profiles')
+      .upsert(payload, { onConflict: 'id' })
+      .select('id, first_name, last_name, email')
+      .single();
+
+    console.log('[edit-profile] result:', result, '| error:', error);
 
     setSaving(false);
     if (error) {
-      setToast('Failed to save: ' + error.message);
+      setToastOk(false);
+      setToast('Save failed: ' + error.message);
     } else {
-      setToast('Profile saved!');
-      setTimeout(() => { setToast(null); router.push('/profile'); }, 1200);
+      setToastOk(true);
+      setToast('Profile saved successfully!');
+      setTimeout(() => { setToast(null); router.push('/profile'); }, 2000);
     }
   }
 
@@ -84,7 +99,10 @@ export default function EditProfilePage() {
       <Header />
 
       {toast && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-primary text-white px-6 py-3 rounded-xl shadow-lg text-sm font-semibold">
+        <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-6 py-3 rounded-xl shadow-lg text-sm font-semibold text-white ${toastOk ? 'bg-emerald-600' : 'bg-red-600'}`}>
+          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+            {toastOk ? 'check_circle' : 'error'}
+          </span>
           {toast}
         </div>
       )}
