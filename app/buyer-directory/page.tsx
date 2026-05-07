@@ -290,7 +290,7 @@ function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitl
 export default function BuyerDirectoryPage() {
   const { isAdmin, isAtLeast, loading: permLoading } = useUserTier();
 
-  const canViewContact = !permLoading && (isAtLeast('priority') || !!isAdmin);
+  const canViewContact = !permLoading && (isAtLeast('standard') || !!isAdmin);
 
   // ── Navigation state ──
   const [tab, setTab] = useState<MainTab>('directory');
@@ -467,7 +467,7 @@ export default function BuyerDirectoryPage() {
             </div>
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Upgrade to Contact Buyers</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">
-              Direct buyer contact requires a Priority or Exclusive plan. Upgrade to see full contact details and message buyers directly.
+              Direct buyer contact requires a paid LotScout account. Upgrade to see full contact details and message buyers directly.
             </p>
             <div className="flex gap-3">
               <Link href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">

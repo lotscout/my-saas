@@ -386,7 +386,7 @@ export default function MarketplacePage() {
     return score;
   }
 
-  const canViewContact = !loading && (tier === 'priority' || tier === 'exclusive');
+  const canViewContact = !loading && !!tier;
   const isFreeUser = !loading && !tier;
   const isPaidUser = !loading && !!tier;
 
