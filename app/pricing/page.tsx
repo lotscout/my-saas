@@ -6,40 +6,20 @@ import { useUserTier } from '@/hooks/useUserTier';
 
 const GRID = { display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr' } as const;
 
-const SECTIONS = [
-  {
-    label: 'Core Access',
-    features: [
-      { name: 'Land Marketplace Access', standard: true,        priority: true,        exclusive: true        },
-      { name: 'Buyer Directory Access',  standard: true,        priority: true,        exclusive: true        },
-      { name: 'Custom Company Profile',  standard: true,        priority: true,        exclusive: true        },
-    ],
-  },
-  {
-    label: 'Analysis Tools',
-    features: [
-      { name: 'Lot Analysis Reports',            standard: true,           priority: true,            exclusive: true           },
-      { name: 'Property Analysis Reports',       standard: '5/month',      priority: '15/month',      exclusive: 'Unlimited'    },
-      { name: 'Additional Analysis Reports',     standard: '$4.99 each',   priority: '$4.99 each',    exclusive: false          },
-      { name: 'Lot to Buyer Match AI',           standard: true,           priority: true,            exclusive: true           },
-      { name: 'Report Delivery',                 standard: '24 hours',     priority: '24 hours',      exclusive: '15 min'       },
-    ],
-  },
-  {
-    label: 'Growth Features',
-    features: [
-      { name: 'Unlimited Listings',        standard: false, priority: true,  exclusive: true  },
-      { name: 'Promoted Lot Requests',     standard: false, priority: true,  exclusive: true  },
-      { name: 'Financing Partners Access', standard: false, priority: true,  exclusive: true  },
-    ],
-  },
-  {
-    label: 'Support',
-    features: [
-      { name: 'Hands-On Listing Support', standard: false, priority: false, exclusive: true  },
-      { name: '24/7 Support',             standard: false, priority: true,  exclusive: true  },
-    ],
-  },
+const FEATURES = [
+  { name: 'Land Marketplace Access',     standard: true,          priority: true,          exclusive: true          },
+  { name: 'Buyer Directory Access',      standard: true,          priority: true,          exclusive: true          },
+  { name: 'Custom Company Profile',      standard: true,          priority: true,          exclusive: true          },
+  { name: 'Lot Analysis Reports',        standard: true,          priority: true,          exclusive: true          },
+  { name: 'Property Analysis Reports',   standard: '5/month',     priority: '15/month',    exclusive: 'Unlimited'   },
+  { name: 'Additional Analysis Reports', standard: '$4.99 each',  priority: '$4.99 each',  exclusive: false         },
+  { name: 'Lot to Buyer Match AI',       standard: true,          priority: true,          exclusive: true          },
+  { name: 'Report Delivery',             standard: '24 hours',    priority: '24 hours',    exclusive: '15 min'      },
+  { name: 'Unlimited Listings',          standard: false,         priority: true,          exclusive: true          },
+  { name: 'Promoted Lot Requests',       standard: false,         priority: true,          exclusive: true          },
+  { name: 'Financing Partners Access',   standard: false,         priority: true,          exclusive: true          },
+  { name: '24/7 Support',               standard: false,         priority: true,          exclusive: true          },
+  { name: 'Hands-On Listing Support',   standard: false,         priority: false,         exclusive: true          },
 ];
 
 function Check({ muted = false }: { muted?: boolean }) {
@@ -102,7 +82,7 @@ export default function PricingPage() {
       <main className="flex-grow pt-24 pb-20 px-6 max-w-7xl mx-auto w-full">
         {/* Page heading */}
         <header className="mb-8">
-          <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">Platform <span className="text-emerald-600">Pricing</span></h1>
+          <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight"><span className="text-emerald-600">Pricing</span></h1>
         </header>
 
         <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
@@ -158,20 +138,22 @@ export default function PricingPage() {
             </div>
 
             {/* Priority */}
-            <div className="p-5 flex flex-col border-l-2 border-r-2 border-t-2 border-primary-container relative">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="p-5 flex flex-col border-l border-outline-variant/10 relative">
+              {userTier === 'priority' ? (
+                <span className="absolute top-2 right-2 text-secondary text-xs font-semibold">Current Plan</span>
+              ) : (
+                <span className="absolute top-2 right-2 rotate-12 bg-[#1B4332] text-white text-xs font-bold px-3 py-1.5 rounded-full tracking-wide shadow-sm">
+                  Most Popular
+                </span>
+              )}
+              <div className="mb-2 text-center">
                 <span className="text-secondary font-bold text-sm tracking-widest uppercase">Priority</span>
-                {userTier === 'priority' ? (
-                  <span className="text-secondary text-xs font-semibold">Current Plan</span>
-                ) : (
-                  <span className="bg-[#1B4332] text-white text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">Most Popular</span>
-                )}
               </div>
-              <div className="flex items-baseline gap-1 mb-1">
+              <div className="flex items-baseline gap-1 mb-1 justify-center">
                 <span className="text-4xl font-extrabold text-primary font-headline">${prices.priority}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
+              <p className="text-xs text-secondary/70 mb-4 text-center">{billingSubtext()}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
@@ -204,58 +186,33 @@ export default function PricingPage() {
             </div>
           </div>
 
-          {/* ── Feature sections ── */}
-          {SECTIONS.map((section, si) => (
-            <div key={si}>
-              {/* Section header */}
-              <div style={GRID} className="border-t border-outline-variant/10 pt-3 pb-1">
-                <div className="pl-6 pr-4 flex items-center">
-                  <span className="border-l-2 border-primary pl-2 text-xs font-bold text-primary uppercase">
-                    {section.label}
-                  </span>
+          {/* ── Feature rows ── */}
+          {FEATURES.map((feature, fi) => {
+            const cell = (val: boolean | string) =>
+              typeof val === 'string'
+                ? <span className="text-xs font-bold text-primary">{val}</span>
+                : val ? <Check /> : <Dash />;
+            return (
+              <div
+                key={fi}
+                style={GRID}
+                className={fi > 0 ? 'border-t border-outline-variant/5' : 'border-t border-outline-variant/10'}
+              >
+                <div className="py-1 pl-8 pr-4 text-sm text-secondary flex items-center">
+                  {feature.name}
                 </div>
-                <div className="border-l border-outline-variant/10" />
-                <div className="border-l-2 border-r-2 border-primary-container/20" />
-                <div className="border-l border-outline-variant/10" />
+                <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                  {cell(feature.standard)}
+                </div>
+                <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                  {cell(feature.priority)}
+                </div>
+                <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                  {cell(feature.exclusive)}
+                </div>
               </div>
-
-              {/* Feature rows */}
-              {section.features.map((feature, fi) => {
-                const cell = (val: boolean | string, muted: boolean) =>
-                  typeof val === 'string'
-                    ? <span className={`text-xs font-bold ${muted ? 'text-on-primary-container' : 'text-primary'}`}>{val}</span>
-                    : val ? <Check muted={muted} /> : <Dash />;
-                return (
-                  <div
-                    key={fi}
-                    style={GRID}
-                    className={fi > 0 ? 'border-t border-outline-variant/5' : ''}
-                  >
-                    <div className="py-1 pl-8 pr-4 text-sm text-secondary flex items-center">
-                      {feature.name}
-                    </div>
-                    <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
-                      {cell(feature.standard, false)}
-                    </div>
-                    <div className="py-1 px-4 flex justify-center items-center border-l-2 border-r-2 border-primary-container/20">
-                      {cell(feature.priority, false)}
-                    </div>
-                    <div className="py-1 px-4 flex justify-center items-center border-l border-outline-variant/10">
-                      {cell(feature.exclusive, false)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-
-          {/* Priority column bottom cap */}
-          <div style={GRID}>
-            <div className="p-4 pl-8" />
-            <div className="p-4 border-l border-outline-variant/10" />
-            <div className="p-8 border-l-2 border-r-2 border-b-2 border-primary-container rounded-b-2xl" />
-            <div className="p-4 border-l border-outline-variant/10" />
-          </div>
+            );
+          })}
 
         </div>
       </main>
