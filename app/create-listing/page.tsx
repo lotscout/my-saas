@@ -163,6 +163,7 @@ export default function CreateListingPage() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Submission failed')
 
+      sessionStorage.setItem('listing_submitted', '1')
       setToast('Listing submitted! Redirecting…')
       setTimeout(() => router.push('/dashboard'), 1500)
     } catch (err) {
@@ -830,15 +831,20 @@ export default function CreateListingPage() {
                   <div className="md:col-span-2 space-y-4 pt-4">
                     <h3 className="text-primary font-headline font-bold text-lg border-b border-surface-container-low pb-2">Contact Preferences *</h3>
                     <div className="flex flex-wrap gap-6 pt-2">
-                      {['Email', 'Phone Call', 'Text / SMS'].map(opt => (
-                        <label key={opt} className="flex items-center gap-3 cursor-pointer group">
+                      {[
+                        { label: 'Email',                         value: 'Email'       },
+                        { label: 'Phone Call',                    value: 'Phone Call'  },
+                        { label: 'Text / SMS',                    value: 'Text / SMS'  },
+                        { label: 'In Platform (LotScout Messaging)', value: 'in_platform' },
+                      ].map(({ label, value }) => (
+                        <label key={value} className="flex items-center gap-3 cursor-pointer group">
                           <input
                             type="checkbox"
-                            checked={(formData.contact_methods ?? []).includes(opt)}
-                            onChange={() => { toggleArray('contact_methods', opt); setStep3ContactError('') }}
+                            checked={(formData.contact_methods ?? []).includes(value)}
+                            onChange={() => { toggleArray('contact_methods', value); setStep3ContactError('') }}
                             className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20 bg-surface-container-low"
                           />
-                          <span className="text-on-surface font-medium group-hover:text-primary transition-colors">{opt}</span>
+                          <span className="text-on-surface font-medium group-hover:text-primary transition-colors">{label}</span>
                         </label>
                       ))}
                     </div>
