@@ -5,6 +5,19 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
 
+const US_STATES = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+  'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
+  'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
+  'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri',
+  'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
+  'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
+  'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+  'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
+];
+
 export default function EditProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -17,6 +30,8 @@ export default function EditProfilePage() {
   const [phone, setPhone] = useState('');
   const [bio, setBio] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [state, setState] = useState('');
+  const [county, setCounty] = useState('');
   const [tier, setTier] = useState('');
   const [toastOk, setToastOk] = useState(true);
 
@@ -26,11 +41,10 @@ export default function EditProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/sign-in'); return; }
       setEmail(user.email ?? '');
-      // user_metadata holds first_name/last_name set at signup — use as fallback
       const meta = (user.user_metadata ?? {}) as Record<string, string>;
       const { data, error: profileError } = await supabase
         .from('profiles')
-        .select('first_name, last_name, phone, bio, company_name, subscription_tier')
+        .select('first_name, last_name, phone, bio, company_name, subscription_tier, state, county')
         .eq('id', user.id)
         .single();
       if (profileError) console.warn('[edit-profile] load error:', profileError.message);
@@ -39,6 +53,8 @@ export default function EditProfilePage() {
       setPhone(data?.phone ?? '');
       setBio(data?.bio ?? '');
       setCompanyName(data?.company_name ?? '');
+      setState(data?.state ?? '');
+      setCounty(data?.county ?? '');
       setTier(data?.subscription_tier ?? '');
       setLoading(false);
     }
@@ -59,18 +75,16 @@ export default function EditProfilePage() {
       phone: phone.trim() || null,
       bio: bio.trim() || null,
       company_name: companyName.trim() || null,
+      state: state.trim() || null,
+      county: county.trim() || null,
       updated_at: new Date().toISOString(),
     };
-
-    console.log('[edit-profile] upserting payload:', payload);
 
     const { data: result, error } = await supabase
       .from('profiles')
       .upsert(payload, { onConflict: 'id' })
       .select('id, first_name, last_name, email')
       .single();
-
-    console.log('[edit-profile] result:', result, '| error:', error);
 
     setSaving(false);
     if (error) {
@@ -200,6 +214,29 @@ export default function EditProfilePage() {
                       readOnly
                     />
                     <p className="text-[11px] text-secondary mt-1">Email cannot be changed here.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-secondary uppercase mb-1">State</label>
+                    <select
+                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
+                      value={state}
+                      onChange={e => setState(e.target.value)}
+                    >
+                      <option value="">Select a state</option>
+                      {US_STATES.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-secondary uppercase mb-1">County</label>
+                    <input
+                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
+                      type="text"
+                      placeholder="e.g. Travis County"
+                      value={county}
+                      onChange={e => setCounty(e.target.value)}
+                    />
                   </div>
                 </div>
               </div>

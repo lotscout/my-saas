@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import CreateListingGate from '@/components/CreateListingGate';
@@ -64,16 +64,6 @@ interface Message {
   listing: any;
 }
 
-interface UserListing {
-  id: any;
-  address: any;
-  acreage: any;
-  price: any;
-  status: any;
-  county?: any;
-  land_type?: any;
-}
-
 interface FeedListing {
   id: any;
   title: any;
@@ -84,7 +74,6 @@ interface FeedListing {
   land_type: any;
   created_at: any;
 }
-
 
 interface Report {
   id: any;
@@ -97,12 +86,6 @@ interface Report {
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-surface-container-high rounded-xl ${className ?? ''}`} />;
-}
-
-function senderName(msg: Message): string {
-  if (!msg.sender) return 'Unknown';
-  const { first_name, last_name } = msg.sender;
-  return [first_name, last_name].filter(Boolean).join(' ') || 'Unknown';
 }
 
 function buyerName(b: any): string {
@@ -138,6 +121,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [showSubmittedToast, setShowSubmittedToast] = useState(false);
+  const [profileState, setProfileState] = useState<string | null>(null);
+  const [profileCounty, setProfileCounty] = useState<string | null>(null);
+  const [geoBannerDismissed, setGeoBannerDismissed] = useState(false);
+  const [geoSaving, setGeoSaving] = useState(false);
+  const [geoToast, setGeoToast] = useState<string | null>(null);
+  const [nearbyListings, setNearbyListings] = useState<any[]>([]);
+  const [nearbyBuyers, setNearbyBuyers] = useState<any[]>([]);
+  const currentUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && sessionStorage.getItem('listing_submitted')) {
@@ -154,10 +145,12 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      currentUserIdRef.current = user.id;
+
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
       const [profileRes, subRes, messagesRes, reportsRes, userListingsRes, userCriteriaRes, unreadRes, analysisRes, draftListingsRes] = await Promise.all([
-        supabase.from('profiles').select('first_name, last_name, avatar_url, bio, phone, company_name').eq('id', user.id).single(),
+        supabase.from('profiles').select('first_name, last_name, avatar_url, bio, phone, company_name, state, county').eq('id', user.id).single(),
         supabase.from('subscriptions').select('tier').eq('user_id', user.id).eq('status', 'active').single(),
         supabase.from('messages')
           .select('id, body, created_at, listing_id, sender:sender_id(first_name, last_name), listing:listing_id(title)')
@@ -197,6 +190,13 @@ export default function DashboardPage() {
       setHasDraftListing((draftListingsRes.count ?? 0) > 0);
       setMessages((messagesRes.data as any[]) ?? []);
       setReports((reportsRes.data as any[]) ?? []);
+
+      const userState = p?.state ?? null;
+      const userCounty = p?.county ?? null;
+      setProfileState(userState);
+      setProfileCounty(userCounty);
+
+      setGeoBannerDismissed(localStorage.getItem('geo_banner_dismissed') === '1');
 
       const userListings: any[] = (userListingsRes.data as any[]) ?? [];
       const userCriteria: any[] = (userCriteriaRes.data as any[]) ?? [];
@@ -241,11 +241,108 @@ export default function DashboardPage() {
         }
       }
 
+      // Nearby listings and buyers filtered by profile state
+      if (userState) {
+        const [nearbyListingsRes, nearbyBuyersRes] = await Promise.all([
+          supabase.from('listings')
+            .select('id, title, state, county, street_address, lot_size_acres, asking_price, zoning, created_at')
+            .eq('status', 'active')
+            .eq('state', userState)
+            .neq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(3),
+          supabase.from('buyer_criteria')
+            .select('id, user_id, location, min_acreage, max_acreage, min_budget, max_budget, land_type, buyer:user_id(first_name, last_name, state)')
+            .eq('active', true)
+            .neq('user_id', user.id),
+        ]);
+        setNearbyListings((nearbyListingsRes.data as any[]) ?? []);
+        if (nearbyBuyersRes.data) {
+          setNearbyBuyers(
+            (nearbyBuyersRes.data as any[])
+              .filter(b => (b.buyer as any)?.state === userState)
+              .slice(0, 3)
+          );
+        }
+      }
+
       setLoading(false);
     }
 
     load();
   }, []);
+
+  async function handleEnableLocation() {
+    if (!navigator.geolocation) {
+      localStorage.setItem('geo_banner_dismissed', '1');
+      setGeoBannerDismissed(true);
+      return;
+    }
+    setGeoSaving(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          const res = await fetch(
+            `https://geocoding.geo.census.gov/geocoder/geographies/coordinates?x=${lng}&y=${lat}&benchmark=Public_AR_Current&vintage=Current_Current&format=json`
+          );
+          const json = await res.json();
+          const countyName: string | null = json.result?.geographies?.Counties?.[0]?.NAME ?? null;
+          const stateName: string | null = json.result?.geographies?.States?.[0]?.NAME ?? null;
+
+          const uid = currentUserIdRef.current;
+          if (uid) {
+            const supabase = createClient();
+            await supabase.from('profiles')
+              .upsert({ id: uid, state: stateName, county: countyName }, { onConflict: 'id' });
+
+            if (stateName) {
+              const [nearbyListingsRes, nearbyBuyersRes] = await Promise.all([
+                supabase.from('listings')
+                  .select('id, title, state, county, street_address, lot_size_acres, asking_price, zoning, created_at')
+                  .eq('status', 'active')
+                  .eq('state', stateName)
+                  .neq('user_id', uid)
+                  .order('created_at', { ascending: false })
+                  .limit(3),
+                supabase.from('buyer_criteria')
+                  .select('id, user_id, location, min_acreage, max_acreage, min_budget, max_budget, land_type, buyer:user_id(first_name, last_name, state)')
+                  .eq('active', true)
+                  .neq('user_id', uid),
+              ]);
+              setNearbyListings((nearbyListingsRes.data as any[]) ?? []);
+              if (nearbyBuyersRes.data) {
+                setNearbyBuyers(
+                  (nearbyBuyersRes.data as any[])
+                    .filter(b => (b.buyer as any)?.state === stateName)
+                    .slice(0, 3)
+                );
+              }
+            }
+          }
+
+          setProfileState(stateName);
+          setProfileCounty(countyName);
+          setGeoBannerDismissed(true);
+
+          if (stateName || countyName) {
+            setGeoToast(`Location set to ${[countyName, stateName].filter(Boolean).join(', ')}`);
+            setTimeout(() => setGeoToast(null), 5000);
+          }
+        } catch (e) {
+          console.warn('[geolocation] reverse geocode failed', e);
+          setGeoBannerDismissed(true);
+        }
+        setGeoSaving(false);
+      },
+      () => {
+        localStorage.setItem('geo_banner_dismissed', '1');
+        setGeoBannerDismissed(true);
+        setGeoSaving(false);
+      },
+      { timeout: 10000 }
+    );
+  }
 
   return (
     <div className="bg-surface text-on-surface antialiased font-body">
@@ -261,6 +358,13 @@ export default function DashboardPage() {
           <button onClick={() => setShowSubmittedToast(false)} className="ml-2 text-white/60 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-lg">close</span>
           </button>
+        </div>
+      )}
+
+      {geoToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-2xl">
+          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>location_on</span>
+          <span className="text-sm font-semibold">{geoToast}</span>
         </div>
       )}
 
@@ -283,7 +387,7 @@ export default function DashboardPage() {
         </header>
 
         {/* Quick Actions */}
-        <section className="flex flex-wrap gap-3 mb-12">
+        <section className="flex flex-wrap gap-3 mb-8">
           {[
             { icon: 'analytics', label: 'Analyze a Property', href: '/property-analysis' },
             { icon: 'explore',   label: 'Browse Marketplace', href: '/marketplace'        },
@@ -322,6 +426,33 @@ export default function DashboardPage() {
             )
           )}
         </section>
+
+        {/* Geolocation Banner */}
+        {!loading && !profileState && !geoBannerDismissed && (
+          <section className="mb-8">
+            <div className="flex items-center gap-4 px-5 py-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-sm">
+              <span className="material-symbols-outlined text-primary text-2xl shrink-0">my_location</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-on-surface">Enable location for personalized listings</p>
+                <p className="text-xs text-secondary">See nearby listings and active buyers in your area.</p>
+              </div>
+              <button
+                onClick={handleEnableLocation}
+                disabled={geoSaving}
+                className="shrink-0 bg-primary text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                {geoSaving ? 'Detecting…' : 'Enable'}
+              </button>
+              <button
+                onClick={() => { localStorage.setItem('geo_banner_dismissed', '1'); setGeoBannerDismissed(true); }}
+                className="shrink-0 text-secondary hover:text-on-surface transition-colors"
+                aria-label="Dismiss"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* To-Do */}
         {!loading && (() => {
@@ -440,7 +571,7 @@ export default function DashboardPage() {
 
         </section>
 
-        {/* New Listings For You */}
+        {/* New Listings For You (by buyer criteria) */}
         {(loading || hasBuyerCriteria) && (
           <section className="mb-12">
             <div className="flex justify-between items-center mb-6 px-2">
@@ -489,6 +620,78 @@ export default function DashboardPage() {
                   </div>
                 ))
               )}
+            </div>
+          </section>
+        )}
+
+        {/* New Listings Near You (by profile state) */}
+        {!loading && nearbyListings.length > 0 && (
+          <section className="mb-12">
+            <div className="flex justify-between items-center mb-6 px-2">
+              <div>
+                <h3 className="text-primary font-bold tracking-tight text-xl font-headline">New Listings Near You</h3>
+                <p className="text-xs text-secondary mt-0.5">{profileCounty ? `${profileCounty}, ` : ''}{profileState}</p>
+              </div>
+              <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/marketplace">See all</a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {nearbyListings.map(listing => (
+                <a key={listing.id} href={`/marketplace/${listing.id}`} className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
+                  <div className="relative h-40 overflow-hidden bg-surface-container-high flex items-center justify-center">
+                    <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">landscape</span>
+                    {listing.asking_price && (
+                      <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-2 py-0.5 rounded-lg text-primary font-bold text-xs">
+                        {formatPrice(listing.asking_price)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-bold text-on-surface text-sm mb-1 truncate">{listing.title ?? listing.street_address ?? 'Untitled'}</h4>
+                    <p className="text-xs text-secondary mb-3">{[listing.county, listing.state].filter(Boolean).join(', ')}</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {listing.lot_size_acres != null && (
+                        <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-0.5 rounded-md text-[10px] font-bold uppercase">{listing.lot_size_acres} Acres</span>
+                      )}
+                      {listing.zoning && (
+                        <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-0.5 rounded-md text-[10px] font-bold uppercase">{listing.zoning}</span>
+                      )}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Active Buyers in Your Area (by profile state) */}
+        {!loading && nearbyBuyers.length > 0 && (
+          <section className="mb-12">
+            <div className="flex justify-between items-center mb-6 px-2">
+              <div>
+                <h3 className="text-primary font-bold tracking-tight text-xl font-headline">Active Buyers in Your Area</h3>
+                <p className="text-xs text-secondary mt-0.5">{profileState}</p>
+              </div>
+              <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/buyer-directory">See all</a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {nearbyBuyers.map(b => (
+                <div key={b.id} className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-outline-variant/10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>account_circle</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-on-surface truncate">{buyerName(b)}</p>
+                      <p className="text-xs text-secondary truncate">{criteriaLabel(b)}</p>
+                    </div>
+                  </div>
+                  {(b.min_budget || b.max_budget) && (
+                    <p className="text-xs text-secondary">
+                      Budget: {b.min_budget ? formatPrice(b.min_budget) : '—'} – {b.max_budget ? formatPrice(b.max_budget) : '—'}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           </section>
         )}
