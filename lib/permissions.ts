@@ -21,7 +21,7 @@ export function getReportDeliveryTime(tier: Tier): '24hr' | '15min' {
 }
 
 export function hasFinancingAccess(tier: Tier): boolean {
-  return tier === 'exclusive';
+  return tier === 'priority' || tier === 'exclusive';
 }
 
 export function hasAccountManager(tier: Tier): boolean {
