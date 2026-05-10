@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       ...(existingCustomerId ? { customer: existingCustomerId } : {}),
       ...(isOneTime ? {} : { metadata: { tier } }),
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/property-analysis`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/property-analysis`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
     });
 
     return NextResponse.json({ url: session.url });
