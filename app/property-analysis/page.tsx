@@ -41,35 +41,28 @@ export default function PropertyAnalysisPage() {
   const [overlayDismissed, setOverlayDismissed] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
 
-  // Form state
   const [inputMode, setInputMode] = useState<'address' | 'apn'>('address');
 
-  // Address fields
   const [streetAddress, setStreetAddress] = useState('');
   const [city, setCity] = useState('');
   const [addrState, setAddrState] = useState('');
   const [zipCode, setZipCode] = useState('');
 
-  // APN fields
   const [apn, setApn] = useState('');
   const [apnCounty, setApnCounty] = useState('');
   const [apnState, setApnState] = useState('');
 
-  // Validation
   const [addrValidStatus, setAddrValidStatus] = useState<AddrValidStatus>('idle');
   const [addrValidMsg, setAddrValidMsg] = useState('');
   const [resolvedCounty, setResolvedCounty] = useState('');
 
-  // Submit
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [deliveryPopup, setDeliveryPopup] = useState<{ turnaround: string; property: string } | null>(null);
 
-  // Past requests
   const [requests, setRequests] = useState<AnalysisRequest[]>([]);
   const [requestsLoading, setRequestsLoading] = useState(false);
 
-  // Monthly limit & duplicate detection
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [purchasingAdditional, setPurchasingAdditional] = useState(false);
@@ -85,7 +78,6 @@ export default function PropertyAnalysisPage() {
   const monthlyUsed = requests.filter(r => new Date(r.submitted_at) >= startOfCurrentMonth).length;
   const atLimit = monthlyLimit !== null && monthlyUsed >= monthlyLimit;
 
-  // Always start at the top of the page
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
@@ -166,42 +158,32 @@ export default function PropertyAnalysisPage() {
 
   async function handleSubmit() {
     if (!canSubmit || submitting) return;
-
-    // Monthly limit check
     if (atLimit) { setShowLimitModal(true); return; }
-
-    // Duplicate detection (check against loaded requests list)
     const isDuplicate = inputMode === 'address'
       ? requests.some(r => r.street_address?.toLowerCase().trim() === streetAddress.toLowerCase().trim())
       : requests.some(r => r.apn?.toLowerCase().trim() === apn.toLowerCase().trim());
     if (isDuplicate) { setShowDuplicateModal(true); return; }
-
     setSubmitting(true);
     setSubmitError('');
-    // Clear any address validation state so it never shows alongside the submit result
     setAddrValidStatus('idle');
     setAddrValidMsg('');
     try {
       const body = inputMode === 'address'
         ? { inputType: 'address', streetAddress, city, county: resolvedCounty, state: addrState, zipCode }
         : { inputType: 'apn', apn, county: apnCounty, state: apnState };
-
       const res = await fetch('/api/property-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Submission failed');
       }
-
       const result = await res.json();
       const propertyLabel = inputMode === 'address'
         ? [streetAddress, city, addrState].filter(Boolean).join(', ')
         : `APN ${apn} · ${apnCounty} County, ${apnState}`;
-
       setDeliveryPopup({ turnaround: result.turnaround ?? '24 hours', property: propertyLabel });
       setStreetAddress(''); setCity(''); setAddrState(''); setZipCode('');
       setApn(''); setApnCounty(''); setApnState('');
@@ -219,13 +201,14 @@ export default function PropertyAnalysisPage() {
   }
 
   function statusBadge(status: string) {
+    if (status === 'pending') {
+      return <span className="text-xs font-bold text-on-surface">Pending</span>;
+    }
     const styles: Record<string, string> = {
-      pending: 'bg-amber-50 text-amber-700 border-amber-200',
       in_progress: 'bg-blue-50 text-blue-700 border-blue-200',
       complete: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     };
     const labels: Record<string, string> = {
-      pending: 'Pending',
       in_progress: 'In Progress',
       complete: 'Complete',
     };
@@ -272,8 +255,8 @@ export default function PropertyAnalysisPage() {
       {showDuplicateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
-            <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-amber-600 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>content_copy</span>
+            <div className="w-14 h-14 bg-surface-container-high rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-secondary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>content_copy</span>
             </div>
             <h2 className="font-headline text-xl font-extrabold text-on-surface mb-2">Already Submitted</h2>
             <p className="text-secondary text-sm leading-relaxed mb-6">
@@ -296,8 +279,8 @@ export default function PropertyAnalysisPage() {
             <button onClick={() => setShowLimitModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors">
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
-            <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-amber-600 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
+            <div className="w-14 h-14 bg-surface-container-high rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-secondary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
             </div>
             <h2 className="font-headline text-xl font-extrabold text-on-surface mb-2">Monthly Limit Reached</h2>
             <p className="text-secondary text-sm leading-relaxed mb-6">
@@ -328,7 +311,7 @@ export default function PropertyAnalysisPage() {
 
       <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-8">
 
-        {/* Page heading — centered */}
+        {/* Page heading */}
         <div className="mb-10 text-center">
           <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Tools</p>
           <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
@@ -336,13 +319,15 @@ export default function PropertyAnalysisPage() {
           </h1>
         </div>
 
-        {/* TOP SECTION — 50/50: Submit a Property | How It Works */}
+        {/* ── Two-column layout ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
 
-          {/* Left: Submit a Property */}
-          <div className="flex flex-col">
+          {/* LEFT: Unified white card — Submit a Property + How It Works */}
+          <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm flex flex-col">
+
             {isPaid ? (
-              <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm overflow-hidden flex flex-col h-full">
+              <>
+                {/* Form header */}
                 <div className="px-8 pt-6 pb-5 border-b border-outline-variant/15">
                   <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
                   <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
@@ -367,7 +352,8 @@ export default function PropertyAnalysisPage() {
                   </div>
                 </div>
 
-                <div className="p-8 space-y-6 flex-1">
+                {/* Form fields */}
+                <div className="p-8 space-y-6">
                   {inputMode === 'address' ? (
                     <>
                       <div>
@@ -384,40 +370,20 @@ export default function PropertyAnalysisPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                           <label className={labelClass}>City</label>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="Austin"
-                            value={city}
-                            onChange={e => { setCity(e.target.value); resetAddrValidation(); }}
-                            onBlur={handleAddressBlur}
-                          />
+                          <input type="text" className={inputClass} placeholder="Austin" value={city} onChange={e => { setCity(e.target.value); resetAddrValidation(); }} onBlur={handleAddressBlur} />
                         </div>
                         <div>
                           <label className={labelClass}>State</label>
-                          <select
-                            className={selectClass}
-                            value={addrState}
-                            onChange={e => { setAddrState(e.target.value); resetAddrValidation(); }}
-                            onBlur={handleAddressBlur}
-                          >
+                          <select className={selectClass} value={addrState} onChange={e => { setAddrState(e.target.value); resetAddrValidation(); }} onBlur={handleAddressBlur}>
                             <option value="">Select state</option>
                             {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                         </div>
                         <div>
                           <label className={labelClass}>Zip Code</label>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="78701"
-                            value={zipCode}
-                            onChange={e => { setZipCode(e.target.value); resetAddrValidation(); }}
-                            onBlur={handleAddressBlur}
-                          />
+                          <input type="text" className={inputClass} placeholder="78701" value={zipCode} onChange={e => { setZipCode(e.target.value); resetAddrValidation(); }} onBlur={handleAddressBlur} />
                         </div>
                       </div>
-
                       {addrValidStatus === 'validating' && (
                         <div className="flex items-center gap-2 text-secondary text-sm">
                           <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -434,7 +400,7 @@ export default function PropertyAnalysisPage() {
                         </div>
                       )}
                       {addrValidStatus === 'invalid' && (
-                        <div className="flex items-start gap-2 text-amber-800 text-sm font-semibold bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                        <div className="flex items-start gap-2 text-secondary text-sm font-semibold bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3">
                           <span className="material-symbols-outlined text-base shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
                           {addrValidMsg}
                         </div>
@@ -449,32 +415,16 @@ export default function PropertyAnalysisPage() {
                     <>
                       <div>
                         <label className={labelClass}>APN / Parcel ID</label>
-                        <input
-                          type="text"
-                          className={inputClass}
-                          placeholder="e.g. 123-456-789"
-                          value={apn}
-                          onChange={e => setApn(e.target.value)}
-                        />
+                        <input type="text" className={inputClass} placeholder="e.g. 123-456-789" value={apn} onChange={e => setApn(e.target.value)} />
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className={labelClass}>County</label>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. Bastrop"
-                            value={apnCounty}
-                            onChange={e => setApnCounty(e.target.value)}
-                          />
+                          <input type="text" className={inputClass} placeholder="e.g. Bastrop" value={apnCounty} onChange={e => setApnCounty(e.target.value)} />
                         </div>
                         <div>
                           <label className={labelClass}>State</label>
-                          <select
-                            className={selectClass}
-                            value={apnState}
-                            onChange={e => setApnState(e.target.value)}
-                          >
+                          <select className={selectClass} value={apnState} onChange={e => setApnState(e.target.value)}>
                             <option value="">Select state</option>
                             {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
@@ -518,15 +468,15 @@ export default function PropertyAnalysisPage() {
                     ) : 'Submit for Analysis'}
                   </button>
                 </div>
-              </div>
+              </>
             ) : (
-              /* Free user: search bar in a card */
-              <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm p-8 flex flex-col h-full">
+              /* Free user: search bar */
+              <div className="p-8">
                 <div className="mb-6">
                   <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
                   <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
                 </div>
-                <div className="flex-1 flex flex-col justify-center gap-6">
+                <div className="flex flex-col gap-6">
                   <div className="relative">
                     <div className="bg-surface-container-low p-2 rounded-full border border-outline-variant/30 shadow-sm flex items-center gap-2">
                       <div className="flex-1 flex items-center px-6">
@@ -548,7 +498,6 @@ export default function PropertyAnalysisPage() {
                         <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-1">analytics</span>
                       </button>
                     </div>
-
                     {showInputGate && (
                       <div className="absolute inset-0 z-10 flex items-center justify-between gap-4 bg-surface-container-low/95 backdrop-blur-sm rounded-full border border-primary/20 px-8 shadow-lg">
                         <div className="flex items-center gap-3 min-w-0">
@@ -571,7 +520,6 @@ export default function PropertyAnalysisPage() {
                       </div>
                     )}
                   </div>
-
                   <div className="flex gap-6 text-secondary text-sm">
                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> 150M+ Parcels</span>
                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> Real-time Comps</span>
@@ -580,41 +528,40 @@ export default function PropertyAnalysisPage() {
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Right: How It Works */}
-          <div className="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/15 flex flex-col">
-            <h2 className="font-headline text-3xl font-extrabold text-primary tracking-tight mb-2">How it works</h2>
-            <p className="text-secondary text-sm leading-relaxed mb-8">
-              LotScout uses advanced data and mapping technology to quickly analyze land, so you can confidently make smarter buying and selling decisions.
-            </p>
-            <div className="space-y-4 flex-1">
-              {[
-                { icon: 'input',        step: '01', title: 'Input Property',              body: 'Search by address, parcel ID, or simply drop a pin on our high-resolution topographic map interface.' },
-                { icon: 'auto_awesome', step: '02', title: 'AI-Powered Comparison',       body: 'Our engine instantly scans thousands of recent transactions and environmental data points to calculate true market value.' },
-                { icon: 'description',  step: '03', title: 'Export Comprehensive Report', body: 'Download a detailed PDF report containing zoning insights, risk assessments, and comparable property maps.' },
-              ].map(({ icon, step, title, body }) => (
-                <div key={step} className="flex gap-5 bg-surface-container-low p-6 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
-                  <div className="flex-none w-12 h-12 bg-primary text-on-primary rounded-lg flex items-center justify-center shadow-inner">
-                    <span className="material-symbols-outlined text-xl">{icon}</span>
+            {/* Divider between form and How It Works */}
+            <div className="border-t border-outline-variant/15 mx-8" />
+
+            {/* How It Works */}
+            <div className="p-8">
+              <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight mb-2">How it works</h2>
+              <p className="text-secondary text-sm leading-relaxed mb-6">
+                LotScout uses advanced data and mapping technology to quickly analyze land, so you can confidently make smarter buying and selling decisions.
+              </p>
+              <div className="space-y-3">
+                {[
+                  { icon: 'input',        step: '01', title: 'Input Property',              body: 'Search by address, parcel ID, or simply drop a pin on our high-resolution topographic map interface.' },
+                  { icon: 'auto_awesome', step: '02', title: 'AI-Powered Comparison',       body: 'Our engine instantly scans thousands of recent transactions and environmental data points to calculate true market value.' },
+                  { icon: 'description',  step: '03', title: 'Export Comprehensive Report', body: 'Download a detailed PDF report containing zoning insights, risk assessments, and comparable property maps.' },
+                ].map(({ icon, step, title, body }) => (
+                  <div key={step} className="flex gap-5 bg-surface-container-low p-5 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
+                    <div className="flex-none w-10 h-10 bg-primary text-on-primary rounded-lg flex items-center justify-center shadow-inner">
+                      <span className="material-symbols-outlined text-base">{icon}</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest mb-0.5">Step {step}</p>
+                      <h3 className="font-headline text-sm font-bold text-primary mb-0.5">{title}</h3>
+                      <p className="text-secondary leading-relaxed text-xs">{body}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest mb-0.5">Step {step}</p>
-                    <h3 className="font-headline text-base font-bold text-primary mb-1">{title}</h3>
-                    <p className="text-secondary leading-relaxed text-sm">{body}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* BOTTOM SECTION — 50/50: Sample Report | Past Requests */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-
-          {/* Left: Sample Analysis Report */}
+          {/* RIGHT: Sample Analysis Report */}
           <div className="flex flex-col">
-            <div className="rounded-2xl border border-outline-variant/30 overflow-hidden shadow-xl">
+            <div className="rounded-2xl border border-outline-variant/30 overflow-hidden shadow-xl flex-1">
 
               <div className="bg-primary px-8 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -625,7 +572,6 @@ export default function PropertyAnalysisPage() {
                 <span className="text-white/50 text-xs">Generated Apr 12, 2026 • LotScout AI</span>
               </div>
 
-              {/* White background — no green tint */}
               <div className="bg-white p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <div className="lg:col-span-2 space-y-6">
@@ -726,7 +672,7 @@ export default function PropertyAnalysisPage() {
                       {[
                         { label: 'Flood Risk',     score: 92, verdict: 'Low',       color: 'bg-emerald-500' },
                         { label: 'Soil Quality',   score: 84, verdict: 'Good',      color: 'bg-emerald-400' },
-                        { label: 'Utility Access', score: 76, verdict: 'Moderate',  color: 'bg-yellow-400' },
+                        { label: 'Utility Access', score: 76, verdict: 'Moderate',  color: 'bg-emerald-300' },
                         { label: 'Road Frontage',  score: 95, verdict: 'Excellent', color: 'bg-emerald-500' },
                         { label: 'Title Clarity',  score: 88, verdict: 'Clear',     color: 'bg-emerald-400' },
                       ].map(({ label, score, verdict, color }) => (
@@ -757,7 +703,7 @@ export default function PropertyAnalysisPage() {
               </div>
             </div>
 
-            {/* Faster Results banner — clean, no yellow */}
+            {/* Faster Results banner */}
             {showSpeedBanner && (
               <div className="mt-4 flex items-center gap-4 bg-white border border-outline-variant/20 rounded-2xl px-6 py-4 shadow-sm">
                 <span className="material-symbols-outlined text-primary text-2xl shrink-0">bolt</span>
@@ -771,85 +717,85 @@ export default function PropertyAnalysisPage() {
               </div>
             )}
           </div>
+        </div>
 
-          {/* Right: Past Requests or Upgrade CTA */}
-          <div id="past-requests" className="flex flex-col">
-            {isPaid ? (
-              <>
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Your Past Requests</h2>
-                  <button onClick={loadRequests} className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">refresh</span> Refresh
-                  </button>
-                </div>
-
-                {requestsLoading ? (
-                  <div className="text-secondary text-sm">Loading requests...</div>
-                ) : requests.length === 0 ? (
-                  <div className="bg-surface-container-low border border-dashed border-outline-variant/40 rounded-2xl p-10 text-center">
-                    <span className="material-symbols-outlined text-secondary/40 text-4xl mb-3 block">analytics</span>
-                    <p className="text-secondary text-sm">No requests yet. Submit a property above to get started.</p>
-                  </div>
-                ) : (
-                  <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-outline-variant/20 bg-surface-container-lowest">
-                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Date Submitted</th>
-                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Address / APN</th>
-                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">County</th>
-                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">State</th>
-                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Status</th>
-                            <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Report</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {requests.map((req, i) => (
-                            <tr key={req.id} className={`border-b border-outline-variant/10 last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-container-lowest/40'}`}>
-                              <td className="px-6 py-4 text-secondary whitespace-nowrap">{formatDate(req.submitted_at)}</td>
-                              <td className="px-6 py-4 text-on-surface font-medium max-w-xs">
-                                {req.input_type === 'address'
-                                  ? [req.street_address, req.city].filter(Boolean).join(', ') || '—'
-                                  : `APN: ${req.apn ?? '—'}`}
-                              </td>
-                              <td className="px-6 py-4 text-on-surface">{req.county || '—'}</td>
-                              <td className="px-6 py-4 text-on-surface">{req.state}</td>
-                              <td className="px-6 py-4">{statusBadge(req.status)}</td>
-                              <td className="px-6 py-4">
-                                {req.status === 'complete' && req.report_url ? (
-                                  <a
-                                    href={req.report_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 bg-primary text-on-primary font-bold text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                                  >
-                                    <span className="material-symbols-outlined text-sm">open_in_new</span>
-                                    View Report
-                                  </a>
-                                ) : (
-                                  <span className="text-secondary text-xs">—</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="bg-primary/5 border border-primary/10 rounded-2xl p-10 text-center flex flex-col items-center justify-center flex-1 min-h-[320px]">
-                <span className="material-symbols-outlined text-primary text-4xl mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                <h3 className="font-headline text-2xl font-bold text-primary mb-2">Unlock Property Analysis</h3>
-                <p className="text-secondary text-sm leading-relaxed mb-6 max-w-sm">Get detailed AI-powered reports including comparable sales, zoning insights, and risk scoring for any parcel in the US.</p>
-                <a href="/pricing" className="inline-flex items-center gap-2 bg-primary text-on-primary font-bold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">
-                  View Plans <span className="material-symbols-outlined">arrow_forward</span>
-                </a>
+        {/* ── PAST REQUESTS — full width below both columns ── */}
+        <div id="past-requests">
+          {isPaid ? (
+            <>
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Your Past Requests</h2>
+                <button onClick={loadRequests} className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
+                  <span className="material-symbols-outlined text-base">refresh</span> Refresh
+                </button>
               </div>
-            )}
-          </div>
+
+              {requestsLoading ? (
+                <div className="text-secondary text-sm">Loading requests...</div>
+              ) : requests.length === 0 ? (
+                <div className="bg-surface-container-low border border-dashed border-outline-variant/40 rounded-2xl p-10 text-center">
+                  <span className="material-symbols-outlined text-secondary/40 text-4xl mb-3 block">analytics</span>
+                  <p className="text-secondary text-sm">No requests yet. Submit a property above to get started.</p>
+                </div>
+              ) : (
+                <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-outline-variant/20 bg-surface-container-lowest">
+                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Date Submitted</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Address / APN</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">County</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">State</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Status</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Report</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {requests.map((req, i) => (
+                          <tr key={req.id} className={`border-b border-outline-variant/10 last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-container-lowest/40'}`}>
+                            <td className="px-6 py-4 text-secondary whitespace-nowrap">{formatDate(req.submitted_at)}</td>
+                            <td className="px-6 py-4 text-on-surface font-medium max-w-xs">
+                              {req.input_type === 'address'
+                                ? [req.street_address, req.city].filter(Boolean).join(', ') || '—'
+                                : `APN: ${req.apn ?? '—'}`}
+                            </td>
+                            <td className="px-6 py-4 text-on-surface">{req.county || '—'}</td>
+                            <td className="px-6 py-4 text-on-surface">{req.state}</td>
+                            <td className="px-6 py-4">{statusBadge(req.status)}</td>
+                            <td className="px-6 py-4">
+                              {req.status === 'complete' && req.report_url ? (
+                                <a
+                                  href={req.report_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 bg-primary text-on-primary font-bold text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                                >
+                                  <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                  View Report
+                                </a>
+                              ) : (
+                                <span className="text-secondary text-xs">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="bg-primary/5 border border-primary/10 rounded-2xl p-10 text-center flex flex-col items-center justify-center min-h-[240px]">
+              <span className="material-symbols-outlined text-primary text-4xl mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+              <h3 className="font-headline text-2xl font-bold text-primary mb-2">Unlock Property Analysis</h3>
+              <p className="text-secondary text-sm leading-relaxed mb-6 max-w-sm">Get detailed AI-powered reports including comparable sales, zoning insights, and risk scoring for any parcel in the US.</p>
+              <a href="/pricing" className="inline-flex items-center gap-2 bg-primary text-on-primary font-bold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">
+                View Plans <span className="material-symbols-outlined">arrow_forward</span>
+              </a>
+            </div>
+          )}
         </div>
 
       </main>
