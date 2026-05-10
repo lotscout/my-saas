@@ -482,7 +482,7 @@ export default function DashboardPage() {
                   <li key={item.label}>
                     <a href={item.href} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-colors group">
                       <span
-                        className={`material-symbols-outlined text-xl shrink-0 ${item.done ? 'text-emerald-500' : 'text-amber-500'}`}
+                        className={`material-symbols-outlined text-xl shrink-0 ${item.done ? 'text-emerald-500' : 'text-secondary'}`}
                         style={item.done ? { fontVariationSettings: "'FILL' 1" } : undefined}
                       >
                         {item.done ? 'check_circle' : 'radio_button_unchecked'}

@@ -13,8 +13,8 @@ export default function ListingLimitBanner({ listingsUsed, tier }: ListingLimitB
 
   if (listingsUsed === 2) {
     return (
-      <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm font-medium">
-        <span className="material-symbols-outlined text-amber-500 text-lg flex-none" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+      <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-medium">
+        <span className="material-symbols-outlined text-slate-400 text-lg flex-none" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
         <span>You have <span className="font-bold">1 listing remaining</span> this month.</span>
       </div>
     );

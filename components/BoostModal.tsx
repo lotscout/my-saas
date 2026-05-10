@@ -128,8 +128,8 @@ export default function BoostModal({ listingId, listingTitle, tier, onClose }: P
               </div>
             </div>
           ) : budgetNum > 0 ? (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-              <p className="text-amber-700 text-sm">Budget must be at least ${weeklyRate.toFixed(2)} for 1 week of promotion.</p>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+              <p className="text-slate-600 text-sm">Budget must be at least ${weeklyRate.toFixed(2)} for 1 week of promotion.</p>
             </div>
           ) : null}
 

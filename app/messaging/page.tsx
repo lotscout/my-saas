@@ -251,8 +251,8 @@ export default function MessagingPage() {
             <button onClick={() => setShowSendUpgradeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors">
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
-            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
-              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Upgrade to Send Messages</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">Messaging buyers and sellers is available on paid plans. Upgrade to start closing deals.</p>
@@ -461,7 +461,7 @@ export default function MessagingPage() {
                     {isFreeUser ? (
                       <button
                         onClick={() => setShowSendUpgradeModal(true)}
-                        className="w-full flex items-center justify-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 py-4 rounded-2xl font-bold text-sm hover:bg-amber-100 transition-colors"
+                        className="w-full flex items-center justify-center gap-3 bg-surface-container-high border border-outline-variant/20 text-secondary py-4 rounded-2xl font-bold text-sm hover:bg-surface-container-highest transition-colors"
                       >
                         <span className="material-symbols-outlined text-base">lock</span>
                         Upgrade to Send Messages

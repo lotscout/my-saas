@@ -240,7 +240,7 @@ export default function AdminUsersPage() {
                           <div className="font-medium text-on-surface flex items-center gap-2">
                             {name}
                             {u.is_test_profile && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-bold uppercase tracking-wide">Test</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold uppercase tracking-wide">Test</span>
                             )}
                           </div>
                           <div className="text-on-surface/50 text-xs">{u.email || '—'}</div>

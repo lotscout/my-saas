@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/*
+ * Button / badge color standards — do not deviate from these rules:
+ *   Green buttons/badges: bg-green-700 text-white (or bg-emerald-700 text-white). No light-on-light.
+ *   No yellow or amber buttons, banners, or badges in user-facing UI.
+ *   Neutral informational banners: bg-blue-50 border-blue-200 text-blue-800.
+ *   Neutral warning banners: bg-slate-50 border-slate-200 text-slate-700.
+ *   Locked / upgrade state buttons: bg-surface-container-high text-secondary border border-outline-variant/20.
+ *   Admin-only status badges (pending): bg-slate-100 text-slate-700.
+ */
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

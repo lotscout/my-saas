@@ -39,16 +39,16 @@ export default function FundingPartnersPage() {
 
         {/* Upgrade notice for free/standard users */}
         {!hasAccess && (
-          <div className="flex items-center gap-3 mb-8 px-5 py-4 bg-amber-50 border border-amber-200 rounded-2xl">
-            <span className="material-symbols-outlined text-amber-600 text-xl shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-            <p className="text-sm text-amber-800 font-medium flex-1">
+          <div className="flex items-center gap-3 mb-8 px-5 py-4 bg-blue-50 border border-blue-200 rounded-2xl">
+            <span className="material-symbols-outlined text-blue-600 text-xl shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+            <p className="text-sm text-blue-800 font-medium flex-1">
               Funding partner details are available on the{' '}
               <span className="font-bold">Priority</span> and{' '}
               <span className="font-bold">Exclusive</span> plans.
             </p>
             <a
               href="/pricing"
-              className="shrink-0 text-xs font-bold text-amber-800 underline hover:text-amber-900 whitespace-nowrap"
+              className="shrink-0 text-xs font-bold text-blue-800 underline hover:text-blue-900 whitespace-nowrap"
             >
               Upgrade your plan →
             </a>
@@ -64,7 +64,7 @@ export default function FundingPartnersPage() {
 
             {/* Category badge — always visible */}
             <div className="mb-4">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-700 text-white">
                 Business Credit &amp; Capital
               </span>
             </div>

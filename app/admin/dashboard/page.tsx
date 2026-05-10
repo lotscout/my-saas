@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
             label="Pending Listings"
             value={stats?.pendingListings ?? null}
             icon="pending_actions"
-            color="bg-amber-500"
+            color="bg-slate-500"
           />
           <StatCard
             label="Analysis Requests"
@@ -93,14 +93,14 @@ export default function AdminDashboardPage() {
             href="/admin/listings"
             className="group bg-white border border-outline-variant/10 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex items-center gap-4"
           >
-            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-none">
-              <span className="material-symbols-outlined text-amber-700 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>list_alt</span>
+            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-none">
+              <span className="material-symbols-outlined text-slate-600 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>list_alt</span>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-on-surface">Listings Queue</p>
                 {stats?.pendingListings ? (
-                  <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded-full">{stats.pendingListings}</span>
+                  <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2 py-0.5 rounded-full">{stats.pendingListings}</span>
                 ) : null}
               </div>
               <p className="text-xs text-on-surface/50 mt-0.5">Review and approve pending submissions</p>

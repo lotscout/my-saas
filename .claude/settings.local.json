@@ -33,7 +33,15 @@
       "Bash(xargs sed *)",
       "mcp__plugin_supabase_supabase__list_projects",
       "mcp__plugin_supabase_supabase__execute_sql",
-      "mcp__plugin_supabase_supabase__apply_migration"
+      "mcp__plugin_supabase_supabase__apply_migration",
+      "mcp__plugin_supabase_supabase__list_tables",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\bobby\\\\my-saas\" -Recurse -Depth 2)",
+      "Bash(Select-Object FullName)",
+      "Bash(Remove-Item *)",
+      "Bash(Get-ChildItem -Recurse -Path app, components -Include \"*.tsx\", \"*.ts\")",
+      "Bash(Measure-Object)",
+      "Bash(Select-Object -ExpandProperty Count)",
+      "Bash(grep -E '\\\\.\\(tsx|ts\\)$')"
     ]
   }
 }

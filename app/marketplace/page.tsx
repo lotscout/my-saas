@@ -599,8 +599,8 @@ export default function MarketplacePage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowFreeModal(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
             <button onClick={() => setShowFreeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
-            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
-              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Create a Listing</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">Listing your property requires a paid LotScout account. Choose a plan to get started.</p>
@@ -617,8 +617,8 @@ export default function MarketplacePage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowBuyerFreeModal(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
             <button onClick={() => setShowBuyerFreeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
-            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
-              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Find a Property</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">Finding a property requires a paid LotScout account. Choose a plan to get started.</p>
@@ -635,8 +635,8 @@ export default function MarketplacePage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowContactUpgradeModal(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
             <button onClick={() => setShowContactUpgradeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
-            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
-              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Upgrade to Contact Sellers</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">Contacting sellers and making offers requires a paid LotScout account. Upgrade to get direct access to every deal.</p>

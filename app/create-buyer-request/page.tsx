@@ -289,8 +289,8 @@ export default function CreateBuyerRequestPage() {
             >
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
-            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
-              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Find a Property</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">

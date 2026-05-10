@@ -46,7 +46,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_BADGE: Record<string, string> = {
   active: 'bg-emerald-100 text-emerald-800',
   rejected: 'bg-red-100 text-red-700',
-  pending_review: 'bg-amber-100 text-amber-800',
+  pending_review: 'bg-slate-100 text-slate-700',
   revision_needed: 'bg-orange-100 text-orange-800',
 };
 
@@ -418,7 +418,7 @@ export default function AdminListingsPage() {
         <div className="flex items-center gap-2 mb-4">
           <h2 className="font-headline font-bold text-xl text-on-surface">Pending Buyer Requests</h2>
           {pendingBuyers.length > 0 && (
-            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{pendingBuyers.length}</span>
+            <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-0.5 rounded-full">{pendingBuyers.length}</span>
           )}
         </div>
 
