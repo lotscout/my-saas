@@ -60,26 +60,42 @@ export async function POST(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, last_name, subscription_tier')
+    .select('first_name, last_name, subscription_tier, is_admin')
     .eq('id', user.id)
     .single();
 
-  // Enforce monthly limits
-  const TIER_LIMITS: Record<string, number | null> = { standard: 5, priority: 15, exclusive: null };
-  const tierKey = profile?.subscription_tier ?? '';
-  const monthlyLimit = TIER_LIMITS[tierKey] ?? 0;
+  const isAdmin = profile?.is_admin === true;
 
-  if (monthlyLimit !== null) {
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-    const { count } = await supabase
-      .from('property_analysis_requests')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .gte('submitted_at', startOfMonth.toISOString());
-    if ((count ?? 0) >= monthlyLimit) {
-      return NextResponse.json({ error: 'Monthly limit reached', code: 'MONTHLY_LIMIT_REACHED' }, { status: 429 });
+  // Admins bypass all limits
+  if (!isAdmin) {
+    // Check paid-session bypass first
+    const paidSessionId = body.paidSessionId as string | undefined;
+    if (paidSessionId) {
+      const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+      const session = await stripe.checkout.sessions.retrieve(paidSessionId).catch(() => null);
+      if (!session || session.payment_status !== 'paid' || session.client_reference_id !== user.id) {
+        return NextResponse.json({ error: 'Invalid or unpaid session', code: 'INVALID_SESSION' }, { status: 403 });
+      }
+      // Paid session verified — skip monthly limit check
+    } else {
+      // Enforce monthly limits
+      const TIER_LIMITS: Record<string, number | null> = { standard: 5, priority: 15, exclusive: null };
+      const tierKey = profile?.subscription_tier ?? '';
+      const monthlyLimit = TIER_LIMITS[tierKey] ?? 0;
+
+      if (monthlyLimit !== null) {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        const { count } = await supabase
+          .from('property_analysis_requests')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('submitted_at', startOfMonth.toISOString());
+        if ((count ?? 0) >= monthlyLimit) {
+          return NextResponse.json({ error: 'Monthly limit reached', code: 'MONTHLY_LIMIT_REACHED' }, { status: 429 });
+        }
+      }
     }
   }
 

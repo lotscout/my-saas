@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Header from '@/components/Header';
-import { useSubscription } from '@/hooks/useSubscription';
+import { usePermissions } from '@/hooks/usePermissions';
 import { createClient } from '@/lib/supabase/client';
 
 const US_STATES = [
@@ -30,14 +30,14 @@ interface AnalysisRequest {
   submitted_at: string;
 }
 
-type AddrValidStatus = 'idle' | 'validating' | 'valid' | 'invalid';
+type AddrValidStatus = 'idle' | 'validating' | 'valid';
 
 const inputClass = 'w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-on-surface placeholder-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors text-sm';
 const selectClass = `${inputClass} cursor-pointer`;
 const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wider mb-1.5';
 
 export default function PropertyAnalysisPage() {
-  const { tier, loading } = useSubscription();
+  const { tier, loading, isAdmin } = usePermissions();
   const [overlayDismissed, setOverlayDismissed] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
 
@@ -65,7 +65,8 @@ export default function PropertyAnalysisPage() {
 
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
-  const [purchasingAdditional, setPurchasingAdditional] = useState(false);
+  const [buyingReport, setBuyingReport] = useState(false);
+  const [pendingPaidSession, setPendingPaidSession] = useState<string | null>(null);
 
   const isFree = !loading && !tier;
   const isPaid = !loading && !!tier;
@@ -76,10 +77,34 @@ export default function PropertyAnalysisPage() {
   const monthlyLimit = tier ? (MONTHLY_LIMITS[tier] ?? null) : null;
   const startOfCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   const monthlyUsed = requests.filter(r => new Date(r.submitted_at) >= startOfCurrentMonth).length;
-  const atLimit = monthlyLimit !== null && monthlyUsed >= monthlyLimit;
+  const atLimit = !isAdmin && monthlyLimit !== null && monthlyUsed >= monthlyLimit;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paidSession = params.get('paid_session');
+    if (!paidSession) return;
+    const saved = sessionStorage.getItem('pa_form_data');
+    if (saved) {
+      try {
+        const d = JSON.parse(saved) as Record<string, string>;
+        if (d.inputMode === 'address' || d.inputMode === 'apn') setInputMode(d.inputMode as 'address' | 'apn');
+        setStreetAddress(d.streetAddress ?? '');
+        setCity(d.city ?? '');
+        setAddrState(d.addrState ?? '');
+        setZipCode(d.zipCode ?? '');
+        setApn(d.apn ?? '');
+        setApnCounty(d.apnCounty ?? '');
+        setApnState(d.apnState ?? '');
+        setResolvedCounty(d.resolvedCounty ?? '');
+        sessionStorage.removeItem('pa_form_data');
+      } catch {}
+    }
+    setPendingPaidSession(paidSession);
+    window.history.replaceState({}, '', '/property-analysis');
   }, []);
 
   const loadRequests = useCallback(async () => {
@@ -97,6 +122,13 @@ export default function PropertyAnalysisPage() {
     if (isPaid) loadRequests();
   }, [isPaid, loadRequests]);
 
+  useEffect(() => {
+    if (pendingPaidSession && canSubmit && !submitting) {
+      void handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingPaidSession]);
+
   const validateAddress = useCallback(async () => {
     if (!streetAddress.trim() || !city.trim() || !addrState || !zipCode.trim()) return;
     setAddrValidStatus('validating');
@@ -109,8 +141,8 @@ export default function PropertyAnalysisPage() {
       const data = await res.json();
       const matches = data?.result?.addressMatches;
       if (!matches || matches.length === 0) {
-        setAddrValidStatus('invalid');
-        setAddrValidMsg('Address could not be auto-verified. You can still submit and our team will verify manually.');
+        setAddrValidStatus('idle');
+        setAddrValidMsg('');
       } else {
         const match = matches[0];
         const county = match?.geographies?.Counties?.[0]?.NAME ?? '';
@@ -119,8 +151,8 @@ export default function PropertyAnalysisPage() {
         setAddrValidMsg(county ? `Valid address · ${county} County, ${addrState}` : `Valid address · ${addrState}`);
       }
     } catch {
-      setAddrValidStatus('invalid');
-      setAddrValidMsg('Address could not be auto-verified. You can still submit and our team will verify manually.');
+      setAddrValidStatus('idle');
+      setAddrValidMsg('');
     }
   }, [streetAddress, city, addrState, zipCode]);
 
@@ -142,23 +174,27 @@ export default function PropertyAnalysisPage() {
   const addrFieldsFilled = streetAddress.trim() !== '' && city.trim() !== '' && addrState !== '' && zipCode.trim() !== '';
   const canSubmit = inputMode === 'address' ? addrFieldsFilled : apnValid;
 
-  async function purchaseAdditionalReport() {
-    setPurchasingAdditional(true);
+  async function buyReportWithStripe() {
+    setBuyingReport(true);
+    sessionStorage.setItem('pa_form_data', JSON.stringify({
+      inputMode, streetAddress, city, addrState, zipCode,
+      apn, apnCounty, apnState, resolvedCounty,
+    }));
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch('/api/stripe/pay-per-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceKey: 'additionalReport' }),
       });
       const data = await res.json();
-      if (data.url) window.open(data.url, '_blank');
-    } catch {}
-    setPurchasingAdditional(false);
+      if (data.url) window.location.href = data.url;
+    } catch {
+      setBuyingReport(false);
+    }
   }
 
   async function handleSubmit() {
     if (!canSubmit || submitting) return;
-    if (atLimit) { setShowLimitModal(true); return; }
+    if (atLimit && !pendingPaidSession) { setShowLimitModal(true); return; }
     const isDuplicate = inputMode === 'address'
       ? requests.some(r => r.street_address?.toLowerCase().trim() === streetAddress.toLowerCase().trim())
       : requests.some(r => r.apn?.toLowerCase().trim() === apn.toLowerCase().trim());
@@ -168,9 +204,10 @@ export default function PropertyAnalysisPage() {
     setAddrValidStatus('idle');
     setAddrValidMsg('');
     try {
-      const body = inputMode === 'address'
+      const baseBody = inputMode === 'address'
         ? { inputType: 'address', streetAddress, city, county: resolvedCounty, state: addrState, zipCode }
         : { inputType: 'apn', apn, county: apnCounty, state: apnState };
+      const body = pendingPaidSession ? { ...baseBody, paidSessionId: pendingPaidSession } : baseBody;
       const res = await fetch('/api/property-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -188,6 +225,7 @@ export default function PropertyAnalysisPage() {
       setStreetAddress(''); setCity(''); setAddrState(''); setZipCode('');
       setApn(''); setApnCounty(''); setApnState('');
       setAddrValidStatus('idle'); setAddrValidMsg(''); setResolvedCounty('');
+      setPendingPaidSession(null);
       await loadRequests();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Submission failed. Please try again.');
@@ -275,34 +313,35 @@ export default function PropertyAnalysisPage() {
       {/* Monthly limit modal */}
       {showLimitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
-            <button onClick={() => setShowLimitModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+            <button onClick={() => setShowLimitModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors">
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
-            <div className="w-14 h-14 bg-surface-container-high rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-secondary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
+            <h2 className="font-headline text-xl font-extrabold text-black mb-6">Upgrade account or pay per report.</h2>
+            <div className="border border-gray-200 rounded-xl overflow-hidden">
+              <div className="p-5 border-b border-gray-200">
+                <p className="text-sm text-gray-700 mb-3">Upgrade your plan for more monthly reports</p>
+                <a
+                  href="/pricing"
+                  className="inline-block bg-green-700 text-white rounded px-4 py-2 text-sm font-bold hover:bg-green-800 transition-colors"
+                >
+                  Upgrade Now
+                </a>
+              </div>
+              <div className="p-5">
+                <p className="text-sm text-gray-700 mb-3">Or get this single report for $29</p>
+                <button
+                  onClick={buyReportWithStripe}
+                  disabled={buyingReport}
+                  className="inline-block border border-green-700 text-green-700 rounded px-4 py-2 text-sm font-bold hover:bg-green-50 transition-colors disabled:opacity-50"
+                >
+                  {buyingReport ? 'Loading…' : 'Buy This Report'}
+                </button>
+              </div>
             </div>
-            <h2 className="font-headline text-xl font-extrabold text-on-surface mb-2">Monthly Limit Reached</h2>
-            <p className="text-secondary text-sm leading-relaxed mb-6">
-              You have used all {monthlyLimit} reports included in your{' '}
-              <span className="font-semibold text-on-surface capitalize">{tier}</span> plan this month.
-              Additional reports are $4.99 each.
+            <p className="text-xs text-gray-400 mt-4 text-center">
+              Reports delivered within 24 hours. Exclusive members receive results in 15 minutes.
             </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={purchaseAdditionalReport}
-                disabled={purchasingAdditional}
-                className="w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
-              >
-                {purchasingAdditional ? 'Loading…' : 'Purchase Additional Report ($4.99)'}
-              </button>
-              <a href="/pricing" className="w-full bg-surface-container-high text-secondary font-bold py-3 rounded-xl text-center hover:bg-surface-container-highest transition-colors text-sm block">
-                Upgrade Plan
-              </a>
-              <button onClick={() => setShowLimitModal(false)} className="w-full text-secondary text-sm py-2 hover:text-on-surface transition-colors">
-                Dismiss
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -396,12 +435,6 @@ export default function PropertyAnalysisPage() {
                       {addrValidStatus === 'valid' && (
                         <div className="flex items-center gap-2 text-emerald-700 text-sm font-semibold bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
                           <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                          {addrValidMsg}
-                        </div>
-                      )}
-                      {addrValidStatus === 'invalid' && (
-                        <div className="flex items-start gap-2 text-secondary text-sm font-semibold bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3">
-                          <span className="material-symbols-outlined text-base shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
                           {addrValidMsg}
                         </div>
                       )}
