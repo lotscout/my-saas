@@ -5,11 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUserTier } from '@/hooks/useUserTier';
 import { createClient } from '@/lib/supabase/client';
-import Header from '@/components/Header';
-import SendMessageModal from '@/components/SendMessageModal';
-
-const IMAGE_REQUEST_BODY =
-  "Hi, I'm interested in this property and would like to request additional images. Thank you!";
 
 interface Listing {
   id: string;
@@ -70,12 +65,7 @@ export default function ListingDetailPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [toastMsg, setToastMsg] = useState('');
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [authed, setAuthed] = useState<boolean | null>(null);
-  const [imageRequestSent, setImageRequestSent] = useState(false);
-  const [imageRequestLoading, setImageRequestLoading] = useState(false);
 
   const { tier, isAdmin, loading: tierLoading } = useUserTier();
 
@@ -87,7 +77,6 @@ export default function ListingDetailPage() {
       if (!user) {
         router.replace(`/login?next=/listings/${id}`);
       } else {
-        setCurrentUserId(user.id);
         setAuthed(true);
       }
     })();
@@ -123,56 +112,14 @@ export default function ListingDetailPage() {
     })();
   }, [id, authed]);
 
-  // Check if buyer already sent an image request for this listing's seller
-  useEffect(() => {
-    if (!listing || !currentUserId) return;
-    (async () => {
-      const supabase = createClient();
-      const { data: conv } = await supabase
-        .from('conversations')
-        .select('id')
-        .or(
-          `and(buyer_id.eq.${currentUserId},seller_id.eq.${listing.user_id}),` +
-          `and(buyer_id.eq.${listing.user_id},seller_id.eq.${currentUserId})`
-        )
-        .limit(1)
-        .maybeSingle();
-      if (!conv) return;
-      const { data: msg } = await supabase
-        .from('messages')
-        .select('id')
-        .eq('conversation_id', conv.id)
-        .eq('sender_id', currentUserId)
-        .eq('body', IMAGE_REQUEST_BODY)
-        .maybeSingle();
-      if (msg) setImageRequestSent(true);
-    })();
-  }, [listing, currentUserId]);
+  const ADMIN_USER_ID = '43489074-71ec-4ba3-a03a-f1e47a8ba768';
 
   function handleMessage() {
     if (tierLoading) return;
     if (!tier && !isAdmin) { setShowUpgradeModal(true); return; }
-    setShowMessageModal(true);
-  }
-
-  async function handleRequestImages() {
-    if (tierLoading) return;
-    if (!tier && !isAdmin) { setShowUpgradeModal(true); return; }
-    if (imageRequestSent || imageRequestLoading) return;
-    setImageRequestLoading(true);
-    try {
-      const res = await fetch(`/api/listings/${id}/request-images`, { method: 'POST' });
-      const data = await res.json();
-      if (res.ok || data.alreadySent) {
-        setImageRequestSent(true);
-        setToastMsg('Image request sent!');
-        setTimeout(() => setToastMsg(''), 3000);
-      }
-    } catch {
-      // silent — button stays enabled for retry
-    } finally {
-      setImageRequestLoading(false);
-    }
+    // FB placeholder listings (no user_id) route messages to admin
+    const recipientId = listing?.user_id ?? ADMIN_USER_ID;
+    router.push(`/messaging?recipient=${recipientId}`);
   }
 
   // Still checking auth or awaiting redirect
@@ -195,7 +142,10 @@ export default function ListingDetailPage() {
     );
   }
 
-  const sellerName = [listing.seller_first_name, listing.seller_last_name].filter(Boolean).join(' ') || listing.digital_signature || 'Private Seller';
+  const sellerName = listing.contact_methods?.[0]
+    || [listing.seller_first_name, listing.seller_last_name].filter(Boolean).join(' ')
+    || listing.digital_signature
+    || 'Private Seller';
 
   const pricePerAcre =
     listing.lot_size_unit === 'acres' && listing.lot_size_acres && listing.asking_price
@@ -220,7 +170,6 @@ export default function ListingDetailPage() {
 
   return (
     <div className="bg-surface text-on-surface">
-      <Header />
       {/* Upgrade modal */}
       {showUpgradeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -229,8 +178,8 @@ export default function ListingDetailPage() {
             <button onClick={() => setShowUpgradeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors">
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
-            <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mb-5">
-              <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-5">
+              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
             </div>
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Upgrade to Message Sellers</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">
@@ -248,35 +197,10 @@ export default function ListingDetailPage() {
         </div>
       )}
 
-      {/* Send message modal */}
-      {showMessageModal && currentUserId && listing && (
-        <SendMessageModal
-          recipientId={listing.user_id}
-          recipientName={sellerName}
-          currentUserId={currentUserId}
-          currentUserIsBuyer={true}
-          listingId={listing.id}
-          onClose={() => setShowMessageModal(false)}
-          onSent={() => {
-            setShowMessageModal(false);
-            setToastMsg('Message sent successfully');
-            setTimeout(() => setToastMsg(''), 3000);
-          }}
-        />
-      )}
-
-      {/* Success toast */}
-      {toastMsg && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-700 text-white px-6 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2">
-          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-          {toastMsg}
-        </div>
-      )}
-
       <main className="pt-32 pb-24 max-w-7xl mx-auto px-6">
 
         {/* Header */}
-        <header className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 mb-10 shadow-sm border border-outline-variant/15">
+        <header className="bg-surface-container-lowest rounded-xl p-8 mb-10 shadow-sm border border-outline-variant/15">
           <div className="flex flex-col gap-6">
             <Link href="/marketplace" className="flex items-center gap-2 text-secondary font-medium text-sm hover:text-primary transition-colors w-fit">
               <span className="material-symbols-outlined text-lg">arrow_back</span>
@@ -447,7 +371,7 @@ export default function ListingDetailPage() {
           <aside className="lg:col-span-4 space-y-8">
 
             {/* CTA Card */}
-            <div className="bg-primary-container text-white rounded-xl p-4 sm:p-8 shadow-xl">
+            <div className="bg-primary-container text-white rounded-xl p-8 shadow-xl">
               <h3 className="text-2xl font-bold font-headline mb-6">Interested in this property?</h3>
 
               <button
@@ -456,29 +380,6 @@ export default function ListingDetailPage() {
               >
                 Message Seller
               </button>
-
-              {/* Request Images button */}
-              {!tierLoading && (tier || isAdmin) ? (
-                <button
-                  onClick={handleRequestImages}
-                  disabled={imageRequestSent || imageRequestLoading}
-                  className="w-full py-3 mt-3 border-2 border-green-700 text-green-700 bg-white font-bold rounded-lg hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {imageRequestSent ? 'Request Sent ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
-                </button>
-              ) : !tierLoading ? (
-                <div className="relative group mt-3">
-                  <button
-                    disabled
-                    className="w-full py-3 border-2 border-green-700/40 text-green-700/40 bg-white font-bold rounded-lg cursor-not-allowed"
-                  >
-                    Request Images
-                  </button>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    Upgrade to request images
-                  </div>
-                </div>
-              ) : null}
 
               {isMessagingOnly && (
                 <div className="flex items-center justify-center gap-2 mt-4 text-on-primary-container text-xs font-medium uppercase tracking-widest">
@@ -501,7 +402,7 @@ export default function ListingDetailPage() {
             </div>
 
             {/* Listing Information */}
-            <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 border border-outline-variant/15 shadow-sm">
+            <div className="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/15 shadow-sm">
               <h4 className="text-xs font-bold text-outline uppercase tracking-widest mb-6">Listing Information</h4>
               <ul className="space-y-4">
                 <li className="flex justify-between items-center border-b border-surface-container-high pb-4">

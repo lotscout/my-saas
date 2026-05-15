@@ -34,10 +34,10 @@ export async function GET(request: NextRequest) {
   const userIds = [...new Set(requests.map((r) => r.user_id).filter(Boolean))];
   const { data: profiles } = await service
     .from('profiles')
-    .select('id, first_name, last_name, company_name, avatar_url')
+    .select('id, first_name, last_name, company_name, avatar_url, is_test_profile')
     .in('id', userIds);
 
-  const profileMap: Record<string, { first_name: string | null; last_name: string | null; company_name: string | null; avatar_url: string | null }> = {};
+  const profileMap: Record<string, { first_name: string | null; last_name: string | null; company_name: string | null; avatar_url: string | null; is_test_profile: boolean | null }> = {};
   (profiles ?? []).forEach((p) => { profileMap[p.id] = p; });
 
   const enriched = requests.map((r) => ({
