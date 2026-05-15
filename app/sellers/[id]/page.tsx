@@ -80,7 +80,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
 
       <main className="pt-24 pb-20 px-4 sm:px-8 max-w-4xl mx-auto">
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-8 mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-4 sm:p-8 mb-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             {/* Avatar */}
             <div className="shrink-0">
@@ -187,7 +187,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
         </section>
       </main>
 
-      <footer className="w-full py-16 px-8 bg-primary grid grid-cols-1 md:grid-cols-2 items-center gap-8 z-10 relative">
+      <footer className="w-full py-10 px-4 sm:px-8 bg-primary grid grid-cols-1 md:grid-cols-2 items-center gap-8 z-10 relative">
         <div className="space-y-6">
           <div className="text-emerald-50 font-black text-2xl tracking-tighter flex items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -309,12 +309,12 @@ export default function PropertyAnalysisPage() {
 
       <Header />
 
-      <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-8">
+      <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-4 sm:px-8">
 
         {/* Page heading */}
         <div className="mb-10 text-center">
           <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Tools</p>
-          <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+          <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
             Deal <span className="text-emerald-600">Analysis</span>
           </h1>
         </div>

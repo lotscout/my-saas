@@ -208,7 +208,7 @@ export default function BuyerRequestPage() {
         </div>
       )}
 
-      <main className="pt-32 pb-24 max-w-7xl mx-auto px-8">
+      <main className="pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-8">
 
         {/* Back */}
         <div className="mb-8">
@@ -219,9 +219,9 @@ export default function BuyerRequestPage() {
         </div>
 
         {/* Identity Block */}
-        <section className="bg-surface-container-lowest p-8 rounded-xl mb-10 flex flex-col md:flex-row items-center md:items-start gap-8 border border-outline-variant/15">
+        <section className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl mb-10 flex flex-col md:flex-row items-center md:items-start gap-8 border border-outline-variant/15">
           <div className="flex-grow text-center md:text-left">
-            <h1 className="text-4xl font-extrabold text-primary mb-1">{buyerName}</h1>
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-primary mb-1">{buyerName}</h1>
             {companyName && (
               <p className="text-xl text-secondary font-medium mb-4">{companyName}</p>
             )}
@@ -253,7 +253,7 @@ export default function BuyerRequestPage() {
           <div className="lg:col-span-7 space-y-10">
 
             {/* Property Criteria */}
-            <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/15">
+            <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl border border-outline-variant/15">
               <div className="flex items-center gap-3 mb-8 border-b border-surface-container-low pb-4">
                 <span className="material-symbols-outlined text-primary">map</span>
                 <h2 className="text-2xl font-bold text-primary">Property Criteria</h2>
@@ -303,7 +303,7 @@ export default function BuyerRequestPage() {
 
             {/* Target Location */}
             {hasLocation && (
-              <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/15">
+              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl border border-outline-variant/15">
                 <div className="flex items-center gap-3 mb-8 border-b border-surface-container-low pb-4">
                   <span className="material-symbols-outlined text-primary">location_on</span>
                   <h2 className="text-2xl font-bold text-primary">Target Location</h2>
@@ -339,7 +339,7 @@ export default function BuyerRequestPage() {
 
             {/* Intended Use */}
             {hasIntendedUse && (
-              <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/15">
+              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl border border-outline-variant/15">
                 <div className="flex items-center gap-3 mb-8 border-b border-surface-container-low pb-4">
                   <span className="material-symbols-outlined text-primary">agriculture</span>
                   <h2 className="text-2xl font-bold text-primary">Intended Use</h2>
@@ -382,7 +382,7 @@ export default function BuyerRequestPage() {
 
           {/* Sidebar */}
           <aside className="lg:col-span-3 space-y-8">
-            <div className="bg-primary p-8 rounded-xl text-on-primary shadow-lg">
+            <div className="bg-primary p-4 sm:p-8 rounded-xl text-on-primary shadow-lg">
               <h3 className="text-xl font-bold mb-4">Interested in connecting?</h3>
               <p className="text-on-primary-container text-sm mb-8 leading-relaxed opacity-90">
                 This buyer is actively seeking land on LotScout. Secure direct matching is available for eligible land owners.
@@ -400,8 +400,8 @@ export default function BuyerRequestPage() {
       </main>
 
       {/* Footer banner */}
-      <section className="max-w-7xl mx-auto px-8 mb-24">
-        <div className="bg-primary-fixed text-on-primary-fixed rounded-xl p-10 flex flex-col md:flex-row justify-between items-center gap-8 border border-primary/10">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-24">
+        <div className="bg-primary-fixed text-on-primary-fixed rounded-xl p-5 sm:p-10 flex flex-col md:flex-row justify-between items-center gap-8 border border-primary/10">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-extrabold text-primary mb-2">
               Are you a seller with land that matches these criteria?

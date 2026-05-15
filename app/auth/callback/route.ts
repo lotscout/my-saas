@@ -16,11 +16,9 @@ export async function GET(request: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? origin
 
   if (code) {
-    // Build the redirect response first so we can attach cookies directly to it.
-    // Using cookies() from next/headers + NextResponse.redirect() in the same
-    // Route Handler loses the Set-Cookie headers in Next.js 16 — cookies must be
-    // set on the same response object that is returned.
-    const response = NextResponse.redirect(`${siteUrl}${next}`)
+    // Collect cookies during session exchange, then build the redirect response
+    // after determining the correct destination (admin vs regular user).
+    const pendingCookies: Array<{ name: string; value: string; options: Parameters<ReturnType<typeof NextResponse.redirect>['cookies']['set']>[2] }> = []
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,7 +30,7 @@ export async function GET(request: NextRequest) {
           },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
+              pendingCookies.push({ name, value, options })
             })
           },
         },
@@ -48,6 +46,8 @@ export async function GET(request: NextRequest) {
     // For password resets, the session is now established — just redirect to the form.
     // Skip the profile upsert; the user already exists and this isn't an OAuth sign-in.
     if (type === 'recovery') {
+      const response = NextResponse.redirect(`${siteUrl}${next}`)
+      pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
       return response
     }
 
@@ -56,6 +56,8 @@ export async function GET(request: NextRequest) {
     // This upsert acts as a safety net for both new and returning OAuth users,
     // filling in name + avatar from Google metadata only when those fields are null.
     const user = sessionData.user
+    let destination = next
+
     if (user) {
       try {
         const meta = (user.user_metadata ?? {}) as Record<string, string>
@@ -99,12 +101,20 @@ export async function GET(request: NextRequest) {
             .eq('id', user.id)
             .is('first_name', null)
         }
+
+        // Step 3: redirect admins to their dashboard instead of the regular one.
+        const { data: profile } = await service.from('profiles').select('is_admin').eq('id', user.id).single()
+        if (profile?.is_admin) {
+          destination = '/admin/dashboard'
+        }
       } catch (profileErr) {
         // Non-fatal: log but don't block the redirect
         console.error('[auth/callback] profile upsert error:', profileErr)
       }
     }
 
+    const response = NextResponse.redirect(`${siteUrl}${destination}`)
+    pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
     return response
   }
 

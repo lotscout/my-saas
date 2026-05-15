@@ -55,6 +55,14 @@ export default function SignInPage() {
       body: JSON.stringify({ rememberMe }),
     });
 
+    const { data: { user: signedInUser } } = await supabase.auth.getUser();
+    if (signedInUser) {
+      const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', signedInUser.id).single();
+      if (profile?.is_admin) {
+        router.push('/admin/dashboard');
+        return;
+      }
+    }
     router.push('/dashboard');
   }
 

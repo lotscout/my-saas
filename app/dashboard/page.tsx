@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
 import CreateListingGate from '@/components/CreateListingGate';
@@ -107,6 +108,7 @@ function criteriaLabel(b: any): string {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [firstName, setFirstName] = useState<string | null>(null);
   const [tier, setTier] = useState<Tier | null>(null);
   const [profileIncomplete, setProfileIncomplete] = useState(false);
@@ -150,7 +152,7 @@ export default function DashboardPage() {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
       const [profileRes, subRes, messagesRes, reportsRes, userListingsRes, userCriteriaRes, unreadRes, analysisRes, draftListingsRes] = await Promise.all([
-        supabase.from('profiles').select('first_name, last_name, avatar_url, bio, phone, company_name, state, county').eq('id', user.id).single(),
+        supabase.from('profiles').select('first_name, last_name, avatar_url, bio, phone, company_name, state, county, is_admin').eq('id', user.id).single(),
         supabase.from('subscriptions').select('tier').eq('user_id', user.id).eq('status', 'active').single(),
         supabase.from('messages')
           .select('id, body, created_at, listing_id, sender:sender_id(first_name, last_name), listing:listing_id(title)')
@@ -175,6 +177,11 @@ export default function DashboardPage() {
         supabase.from('property_analysis_requests').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'complete'),
         supabase.from('listings').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'draft'),
       ]);
+
+      if (profileRes.data?.is_admin) {
+        router.replace('/admin/dashboard');
+        return;
+      }
 
       setFirstName(
         profileRes.data?.first_name ??
@@ -368,18 +375,18 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <main className="max-w-[1440px] mx-auto pt-24 pb-12 px-8">
+      <main className="max-w-[1440px] mx-auto pt-24 pb-12 px-4 sm:px-8">
 
         {/* Dashboard Header */}
         <header className="mb-10">
           <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Overview</p>
           {loading ? (
             <div className="flex items-center gap-3">
-              <span className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter">{getGreeting()},</span>
+              <span className="font-headline text-3xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter">{getGreeting()},</span>
               <Skeleton className="h-12 w-40 rounded-2xl" />
             </div>
           ) : (
-            <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
               {getGreeting()},{' '}
               <span className="text-emerald-600">{firstName ?? 'there'}</span>
             </h1>
@@ -498,10 +505,10 @@ export default function DashboardPage() {
         })()}
 
         {/* Stats Row */}
-        <section className="grid grid-cols-3 gap-6 mb-12">
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-12">
 
           {/* New Messages */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-8 text-center min-h-[220px]">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-[180px] sm:min-h-[220px]">
             <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>mail</span>
             {loading ? (
               <>
@@ -524,7 +531,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Completed Reports */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-8 text-center min-h-[220px]">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-[180px] sm:min-h-[220px]">
             <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
             {loading ? (
               <>
@@ -547,7 +554,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Matched Buyers */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-8 text-center min-h-[220px]">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-[180px] sm:min-h-[220px]">
             <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
             {loading ? (
               <>
@@ -725,7 +732,7 @@ export default function DashboardPage() {
         )}
 
         {/* Monthly Market Report */}
-        <section className="bg-primary rounded-[2rem] p-10 relative overflow-hidden text-white shadow-2xl">
+        <section className="bg-primary rounded-[2rem] p-5 sm:p-10 relative overflow-hidden text-white shadow-2xl">
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-10">
             <div className="w-full h-full bg-gradient-to-l from-emerald-400 to-transparent" />
           </div>
@@ -735,7 +742,7 @@ export default function DashboardPage() {
                 <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-[0.2em] border border-emerald-500/30">Monthly Report</span>
                 <span className="text-emerald-100/60 text-xs font-medium italic">May 2026</span>
               </div>
-              <h2 className="text-5xl font-extrabold tracking-tighter mb-6 leading-none font-headline">LotScout Land Market Report</h2>
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tighter mb-6 leading-none font-headline">LotScout Land Market Report</h2>
               <p className="text-emerald-100/70 text-lg font-body max-w-xl mb-8 leading-relaxed">
                 This month's report covers national farmland values, top 5 states by market activity, and notable shifts in recreational and agricultural land demand. U.S. farmland averaged $4,350/acre in 2025, up 4.3% year over year.
               </p>
@@ -767,7 +774,7 @@ export default function DashboardPage() {
 
       {/* Footer */}
       <footer className="w-full py-12 border-t border-emerald-900/5 bg-slate-50">
-        <div className="flex flex-col md:flex-row justify-between items-center px-12 max-w-[1440px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-center px-4 sm:px-8 max-w-[1440px] mx-auto">
           <div className="mb-6 md:mb-0">
             <span className="font-headline font-bold text-emerald-900 text-lg">LotScout</span>
             <p className="text-slate-500 text-sm mt-1">&copy; 2024 LotScout. The Digital Cartographer.</p>

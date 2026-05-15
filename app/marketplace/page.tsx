@@ -672,11 +672,11 @@ export default function MarketplacePage() {
         </div>
       )}
 
-      <main className="pt-24 px-10 pb-20 min-h-screen max-w-[1400px] mx-auto">
+      <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1400px] mx-auto">
         {/* Header */}
         <section className="mb-8 flex flex-col md:flex-row justify-between items-end gap-6">
           <div className="max-w-2xl">
-            <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
+            <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
               Scout Your <span className="text-emerald-600">Next Deal</span>
             </h1>
             <p className="text-slate-500 font-body text-lg leading-relaxed">
@@ -1038,7 +1038,7 @@ export default function MarketplacePage() {
                 <p className="text-sm">Try a different search term</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
                 {filteredListings.map(listing => {
                   const imgSrc = listing.photos_urls?.[0] ?? PLACEHOLDER_IMG;
                   const acreage = formatAcreage(listing.lot_size_acres, listing.lot_size_sqft);
@@ -1276,7 +1276,7 @@ export default function MarketplacePage() {
         )}
       </main>
 
-      <footer className="w-full py-16 px-8 bg-primary dark:bg-black grid grid-cols-1 md:grid-cols-2 items-center gap-8 z-10 relative">
+      <footer className="w-full py-10 px-4 sm:px-8 bg-primary dark:bg-black grid grid-cols-1 md:grid-cols-2 items-center gap-8 z-10 relative">
         <div className="space-y-6">
           <div className="text-emerald-50 font-black text-2xl tracking-tighter flex items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1307,7 +1307,7 @@ export default function MarketplacePage() {
       )}
 
       {/* FAB */}
-      <div className="fixed bottom-10 right-10 z-[60]">
+      <div className="fixed bottom-6 right-6 z-[60]">
         <button
           onClick={activeTab === 'properties' ? handleCreateListing : handlePostBuyerRequest}
           className="bg-primary text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform ring-4 ring-white/10"

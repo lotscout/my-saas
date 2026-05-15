@@ -122,7 +122,7 @@ export default function EditProfilePage() {
       )}
 
       <div className="pt-16 flex min-h-screen">
-        <main className="flex-1 bg-surface-container-low p-8 md:p-12">
+        <main className="flex-1 bg-surface-container-low p-4 sm:p-8 md:p-12">
           <div className="max-w-5xl mx-auto space-y-12">
 
             {/* Page Header */}
@@ -141,7 +141,7 @@ export default function EditProfilePage() {
 
             {/* Profile Identity Section */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="lg:col-span-4 bg-surface-container-lowest p-8 rounded-xl space-y-6">
+              <div className="lg:col-span-4 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6">
                 <h3 className="font-headline text-xl font-bold text-primary flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary-container">badge</span>
                   Profile Identity
@@ -155,7 +155,7 @@ export default function EditProfilePage() {
                 <p className="text-xs text-center text-secondary leading-relaxed">JPG, GIF or PNG. Max size of 2MB.</p>
               </div>
 
-              <div className="lg:col-span-8 bg-surface-container-lowest p-8 rounded-xl space-y-6">
+              <div className="lg:col-span-8 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-primary tracking-wide uppercase">First Name</label>
@@ -192,7 +192,7 @@ export default function EditProfilePage() {
             {/* Contact & Company Section */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Contact Information */}
-              <div className="bg-surface-container-lowest p-8 rounded-xl space-y-6">
+              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6">
                 <h3 className="font-headline text-xl font-bold text-primary">Contact Information</h3>
                 <div className="space-y-4">
                   <div>
@@ -242,7 +242,7 @@ export default function EditProfilePage() {
               </div>
 
               {/* Company */}
-              <div className="bg-surface-container-lowest p-8 rounded-xl space-y-6 flex flex-col">
+              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6 flex flex-col">
                 <div className="flex justify-between items-start">
                   <h3 className="font-headline text-xl font-bold text-primary">Company</h3>
                 </div>
@@ -262,7 +262,7 @@ export default function EditProfilePage() {
             </section>
 
             {/* Account Management Section */}
-            <section className="bg-surface-container-lowest p-8 rounded-xl space-y-8">
+            <section className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-8">
               <div className="flex items-center justify-between border-b border-outline-variant/30 pb-4">
                 <h3 className="font-headline text-xl font-bold text-primary">Account Management</h3>
                 {tier && (

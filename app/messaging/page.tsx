@@ -267,7 +267,7 @@ export default function MessagingPage() {
       <Header />
 
       <main className="flex flex-1 pt-16 h-full overflow-hidden">
-        <div className="max-w-screen-2xl mx-auto px-8 w-full flex h-full overflow-hidden">
+        <div className="max-w-screen-2xl mx-auto px-2 sm:px-8 w-full flex h-full overflow-hidden">
 
           {/* Left nav sidebar */}
           <aside className="flex-none w-56 h-full flex flex-col border-r border-outline-variant/20 bg-white font-['Inter'] text-sm font-medium">

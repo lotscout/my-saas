@@ -357,7 +357,7 @@ export default function CreateListingPage() {
           {currentStep === 1 && (
             <>
               <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/10">
-                <div className="p-8 md:p-12">
+                <div className="p-4 sm:p-8 md:p-12">
                   <div className="space-y-10">
 
                     {/* Ownership Type dropdown */}
@@ -433,7 +433,7 @@ export default function CreateListingPage() {
           {/* ── Step 2 ── */}
           {currentStep === 2 && (
             <>
-              <div className="bg-surface-container-lowest p-8 md:p-12 rounded-xl border border-outline-variant/15 shadow-sm">
+              <div className="bg-surface-container-lowest p-4 sm:p-8 md:p-12 rounded-xl border border-outline-variant/15 shadow-sm">
                 <div className="space-y-12">
 
                   {/* Core Details */}
@@ -750,7 +750,7 @@ export default function CreateListingPage() {
           {/* ── Step 3 ── */}
           {currentStep === 3 && (
             <div className="flex flex-col gap-8">
-              <div className="bg-surface-container-lowest rounded-xl p-8 md:p-12 shadow-sm border border-surface-container">
+              <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 md:p-12 shadow-sm border border-surface-container">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
 
                   {/* Photos Upload */}
@@ -893,7 +893,7 @@ export default function CreateListingPage() {
           {/* ── Step 4 ── */}
           {currentStep === 4 && (
             <div className="flex-grow">
-              <div className="bg-surface-container-lowest rounded-xl p-8 md:p-12 shadow-sm border border-outline-variant/10">
+              <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 md:p-12 shadow-sm border border-outline-variant/10">
                 <section className="space-y-6">
 
                   {/* Compliance checkboxes */}

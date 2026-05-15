@@ -175,7 +175,7 @@ export default function HomePage() {
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-primary">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-surface-container-high">
-        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
           <Link href="/home" className="font-headline text-xl font-extrabold text-primary tracking-tight">LotScout</Link>
           <div className="hidden md:flex items-center gap-8">
             <Link href="/home#platform" className="text-sm font-semibold text-secondary hover:text-primary transition-colors">Platform</Link>
@@ -195,11 +195,11 @@ export default function HomePage() {
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
           <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary-fixed-dim rounded-full blur-3xl"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
           <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center">
             {/* Left column: hero text */}
             <div>
-              <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
+              <h1 className="font-headline text-3xl sm:text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
                 America&apos;s #1 Platform for Off-Market Land Deals.
               </h1>
               <p className="font-body text-lg text-on-primary-container leading-relaxed mb-8 max-w-2xl">
@@ -219,7 +219,7 @@ export default function HomePage() {
       </header>
 
       {/* Off-market callout banner */}
-      <div className="bg-emerald-900 py-4 px-8">
+      <div className="bg-emerald-900 py-4 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
           <span className="material-symbols-outlined text-emerald-300 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>lock_open</span>
           <p className="text-white font-semibold text-base">
@@ -229,8 +229,8 @@ export default function HomePage() {
       </div>
 
       {/* SECTION 2: Social Proof Stats */}
-      <section className="py-16 bg-primary text-white px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+      <section className="py-16 bg-primary text-white px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
             { stat: '92%',     label: 'Fast Closing Rate' },
             { stat: '$4.32M',  label: 'Commission Saved' },
@@ -238,7 +238,7 @@ export default function HomePage() {
             { stat: '2,400+',  label: 'Active Listings' },
           ].map(({ stat, label }) => (
             <div key={label} className="text-center p-6 bg-white/5 rounded-2xl">
-              <div className="text-4xl md:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
+              <div className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
               <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
             </div>
           ))}
@@ -246,11 +246,11 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 3: Marketplace Preview */}
-      <section className="py-16 bg-surface px-8">
+      <section className="py-16 bg-surface px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-4">A Glimpse of What&apos;s Inside</h2>
-          <p className="text-secondary text-xl mb-12">All properties on LotScout are off-market listings you won&apos;t find on Zillow or Realtor.com.</p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-4">A Glimpse of What&apos;s Inside</h2>
+          <p className="text-secondary text-base sm:text-xl mb-8 sm:mb-12">All properties on LotScout are off-market listings you won&apos;t find on Zillow or Realtor.com.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1 */}
             <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -307,13 +307,13 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 4: New Buyers Added Daily */}
-      <section className="py-16 bg-surface-container-low px-8">
+      <section className="py-16 bg-surface-container-low px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
-          <p className="text-secondary text-lg mb-10 max-w-2xl">
+          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
+          <p className="text-secondary text-base sm:text-lg mb-8 sm:mb-10 max-w-2xl">
             Sellers — these buyers are actively searching for land like yours right now.
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Buyer Card 1 */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col">
               <div className="flex items-start justify-between mb-4">
@@ -424,9 +424,9 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 5: The Problem */}
-      <section className="py-16 bg-surface px-8">
+      <section className="py-16 bg-surface px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-8 tracking-tight">Sound Familiar?</h2>
+          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary mb-8 tracking-tight">Sound Familiar?</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {/* Before LotScout */}
             <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
@@ -470,13 +470,13 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 6: Who It's For */}
-      <section className="py-16 bg-surface-container-low px-8">
+      <section className="py-16 bg-surface-container-low px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h2 className="font-headline text-4xl font-bold text-primary tracking-tight mb-3">Built for Both Sides of the Deal</h2>
-            <p className="text-secondary text-lg max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
+            <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-3">Built for Both Sides of the Deal</h2>
+            <p className="text-secondary text-base sm:text-lg max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-0 overflow-hidden rounded-3xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 overflow-hidden rounded-3xl">
             {/* Seller */}
             <div className="bg-primary p-8 md:p-10 flex flex-col justify-between">
               <div>
@@ -522,10 +522,10 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 7: Pricing */}
-      <section className="py-16 bg-surface px-8">
+      <section className="py-16 bg-surface px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-bold text-primary mb-10 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary mb-8 sm:mb-10 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {/* Standard */}
             <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Standard</h3>
@@ -607,10 +607,10 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 8: Final CTA */}
-      <section className="py-16 bg-primary px-8 text-center relative overflow-hidden">
+      <section className="py-16 bg-primary px-4 sm:px-8 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="font-headline text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Your Next Land Partnership Starts Here</h2>
+          <h2 className="font-headline text-2xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Your Next Land Partnership Starts Here</h2>
           <p className="text-on-primary-container text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
             LotScout connects serious buyers and sellers of off-market land directly. No realtors. No commission. No waiting on the MLS. Just the right match at the right time.
           </p>

@@ -17,6 +17,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   async function handleSignOut() {
@@ -35,67 +36,110 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
+
   return (
-    <header className="fixed top-0 w-full z-50 dark:bg-emerald-950/80 backdrop-blur-md border-b border-emerald-900/10 dark:border-emerald-100/10 shadow-sm flex justify-between items-center px-8 h-16 mx-auto bg-white">
-      <div className="text-xl font-black text-primary tracking-tighter flex items-center gap-3 font-['Manrope']">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          alt="LotScout Logo"
-          className="h-8 w-8 object-contain"
-          src="/logo.png"
-        />
-        LotScout
-      </div>
-      <nav className="hidden md:flex items-center gap-8 font-['Manrope'] font-bold tracking-tight h-full">
-        {NAV_LINKS.map(({ label, href }) => {
-          const isActive = href !== '#' && pathname === href;
-          return (
-            <a
-              key={label}
-              className={`h-full flex items-center transition-colors ${
-                isActive
-                  ? 'text-primary border-b-2 border-primary pb-1'
-                  : 'text-primary/70 hover:text-primary'
-              }`}
-              href={href}
-            >
-              {label}
-            </a>
-          );
-        })}
-      </nav>
-      <div className="flex items-center gap-4">
-        <button className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
-        <div className="relative" ref={dropdownRef}>
-          <button
-            className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all"
-            onClick={() => setDropdownOpen((prev) => !prev)}
-          >
-            <span className="material-symbols-outlined">account_circle</span>
-          </button>
-          {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden z-50">
-              <a
-                href="/profile"
-                className="flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors"
-                onClick={() => setDropdownOpen(false)}
-              >
-                <span className="material-symbols-outlined text-base">person</span>
-                My Profile
-              </a>
+    <>
+      <header className="fixed top-0 w-full z-50 bg-white border-b border-emerald-900/10 shadow-sm">
+        <div className="flex justify-between items-center px-4 sm:px-8 h-16 mx-auto">
+
+          {/* Logo */}
+          <div className="text-xl font-black text-primary tracking-tighter flex items-center gap-3 font-['Manrope']">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img alt="LotScout Logo" className="h-8 w-8 object-contain" src="/logo.png" />
+            LotScout
+          </div>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-8 font-['Manrope'] font-bold tracking-tight h-full">
+            {NAV_LINKS.map(({ label, href }) => {
+              const isActive = href !== '#' && pathname === href;
+              return (
+                <a
+                  key={label}
+                  className={`h-full flex items-center transition-colors ${
+                    isActive
+                      ? 'text-primary border-b-2 border-primary pb-1'
+                      : 'text-primary/70 hover:text-primary'
+                  }`}
+                  href={href}
+                >
+                  {label}
+                </a>
+              );
+            })}
+          </nav>
+
+          {/* Right side actions */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all">
+              <span className="material-symbols-outlined">notifications</span>
+            </button>
+            <div className="relative" ref={dropdownRef}>
               <button
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors border-t border-outline-variant/10"
-                onClick={handleSignOut}
+                className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all"
+                onClick={() => setDropdownOpen((prev) => !prev)}
               >
-                <span className="material-symbols-outlined text-base">logout</span>
-                Sign Out
+                <span className="material-symbols-outlined">account_circle</span>
               </button>
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden z-50">
+                  <a
+                    href="/profile"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <span className="material-symbols-outlined text-base">person</span>
+                    My Profile
+                  </a>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors border-t border-outline-variant/10"
+                    onClick={handleSignOut}
+                  >
+                    <span className="material-symbols-outlined text-base">logout</span>
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Hamburger — mobile only */}
+            <button
+              className="md:hidden p-2 text-primary hover:bg-emerald-50 rounded-full transition-all"
+              onClick={() => setMobileOpen((prev) => !prev)}
+              aria-label="Toggle menu"
+            >
+              <span className="material-symbols-outlined">
+                {mobileOpen ? 'close' : 'menu'}
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Mobile nav drawer — same bg-white as header, no z-index bleed */}
+      {mobileOpen && (
+        <div className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-emerald-900/10 shadow-md md:hidden">
+          <nav className="flex flex-col font-['Manrope'] font-bold">
+            {NAV_LINKS.map(({ label, href }) => {
+              const isActive = href !== '#' && pathname === href;
+              return (
+                <a
+                  key={label}
+                  href={href}
+                  className={`px-6 py-4 text-base border-b border-surface-container-high transition-colors ${
+                    isActive ? 'text-primary bg-emerald-50' : 'text-primary/70 hover:text-primary hover:bg-emerald-50'
+                  }`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {label}
+                </a>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+    </>
   );
 }

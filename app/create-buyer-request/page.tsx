@@ -321,7 +321,7 @@ export default function CreateBuyerRequestPage() {
             <form onSubmit={handleSubmit} className="divide-y divide-surface-container">
 
               {/* ── 1. Property Details ── */}
-              <section className="p-8 lg:p-10">
+              <section className="p-4 sm:p-8 lg:p-10">
                 <div className="flex items-center gap-3 mb-8">
                   <span className="material-symbols-outlined text-primary text-3xl">landscape</span>
                   <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Property Details</h2>
@@ -476,7 +476,7 @@ export default function CreateBuyerRequestPage() {
               </section>
 
               {/* ── 2. Budget & Pricing ── */}
-              <section className="p-8 lg:p-10 bg-surface/30">
+              <section className="p-4 sm:p-8 lg:p-10 bg-surface/30">
                 <div className="flex items-center gap-3 mb-8">
                   <span className="material-symbols-outlined text-primary text-3xl">payments</span>
                   <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Budget &amp; Pricing</h2>
@@ -544,7 +544,7 @@ export default function CreateBuyerRequestPage() {
               </section>
 
               {/* ── 3. Intended Use ── */}
-              <section className="p-8 lg:p-10">
+              <section className="p-4 sm:p-8 lg:p-10">
                 <div className="flex items-center gap-3 mb-8">
                   <span className="material-symbols-outlined text-primary text-3xl">category</span>
                   <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Intended Use</h2>
@@ -607,7 +607,7 @@ export default function CreateBuyerRequestPage() {
               </section>
 
               {/* ── 4. Purchase Timeline ── */}
-              <section className="p-8 lg:p-10 bg-surface/30">
+              <section className="p-4 sm:p-8 lg:p-10 bg-surface/30">
                 <div className="flex items-center gap-3 mb-8">
                   <span className="material-symbols-outlined text-primary text-3xl">calendar_month</span>
                   <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Purchase Timeline</h2>
@@ -667,7 +667,7 @@ export default function CreateBuyerRequestPage() {
               </section>
 
               {/* ── 5. Contact Preferences ── */}
-              <section className="p-8 lg:p-10">
+              <section className="p-4 sm:p-8 lg:p-10">
                 <div className="flex items-center gap-3 mb-8">
                   <span className="material-symbols-outlined text-primary text-3xl">contact_support</span>
                   <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Contact Preferences</h2>

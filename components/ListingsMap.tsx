@@ -89,7 +89,18 @@ export default function ListingsMap({ listings }: ListingsMapProps) {
         iconAnchor: [5, 5],
       });
 
-      listings.forEach(listing => {
+      // Filter out listings with missing or zero coordinates before plotting
+      const plottable = listings.filter(
+        l => l.latitude && l.longitude && l.latitude !== 0 && l.longitude !== 0
+      );
+
+      console.log(
+        `[ListingsMap] ${listings.length} listings received, ${plottable.length} plottable. ` +
+        `Sample coords (lat, lng):`,
+        plottable.slice(0, 5).map(l => ({ id: l.id, lat: l.latitude, lng: l.longitude, state: l.state, county: l.county }))
+      );
+
+      plottable.forEach(listing => {
         const isUnderContract = listing.ownership_type === 'Under Contract';
         const icon = isUnderContract ? contractIcon : greenIcon;
 
@@ -130,7 +141,7 @@ export default function ListingsMap({ listings }: ListingsMapProps) {
   }, [listings]);
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden border border-outline-variant/20" style={{ height: '600px' }}>
+    <div className="relative w-full rounded-2xl overflow-hidden border border-outline-variant/20" style={{ height: 'clamp(280px, 50vw, 600px)' }}>
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
       <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow text-xs font-semibold text-slate-600 flex items-center gap-3 z-[1000]">
         <span className="flex items-center gap-1.5">

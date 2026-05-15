@@ -8,6 +8,9 @@ import { createClient } from '@/lib/supabase/client';
 import Header from '@/components/Header';
 import SendMessageModal from '@/components/SendMessageModal';
 
+const IMAGE_REQUEST_BODY =
+  "Hi, I'm interested in this property and would like to request additional images. Thank you!";
+
 interface Listing {
   id: string;
   user_id: string;
@@ -71,6 +74,8 @@ export default function ListingDetailPage() {
   const [toastMsg, setToastMsg] = useState('');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [imageRequestSent, setImageRequestSent] = useState(false);
+  const [imageRequestLoading, setImageRequestLoading] = useState(false);
 
   const { tier, isAdmin, loading: tierLoading } = useUserTier();
 
@@ -118,10 +123,56 @@ export default function ListingDetailPage() {
     })();
   }, [id, authed]);
 
+  // Check if buyer already sent an image request for this listing's seller
+  useEffect(() => {
+    if (!listing || !currentUserId) return;
+    (async () => {
+      const supabase = createClient();
+      const { data: conv } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(
+          `and(buyer_id.eq.${currentUserId},seller_id.eq.${listing.user_id}),` +
+          `and(buyer_id.eq.${listing.user_id},seller_id.eq.${currentUserId})`
+        )
+        .limit(1)
+        .maybeSingle();
+      if (!conv) return;
+      const { data: msg } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('conversation_id', conv.id)
+        .eq('sender_id', currentUserId)
+        .eq('body', IMAGE_REQUEST_BODY)
+        .maybeSingle();
+      if (msg) setImageRequestSent(true);
+    })();
+  }, [listing, currentUserId]);
+
   function handleMessage() {
     if (tierLoading) return;
     if (!tier && !isAdmin) { setShowUpgradeModal(true); return; }
     setShowMessageModal(true);
+  }
+
+  async function handleRequestImages() {
+    if (tierLoading) return;
+    if (!tier && !isAdmin) { setShowUpgradeModal(true); return; }
+    if (imageRequestSent || imageRequestLoading) return;
+    setImageRequestLoading(true);
+    try {
+      const res = await fetch(`/api/listings/${id}/request-images`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok || data.alreadySent) {
+        setImageRequestSent(true);
+        setToastMsg('Image request sent!');
+        setTimeout(() => setToastMsg(''), 3000);
+      }
+    } catch {
+      // silent — button stays enabled for retry
+    } finally {
+      setImageRequestLoading(false);
+    }
   }
 
   // Still checking auth or awaiting redirect
@@ -225,7 +276,7 @@ export default function ListingDetailPage() {
       <main className="pt-32 pb-24 max-w-7xl mx-auto px-6">
 
         {/* Header */}
-        <header className="bg-surface-container-lowest rounded-xl p-8 mb-10 shadow-sm border border-outline-variant/15">
+        <header className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 mb-10 shadow-sm border border-outline-variant/15">
           <div className="flex flex-col gap-6">
             <Link href="/marketplace" className="flex items-center gap-2 text-secondary font-medium text-sm hover:text-primary transition-colors w-fit">
               <span className="material-symbols-outlined text-lg">arrow_back</span>
@@ -396,7 +447,7 @@ export default function ListingDetailPage() {
           <aside className="lg:col-span-4 space-y-8">
 
             {/* CTA Card */}
-            <div className="bg-primary-container text-white rounded-xl p-8 shadow-xl">
+            <div className="bg-primary-container text-white rounded-xl p-4 sm:p-8 shadow-xl">
               <h3 className="text-2xl font-bold font-headline mb-6">Interested in this property?</h3>
 
               <button
@@ -405,6 +456,29 @@ export default function ListingDetailPage() {
               >
                 Message Seller
               </button>
+
+              {/* Request Images button */}
+              {!tierLoading && (tier || isAdmin) ? (
+                <button
+                  onClick={handleRequestImages}
+                  disabled={imageRequestSent || imageRequestLoading}
+                  className="w-full py-3 mt-3 border-2 border-green-700 text-green-700 bg-white font-bold rounded-lg hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {imageRequestSent ? 'Request Sent ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
+                </button>
+              ) : !tierLoading ? (
+                <div className="relative group mt-3">
+                  <button
+                    disabled
+                    className="w-full py-3 border-2 border-green-700/40 text-green-700/40 bg-white font-bold rounded-lg cursor-not-allowed"
+                  >
+                    Request Images
+                  </button>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    Upgrade to request images
+                  </div>
+                </div>
+              ) : null}
 
               {isMessagingOnly && (
                 <div className="flex items-center justify-center gap-2 mt-4 text-on-primary-container text-xs font-medium uppercase tracking-widest">
@@ -427,7 +501,7 @@ export default function ListingDetailPage() {
             </div>
 
             {/* Listing Information */}
-            <div className="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/15 shadow-sm">
+            <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 border border-outline-variant/15 shadow-sm">
               <h4 className="text-xs font-bold text-outline uppercase tracking-widest mb-6">Listing Information</h4>
               <ul className="space-y-4">
                 <li className="flex justify-between items-center border-b border-surface-container-high pb-4">

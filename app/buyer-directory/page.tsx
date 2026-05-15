@@ -502,7 +502,7 @@ export default function BuyerDirectoryPage() {
 
           {/* Page header */}
           <div className="mb-8">
-            <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
+            <h1 className="font-headline text-2xl sm:text-3xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
               Find Your <span className="text-emerald-600">Next Buyer</span>
             </h1>
             <p className="text-secondary text-sm">Connect with verified land buyers actively seeking properties across the US.</p>

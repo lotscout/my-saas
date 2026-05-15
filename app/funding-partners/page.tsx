@@ -24,12 +24,12 @@ export default function FundingPartnersPage() {
     <div className="bg-surface text-on-surface antialiased font-body min-h-screen">
       <Header />
 
-      <main className="max-w-[1440px] mx-auto pt-28 pb-20 px-8">
+      <main className="max-w-[1440px] mx-auto pt-28 pb-20 px-4 sm:px-8">
 
         {/* Page heading */}
         <header className="mb-10">
           <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Partner Access</p>
-          <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-3">
+          <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-3">
             Funding <span className="text-emerald-600">Partners</span>
           </h1>
           <p className="text-secondary text-lg font-medium max-w-xl">

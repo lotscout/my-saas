@@ -80,7 +80,7 @@ export default function PricingPage() {
     <div className="bg-background text-on-surface antialiased min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-grow pt-20 pb-4 px-6 max-w-7xl mx-auto w-full">
+      <main className="flex-grow pt-20 pb-4 px-4 sm:px-6 max-w-7xl mx-auto w-full">
         {/* Page heading */}
         <header className="mb-4">
           <h1 className="font-headline text-3xl font-extrabold text-primary tracking-tighter leading-tight">
@@ -88,7 +88,8 @@ export default function PricingPage() {
           </h1>
         </header>
 
-        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
+        <div className="overflow-x-auto rounded-2xl">
+        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5 min-w-[560px]">
 
           {/* ── Column headers ── */}
           <div style={GRID} className="border-b border-outline-variant/10">
@@ -232,6 +233,7 @@ export default function PricingPage() {
             );
           })}
 
+        </div>
         </div>
       </main>
 

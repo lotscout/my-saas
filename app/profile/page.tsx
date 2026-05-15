@@ -60,7 +60,7 @@ export default function ProfilePage() {
     <div className="bg-surface text-on-surface font-body">
       <Header />
 
-      <main className="pt-24 pb-20 max-w-screen-xl mx-auto px-8 space-y-12">
+      <main className="pt-24 pb-20 max-w-screen-xl mx-auto px-4 sm:px-8 space-y-12">
         {/* Hero Section */}
         <section className="bg-surface-container-low border border-outline-variant/30 rounded-[2.5rem] p-8 md:p-14 relative overflow-hidden shadow-sm">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/5 to-transparent"></div>
@@ -87,7 +87,7 @@ export default function ProfilePage() {
                     </span>
                   </div>
                 )}
-                <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+                <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
                   {firstPart}{restPart ? <> <span className="text-emerald-600">{restPart}</span></> : null}
                 </h1>
                 {profile?.company_name && (
@@ -115,7 +115,7 @@ export default function ProfilePage() {
         {/* Grid Layout for Bio & Criteria */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* About Section */}
-          <section className="md:col-span-7 bg-white p-10 rounded-[2.5rem] border border-outline-variant/30 shadow-sm">
+          <section className="md:col-span-7 bg-white p-5 sm:p-10 rounded-[2.5rem] border border-outline-variant/30 shadow-sm">
             <h2 className="text-2xl font-bold text-primary mb-6 font-headline">About</h2>
             <div className="space-y-4 text-on-surface-variant leading-relaxed font-body text-lg">
               {profile?.bio ? (
@@ -127,7 +127,7 @@ export default function ProfilePage() {
           </section>
 
           {/* Acquisition Criteria Section */}
-          <section className="md:col-span-5 bg-primary p-10 rounded-[2.5rem] text-white shadow-sm relative overflow-hidden">
+          <section className="md:col-span-5 bg-primary p-5 sm:p-10 rounded-[2.5rem] text-white shadow-sm relative overflow-hidden">
             <div className="absolute -top-4 -right-4 opacity-10">
               <span className="material-symbols-outlined" style={{ fontSize: '96px' }}>analytics</span>
             </div>

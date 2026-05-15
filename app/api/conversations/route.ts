@@ -49,13 +49,13 @@ export async function GET() {
 
   const { data: profileRows } = await service
     .from('profiles')
-    .select('id, first_name, last_name, company_name, avatar_url')
+    .select('id, first_name, last_name, company_name, avatar_url, email')
     .in('id', otherIds);
 
   const profileMap: Record<string, ProfileRow> = {};
   for (const p of profileRows ?? []) profileMap[p.id] = p;
 
-  // For participants with no display name, fall back to their auth email
+  // For participants with no display name, fall back to auth user data
   const namelessIds = otherIds.filter(id => {
     const p = profileMap[id];
     return !p?.company_name && !p?.first_name && !p?.last_name;
@@ -65,11 +65,26 @@ export async function GET() {
     await Promise.all(
       namelessIds.map(async id => {
         const { data } = await service.auth.admin.getUserById(id);
-        const email = data?.user?.email ?? null;
+        const authUser = data?.user;
         if (!profileMap[id]) {
           profileMap[id] = { id, first_name: null, last_name: null, company_name: null, avatar_url: null };
         }
-        profileMap[id].email = email;
+        // Fill email from auth if not already stored on profile
+        if (!profileMap[id].email) {
+          profileMap[id].email = authUser?.email ?? null;
+        }
+        // Also pull name fields from auth metadata for accounts whose profile
+        // row was created without going through the handle_new_user trigger
+        const meta = (authUser?.raw_user_meta_data ?? {}) as Record<string, unknown>;
+        if (!profileMap[id].company_name && meta.company_name) {
+          profileMap[id].company_name = meta.company_name as string;
+        }
+        if (!profileMap[id].first_name && meta.first_name) {
+          profileMap[id].first_name = meta.first_name as string;
+        }
+        if (!profileMap[id].last_name && meta.last_name) {
+          profileMap[id].last_name = meta.last_name as string;
+        }
       })
     );
   }
