@@ -36,6 +36,7 @@ interface BuyerRequest {
     last_name: string | null;
     company_name: string | null;
     avatar_url: string | null;
+    is_test_profile: boolean | null;
   } | null;
 }
 

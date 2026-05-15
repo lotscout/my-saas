@@ -192,7 +192,7 @@ interface BuyerRequest {
   additional_notes: string | null;
   contact_preference: string[];
   created_at: string;
-  profiles: { first_name: string | null; last_name: string | null; avatar_url: string | null } | null;
+  profiles: { first_name: string | null; last_name: string | null; avatar_url: string | null; is_test_profile: boolean | null } | null;
 }
 
 function fmtPerAcreMkt(budgetMax: number | null, minAcreage: number | null, budgetMin: number | null): string {
