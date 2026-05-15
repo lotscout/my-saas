@@ -75,7 +75,7 @@ export async function GET() {
         }
         // Also pull name fields from auth metadata for accounts whose profile
         // row was created without going through the handle_new_user trigger
-        const meta = (authUser?.raw_user_meta_data ?? {}) as Record<string, unknown>;
+        const meta = (authUser?.user_metadata ?? {}) as Record<string, unknown>;
         if (!profileMap[id].company_name && meta.company_name) {
           profileMap[id].company_name = meta.company_name as string;
         }
