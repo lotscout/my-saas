@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface Stats {
   totalUsers: number;
@@ -8,6 +8,15 @@ interface Stats {
   pendingListings: number;
   pendingAnalysis: number;
   pendingBuyerRequests: number;
+}
+
+interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  link: string | null;
+  created_at: string;
+  read_at: string | null;
 }
 
 function StatCard({ label, value, icon, color }: { label: string; value: number | null; icon: string; color: string }) {
@@ -26,32 +35,161 @@ function StatCard({ label, value, icon, color }: { label: string; value: number 
   );
 }
 
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifLoading, setNotifLoading] = useState(true);
+  const [dismissingAll, setDismissingAll] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/stats')
       .then(r => r.json())
       .then(data => {
-        if (data.error) setError(data.error);
+        if (data.error) setStatsError(data.error);
         else setStats(data);
       })
-      .catch(err => setError(err.message));
+      .catch(err => setStatsError(err.message));
   }, []);
+
+  const loadNotifications = useCallback(async () => {
+    setNotifLoading(true);
+    try {
+      const res = await fetch('/api/admin/notifications');
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications ?? []);
+      }
+    } catch {}
+    setNotifLoading(false);
+  }, []);
+
+  useEffect(() => { loadNotifications(); }, [loadNotifications]);
+
+  async function dismissNotification(id: string) {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    await fetch('/api/admin/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+  }
+
+  async function dismissAll() {
+    setDismissingAll(true);
+    setNotifications([]);
+    await fetch('/api/admin/notifications', { method: 'DELETE' });
+    setDismissingAll(false);
+  }
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="font-headline text-3xl font-extrabold text-on-surface tracking-tight">Admin Dashboard</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="font-headline text-3xl font-extrabold text-on-surface tracking-tight">Admin Dashboard</h1>
+          {notifications.length > 0 && (
+            <span className="bg-red-500 text-white text-xs font-extrabold px-2.5 py-1 rounded-full">
+              {notifications.length}
+            </span>
+          )}
+        </div>
         <p className="text-on-surface/50 mt-1 text-sm">Real-time overview of LotScout platform activity.</p>
       </div>
 
-      {error && (
+      {statsError && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
-          Failed to load stats: {error}
+          Failed to load stats: {statsError}
         </div>
+      )}
+
+      {/* Notifications panel */}
+      {(notifLoading || notifications.length > 0) && (
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xs font-bold text-on-surface/40 uppercase tracking-widest flex items-center gap-2">
+              Notifications
+              {notifications.length > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
+                  {notifications.length}
+                </span>
+              )}
+            </h2>
+            {notifications.length > 1 && (
+              <button
+                onClick={dismissAll}
+                disabled={dismissingAll}
+                className="text-xs text-on-surface/40 hover:text-on-surface/70 font-semibold transition-colors"
+              >
+                Dismiss all
+              </button>
+            )}
+          </div>
+          <div className="bg-white border border-outline-variant/10 rounded-2xl shadow-sm overflow-hidden">
+            {notifLoading ? (
+              <div className="p-6 space-y-3">
+                {[0, 1].map(i => (
+                  <div key={i} className="animate-pulse flex items-center gap-4">
+                    <div className="w-8 h-8 bg-surface-container rounded-lg flex-none" />
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-3.5 bg-surface-container rounded w-2/3" />
+                      <div className="h-3 bg-surface-container rounded w-1/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="p-6 text-center text-on-surface/40 text-sm">No unread notifications</div>
+            ) : (
+              <ul className="divide-y divide-outline-variant/10">
+                {notifications.map(n => (
+                  <li key={n.id} className="flex items-center gap-4 px-6 py-4 hover:bg-surface-container-lowest transition-colors group">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-none">
+                      <span className="material-symbols-outlined text-emerald-700 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        {n.type === 'new_message' ? 'chat' : 'notifications'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {n.link ? (
+                        <a href={n.link} className="font-semibold text-sm text-on-surface hover:text-primary transition-colors block truncate">
+                          {n.message}
+                        </a>
+                      ) : (
+                        <p className="font-semibold text-sm text-on-surface truncate">{n.message}</p>
+                      )}
+                      <p className="text-xs text-on-surface/40 mt-0.5">{relativeTime(n.created_at)}</p>
+                    </div>
+                    {n.link && (
+                      <a
+                        href={n.link}
+                        className="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors whitespace-nowrap"
+                      >
+                        View Thread
+                      </a>
+                    )}
+                    <button
+                      onClick={() => dismissNotification(n.id)}
+                      className="shrink-0 text-on-surface/20 hover:text-on-surface/60 transition-colors opacity-0 group-hover:opacity-100"
+                      title="Dismiss"
+                    >
+                      <span className="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
       )}
 
       {/* Stats grid */}

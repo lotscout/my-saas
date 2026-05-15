@@ -196,25 +196,30 @@ export default function MessagingPage() {
     const body = newMessage.trim();
     setNewMessage('');
     setSending(true);
-    const supabase = createClient();
-    const { data: inserted, error } = await supabase
-      .from('messages')
-      .insert({ conversation_id: selectedConv.id, sender_id: currentUserId, body })
-      .select('id, body, sender_id, created_at, is_read')
-      .single();
-    if (!error && inserted) {
-      setMessages(prev => {
-        if (prev.some(m => m.id === inserted.id)) return prev;
-        return [...prev, inserted as Message];
+    try {
+      const recipientId = selectedConv.other_participant?.id;
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: selectedConv.id, recipientId, body }),
       });
-      await supabase.from('conversations').update({
-        last_message_at: (inserted as Message).created_at,
-        last_message_preview: body.length > 100 ? body.slice(0, 100) + '…' : body,
-      }).eq('id', selectedConv.id);
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to send message');
+      // Optimistically add the message (realtime may also add it; dedup logic handles it)
+      if (result.message) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === result.message.id)) return prev;
+          return [...prev, result.message as Message];
+        });
+      }
       await loadConversations(currentUserId);
+    } catch (err) {
+      console.error('[messaging] sendMessage error:', err);
+      setNewMessage(body); // restore on failure
+    } finally {
+      setSending(false);
+      inputRef.current?.focus();
     }
-    setSending(false);
-    inputRef.current?.focus();
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
