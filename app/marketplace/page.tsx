@@ -1066,38 +1066,55 @@ export default function MarketplacePage() {
                         )}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img alt="Land listing" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={imgSrc} />
-                        <div className="absolute top-3 right-3 z-10">
-                          <button
-                            onClick={(e) => toggleFavorite(e, listing.id)}
-                            disabled={savingId === listing.id}
-                            className={`bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-sm transition-transform hover:scale-110 disabled:opacity-60 ${
-                              savedListingIds.has(listing.id) ? 'text-red-500' : 'text-slate-500'
-                            }`}
-                          >
-                            <span
-                              className="material-symbols-outlined text-base"
-                              style={{ fontVariationSettings: savedListingIds.has(listing.id) ? "'FILL' 1" : "'FILL' 0" }}
-                            >
-                              favorite
-                            </span>
-                          </button>
-                        </div>
                       </div>
 
-                      {/* Card body */}
+                      {/* Card body — Zillow style */}
                       <div className="p-4 flex-1 flex flex-col">
-                        {price
-                          ? <p className="text-2xl font-extrabold text-primary leading-tight">{price}</p>
-                          : <p className="text-sm font-semibold text-slate-400 italic">Price on request</p>
-                        }
-                        {acreage && <p className="text-sm font-bold text-on-surface mt-0.5">{acreage}</p>}
-                        <p className="text-sm text-secondary mt-1.5 truncate">{addressLine}</p>
-                        {countyState && <p className="text-xs text-secondary/70 mt-0.5">{countyState}</p>}
-                        {listing.zoning && (
-                          <div className="mt-3">
-                            <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
+                        {/* Price + action icons */}
+                        <div className="flex items-start justify-between mb-1">
+                          {price
+                            ? <p className="text-2xl font-extrabold text-slate-900 leading-tight">{price}</p>
+                            : <p className="text-sm font-semibold text-slate-400 italic mt-1">Price on request</p>
+                          }
+                          <div className="flex items-center gap-0.5 shrink-0 ml-2">
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (navigator.share) { navigator.share({ title: countyState, url: window.location.origin + `/listings/${listing.id}` }); } }}
+                              className="p-1.5 rounded-full hover:bg-slate-100 transition-colors text-slate-500"
+                              aria-label="Share"
+                            >
+                              <span className="material-symbols-outlined text-xl">ios_share</span>
+                            </button>
+                            <button
+                              onClick={(e) => toggleFavorite(e, listing.id)}
+                              disabled={savingId === listing.id}
+                              className={`p-1.5 rounded-full hover:bg-slate-100 transition-colors disabled:opacity-60 ${
+                                savedListingIds.has(listing.id) ? 'text-red-500' : 'text-slate-500'
+                              }`}
+                              aria-label="Save"
+                            >
+                              <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: savedListingIds.has(listing.id) ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                            </button>
                           </div>
+                        </div>
+
+                        {/* Stats line */}
+                        {(acreage || listing.road_access?.length > 0) && (
+                          <p className="text-sm font-semibold text-slate-800 mb-1">
+                            {[acreage, listing.road_access?.[0]].filter(Boolean).join(' • ')}
+                          </p>
                         )}
+
+                        {/* Location */}
+                        <p className="text-sm text-slate-600 mb-2">
+                          {[countyState, listing.zip_code].filter(Boolean).join(' ') || 'Location not specified'}
+                        </p>
+
+                        {/* Description snippet */}
+                        {listing.property_description && (
+                          <p className="text-xs text-slate-500 line-clamp-2">{listing.property_description}</p>
+                        )}
+
+                        {/* Boost button — own listings only */}
                         {profile?.id && listing.user_id === profile.id && (
                           <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoostModal({ listingId: listing.id, title: listing.title ?? 'Your Listing' }); }}
