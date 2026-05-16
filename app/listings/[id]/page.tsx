@@ -313,10 +313,16 @@ export default function ListingDetailPage() {
                     <span className="text-on-surface font-medium">{listing.street_address}</span>
                   </div>
                 )}
-                {(listing.city || listing.county) && (
+                {listing.city && (
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-outline mb-1">{listing.city ? 'City' : 'County'}</span>
-                    <span className="text-on-surface font-medium">{listing.city || listing.county}</span>
+                    <span className="text-xs font-bold text-outline mb-1">City</span>
+                    <span className="text-on-surface font-medium">{listing.city}</span>
+                  </div>
+                )}
+                {listing.county && (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-outline mb-1">County</span>
+                    <span className="text-on-surface font-medium">{listing.county}</span>
                   </div>
                 )}
                 {listing.state && (
@@ -329,12 +335,6 @@ export default function ListingDetailPage() {
                   <div className="flex flex-col">
                     <span className="text-xs font-bold text-outline mb-1">Zip Code</span>
                     <span className="text-on-surface font-medium">{listing.zip_code}</span>
-                  </div>
-                )}
-                {listing.county && listing.city && (
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-outline mb-1">County</span>
-                    <span className="text-on-surface font-medium">{listing.county}</span>
                   </div>
                 )}
               </div>
