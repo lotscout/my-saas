@@ -13,6 +13,7 @@ interface Listing {
   ownership_type: string | null;
   title: string | null;
   property_description: string | null;
+  city: string | null;
   state: string | null;
   county: string | null;
   zip_code: string | null;
@@ -306,22 +307,36 @@ export default function ListingDetailPage() {
                 <h2 className="text-xl font-bold font-headline text-primary">Location</h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-outline mb-1">State</span>
-                  <span className="text-on-surface font-medium">{listing.state || '—'}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-outline mb-1">County</span>
-                  <span className="text-on-surface font-medium">{listing.county || '—'}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-outline mb-1">Zip Code</span>
-                  <span className="text-on-surface font-medium">{listing.zip_code || '—'}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-outline mb-1">Street Address</span>
-                  <span className="text-on-surface font-medium">{listing.street_address || 'Undisclosed Address'}</span>
-                </div>
+                {listing.street_address?.trim() && (
+                  <div className="flex flex-col col-span-2">
+                    <span className="text-xs font-bold text-outline mb-1">Street Address</span>
+                    <span className="text-on-surface font-medium">{listing.street_address}</span>
+                  </div>
+                )}
+                {(listing.city || listing.county) && (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-outline mb-1">{listing.city ? 'City' : 'County'}</span>
+                    <span className="text-on-surface font-medium">{listing.city || listing.county}</span>
+                  </div>
+                )}
+                {listing.state && (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-outline mb-1">State</span>
+                    <span className="text-on-surface font-medium">{listing.state}</span>
+                  </div>
+                )}
+                {listing.zip_code && (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-outline mb-1">Zip Code</span>
+                    <span className="text-on-surface font-medium">{listing.zip_code}</span>
+                  </div>
+                )}
+                {listing.county && listing.city && (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-outline mb-1">County</span>
+                    <span className="text-on-surface font-medium">{listing.county}</span>
+                  </div>
+                )}
               </div>
             </section>
 
