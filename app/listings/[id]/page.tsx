@@ -344,15 +344,19 @@ export default function ListingDetailPage() {
                 <span className="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg">photo_library</span>
                 <h2 className="text-xl font-bold font-headline text-primary">Photos</h2>
               </div>
-              {listing.photos_urls?.length ? (
+              {listing.photos_urls?.filter(u => u?.trim()).length ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {listing.photos_urls.map((url, i) => (
-                    <div key={i} className="aspect-video rounded-xl overflow-hidden group">
+                  {listing.photos_urls.filter(u => u?.trim()).map((url, i) => (
+                    <div key={i} className="aspect-video rounded-xl overflow-hidden group photo-slot">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={url}
                         alt={`Property photo ${i + 1}`}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onError={(e) => {
+                          const slot = (e.target as HTMLImageElement).closest('.photo-slot') as HTMLElement | null;
+                          if (slot) slot.style.display = 'none';
+                        }}
                       />
                     </div>
                   ))}

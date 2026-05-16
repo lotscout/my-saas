@@ -1086,7 +1086,10 @@ export default function MarketplacePage() {
 
                       {/* Card body */}
                       <div className="p-4 flex-1 flex flex-col">
-                        <p className="text-2xl font-extrabold text-primary leading-tight">{price}</p>
+                        {price
+                          ? <p className="text-2xl font-extrabold text-primary leading-tight">{price}</p>
+                          : <p className="text-sm font-semibold text-slate-400 italic">Price on request</p>
+                        }
                         {acreage && <p className="text-sm font-bold text-on-surface mt-0.5">{acreage}</p>}
                         <p className="text-sm text-secondary mt-1.5 truncate">{addressLine}</p>
                         {countyState && <p className="text-xs text-secondary/70 mt-0.5">{countyState}</p>}
