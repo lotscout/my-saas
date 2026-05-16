@@ -1068,7 +1068,7 @@ export default function MarketplacePage() {
                         <img alt="Land listing" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={imgSrc} />
                       </div>
 
-                      {/* Card body — Zillow style */}
+                      {/* Card body */}
                       <div className="p-4 flex-1 flex flex-col">
                         {/* Price + action icons */}
                         <div className="flex items-start justify-between mb-1">
@@ -1097,22 +1097,28 @@ export default function MarketplacePage() {
                           </div>
                         </div>
 
-                        {/* Stats line */}
-                        {(acreage || listing.road_access?.length > 0) && (
-                          <p className="text-sm font-semibold text-slate-800 mb-1">
-                            {[acreage, listing.road_access?.[0]].filter(Boolean).join(' • ')}
-                          </p>
-                        )}
+                        {/* Lot size */}
+                        {acreage && <p className="text-sm font-semibold text-slate-800 mb-1">{acreage}</p>}
 
-                        {/* Location */}
-                        <p className="text-sm text-slate-600 mb-2">
-                          {[countyState, listing.zip_code].filter(Boolean).join(' ') || 'Location not specified'}
+                        {/* Address: street if available, else county/state */}
+                        <p className="text-sm text-slate-600 mb-3">
+                          {listing.street_address?.trim()
+                            ? `${listing.street_address}${countyState ? `, ${countyState}` : ''}`
+                            : countyState || 'Location not specified'
+                          }
                         </p>
 
-                        {/* Description snippet */}
-                        {listing.property_description && (
-                          <p className="text-xs text-slate-500 line-clamp-2">{listing.property_description}</p>
-                        )}
+                        {/* Detail chips */}
+                        {(() => {
+                          const details = [
+                            listing.road_access?.[0],
+                            listing.utilities?.[0],
+                            listing.zoning,
+                          ].filter(Boolean) as string[];
+                          return details.length > 0 ? (
+                            <p className="text-xs text-slate-500">{details.join(' • ')}</p>
+                          ) : null;
+                        })()}
 
                         {/* Boost button — own listings only */}
                         {profile?.id && listing.user_id === profile.id && (
