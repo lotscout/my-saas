@@ -146,7 +146,22 @@ export default function ListingDetailPage() {
   const sellerName = listing.contact_methods?.[0]
     || [listing.seller_first_name, listing.seller_last_name].filter(Boolean).join(' ')
     || listing.digital_signature
-    || 'Private Seller';
+    || 'By Owner';
+
+  // Generate a display title that includes location
+  const locationLabel = listing.city
+    ? `${listing.city}, ${listing.state ?? ''}`
+    : listing.county
+    ? `${listing.county} County, ${listing.state ?? ''}`
+    : listing.state ?? null;
+  const acreLabel = listing.lot_size_acres
+    ? `${listing.lot_size_acres.toLocaleString()} Acres`
+    : listing.lot_size_sqft
+    ? `${listing.lot_size_sqft.toLocaleString()} sq ft`
+    : null;
+  const displayTitle = listing.title?.trim() && !/^[A-Z]{2}$/.test(listing.title.trim())
+    ? listing.title
+    : [acreLabel, locationLabel ? `in ${locationLabel}` : null].filter(Boolean).join(' ') || 'Land Listing';
 
   const pricePerAcre =
     listing.lot_size_unit === 'acres' && listing.lot_size_acres && listing.asking_price
@@ -211,7 +226,7 @@ export default function ListingDetailPage() {
             <div className="flex flex-col md:flex-row justify-between items-start gap-6">
               <div className="flex-1">
                 <h1 className="text-3xl md:text-4xl font-extrabold font-headline text-primary mb-2">
-                  {listing.title || 'Untitled Listing'}
+                  {displayTitle}
                 </h1>
                 <p className="text-secondary font-body">
                   Seller:{' '}
