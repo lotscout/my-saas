@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       'price_negotiable,ownership_type,contact_methods,status,photos_urls,' +
       'digital_signature,created_at,user_id,promoted,boost_expires_at,lat,lng'
     )
-    .in_('status', ['active', 'published'])
+    .in('status', ['active', 'published'])
     .order(orderCol, { ascending })
     .limit(limit);
 
