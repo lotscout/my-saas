@@ -474,14 +474,7 @@ export default function BuyerDirectoryPage() {
     setGlobalSearch('');
   }
 
-  const searchPlaceholder = 'Search buyers by state, county...';
-    : view === 'grid'
-    ? 'Search buyers by name, company, state, or use case...'
-    : view === 'national'
-    ? 'Search buyers by name, company, state, or use case...'
-    : view === 'active'
-    ? 'Filter active buyers by name, company, or state...'
-    : 'Search buyers by name, company, state, or use case...';
+  const searchPlaceholder = view === 'active' ? 'Filter active buyers by name, company, or state...' : 'Search buyers by name, company, state, or use case...';
 
   const handleSearchChange = (val: string) => {
     setGlobalSearch(val);
