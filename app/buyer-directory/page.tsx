@@ -390,7 +390,6 @@ export default function BuyerDirectoryPage() {
   const [activeUseCaseFilter, setActiveUseCaseFilter] = useState('');
   const [activeRoadAccess, setActiveRoadAccess] = useState('');
 
-  // ── Buyer requests tab ──
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
   const [brLoading, setBrLoading] = useState(false);
   const [brSearch, setBrSearch] = useState('');
@@ -478,8 +477,7 @@ export default function BuyerDirectoryPage() {
     setGlobalSearch('');
   }
 
-  const searchPlaceholder = tab === 'requests'
-    ? 'Search by state, county, or zip code...'
+  const searchPlaceholder = 'Search buyers by state, county...';
     : view === 'grid'
     ? 'Search buyers by name, company, state, or use case...'
     : view === 'national'
@@ -540,12 +538,12 @@ export default function BuyerDirectoryPage() {
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
             <input
               type="text"
-              value={tab === 'requests' ? brSearch : globalSearch}
+              value={globalSearch}
               onChange={e => handleSearchChange(e.target.value)}
               placeholder={searchPlaceholder}
               className="w-full bg-white border border-outline-variant/25 rounded-2xl pl-11 pr-10 py-3.5 text-sm text-on-surface placeholder:text-secondary shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
             />
-            {(tab === 'requests' ? brSearch : globalSearch) && (
+            {globalSearch && (
               <button
                 onClick={() => handleSearchChange('')}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface"
@@ -554,84 +552,6 @@ export default function BuyerDirectoryPage() {
               </button>
             )}
           </div>
-
-          {/* Tab toggle */}
-          <div className="flex items-center gap-1 bg-surface-container-low rounded-2xl p-1 w-fit mb-8">
-            {(['directory', 'requests'] as MainTab[]).map(t => (
-              <button
-                key={t}
-                onClick={() => { setTab(t); setView('grid'); setGlobalSearch(''); setBrSearch(''); }}
-                className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
-                  tab === t
-                    ? 'bg-white text-primary shadow-sm'
-                    : 'text-secondary hover:text-on-surface'
-                }`}
-              >
-                {t === 'directory' ? 'Buyer Directory' : 'Buyer Requests'}
-              </button>
-            ))}
-          </div>
-
-          {/* ── DIRECTORY TAB ── */
-              {/* Grid view — 3 category cards */}
-              {view === 'grid' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Card 1: Top National Buyers */}
-                  <button
-                    onClick={() => openView('national')}
-                    className="group bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-8 text-left hover:border-primary/30 hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
-                  >
-                    <div className="w-14 h-14 bg-primary/8 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-primary/12 transition-colors">
-                      <span className="material-symbols-outlined text-primary text-3xl">language</span>
-                    </div>
-                    <h3 className="font-headline text-xl font-extrabold text-primary mb-2">Top National Buyers</h3>
-                    <p className="text-secondary text-sm leading-relaxed mb-6">
-                      Browse the highest-volume land buyers actively purchasing across the US
-                    </p>
-                    <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                      Browse buyers
-                      <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </div>
-                  </button>
-
-                  {/* Card 2: Top Buyers by State */}
-                  <button
-                    onClick={() => openView('by-state')}
-                    className="group bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-8 text-left hover:border-primary/30 hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
-                  >
-                    <div className="w-14 h-14 bg-primary/8 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-primary/12 transition-colors">
-                      <span className="material-symbols-outlined text-primary text-3xl">map</span>
-                    </div>
-                    <h3 className="font-headline text-xl font-extrabold text-primary mb-2">Top Buyers by State</h3>
-                    <p className="text-secondary text-sm leading-relaxed mb-6">
-                      Find the most active buyers in any state
-                    </p>
-                    <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                      Select a state
-                      <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </div>
-                  </button>
-
-                  {/* Card 3: Active Buyers */}
-                  <button
-                    onClick={() => openView('active')}
-                    className="group bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-8 text-left hover:border-primary/30 hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
-                  >
-                    <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-emerald-100 transition-colors">
-                      <span className="material-symbols-outlined text-emerald-700 text-3xl">bolt</span>
-                    </div>
-                    <h3 className="font-headline text-xl font-extrabold text-primary mb-2">Active Buyers</h3>
-                    <p className="text-secondary text-sm leading-relaxed mb-6">
-                      Buyers actively seeking land with a purchase timeline under 30 days
-                    </p>
-                    <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
-                      View active buyers
-                      <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </div>
-                  </button>
-                </div>
-              )}
 
               {/* National buyers view */}
               {view === 'national' && (
