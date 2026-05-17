@@ -8,7 +8,6 @@ import Header from '@/components/Header';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type MainTab = 'directory' | 'requests';
 type DirectoryView = 'grid' | 'national' | 'by-state' | 'active';
 
 interface BuyerRequest {
@@ -363,7 +362,6 @@ export default function BuyerDirectoryPage() {
   const isFreeUser = !permLoading && !tier && !isAdmin;
 
   // ── Navigation state ──
-  const [tab, setTab] = useState<MainTab>('directory');
   const [view, setView] = useState<DirectoryView>('grid');
 
   // ── Global search ──
@@ -433,14 +431,6 @@ export default function BuyerDirectoryPage() {
       .catch(() => setActiveLoading(false));
   }, [view]);
 
-  useEffect(() => {
-    if (tab !== 'requests') return;
-    setBrLoading(true);
-    fetch('/api/buyer-directory?status=active&limit=200')
-      .then(r => r.json())
-      .then(({ requests }) => { setBuyerRequests((requests ?? []) as BuyerRequest[]); setBrLoading(false); })
-      .catch(() => setBrLoading(false));
-  }, [tab]);
 
   // ── Filtered lists ──
 
@@ -475,23 +465,6 @@ export default function BuyerDirectoryPage() {
     });
   }, [activeBuyers, globalSearch, activeStateFilter, activeUseCaseFilter, activeRoadAccess]);
 
-  const filteredBR = useMemo(() => {
-    return buyerRequests.filter(r => {
-      const q = brSearch.toLowerCase();
-      const state = (r.target_state ?? '').toLowerCase();
-      const regions = (r.target_regions ?? []).join(' ').toLowerCase();
-      const uc = (r.use_case ?? '').toLowerCase();
-      const matchSearch = !q || state.includes(q) || regions.includes(q) || uc.includes(q);
-      const matchBudget = applyBudgetFilter(r, filterBudget);
-      const matchAcreage = applyAcreageFilter(r, filterAcreage);
-      const matchZoning = !filterZoning || (r.zoning_preference ?? []).some(z => z.toLowerCase().includes(filterZoning));
-      const matchUC = !filterUseCase || uc.includes(filterUseCase);
-      const matchTimeline = !filterTimeline || (r.timeline ?? '').includes(filterTimeline);
-      const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
-      const matchRoad = !filterRoadAccessBR || roads.some(rd => rd.toLowerCase().includes(filterRoadAccessBR.toLowerCase()));
-      return matchSearch && matchBudget && matchAcreage && matchZoning && matchUC && matchTimeline && matchRoad;
-    });
-  }, [buyerRequests, brSearch, filterBudget, filterAcreage, filterZoning, filterUseCase, filterTimeline, filterRoadAccessBR]);
 
   // ── Helpers ──
 
@@ -599,9 +572,7 @@ export default function BuyerDirectoryPage() {
             ))}
           </div>
 
-          {/* ── DIRECTORY TAB ── */}
-          {tab === 'directory' && (
-            <>
+          {/* ── DIRECTORY TAB ── */
               {/* Grid view — 3 category cards */}
               {view === 'grid' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -870,140 +841,6 @@ export default function BuyerDirectoryPage() {
                   )}
                 </div>
               )}
-            </>
-          )}
-
-          {/* ── BUYER REQUESTS TAB ── */}
-          {tab === 'requests' && (
-            <>
-              <div className="flex items-center justify-between mb-6">
-                <p className="text-secondary text-sm">Active buyers looking for land that matches your listings</p>
-                <button
-                  onClick={() => { if (!tier && !isAdmin) { setShowUpgradeModal(true); return; } router.push('/create-buyer-request'); }}
-                  className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-sm"
-                >
-                  <span className="material-symbols-outlined text-base">add</span>
-                  Find a Property
-                </button>
-              </div>
-
-              {/* Filters */}
-              <div className="flex flex-wrap items-center gap-3 py-4 border-y border-outline-variant/20 mb-6">
-                <select value={filterBudget} onChange={e => setFilterBudget(e.target.value)} className={SELECT_CLS}>
-                  <option value="">Budget Range</option>
-                  <option value="under50k">Under $50K</option>
-                  <option value="50k-100k">$50K–$100K</option>
-                  <option value="100k-500k">$100K–$500K</option>
-                  <option value="500k-1m">$500K–$1M</option>
-                  <option value="1m-5m">$1M–$5M</option>
-                  <option value="5m+">$5M+</option>
-                </select>
-                <select value={filterAcreage} onChange={e => setFilterAcreage(e.target.value)} className={SELECT_CLS}>
-                  <option value="">Acreage Range</option>
-                  <option value="under5">Under 5 acres</option>
-                  <option value="5-25">5–25 acres</option>
-                  <option value="25-100">25–100 acres</option>
-                  <option value="100-500">100–500 acres</option>
-                  <option value="500+">500+ acres</option>
-                </select>
-                <select value={filterZoning} onChange={e => setFilterZoning(e.target.value)} className={SELECT_CLS}>
-                  <option value="">Zoning Type</option>
-                  <option value="agricultural">Agricultural</option>
-                  <option value="residential">Residential</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="industrial">Industrial</option>
-                  <option value="mixed use">Mixed Use</option>
-                  <option value="recreational">Recreational</option>
-                  <option value="timber">Timber</option>
-                  <option value="other">Other</option>
-                </select>
-                <select value={filterUseCase} onChange={e => setFilterUseCase(e.target.value)} className={SELECT_CLS}>
-                  <option value="">Use Case</option>
-                  <option value="row crop">Row Crop</option>
-                  <option value="livestock">Livestock/Ranching</option>
-                  <option value="timber">Timber</option>
-                  <option value="recreational">Recreational</option>
-                  <option value="residential development">Residential Development</option>
-                  <option value="commercial development">Commercial Development</option>
-                  <option value="conservation">Conservation</option>
-                  <option value="investment">Investment</option>
-                </select>
-                <select value={filterTimeline} onChange={e => setFilterTimeline(e.target.value)} className={SELECT_CLS}>
-                  <option value="">Timeline</option>
-                  <option value="Actively Buying">Actively Buying</option>
-                  <option value="1-3 months">1–3 months</option>
-                  <option value="3-6 months">3–6 months</option>
-                  <option value="6+ months">6+ months</option>
-                </select>
-                <select value={filterRoadAccessBR} onChange={e => setFilterRoadAccessBR(e.target.value)} className={SELECT_CLS}>
-                  <option value="">Road Access</option>
-                  <option value="Paved Road">Paved Road</option>
-                  <option value="Gravel Road">Gravel Road</option>
-                  <option value="Dirt Road">Dirt Road</option>
-                  <option value="Private Road">Private Road</option>
-                  <option value="Easement">Easement</option>
-                  <option value="No Road Access">No Road Access</option>
-                </select>
-                {(filterBudget || filterAcreage || filterZoning || filterUseCase || filterTimeline || filterRoadAccessBR || brSearch) && (
-                  <button
-                    onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterUseCase(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBrSearch(''); setGlobalSearch(''); }}
-                    className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-sm">close</span>
-                    Clear filters
-                  </button>
-                )}
-              </div>
-
-              {brLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1,2,3].map(i => (
-                    <div key={i} className="bg-surface-container-low rounded-2xl p-6 animate-pulse space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-surface-container-high" />
-                        <div className="space-y-2 flex-1">
-                          <div className="h-3 bg-surface-container-high rounded w-24" />
-                          <div className="h-2 bg-surface-container-high rounded w-16" />
-                        </div>
-                      </div>
-                      <div className="h-2 bg-surface-container-high rounded w-full" />
-                      <div className="h-2 bg-surface-container-high rounded w-3/4" />
-                    </div>
-                  ))}
-                </div>
-              ) : buyerRequests.length === 0 ? (
-                <div className="text-center py-24 text-secondary">
-                  <span className="material-symbols-outlined text-6xl mb-4 block text-primary/20">person_search</span>
-                  <p className="font-headline text-2xl font-bold text-primary mb-2">No buyer requests yet</p>
-                  <p className="text-sm mb-6">Be the first to post your buying criteria and connect with sellers</p>
-                  <button
-                    onClick={() => { if (!tier && !isAdmin) { setShowUpgradeModal(true); return; } router.push('/create-buyer-request'); }}
-                    className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
-                  >
-                    Find a Property
-                  </button>
-                </div>
-              ) : filteredBR.length === 0 ? (
-                <div className="text-center py-16 text-secondary">
-                  <span className="material-symbols-outlined text-5xl mb-4 block text-primary/20">filter_list_off</span>
-                  <p className="font-headline text-xl font-bold text-primary mb-2">No results match your filters</p>
-                  <p className="text-sm">Try adjusting your search or clearing filters</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredBR.map(req => (
-                    <BuyerRequestCard
-                      key={req.id}
-                      req={req}
-                      canViewContact={canViewContact}
-                      isFreeUser={isFreeUser}
-                      onUpgrade={() => setShowUpgradeModal(true)}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          )}
 
         </div>
       </main>
