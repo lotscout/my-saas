@@ -488,7 +488,7 @@ export default function BuyerDirectoryPage() {
 
   const handleSearchChange = (val: string) => {
     setGlobalSearch(val);
-    if (tab === 'requests') setBrSearch(val);
+    setGlobalSearch(val);
   };
 
   // ─── Render ───────────────────────────────────────────────────────────────
