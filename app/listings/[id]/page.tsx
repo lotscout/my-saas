@@ -32,6 +32,7 @@ interface Listing {
   photos_urls: string[] | null;
   seller_first_name: string | null;
   seller_last_name: string | null;
+  owner_name: string | null;
   digital_signature: string | null;
   is_test_listing: boolean | null;
   created_at: string;
@@ -143,7 +144,7 @@ export default function ListingDetailPage() {
     );
   }
 
-  const sellerName = listing.contact_methods?.[0]
+  const sellerName = listing.owner_name
     || [listing.seller_first_name, listing.seller_last_name].filter(Boolean).join(' ')
     || listing.digital_signature
     || 'By Owner';
