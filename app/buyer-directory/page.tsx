@@ -222,10 +222,7 @@ function BuyerRequestCard({ req, canViewContact, isFreeUser, onUpgrade }: BuyerC
             <p className="text-[10px] text-secondary uppercase tracking-widest font-bold">Verified Buyer</p>
           </div>
         </div>
-        <span className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-200">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-          Active Buying
-        </span>
+
       </div>
 
       <div className="space-y-2.5 text-sm">
@@ -592,15 +589,6 @@ export default function BuyerDirectoryPage() {
                     )}
                   </div>
 
-                  {/* Table header */}
-                  <div className="hidden sm:grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-4 py-2 text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">
-                    <span>Buyer</span>
-                    <span className="w-24 text-right">State</span>
-                    <span className="w-32 text-right">Budget</span>
-                    <span className="w-28 text-right hidden lg:block">Use Case</span>
-                    <span className="w-24 text-right">Actions</span>
-                  </div>
-
                   {nationalLoading ? (
                     <div className="space-y-3">
                       {[1,2,3,4,5].map(i => (
@@ -614,14 +602,15 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try adjusting your search or filters</p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {filteredNational.map((req, i) => (
-                        <div key={req.id} className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
-                          <div className="flex-1">
-                            <BuyerRow req={req} canViewContact={canViewContact} onUpgrade={() => setShowUpgradeModal(true)} />
-                          </div>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredNational.map(req => (
+                        <BuyerRequestCard
+                          key={req.id}
+                          req={req}
+                          canViewContact={canViewContact}
+                          isFreeUser={isFreeUser}
+                          onUpgrade={() => setShowUpgradeModal(true)}
+                        />
                       ))}
                     </div>
                   )}
@@ -675,14 +664,15 @@ export default function BuyerDirectoryPage() {
                           <p className="text-sm mt-1">Try a different state</p>
                         </div>
                       ) : (
-                        <div className="space-y-2">
-                          {stateBuyers.map((req, i) => (
-                            <div key={req.id} className="flex items-center gap-3">
-                              <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
-                              <div className="flex-1">
-                                <BuyerRow req={req} canViewContact={canViewContact} onUpgrade={() => setShowUpgradeModal(true)} showTimeline />
-                              </div>
-                            </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {stateBuyers.map(req => (
+                            <BuyerRequestCard
+                              key={req.id}
+                              req={req}
+                              canViewContact={canViewContact}
+                              isFreeUser={isFreeUser}
+                              onUpgrade={() => setShowUpgradeModal(true)}
+                            />
                           ))}
                         </div>
                       )}
