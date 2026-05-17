@@ -260,7 +260,6 @@ export default function MarketplacePage() {
   const [showFreeModal, setShowFreeModal] = useState(false);
   const [showBuyerFreeModal, setShowBuyerFreeModal] = useState(false);
   const [showContactUpgradeModal, setShowContactUpgradeModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'properties' | 'buyer-requests'>('properties');
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsSort, setListingsSort] = useState('recommended');
@@ -424,17 +423,6 @@ export default function MarketplacePage() {
       .catch(() => setListingsLoading(false));
   }, [listingsSort]);
 
-  useEffect(() => {
-    if (activeTab !== 'buyer-requests') return;
-    setBuyerRequestsLoading(true);
-    fetch('/api/buyer-directory?status=active&limit=200')
-      .then(r => r.json())
-      .then(({ requests }) => {
-        setBuyerRequests((requests ?? []) as BuyerRequest[]);
-        setBuyerRequestsLoading(false);
-      })
-      .catch(() => setBuyerRequestsLoading(false));
-  }, [activeTab]);
 
   const filteredListings = useMemo(() => {
     let result = listings;
@@ -703,33 +691,9 @@ export default function MarketplacePage() {
           </div>
         </section>
 
-        {/* Tab toggle */}
-        <div className="mb-8 flex items-center gap-1 bg-surface-container-low p-1 rounded-full w-fit">
-          <button
-            onClick={() => setActiveTab('properties')}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-              activeTab === 'properties'
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-secondary hover:text-on-surface'
-            }`}
-          >
-            Properties
-          </button>
-          <button
-            onClick={() => setActiveTab('buyer-requests')}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-              activeTab === 'buyer-requests'
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-secondary hover:text-on-surface'
-            }`}
-          >
-            Buyer Requests
-          </button>
         </div>
 
         {/* ── PROPERTIES TAB ── */}
-        {activeTab === 'properties' && (
-          <>
             {!loading && tier === 'standard' && listingsThisPeriod >= 2 && (
               <div className="mb-6">
                 <ListingLimitBanner listingsUsed={listingsThisPeriod} tier="standard" />
@@ -1135,171 +1099,7 @@ export default function MarketplacePage() {
                   );
                 })}
               </div>
-            )}
-          </>
-        )}
 
-        {/* ── BUYER REQUESTS TAB ── */}
-        {activeTab === 'buyer-requests' && (
-          <>
-            {/* Search bar */}
-            <div className="mb-4">
-              <div className="relative max-w-xl">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
-                <input
-                  type="text"
-                  value={buyerSearchQuery}
-                  onChange={e => setBuyerSearchQuery(e.target.value)}
-                  placeholder="Search by state, county, or zip code..."
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-4 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                />
-                {buyerSearchQuery && (
-                  <button onClick={() => setBuyerSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
-                    <span className="material-symbols-outlined text-lg">close</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-wrap items-center gap-3 py-4 border-y border-outline-variant/20 mb-6">
-              <select value={filterBudget} onChange={e => setFilterBudget(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="" disabled hidden>Budget Range</option>
-                <option value="under50k">Under $50K</option>
-                <option value="50k-100k">$50K–$100K</option>
-                <option value="100k-500k">$100K–$500K</option>
-                <option value="500k-1m">$500K–$1M</option>
-                <option value="1m-5m">$1M–$5M</option>
-                <option value="5m+">$5M+</option>
-              </select>
-              <select value={filterAcreage} onChange={e => setFilterAcreage(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="" disabled hidden>Acreage Range</option>
-                <option value="under5">Under 5 acres</option>
-                <option value="5-25">5–25 acres</option>
-                <option value="25-100">25–100 acres</option>
-                <option value="100-500">100–500 acres</option>
-                <option value="500+">500+ acres</option>
-              </select>
-              <select value={filterZoningBR} onChange={e => setFilterZoningBR(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="" disabled hidden>Zoning Type</option>
-                <option value="agricultural">Agricultural</option>
-                <option value="residential">Residential</option>
-                <option value="commercial">Commercial</option>
-                <option value="industrial">Industrial</option>
-                <option value="mixed use">Mixed Use</option>
-                <option value="recreational">Recreational</option>
-                <option value="other">Other</option>
-              </select>
-              <select value={filterTimeline} onChange={e => setFilterTimeline(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="" disabled hidden>Timeline</option>
-                <option value="Actively Buying">Actively Buying</option>
-                <option value="1-3 months">1–3 months</option>
-                <option value="3-6 months">3–6 months</option>
-                <option value="6+ months">6+ months</option>
-              </select>
-              <select value={filterRoadAccessBR} onChange={e => setFilterRoadAccessBR(e.target.value)} className={BR_SELECT_CLS}>
-                <option value="" disabled hidden>Road Access</option>
-                <option value="Paved Road">Paved Road</option>
-                <option value="Gravel Road">Gravel Road</option>
-                <option value="Dirt Road">Dirt Road</option>
-                <option value="Private Road">Private Road</option>
-                <option value="Easement">Easement</option>
-                <option value="No Road Access">No Road Access</option>
-              </select>
-              {(filterBudget || filterAcreage || filterZoningBR || filterTimeline || filterRoadAccessBR || buyerSearchQuery) && (
-                <button
-                  onClick={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoningBR(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBuyerSearchQuery(''); }}
-                  className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-sm">close</span>
-                  Clear filters
-                </button>
-              )}
-              <div className="ml-auto flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort By:</span>
-                <select
-                  value={brSort}
-                  onChange={e => setBrSort(e.target.value)}
-                  className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer"
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="budget_desc">Budget High to Low</option>
-                  <option value="budget_asc">Budget Low to High</option>
-                  <option value="timeline">Timeline Soonest First</option>
-                </select>
-              </div>
-            </div>
-
-            {buyerRequestsLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="bg-surface-container-low rounded-2xl p-6 animate-pulse space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-surface-container-high" />
-                      <div className="space-y-2 flex-1">
-                        <div className="h-3 bg-surface-container-high rounded w-24" />
-                        <div className="h-2 bg-surface-container-high rounded w-16" />
-                      </div>
-                    </div>
-                    <div className="h-2 bg-surface-container-high rounded w-full" />
-                    <div className="h-2 bg-surface-container-high rounded w-3/4" />
-                  </div>
-                ))}
-              </div>
-            ) : buyerRequests.length === 0 ? (
-              <div className="text-center py-24 text-secondary">
-                <span className="material-symbols-outlined text-6xl mb-4 block text-primary/20">person_search</span>
-                <p className="font-headline text-2xl font-bold text-primary mb-2">No buyer requests yet</p>
-                <p className="text-sm mb-6">Be the first to post your buying criteria and connect with sellers</p>
-                <button onClick={handlePostBuyerRequest} className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
-                  Find a Property
-                </button>
-              </div>
-            ) : filteredBuyerRequests.length === 0 ? (
-              <div className="text-center py-16 text-secondary">
-                <span className="material-symbols-outlined text-5xl mb-4 block text-primary/20">filter_list_off</span>
-                <p className="font-headline text-xl font-bold text-primary mb-2">No results match your filters</p>
-                <p className="text-sm">Try adjusting your search or clearing filters</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredBuyerRequests.map(req => {
-                  const company = req.display_company || null;
-                  const personName = req.display_name ||
-                    [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || null;
-                  const primaryName = company || personName || 'Anonymous Buyer';
-                  const secondaryName = company ? personName : null;
-                  const blurIdentity = !loading && !canViewContact;
-                  const stateAbbrev = req.target_state ? (STATE_NAMES[req.target_state.toLowerCase()] ?? null) : null;
-                  let location: string;
-                  if (req.target_city && req.target_state) location = `${req.target_city}, ${stateAbbrev ?? req.target_state}`;
-                  else if (req.target_county && req.target_state) location = `${req.target_county} County, ${stateAbbrev ?? req.target_state}`;
-                  else location = req.target_state || 'Location not specified';
-                  const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
-                  const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
-
-                  return (
-                    <Link
-                      key={req.id}
-                      href={`/buyer-requests/${req.id}`}
-                      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
-                    >
-                      <div className={blurIdentity ? 'blur-sm select-none' : ''}>
-                        {primaryName && <p className="font-extrabold text-primary text-base leading-snug">{primaryName}</p>}
-                        {secondaryName && <p className="text-xs text-secondary font-medium mt-0.5 line-clamp-1">{secondaryName}</p>}
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        <div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p><p className={`text-sm font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p></div>
-                        <div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Budget</p><p className="text-sm font-bold text-on-surface">{perAcre}</p></div>
-                        {timeline && (<div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Timeline</p><p className="text-sm font-bold text-on-surface">{timeline}</p></div>)}
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </>
-        )}
       </main>
 
       <footer className="w-full py-10 px-4 sm:px-8 bg-primary dark:bg-black grid grid-cols-1 md:grid-cols-2 items-center gap-8 z-10 relative">
@@ -1335,7 +1135,7 @@ export default function MarketplacePage() {
       {/* FAB */}
       <div className="fixed bottom-6 right-6 z-[60]">
         <button
-          onClick={activeTab === 'properties' ? handleCreateListing : handlePostBuyerRequest}
+          onClick={handleCreateListing}
           className="bg-primary text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform ring-4 ring-white/10"
         >
           <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
