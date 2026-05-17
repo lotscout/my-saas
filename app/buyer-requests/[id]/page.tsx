@@ -234,16 +234,7 @@ export default function BuyerRequestPage() {
               </div>
             )}
           </div>
-          <div className="flex-shrink-0 w-full md:w-auto">
-            <button
-              onClick={handleMessage}
-              className="w-full md:w-auto bg-primary text-on-primary px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
-            >
-              <span className="material-symbols-outlined">chat_bubble</span>
-              Message Buyer
-            </button>
-            <p className="text-[10px] text-center mt-2 text-on-surface-variant uppercase tracking-widest font-bold">LotScout Messaging Only</p>
-          </div>
+
         </section>
 
         {/* Two-column layout */}
