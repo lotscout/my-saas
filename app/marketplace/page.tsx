@@ -1097,6 +1097,7 @@ export default function MarketplacePage() {
                   );
                 })}
               </div>
+            )}
 
       </main>
 
