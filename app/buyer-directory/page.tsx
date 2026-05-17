@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserTier } from '@/hooks/useUserTier';
+import Header from '@/components/Header';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -523,6 +524,7 @@ export default function BuyerDirectoryPage() {
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
+      <Header />
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (
