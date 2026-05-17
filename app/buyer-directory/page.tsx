@@ -349,6 +349,116 @@ function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitl
   );
 }
 
+
+// ─── Top National Builders (static) ──────────────────────────────────────────
+const TOP_BUILDERS = [
+  { rank:1,  company:"D.R. Horton",              tier:"Public Giants",   hq:"Fort Worth, TX",    website:"drhorton.com",           phone:"(817) 390-8200", contacts:["VP Land Acquisition","Director of Land","Land Acquisition Manager"],        notes:"Largest US builder by volume; active in 30+ states" },
+  { rank:2,  company:"Lennar Corporation",        tier:"Public Giants",   hq:"Miami, FL",         website:"lennar.com",              phone:"(305) 559-4000", contacts:["VP Acquisitions","Land Acquisition Director","Regional Land Manager"],        notes:"Multi-family + single-family; heavy FL, TX, CA" },
+  { rank:3,  company:"PulteGroup",                tier:"Public Giants",   hq:"Atlanta, GA",       website:"pultegroup.com",          phone:"(404) 978-6400", contacts:["VP Land","Director of Land Acquisition","Land Acquisition Manager"],         notes:"Del Webb, Centex, DiVosta brands; sunbelt + Southeast" },
+  { rank:4,  company:"NVR Inc.",                  tier:"Public Giants",   hq:"Reston, VA",        website:"nvrinc.com",              phone:"(703) 956-4000", contacts:["Land Acquisition Manager","Director of Real Estate","VP of Real Estate"],     notes:"Ryan Homes, NVHomes; East Coast + Mid-Atlantic" },
+  { rank:5,  company:"Taylor Morrison",           tier:"Public Giants",   hq:"Scottsdale, AZ",    website:"taylormorrison.com",      phone:"(480) 840-8100", contacts:["VP Land","Director of Land","Land Acquisition Manager"],                      notes:"Active in AZ, TX, FL, CO, GA; master-planned + greenfield" },
+  { rank:6,  company:"Toll Brothers",             tier:"Public Giants",   hq:"Fort Washington, PA",website:"tollbrothers.com",       phone:"(215) 938-8000", contacts:["VP Land Acquisition","Director of Land","Land Division President"],            notes:"Luxury segment; premium suburban and coastal markets" },
+  { rank:7,  company:"KB Home",                   tier:"Public Giants",   hq:"Los Angeles, CA",   website:"kbhome.com",              phone:"(310) 231-4000", contacts:["VP Land","Director of Land Acquisitions","Land Manager"],                     notes:"First-time buyer focus; CA, TX, AZ, FL heavy" },
+  { rank:8,  company:"Meritage Homes",            tier:"Public Giants",   hq:"Scottsdale, AZ",    website:"meritagehomes.com",       phone:"(480) 515-8100", contacts:["VP Land","Land Acquisition Director","Land Manager"],                         notes:"Energy-efficient builds; TX, AZ, FL, CO, CA" },
+  { rank:9,  company:"Smith Douglas Homes",       tier:"Public Giants",   hq:"Woodstock, GA",     website:"smithdouglas.com",        phone:"(770) 627-2323", contacts:["VP of Land","Director of Land","Land Acquisition Manager"],                    notes:"Entry-level focus; SE US heavy; growing national" },
+  { rank:10, company:"Century Communities",       tier:"Public Giants",   hq:"Greenwood Village, CO",website:"centurycommunities.com",phone:"(303) 793-4999", contacts:["VP Land","Director of Land Acquisition","Land Acquisition Manager"],         notes:"Affordable + first-time buyer; CO, TX, GA, NV, WA, UT" },
+  { rank:11, company:"Clayton Properties Group",  tier:"Large Private",   hq:"Maryville, TN",     website:"claytonhomes.com",        phone:"(865) 380-3000", contacts:["Director of Land","VP Land","Land Development Manager"],                      notes:"Berkshire Hathaway subsidiary; Southeast focus" },
+  { rank:12, company:"David Weekley Homes",       tier:"Large Private",   hq:"Houston, TX",       website:"davidweekleyhomes.com",   phone:"(713) 963-0500", contacts:["Land Acquisition Manager","VP Land","Director of Real Estate"],               notes:"TX, FL, CO, GA, MN; quality-focused; city/infill" },
+  { rank:13, company:"Shea Homes",                tier:"Large Private",   hq:"Walnut, CA",        website:"sheahomes.com",           phone:"(909) 594-9500", contacts:["VP Land","Director of Land","Land Acquisition Manager"],                      notes:"CA, AZ, CO, WA; active 55+ (Trilogy brand)" },
+  { rank:14, company:"Tri Pointe Homes",          tier:"Large Private",   hq:"Incline Village, NV",website:"tripointehomes.com",     phone:"(775) 826-1400", contacts:["VP Land","Land Acquisition Director","Land Manager"],                         notes:"Premium segment; CA, CO, WA, AZ, TX" },
+  { rank:15, company:"Beazer Homes",              tier:"Large Private",   hq:"Atlanta, GA",       website:"beazer.com",              phone:"(770) 829-3700", contacts:["VP Land","Director of Land Acquisitions","Land Manager"],                     notes:"Entry-to-mid; FL, TX, CA, AZ, SE focus" },
+  { rank:16, company:"LGI Homes",                 tier:"Large Private",   hq:"The Woodlands, TX", website:"lgihomes.com",            phone:"(281) 362-8998", contacts:["VP Land","Director of Land","Land Acquisition Manager"],                      notes:"Entry-level/affordable; TX, AZ, FL, CO, NM — high velocity" },
+  { rank:17, company:"Stanley Martin Homes",      tier:"Large Private",   hq:"Reston, VA",        website:"stanleymartin.com",       phone:"(703) 821-2600", contacts:["VP Land","Director of Land Acquisition","Land Manager"],                      notes:"Mid-Atlantic; DC metro, VA, MD, NC, SC, GA" },
+  { rank:18, company:"Mattamy Homes",             tier:"Large Private",   hq:"Orlando, FL",       website:"mattamyhomes.com",        phone:"(407) 206-9200", contacts:["VP Land","Director of Land Development","Land Acquisition Manager"],           notes:"Canadian-owned; FL, AZ, NC, MN, GA; active land buyer" },
+  { rank:19, company:"Dream Finders Homes",       tier:"Large Private",   hq:"Jacksonville, FL",  website:"dreamfindershomes.com",   phone:"(904) 337-7858", contacts:["VP Land","Director of Land","Land Acquisition Manager"],                      notes:"SE and Mid-Atlantic; FL, NC, SC, GA, VA, CO" },
+  { rank:20, company:"K. Hovnanian Homes",        tier:"Large Private",   hq:"Matawan, NJ",       website:"khov.com",                phone:"(732) 747-7800", contacts:["VP Land","Director of Land Acquisition","Land Manager"],                      notes:"Multi-state; NJ, FL, PA, TX, CA; varied price points" },
+  { rank:21, company:"Chesmar Homes",             tier:"Large Regional",  hq:"Houston, TX",       website:"chesmarhomes.com",        phone:"(713) 714-4800", contacts:["Director of Land","VP Land","Land Manager"],                                   notes:"TX-focused; Houston, San Antonio, Austin, Dallas" },
+  { rank:22, company:"Epcon Communities",         tier:"Large Regional",  hq:"Dublin, OH",        website:"epconfranchising.com",    phone:"(614) 766-3000", contacts:["Director of Land","Land Development Manager","VP of Development"],             notes:"55+ active adult; franchise model; OH, Midwest, Southeast" },
+  { rank:23, company:"Fischer Homes",             tier:"Large Regional",  hq:"Erlanger, KY",      website:"fischerhomes.com",        phone:"(859) 282-0950", contacts:["Director of Land","VP Land","Land Acquisition Manager"],                      notes:"Midwest + Southeast; OH, KY, IN, GA, TN, MO" },
+  { rank:24, company:"Eastwood Homes",            tier:"Large Regional",  hq:"Charlotte, NC",     website:"eastwoodhomes.com",       phone:"(704) 321-1789", contacts:["VP Land","Director of Land","Land Manager"],                                   notes:"SE focus; NC, SC, TN; growing into VA, GA" },
+  { rank:25, company:"Ashton Woods Homes",        tier:"Large Regional",  hq:"Atlanta, GA",       website:"ashtonwoods.com",         phone:"(770) 246-6300", contacts:["Director of Land","VP Land","Land Acquisition Manager"],                      notes:"GA, TX, FL, AZ, NC, SC; design-forward mid-market" },
+  { rank:26, company:"Landsea Homes",             tier:"Large Regional",  hq:"Dallas, TX",        website:"landseahomes.com",        phone:"(949) 345-8080", contacts:["VP Land","Director of Land","Land Manager"],                                   notes:"TX, AZ, FL, CA, CO; sustainability focus" },
+  { rank:27, company:"Empire Communities",        tier:"Large Regional",  hq:"Atlanta, GA",       website:"empirecommunities.com",   phone:"(404) 301-3560", contacts:["VP Land","Director of Land Acquisition","Land Manager"],                      notes:"GA, TX, TN, NC US markets; Canadian parent" },
+  { rank:28, company:"Landmark Homes",            tier:"Large Regional",  hq:"Lititz, PA",        website:"landmarkhomes.net",       phone:"(717) 626-8002", contacts:["VP Land","Director of Land","Land Acquisition Manager"],                      notes:"PA, MD, NJ markets; custom and semi-custom" },
+  { rank:29, company:"Trumark Homes",             tier:"Large Regional",  hq:"San Ramon, CA",     website:"trumarkhomes.com",        phone:"(925) 244-7000", contacts:["VP Land","Director of Land","Land Acquisition Manager"],                      notes:"CA and CO; infill and suburban; design-forward" },
+  { rank:30, company:"Thomas James Homes",        tier:"Large Regional",  hq:"Newport Beach, CA", website:"thomasjameshomes.com",    phone:"(949) 478-8047", contacts:["Director of Acquisitions","VP Acquisitions","Land Acquisition Manager"],       notes:"Infill teardown/rebuild; CA, CO, WA, AZ; high-margin lots" },
+  { rank:31, company:"Forestar Group",            tier:"Land Developers", hq:"Arlington, TX",     website:"forestar.com",            phone:"(817) 769-1860", contacts:["VP Land","Director of Land Development","Land Development Manager"],           notes:"D.R. Horton subsidiary; pure-play land banking" },
+  { rank:32, company:"Brookfield Residential",    tier:"Land Developers", hq:"Denver, CO",        website:"brookfieldresidential.com",phone:"(720) 449-6000",contacts:["VP Land","Director of Land Acquisition","Land Development Manager"],           notes:"Master-planned communities; CO, CA, AZ, TX, MD" },
+  { rank:33, company:"The Howard Hughes Corp.",   tier:"Land Developers", hq:"The Woodlands, TX", website:"howardhughes.com",        phone:"(281) 364-2500", contacts:["VP Development","Director of Land","VP Real Estate"],                         notes:"Master-planned; Summerlin NV, Woodlands TX, Columbia MD" },
+  { rank:34, company:"Irvine Company",            tier:"Land Developers", hq:"Newport Beach, CA", website:"irvinecompany.com",       phone:"(949) 720-2000", contacts:["VP Acquisitions","Director of Land","VP Development"],                        notes:"CA-centric; massive land holdings in Orange County" },
+  { rank:35, company:"Newland Communities",       tier:"Land Developers", hq:"San Diego, CA",     website:"newlandco.com",           phone:"(858) 618-1500", contacts:["VP Land","Director of Land Development","Development Manager"],               notes:"National master-planned; TX, FL, MD, CA, SC, NC" },
+  { rank:36, company:"Sunstone Land Partners",    tier:"Land Developers", hq:"Denver, CO",        website:"sunstoneland.com",        phone:"",               contacts:["Principal","VP Acquisitions","Land Acquisition Manager"],                      notes:"Land banking and development; Rocky Mountain + West" },
+  { rank:37, company:"Vestar Development",        tier:"Land Developers", hq:"Phoenix, AZ",       website:"vestar.com",              phone:"(602) 866-8500", contacts:["VP Development","Director of Acquisitions","Development Manager"],             notes:"Mixed-use and retail/residential land; AZ, West" },
+  { rank:38, company:"Brookfield Properties",     tier:"Land Developers", hq:"New York, NY",      website:"brookfieldproperties.com",phone:"(212) 417-7000", contacts:["VP Development","Director of Acquisitions","Land Development VP"],             notes:"Large-scale mixed-use; national presence" },
+  { rank:39, company:"NexMetro Communities",      tier:"Land Developers", hq:"Phoenix, AZ",       website:"nexmetro.com",            phone:"(602) 441-5300", contacts:["VP Acquisitions","Director of Land","Land Acquisition Manager"],               notes:"Build-to-rent land buyer; AZ, TX, FL, CO, GA" },
+  { rank:40, company:"NexPoint Real Estate",      tier:"Land Developers", hq:"Dallas, TX",        website:"nexpointrei.com",         phone:"(214) 276-6300", contacts:["VP Acquisitions","Director of Development","Land Manager"],                    notes:"BTR and multi-family land; TX-centric with national reach" },
+  { rank:41, company:"Thrive Home Builders",      tier:"Emerging",        hq:"Denver, CO",        website:"thrivehomebuilders.com",  phone:"(303) 345-5687", contacts:["VP Land","Director of Land","Land Manager"],                                   notes:"Sustainability-focused; CO and Mountain West" },
+  { rank:42, company:"Coventry Homes",            tier:"Emerging",        hq:"Houston, TX",       website:"coventryhomes.com",       phone:"(713) 783-3710", contacts:["Director of Land","VP Land","Land Acquisition Manager"],                      notes:"TX-focused; Houston and Austin markets" },
+  { rank:43, company:"Presidio Residential Capital",tier:"Emerging",      hq:"San Diego, CA",     website:"presidiorc.com",          phone:"(858) 875-4900", contacts:["Director of Acquisitions","VP Acquisitions","Investment Manager"],             notes:"Capital partner for builders; lot-banking model; CA" },
+  { rank:44, company:"Century Land Holdings",     tier:"Emerging",        hq:"Phoenix, AZ",       website:"centurylandholdings.com", phone:"",               contacts:["VP Land","Director of Acquisitions","Land Manager"],                          notes:"Land development and lot finishing; AZ, TX, UT" },
+  { rank:45, company:"Sumeer Homes",              tier:"Emerging",        hq:"Irving, TX",        website:"sumeerhomes.com",         phone:"(972) 870-0990", contacts:["VP Land","Director of Land","Land Manager"],                                   notes:"DFW-focused; growing suburban TX markets" },
+  { rank:46, company:"Grenadier Homes",           tier:"Emerging",        hq:"Dallas, TX",        website:"grenadierhomes.com",      phone:"(214) 389-2999", contacts:["Director of Land","VP Acquisitions","Land Manager"],                          notes:"TX-focused; DFW and Austin infill and suburban" },
+  { rank:47, company:"Oakwood Homes",             tier:"Emerging",        hq:"Greenwood Village, CO",website:"oakwoodhomesco.com",   phone:"(303) 799-3300", contacts:["VP Land","Director of Land","Land Acquisition Manager"],                      notes:"CO and Mountain West; attainable housing focus" },
+  { rank:48, company:"Nexus Residential",         tier:"Emerging",        hq:"Tempe, AZ",         website:"nexusresidential.com",    phone:"",               contacts:["VP Acquisitions","Director of Land","Land Manager"],                          notes:"AZ, CO, TX; emerging BTR and entry-level lot buyer" },
+  { rank:49, company:"Landmark 24 Homes",         tier:"Emerging",        hq:"Savannah, GA",      website:"landmark24homes.com",     phone:"(912) 353-2424", contacts:["VP Land","Director of Land","Land Manager"],                                   notes:"SE focus; GA, SC, NC; first-time and move-up buyer" },
+  { rank:50, company:"Armadillo Homes",           tier:"Emerging",        hq:"San Antonio, TX",   website:"armadillohomes.com",      phone:"(210) 764-4663", contacts:["Director of Land","VP Land","Land Manager"],                                   notes:"TX-focused; San Antonio and Austin suburban markets" },
+] as const;
+
+const TIER_COLORS: Record<string, string> = {
+  "Public Giants":   "bg-blue-50 text-blue-700 border-blue-200",
+  "Large Private":   "bg-violet-50 text-violet-700 border-violet-200",
+  "Large Regional":  "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "Land Developers": "bg-amber-50 text-amber-700 border-amber-200",
+  "Emerging":        "bg-rose-50 text-rose-700 border-rose-200",
+};
+
+function BuilderCard({ b }: { b: typeof TOP_BUILDERS[number] }) {
+  const tierCls = TIER_COLORS[b.tier] ?? "bg-surface-container text-secondary border-outline-variant/20";
+  return (
+    <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <span className="text-[10px] font-black text-secondary/50 uppercase tracking-widest">#{b.rank}</span>
+          <h3 className="font-headline text-base font-extrabold text-primary leading-tight mt-0.5">{b.company}</h3>
+          <p className="text-xs text-secondary mt-0.5">{b.hq}</p>
+        </div>
+        <span className={`shrink-0 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${tierCls}`}>{b.tier}</span>
+      </div>
+
+      {/* Contact info */}
+      <div className="space-y-1.5 text-xs">
+        <a
+          href={`https://${b.website}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="flex items-center gap-1.5 text-primary hover:underline font-semibold"
+        >
+          <span className="material-symbols-outlined text-sm">language</span>
+          {b.website}
+        </a>
+        {b.phone && (
+          <div className="flex items-center gap-1.5 text-on-surface-variant">
+            <span className="material-symbols-outlined text-sm">call</span>
+            {b.phone}
+          </div>
+        )}
+      </div>
+
+      {/* Contact titles */}
+      <div className="flex flex-wrap gap-1.5">
+        {b.contacts.map((c, i) => (
+          <span key={i} className="text-[10px] bg-surface-container px-2 py-0.5 rounded-full text-secondary font-semibold border border-outline-variant/20">{c}</span>
+        ))}
+      </div>
+
+      {/* Notes */}
+      <p className="text-[11px] text-secondary leading-relaxed border-t border-outline-variant/15 pt-2">{b.notes}</p>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function BuyerDirectoryPage() {
@@ -368,10 +478,6 @@ export default function BuyerDirectoryPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // ── National buyers ──
-  const [nationalBuyers, setNationalBuyers] = useState<BuyerRequest[]>([]);
-  const [nationalLoading, setNationalLoading] = useState(false);
-  const [nationalUseCase, setNationalUseCase] = useState('');
-  const [nationalRoadAccess, setNationalRoadAccess] = useState('');
 
   // ── By-state buyers ──
   const [selectedState, setSelectedState] = useState('');
@@ -399,15 +505,6 @@ export default function BuyerDirectoryPage() {
 
   // ── Data fetching ──
 
-  useEffect(() => {
-    if (view !== 'national') return;
-    setNationalLoading(true);
-    fetch('/api/buyer-directory?status=active&limit=200')
-      .then(r => r.json())
-      .then(({ requests }) => { setNationalBuyers((requests ?? []) as BuyerRequest[]); setNationalLoading(false); })
-      .catch(() => setNationalLoading(false));
-  }, [view]);
-
   function loadStateBuyers(state: string) {
     if (!state) return;
     setStateLoading(true);
@@ -430,20 +527,6 @@ export default function BuyerDirectoryPage() {
 
   // ── Filtered lists ──
 
-  const filteredNational = useMemo(() => {
-    const q = globalSearch.toLowerCase();
-    return nationalBuyers.filter(r => {
-      const name = getBuyerName(r).toLowerCase();
-      const co = (r.profiles?.company_name ?? '').toLowerCase();
-      const state = (r.target_state ?? '').toLowerCase();
-      const uc = (r.use_case ?? '').toLowerCase();
-      const matchSearch = !q || name.includes(q) || co.includes(q) || state.includes(q) || uc.includes(q);
-      const matchUC = !nationalUseCase || uc.includes(nationalUseCase.toLowerCase());
-      const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
-      const matchRoad = !nationalRoadAccess || roads.some(rd => rd.toLowerCase().includes(nationalRoadAccess.toLowerCase()));
-      return matchSearch && matchUC && matchRoad;
-    });
-  }, [nationalBuyers, globalSearch, nationalUseCase, nationalRoadAccess]);
 
   const filteredActive = useMemo(() => {
     const q = globalSearch.toLowerCase();
@@ -547,66 +630,16 @@ export default function BuyerDirectoryPage() {
               {view === 'national' && (
                 <div>
                   <ViewHeader
-                    title="Top National Buyers"
-                    subtitle="Highest-volume land buyers ranked by budget, actively purchasing across the US"
-                    count={filteredNational.length}
+                    title="Top National Builders"
+                    subtitle="Top 50 US homebuilders and land developers actively acquiring land nationwide"
+                    count={TOP_BUILDERS.length}
                     onBack={backToGrid}
                   />
-
-                  {/* Filters row */}
-                  <div className="flex flex-wrap items-center gap-3 mb-5">
-                    <select value={nationalUseCase} onChange={e => setNationalUseCase(e.target.value)} className={SELECT_CLS}>
-                      <option value="">All Use Cases</option>
-                      <option value="row crop">Row Crop</option>
-                      <option value="livestock">Livestock/Ranching</option>
-                      <option value="timber">Timber</option>
-                      <option value="recreational">Recreational</option>
-                      <option value="residential development">Residential Development</option>
-                      <option value="commercial development">Commercial Development</option>
-                      <option value="conservation">Conservation</option>
-                      <option value="investment">Investment</option>
-                    </select>
-                    <select value={nationalRoadAccess} onChange={e => setNationalRoadAccess(e.target.value)} className={SELECT_CLS}>
-                      <option value="">Road Access</option>
-                      <option value="Paved Road">Paved Road</option>
-                      <option value="Gravel Road">Gravel Road</option>
-                      <option value="Dirt Road">Dirt Road</option>
-                      <option value="Private Road">Private Road</option>
-                      <option value="Easement">Easement</option>
-                      <option value="No Road Access">No Road Access</option>
-                    </select>
-                    {(nationalUseCase || nationalRoadAccess) && (
-                      <button onClick={() => { setNationalUseCase(''); setNationalRoadAccess(''); }} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">close</span> Clear
-                      </button>
-                    )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {TOP_BUILDERS.map(b => (
+                      <BuilderCard key={b.rank} b={b} />
+                    ))}
                   </div>
-
-                  {nationalLoading ? (
-                    <div className="space-y-3">
-                      {[1,2,3,4,5].map(i => (
-                        <div key={i} className="bg-surface-container-low rounded-xl h-16 animate-pulse" />
-                      ))}
-                    </div>
-                  ) : filteredNational.length === 0 ? (
-                    <div className="text-center py-16 text-secondary">
-                      <span className="material-symbols-outlined text-5xl mb-3 block text-primary/20">search_off</span>
-                      <p className="font-semibold">No buyers found</p>
-                      <p className="text-sm mt-1">Try adjusting your search or filters</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredNational.map(req => (
-                        <BuyerRequestCard
-                          key={req.id}
-                          req={req}
-                          canViewContact={canViewContact}
-                          isFreeUser={isFreeUser}
-                          onUpgrade={() => setShowUpgradeModal(true)}
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
               )}
 
