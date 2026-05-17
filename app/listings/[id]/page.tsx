@@ -498,6 +498,14 @@ export default function ListingDetailPage() {
             </div>
 
           </aside>
+
+          {/* Disclaimer */}
+          <div className="mt-10 px-4 py-5 bg-surface-container-low rounded-2xl border border-outline-variant/20">
+            <p className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2">Disclaimer</p>
+            <p className="text-xs text-secondary leading-relaxed">
+              This listing has been submitted by a private or third-party seller. LotScout does not verify, guarantee, or warrant the accuracy, completeness, or legality of any information contained herein. Always independently verify ownership, boundaries, zoning, and all property details prior to entering into any transaction. LotScout strongly recommends closing through a licensed title company and conducting full due diligence before any real estate purchase. To the fullest extent permitted by applicable law, LotScout and its affiliates, employees, and agents shall not be held liable for any direct, indirect, incidental, or consequential damages arising from reliance on the information in this listing.
+            </p>
+          </div>
         </div>
       </main>
     </div>
