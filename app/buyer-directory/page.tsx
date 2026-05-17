@@ -626,6 +626,56 @@ export default function BuyerDirectoryPage() {
             )}
           </div>
 
+              {/* Grid view — 3 category cards */}
+              {view === 'grid' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Card 1: Top National Builders */}
+                  <button
+                    onClick={() => openView('national')}
+                    className="group text-left bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 hover:shadow-lg hover:border-primary/25 transition-all"
+                  >
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
+                      <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>corporate_fare</span>
+                    </div>
+                    <h3 className="font-headline text-lg font-extrabold text-primary mb-1">Top National Builders</h3>
+                    <p className="text-secondary text-sm leading-relaxed">Top 50 homebuilders and land developers actively acquiring land across the US.</p>
+                    <div className="mt-4 flex items-center gap-1 text-primary text-sm font-bold">
+                      View builders <span className="material-symbols-outlined text-base">arrow_forward</span>
+                    </div>
+                  </button>
+
+                  {/* Card 2: Top Buyers by State */}
+                  <button
+                    onClick={() => openView('by-state')}
+                    className="group text-left bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 hover:shadow-lg hover:border-primary/25 transition-all"
+                  >
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
+                      <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>map</span>
+                    </div>
+                    <h3 className="font-headline text-lg font-extrabold text-primary mb-1">Top Buyers by State</h3>
+                    <p className="text-secondary text-sm leading-relaxed">Find the most active land buyers in any state. Filter by location and use case.</p>
+                    <div className="mt-4 flex items-center gap-1 text-primary text-sm font-bold">
+                      Browse by state <span className="material-symbols-outlined text-base">arrow_forward</span>
+                    </div>
+                  </button>
+
+                  {/* Card 3: Active Buyers */}
+                  <button
+                    onClick={() => openView('active')}
+                    className="group text-left bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 hover:shadow-lg hover:border-primary/25 transition-all"
+                  >
+                    <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition-colors">
+                      <span className="material-symbols-outlined text-emerald-600 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+                    </div>
+                    <h3 className="font-headline text-lg font-extrabold text-primary mb-1">Active Buyers</h3>
+                    <p className="text-secondary text-sm leading-relaxed">Buyers with a purchase timeline under 30 days — sorted by most recently posted.</p>
+                    <div className="mt-4 flex items-center gap-1 text-emerald-600 text-sm font-bold">
+                      View active <span className="material-symbols-outlined text-base">arrow_forward</span>
+                    </div>
+                  </button>
+                </div>
+              )}
+
               {/* National buyers view */}
               {view === 'national' && (
                 <div>
