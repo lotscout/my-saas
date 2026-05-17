@@ -737,14 +737,14 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try clearing your filters or check back soon</p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filteredActive.map(req => (
-                        <BuyerRow
+                        <BuyerRequestCard
                           key={req.id}
                           req={req}
                           canViewContact={canViewContact}
+                          isFreeUser={isFreeUser}
                           onUpgrade={() => setShowUpgradeModal(true)}
-                          showTimeline={false}
                         />
                       ))}
                     </div>
