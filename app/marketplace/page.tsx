@@ -691,8 +691,6 @@ export default function MarketplacePage() {
           </div>
         </section>
 
-        </div>
-
         {/* ── PROPERTIES TAB ── */}
             {!loading && tier === 'standard' && listingsThisPeriod >= 2 && (
               <div className="mb-6">
