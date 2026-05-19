@@ -30,8 +30,6 @@ interface Listing {
   preferred_close_date: string | null;
   contact_methods: string[] | null;
   photos_urls: string[] | null;
-  seller_first_name: string | null;
-  seller_last_name: string | null;
   owner_name: string | null;
   digital_signature: string | null;
   is_test_listing: boolean | null;
@@ -145,9 +143,8 @@ export default function ListingDetailPage() {
   }
 
   const sellerName = listing.owner_name
-    || [listing.seller_first_name, listing.seller_last_name].filter(Boolean).join(' ')
     || listing.digital_signature
-    || 'By Owner';
+    || 'Private Seller';
 
   // Generate a display title that includes location
   const locationLabel = listing.city
