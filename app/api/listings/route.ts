@@ -37,7 +37,16 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json(data ?? []);
+  // Sort: listings with images first, no-image listings last (stable — preserves DB sort order within each group)
+  const sorted = (data ?? []).sort((a: any, b: any) => {
+    const aHasImg = Array.isArray(a.photos_urls) && a.photos_urls.length > 0;
+    const bHasImg = Array.isArray(b.photos_urls) && b.photos_urls.length > 0;
+    if (aHasImg && !bHasImg) return -1;
+    if (!aHasImg && bHasImg) return 1;
+    return 0;
+  });
+
+  return NextResponse.json(sorted);
 }
 
 export async function POST(request: NextRequest) {
