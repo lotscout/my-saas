@@ -386,7 +386,7 @@ export default function DashboardPage() {
               <Skeleton className="h-12 w-40 rounded-2xl" />
             </div>
           ) : (
-            <h1 className="font-headline text-3xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+            <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
               {getGreeting()},{' '}
               <span className="text-emerald-600">{firstName ?? 'there'}</span>
             </h1>
@@ -394,7 +394,7 @@ export default function DashboardPage() {
         </header>
 
         {/* Quick Actions */}
-        <section className="flex flex-wrap gap-3 mb-8">
+        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
           {[
             { icon: 'analytics', label: 'Analyze a Property', href: '/property-analysis' },
             { icon: 'explore',   label: 'Browse Marketplace', href: '/marketplace'        },
@@ -403,32 +403,32 @@ export default function DashboardPage() {
             <a
               key={label}
               href={href}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group border border-outline-variant/10"
+              className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/10 text-center"
             >
-              <span className="material-symbols-outlined text-primary">{icon}</span>
-              <span className="text-sm font-semibold text-primary">{label}</span>
+              <span className="material-symbols-outlined text-lg sm:text-xl text-primary">{icon}</span>
+              <span className="text-xs sm:text-sm font-semibold text-primary leading-tight">{label}</span>
             </a>
           ))}
-          <CreateListingGate className="flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group border border-outline-variant/10">
-            <span className="material-symbols-outlined text-primary">add_circle</span>
-            <span className="text-sm font-semibold text-primary">Create Listing</span>
+          <CreateListingGate className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/10 text-center w-full">
+            <span className="material-symbols-outlined text-lg sm:text-xl text-primary">add_circle</span>
+            <span className="text-xs sm:text-sm font-semibold text-primary leading-tight">Create Listing</span>
           </CreateListingGate>
           {!loading && (
             tier ? (
               <a
                 href="/create-buyer-request"
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group border border-outline-variant/10"
+                className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/10 text-center"
               >
-                <span className="material-symbols-outlined text-primary">search</span>
-                <span className="text-sm font-semibold text-primary">Find a Property</span>
+                <span className="material-symbols-outlined text-lg sm:text-xl text-primary">search</span>
+                <span className="text-xs sm:text-sm font-semibold text-primary leading-tight">Find a Property</span>
               </a>
             ) : (
               <a
                 href="/pricing"
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group border border-outline-variant/10"
+                className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/10 text-center"
               >
-                <span className="material-symbols-outlined text-primary">search</span>
-                <span className="text-sm font-semibold text-primary">Find a Property</span>
+                <span className="material-symbols-outlined text-lg sm:text-xl text-primary">search</span>
+                <span className="text-xs sm:text-sm font-semibold text-primary leading-tight">Find a Property</span>
               </a>
             )
           )}
@@ -463,15 +463,6 @@ export default function DashboardPage() {
 
         {/* To-Do */}
         {!loading && (() => {
-          const allClear = !profileIncomplete && unreadCount === 0 && !hasAnalysisReady && !hasDraftListing;
-          if (allClear) {
-            return (
-              <section className="flex items-center gap-3 mb-8 px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-2xl w-fit">
-                <span className="material-symbols-outlined text-emerald-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                <span className="text-sm font-semibold text-emerald-800">You are all caught up!</span>
-              </section>
-            );
-          }
           const items: { label: string; href: string; done: boolean }[] = [
             ...(profileIncomplete ? [{ label: 'Complete your profile', href: '/edit-profile', done: false }] : []),
             ...(unreadCount > 0 ? [{ label: `You have ${unreadCount} unread message${unreadCount !== 1 ? 's' : ''}`, href: '/messaging', done: false }] : []),
@@ -482,7 +473,7 @@ export default function DashboardPage() {
             <section className="mb-10 bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-primary text-xl">checklist</span>
-                <h2 className="font-headline font-bold text-primary text-lg">To-Do</h2>
+                <h2 className="font-headline font-bold text-primary text-base sm:text-lg">To-Do</h2>
               </div>
               <ul className="space-y-2">
                 {items.map(item => (
@@ -494,7 +485,7 @@ export default function DashboardPage() {
                       >
                         {item.done ? 'check_circle' : 'radio_button_unchecked'}
                       </span>
-                      <span className="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">{item.label}</span>
+                      <span className="text-xs sm:text-sm font-medium text-on-surface group-hover:text-primary transition-colors">{item.label}</span>
                       <span className="material-symbols-outlined text-secondary group-hover:text-primary ml-auto text-base transition-colors">arrow_forward</span>
                     </a>
                   </li>
@@ -504,74 +495,71 @@ export default function DashboardPage() {
           );
         })()}
 
-        {/* Stats Row */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-12">
+        {/* Stats Row — always 3 columns */}
+        <section className="grid grid-cols-3 gap-2 sm:gap-6 mb-12">
 
           {/* New Messages */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-[180px] sm:min-h-[220px]">
-            <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>mail</span>
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-2 sm:p-8 text-center">
+            <span className="material-symbols-outlined text-xl sm:text-4xl text-primary mb-1 sm:mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>mail</span>
             {loading ? (
               <>
-                <Skeleton className="h-10 w-16 mb-2" />
-                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-7 w-12 mb-1" />
+                <Skeleton className="h-3 w-20" />
               </>
             ) : unreadCount === 0 ? (
               <>
-                <p className="text-3xl font-extrabold text-on-surface font-headline">0</p>
-                <p className="text-sm font-semibold text-secondary mt-1 mb-3">New Messages</p>
-                <p className="text-xs text-secondary/70">No new messages</p>
+                <p className="text-lg sm:text-3xl font-bold text-on-surface font-headline">0</p>
+                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1">New Messages</p>
               </>
             ) : (
               <>
-                <p className="text-5xl font-extrabold text-primary font-headline">{unreadCount}</p>
-                <p className="text-sm font-semibold text-secondary mt-1 mb-4">New Messages</p>
-                <a href="/messaging" className="text-xs font-bold text-primary hover:underline">View all →</a>
+                <p className="text-lg sm:text-5xl font-extrabold text-primary font-headline">{unreadCount}</p>
+                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1 mb-1 sm:mb-4">New Messages</p>
+                <a href="/messaging" className="text-[10px] sm:text-xs font-bold text-primary hover:underline">View all →</a>
               </>
             )}
           </div>
 
           {/* Completed Reports */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-[180px] sm:min-h-[220px]">
-            <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-2 sm:p-8 text-center">
+            <span className="material-symbols-outlined text-xl sm:text-4xl text-primary mb-1 sm:mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
             {loading ? (
               <>
-                <Skeleton className="h-10 w-16 mb-2" />
-                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-7 w-12 mb-1" />
+                <Skeleton className="h-3 w-20" />
               </>
             ) : reports.length === 0 ? (
               <>
-                <p className="text-3xl font-extrabold text-on-surface font-headline">0</p>
-                <p className="text-sm font-semibold text-secondary mt-1 mb-3">Completed Reports</p>
-                <p className="text-xs text-secondary/70">No completed reports in the last 7 days.</p>
+                <p className="text-lg sm:text-3xl font-bold text-on-surface font-headline">0</p>
+                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1">Reports</p>
               </>
             ) : (
               <>
-                <p className="text-5xl font-extrabold text-primary font-headline">{reports.length}</p>
-                <p className="text-sm font-semibold text-secondary mt-1 mb-4">Completed Reports</p>
-                <a href="/property-analysis" className="text-xs font-bold text-primary hover:underline">View reports →</a>
+                <p className="text-lg sm:text-5xl font-extrabold text-primary font-headline">{reports.length}</p>
+                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1 mb-1 sm:mb-4">Reports</p>
+                <a href="/property-analysis" className="text-[10px] sm:text-xs font-bold text-primary hover:underline">View →</a>
               </>
             )}
           </div>
 
           {/* Matched Buyers */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-[180px] sm:min-h-[220px]">
-            <span className="material-symbols-outlined text-4xl text-primary mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-2 sm:p-8 text-center">
+            <span className="material-symbols-outlined text-xl sm:text-4xl text-primary mb-1 sm:mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
             {loading ? (
               <>
-                <Skeleton className="h-10 w-16 mb-2" />
-                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-7 w-12 mb-1" />
+                <Skeleton className="h-3 w-20" />
               </>
             ) : matchedBuyers.length === 0 ? (
               <>
-                <p className="text-3xl font-extrabold text-on-surface font-headline">0</p>
-                <p className="text-sm font-semibold text-secondary mt-1 mb-3">Matched Buyers</p>
-                <p className="text-xs text-secondary/70">No matched buyers yet.<br />Add an active listing to start matching.</p>
+                <p className="text-lg sm:text-3xl font-bold text-on-surface font-headline">0</p>
+                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1">Matched Buyers</p>
               </>
             ) : (
               <>
-                <p className="text-5xl font-extrabold text-primary font-headline">{matchedBuyers.length}</p>
-                <p className="text-sm font-semibold text-secondary mt-1 mb-4">Matched Buyers</p>
-                <a href="/buyer-directory" className="text-xs font-bold text-primary hover:underline">View buyers →</a>
+                <p className="text-lg sm:text-5xl font-extrabold text-primary font-headline">{matchedBuyers.length}</p>
+                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1 mb-1 sm:mb-4">Matched Buyers</p>
+                <a href="/buyer-directory" className="text-[10px] sm:text-xs font-bold text-primary hover:underline">View →</a>
               </>
             )}
           </div>
@@ -582,7 +570,7 @@ export default function DashboardPage() {
         {(loading || hasBuyerCriteria) && (
           <section className="mb-12">
             <div className="flex justify-between items-center mb-6 px-2">
-              <h3 className="text-primary font-bold tracking-tight text-xl font-headline">New Listings For You</h3>
+              <h3 className="text-primary font-bold tracking-tight text-base sm:text-xl font-headline">New Listings For You</h3>
               <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/marketplace">See all matches</a>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -636,7 +624,7 @@ export default function DashboardPage() {
           <section className="mb-12">
             <div className="flex justify-between items-center mb-6 px-2">
               <div>
-                <h3 className="text-primary font-bold tracking-tight text-xl font-headline">New Listings Near You</h3>
+                <h3 className="text-primary font-bold tracking-tight text-base sm:text-xl font-headline">New Listings Near You</h3>
                 <p className="text-xs text-secondary mt-0.5">{profileCounty ? `${profileCounty}, ` : ''}{profileState}</p>
               </div>
               <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/marketplace">See all</a>
@@ -675,7 +663,7 @@ export default function DashboardPage() {
           <section className="mb-12">
             <div className="flex justify-between items-center mb-6 px-2">
               <div>
-                <h3 className="text-primary font-bold tracking-tight text-xl font-headline">Active Buyers in Your Area</h3>
+                <h3 className="text-primary font-bold tracking-tight text-base sm:text-xl font-headline">Active Buyers in Your Area</h3>
                 <p className="text-xs text-secondary mt-0.5">{profileState}</p>
               </div>
               <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/buyer-directory">See all</a>

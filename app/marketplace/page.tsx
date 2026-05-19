@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
-const ListingsMap = dynamic(() => import('@/components/ListingsMap'), { ssr: false, loading: () => <div className="w-full rounded-2xl bg-surface-container-low animate-pulse" style={{height:'600px'}} /> });
+const ListingsMap = dynamic(() => import('@/components/ListingsMap'), { ssr: false, loading: () => <div className="w-full h-full rounded-2xl bg-surface-container-low animate-pulse" /> });
 import Link from 'next/link';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
@@ -264,9 +264,10 @@ export default function MarketplacePage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsSort, setListingsSort] = useState('recommended');
-  const [viewMode, setViewMode] = useState<'grid'|'map'>('grid');
+  const [mapCollapsed, setMapCollapsed] = useState(false);
   const [mapListings, setMapListings] = useState<unknown[]>([]);
-  const [mapLoading, setMapLoading] = useState(false);
+  const [hoveredListingId, setHoveredListingId] = useState<string | null>(null);
+  const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
   const [buyerRequestsLoading, setBuyerRequestsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -284,6 +285,7 @@ export default function MarketplacePage() {
   const [filterSqFtMax, setFilterSqFtMax] = useState('');
   const [filterRoadAccessProps, setFilterRoadAccessProps] = useState<string[]>([]);
   const [filterRoadAccessBR, setFilterRoadAccessBR] = useState('');
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
 
   function toggleMultiFilter<T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, val: T) {
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]);
@@ -390,14 +392,14 @@ export default function MarketplacePage() {
   const isFreeUser = !loading && !tier;
   const isPaidUser = !loading && !!tier;
 
+  // Read map collapse preference and fetch all map listings on mount
   useEffect(() => {
-    if (viewMode !== 'map' || mapListings.length > 0) return;
-    setMapLoading(true);
+    if (localStorage.getItem('lotscout_map_collapsed') === 'true') setMapCollapsed(true);
     fetch('/api/listings/map')
       .then(r => r.json())
-      .then(data => { if (Array.isArray(data)) setMapListings(data); setMapLoading(false); })
-      .catch(() => setMapLoading(false));
-  }, [viewMode, mapListings.length]);
+      .then(data => { if (Array.isArray(data)) setMapListings(data); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setListingsLoading(true);
@@ -545,6 +547,12 @@ export default function MarketplacePage() {
     });
   }, [buyerRequests, buyerSearchQuery, filterBudget, filterAcreage, filterZoningBR, filterTimeline, filterRoadAccessBR, brSort]);
 
+  // IDs of listings that pass current filters — used to dim non-matching map pins
+  const filteredMapIds = useMemo(
+    () => new Set(filteredListings.map(l => l.id)),
+    [filteredListings]
+  );
+
   // State autocomplete suggestions
   const stateSuggestions = useMemo(() => {
     const q = searchQuery.trim();
@@ -585,6 +593,23 @@ export default function MarketplacePage() {
     if (!profile || !tier) { setShowBuyerFreeModal(true); return; }
     router.push('/create-buyer-request');
   }
+
+  function toggleMap() {
+    setMapCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('lotscout_map_collapsed', String(next));
+      return next;
+    });
+  }
+
+  const handlePinClick = useCallback((listingId: string) => {
+    const el = cardRefs.current.get(listingId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHoveredListingId(listingId);
+      setTimeout(() => setHoveredListingId(null), 2000);
+    }
+  }, []);
 
   return (
     <div className="bg-surface text-on-surface">
@@ -683,24 +708,6 @@ export default function MarketplacePage() {
               Advanced land acquisition powered by cartographic precision. Browse 2,400+ off-market listings throughout the U.S
             </p>
           </div>
-          <div className="flex gap-2 bg-surface-container p-1 rounded-xl">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-                viewMode === 'grid' ? 'bg-surface-container-lowest shadow-sm text-primary' : 'text-slate-500 hover:text-primary'
-              }`}
-            >
-              <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">grid_view</span>Grid</span>
-            </button>
-            <button
-              onClick={() => setViewMode('map')}
-              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-                viewMode === 'map' ? 'bg-surface-container-lowest shadow-sm text-primary' : 'text-slate-500 hover:text-primary'
-              }`}
-            >
-              <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">map</span>Map View</span>
-            </button>
-          </div>
         </section>
 
         {/* Tab toggle */}
@@ -735,6 +742,38 @@ export default function MarketplacePage() {
                 <ListingLimitBanner listingsUsed={listingsThisPeriod} tier="standard" />
               </div>
             )}
+
+            {/* Map — always visible, collapsible */}
+            <div className="mb-4">
+              <div
+                className="overflow-hidden transition-all duration-300 ease-in-out rounded-2xl"
+                style={{ maxHeight: mapCollapsed ? 0 : 380 }}
+              >
+                <div className="relative h-[220px] sm:h-[380px]">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  <ListingsMap
+                    listings={mapListings as any}
+                    filteredIds={filteredMapIds}
+                    highlightedId={hoveredListingId}
+                    onPinClick={handlePinClick}
+                  />
+                  <button
+                    onClick={toggleMap}
+                    className="absolute top-3 right-3 z-[1001] text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white/90 backdrop-blur-sm border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors"
+                  >
+                    Hide Map ▲
+                  </button>
+                </div>
+              </div>
+              {mapCollapsed && (
+                <button
+                  onClick={toggleMap}
+                  className="mt-2 text-xs font-semibold text-slate-500 hover:text-primary transition-colors"
+                >
+                  Show Map ▼
+                </button>
+              )}
+            </div>
 
             {/* Search bar */}
             <div className="mb-6">
@@ -780,8 +819,171 @@ export default function MarketplacePage() {
               </div>
             </div>
 
+            {/* Mobile filter button — only visible on small screens */}
+            <div className="flex md:hidden items-center gap-3 mb-4">
+              {(() => {
+                const activeCount = (filterLotSizeMin || filterLotSizeMax || filterSqFtMin || filterSqFtMax ? 1 : 0)
+                  + filterZoning.length + filterUtilities.length + filterRoadAccessProps.length;
+                return (
+                  <button
+                    onClick={() => setShowFilterDrawer(true)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-all ${
+                      activeCount > 0 ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">tune</span>
+                    Filters{activeCount > 0 ? ` (${activeCount})` : ''}
+                  </button>
+                );
+              })()}
+              <select
+                value={listingsSort}
+                onChange={e => setListingsSort(e.target.value)}
+                className="bg-surface-container-low border-none rounded-lg px-3 py-2.5 text-sm font-bold text-primary focus:ring-0 cursor-pointer"
+              >
+                <option value="recommended">Recommended</option>
+                <option value="newest">Newest</option>
+                <option value="price_asc">Price: Low → High</option>
+                <option value="price_desc">Price: High → Low</option>
+                <option value="acres_asc">Acres: Small → Large</option>
+                <option value="acres_desc">Acres: Large → Small</option>
+              </select>
+            </div>
+
+            {/* Mobile filter drawer */}
+            {showFilterDrawer && (
+              <div className="fixed inset-0 z-[2000] md:hidden">
+                <div className="absolute inset-0 bg-black/40" onClick={() => setShowFilterDrawer(false)} />
+                <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto">
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-outline-variant/10 sticky top-0 bg-white z-10">
+                    <h2 className="font-headline text-base font-bold text-primary">Filters</h2>
+                    <button onClick={() => setShowFilterDrawer(false)} className="text-secondary hover:text-on-surface">
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                  <div className="px-5 py-4 space-y-6">
+
+                    {/* Lot Size */}
+                    <div>
+                      <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-3">Lot Size</p>
+                      <div className="flex gap-2 bg-surface-container-low rounded-lg p-1 mb-3">
+                        {(['acres', 'sqft'] as const).map(u => (
+                          <button
+                            key={u}
+                            onClick={() => { setFilterLotSizeUnit(u); setFilterLotSizeMin(''); setFilterLotSizeMax(''); setFilterSqFtMin(''); setFilterSqFtMax(''); }}
+                            className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all ${filterLotSizeUnit === u ? 'bg-white text-primary shadow-sm' : 'text-secondary'}`}
+                          >
+                            {u === 'acres' ? 'Acres' : 'Sq Ft'}
+                          </button>
+                        ))}
+                      </div>
+                      {filterLotSizeUnit === 'acres' ? (
+                        <div className="flex gap-3">
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-secondary block mb-1">Min Acres</label>
+                            <input type="number" placeholder="e.g. 5" value={filterLotSizeMin} onChange={e => setFilterLotSizeMin(e.target.value)}
+                              className="w-full border border-outline-variant/25 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-secondary block mb-1">Max Acres</label>
+                            <input type="number" placeholder="e.g. 500" value={filterLotSizeMax} onChange={e => setFilterLotSizeMax(e.target.value)}
+                              className="w-full border border-outline-variant/25 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex gap-3">
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-secondary block mb-1">Min Sq Ft</label>
+                            <input type="number" placeholder="e.g. 5000" value={filterSqFtMin} onChange={e => setFilterSqFtMin(e.target.value)}
+                              className="w-full border border-outline-variant/25 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-secondary block mb-1">Max Sq Ft</label>
+                            <input type="number" placeholder="e.g. 50000" value={filterSqFtMax} onChange={e => setFilterSqFtMax(e.target.value)}
+                              className="w-full border border-outline-variant/25 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Zoning */}
+                    <div>
+                      <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-3">Zoning Type</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[['agricultural', 'Agricultural'], ['recreational', 'Recreational'], ['residential', 'Residential'], ['commercial', 'Commercial'], ['mixed', 'Mixed Use'], ['unrestricted', 'Unrestricted']].map(([val, label]) => (
+                          <button key={val} onClick={() => toggleMultiFilter(setFilterZoning, val)}
+                            className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+                              filterZoning.includes(val) ? 'bg-primary/10 border-primary text-primary font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-primary/30'
+                            }`}
+                          >
+                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterZoning.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'}`}>
+                              {filterZoning.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'10px'}}>check</span>}
+                            </span>
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Utilities */}
+                    <div>
+                      <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-3">Utilities Access</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['Water', 'Electric', 'Gas', 'Septic', 'Sewer'].map(val => (
+                          <button key={val} onClick={() => toggleMultiFilter(setFilterUtilities, val)}
+                            className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+                              filterUtilities.includes(val) ? 'bg-primary/10 border-primary text-primary font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-primary/30'
+                            }`}
+                          >
+                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterUtilities.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'}`}>
+                              {filterUtilities.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'10px'}}>check</span>}
+                            </span>
+                            {val}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Road Access */}
+                    <div>
+                      <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-3">Road Access</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['Paved Road', 'Gravel Road', 'Dirt Road', 'Private Road', 'Easement', 'No Road Access'].map(val => (
+                          <button key={val} onClick={() => toggleMultiFilter(setFilterRoadAccessProps, val)}
+                            className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+                              filterRoadAccessProps.includes(val) ? 'bg-primary/10 border-primary text-primary font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-primary/30'
+                            }`}
+                          >
+                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterRoadAccessProps.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'}`}>
+                              {filterRoadAccessProps.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'10px'}}>check</span>}
+                            </span>
+                            {val}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+                  <div className="px-5 py-4 border-t border-outline-variant/10 sticky bottom-0 bg-white flex gap-3">
+                    <button
+                      onClick={() => { setFilterLotSizeMin(''); setFilterLotSizeMax(''); setFilterSqFtMin(''); setFilterSqFtMax(''); setFilterZoning([]); setFilterUtilities([]); setFilterRoadAccessProps([]); }}
+                      className="flex-1 border border-outline-variant/30 text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors"
+                    >
+                      Clear All
+                    </button>
+                    <button
+                      onClick={() => setShowFilterDrawer(false)}
+                      className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-12 gap-8 mb-12">
-              <div className="col-span-12 flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
+              <div className="col-span-12 hidden md:flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
                 {/* Lot Size */}
                 {(() => {
                   const lotSizeActive = filterLotSizeMin || filterLotSizeMax || filterSqFtMin || filterSqFtMax;
@@ -1008,14 +1210,7 @@ export default function MarketplacePage() {
               </div>
             </div>
 
-            {viewMode === 'map' ? (
-              mapLoading ? (
-                <div className="w-full rounded-2xl bg-surface-container-low animate-pulse" style={{height:'600px'}} />
-              ) : (
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                <ListingsMap listings={mapListings as any} />
-              )
-            ) : listingsLoading ? (
+            {listingsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                 {[1,2,3,4,5,6].map(i => (
                   <div key={i} className="flex flex-col animate-pulse">
@@ -1052,8 +1247,20 @@ export default function MarketplacePage() {
                     listing.county ? `${listing.county} County` : null,
                     listing.state,
                   ].filter(Boolean).join(', ');
+                  const isHighlighted = hoveredListingId === listing.id;
                   return (
-                    <Link key={listing.id} href={`/listings/${listing.id}`} className="flex flex-col group rounded-2xl overflow-hidden border border-outline-variant/15 bg-white hover:shadow-lg hover:border-outline-variant/30 transition-all">
+                    <Link
+                      key={listing.id}
+                      href={`/listings/${listing.id}`}
+                      ref={(el: HTMLAnchorElement | null) => { if (el) cardRefs.current.set(listing.id, el); else cardRefs.current.delete(listing.id); }}
+                      onMouseEnter={() => setHoveredListingId(listing.id)}
+                      onMouseLeave={() => setHoveredListingId(null)}
+                      className={`flex flex-col group rounded-2xl overflow-hidden border bg-white transition-all ${
+                        isHighlighted
+                          ? 'border-emerald-500 shadow-md ring-2 ring-emerald-400/40'
+                          : 'border-outline-variant/15 hover:shadow-lg hover:border-outline-variant/30'
+                      }`}
+                    >
                       {/* Image */}
                       <div className="relative overflow-hidden bg-surface-container-low aspect-video">
                         {listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() && (
@@ -1238,12 +1445,6 @@ export default function MarketplacePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBuyerRequests.map(req => {
-                  const company = req.display_company || null;
-                  const personName = req.display_name ||
-                    [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || null;
-                  const primaryName = company || personName || 'Anonymous Buyer';
-                  const secondaryName = company ? personName : null;
-                  const blurIdentity = !loading && !canViewContact;
                   const stateAbbrev = req.target_state ? (STATE_NAMES[req.target_state.toLowerCase()] ?? null) : null;
                   let location: string;
                   if (req.target_city && req.target_state) location = `${req.target_city}, ${stateAbbrev ?? req.target_state}`;
@@ -1252,22 +1453,44 @@ export default function MarketplacePage() {
                   const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
                   const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
 
+                  const listedByMkt = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ');
                   return (
-                    <Link
+                    <div
                       key={req.id}
-                      href={`/buyer-requests/${req.id}`}
                       className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
                     >
-                      <div className={blurIdentity ? 'blur-sm select-none' : ''}>
-                        {primaryName && <p className="font-extrabold text-primary text-base leading-snug">{primaryName}</p>}
-                        {secondaryName && <p className="text-xs text-secondary font-medium mt-0.5 line-clamp-1">{secondaryName}</p>}
+                      <div className="space-y-2">
+                        <div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p><p className={`text-base font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p></div>
+                        <div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Budget</p><p className="text-base font-bold text-on-surface">{perAcre}</p></div>
+                        {timeline && (<div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Timeline</p><p className="text-base font-bold text-on-surface">{timeline}</p></div>)}
                       </div>
-                      <div className="mt-3 space-y-2">
-                        <div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Location</p><p className={`text-sm font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p></div>
-                        <div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Budget</p><p className="text-sm font-bold text-on-surface">{perAcre}</p></div>
-                        {timeline && (<div><p className="text-[10px] font-black uppercase tracking-widest text-secondary/70">Timeline</p><p className="text-sm font-bold text-on-surface">{timeline}</p></div>)}
+                      {listedByMkt && (
+                        <p className="text-xs text-secondary italic mt-3">Listed by {listedByMkt}</p>
+                      )}
+                      <div className="flex gap-2 mt-3">
+                        {canViewContact ? (
+                          <Link
+                            href={`/buyer-requests/${req.id}`}
+                            className="w-1/2 bg-green-700 text-white text-sm font-semibold rounded-xl py-2 text-center hover:bg-green-800 transition-colors"
+                          >
+                            Contact Buyer
+                          </Link>
+                        ) : (
+                          <button
+                            onClick={() => setShowContactUpgradeModal(true)}
+                            className="w-1/2 bg-green-700 text-white text-sm font-semibold rounded-xl py-2 hover:bg-green-800 transition-colors"
+                          >
+                            Contact Buyer
+                          </button>
+                        )}
+                        <Link
+                          href={`/buyer-requests/${req.id}`}
+                          className="w-1/2 border border-green-700 text-green-700 text-sm font-semibold rounded-xl py-2 text-center hover:bg-green-50 transition-colors"
+                        >
+                          See More
+                        </Link>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>

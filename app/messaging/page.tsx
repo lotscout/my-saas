@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
 import { createClient } from '@/lib/supabase/client';
@@ -17,9 +18,11 @@ interface Participant {
 interface ListingContext {
   id: string;
   title: string | null;
+  street_address: string | null;
   county: string | null;
   state: string | null;
   lot_size_acres: number | null;
+  asking_price: number | null;
 }
 
 interface Conversation {
@@ -62,14 +65,19 @@ function initials(p: Participant | null): string {
   return '?';
 }
 
-function listingSubtitle(listing: ListingContext | null): string | null {
+function listingPropertyLine(listing: ListingContext | null): string | null {
   if (!listing) return null;
-  if (listing.title) return `Re: ${listing.title}`;
-  const parts: string[] = [];
-  if (listing.lot_size_acres) parts.push(`${listing.lot_size_acres.toLocaleString()} Acres`);
-  if (listing.county) parts.push(`${listing.county} County`);
-  if (listing.state) parts.push(listing.state);
-  return parts.length > 0 ? `Re: ${parts.join(', ')}` : null;
+  const addressPart = listing.street_address || listing.title || null;
+  const locationPart = [listing.county, listing.state].filter(Boolean).join(', ');
+  const pricePart = listing.asking_price ? `$${listing.asking_price.toLocaleString()}` : null;
+
+  const segments: string[] = [];
+  if (addressPart) segments.push(addressPart);
+  if (locationPart) segments.push(locationPart);
+
+  let line = segments.join(', ');
+  if (pricePart) line += ` — ${pricePart}`;
+  return line || null;
 }
 
 function relativeTime(iso: string): string {
@@ -112,6 +120,7 @@ export default function MessagingPage() {
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -274,8 +283,8 @@ export default function MessagingPage() {
       <main className="flex flex-1 pt-16 h-full overflow-hidden">
         <div className="max-w-screen-2xl mx-auto px-2 sm:px-8 w-full flex h-full overflow-hidden">
 
-          {/* Left nav sidebar */}
-          <aside className="flex-none w-56 h-full flex flex-col border-r border-outline-variant/20 bg-white font-['Inter'] text-sm font-medium">
+          {/* Left nav sidebar — hidden on mobile */}
+          <aside className="hidden md:flex flex-none w-56 h-full flex-col border-r border-outline-variant/20 bg-white font-['Inter'] text-sm font-medium">
             <div className="px-6 pt-6 pb-3">
               <p className="text-xs font-bold text-secondary uppercase tracking-widest">Inbox</p>
             </div>
@@ -302,8 +311,8 @@ export default function MessagingPage() {
           {/* Conversation list + chat area */}
           <section className="flex flex-1 overflow-hidden">
 
-            {/* Conversation list */}
-            <div className="w-80 flex flex-col bg-white border-r border-outline-variant/15">
+            {/* Conversation list — full-width on mobile, fixed-width on desktop */}
+            <div className={`flex flex-col bg-white border-r border-outline-variant/15 md:w-80 ${mobileView === 'list' ? 'flex w-full' : 'hidden md:flex'}`}>
               <div className="p-5 border-b border-outline-variant/10">
                 <h2 className="font-headline text-lg font-extrabold tracking-tight text-primary mb-3">Conversations</h2>
                 <div className="relative">
@@ -345,7 +354,7 @@ export default function MessagingPage() {
                     return (
                       <button
                         key={conv.id}
-                        onClick={() => setSelectedConv(conv)}
+                        onClick={() => { setSelectedConv(conv); setMobileView('chat'); }}
                         className={`w-full text-left p-4 mx-0 transition-colors border-b border-outline-variant/10 last:border-0 ${
                           isSelected
                             ? 'bg-primary/5 border-l-4 border-l-primary'
@@ -363,9 +372,11 @@ export default function MessagingPage() {
                                 <span className="text-[10px] text-secondary shrink-0 ml-2">{relativeTime(conv.last_message_at)}</span>
                               )}
                             </div>
-                            {(() => {
-                              const sub = listingSubtitle(conv.listing) ?? (conv.subject || null);
-                              return sub ? <p className="text-[11px] text-emerald-700 font-medium truncate mb-0.5">{sub}</p> : null;
+                            {conv.listing_id && (() => {
+                              const line = listingPropertyLine(conv.listing);
+                              return line ? (
+                                <p className="text-[11px] text-secondary truncate mb-0.5 leading-tight">{line}</p>
+                              ) : null;
                             })()}
                             {conv.last_message_preview && (
                               <p className="text-xs text-on-surface-variant line-clamp-1">{conv.last_message_preview}</p>
@@ -379,8 +390,8 @@ export default function MessagingPage() {
               </div>
             </div>
 
-            {/* Chat window */}
-            <div className="flex-1 flex flex-col bg-surface-container-lowest">
+            {/* Chat window — shown full-width on mobile when chat is open */}
+            <div className={`flex-col bg-surface-container-lowest md:flex md:flex-1 ${mobileView === 'chat' ? 'flex flex-1' : 'hidden'}`}>
               {!selectedConv ? (
                 <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center p-12">
                   <div className="w-20 h-20 rounded-full bg-surface-container-low flex items-center justify-center">
@@ -394,18 +405,32 @@ export default function MessagingPage() {
               ) : (
                 <>
                   {/* Chat header */}
-                  <div className="h-16 px-6 flex items-center justify-between bg-white border-b border-outline-variant/10 shrink-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
+                  <div className="min-h-[64px] px-4 sm:px-6 py-3 flex items-center justify-between bg-white border-b border-outline-variant/10 shrink-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <button
+                        onClick={() => setMobileView('list')}
+                        className="md:hidden flex items-center gap-1 text-sm font-semibold text-primary mr-1 shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-base">arrow_back</span>
+                      </button>
+                      <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {initials(otherParticipant)}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <h3 className="font-headline font-extrabold text-primary text-sm leading-tight">
                           {participantName(otherParticipant)}
                         </h3>
-                        {(() => {
-                          const sub = listingSubtitle(selectedConv.listing) ?? (selectedConv.subject || null);
-                          return sub ? <p className="text-xs text-emerald-700 font-medium">{sub}</p> : null;
+                        {selectedConv.listing_id && (() => {
+                          const line = listingPropertyLine(selectedConv.listing);
+                          return line ? (
+                            <Link
+                              href={`/listings/${selectedConv.listing_id}`}
+                              className="flex items-center gap-1 text-[11px] text-secondary hover:text-primary transition-colors truncate max-w-xs"
+                            >
+                              <span className="material-symbols-outlined text-[13px] shrink-0">home</span>
+                              <span className="truncate">{line}</span>
+                            </Link>
+                          ) : null;
                         })()}
                       </div>
                     </div>

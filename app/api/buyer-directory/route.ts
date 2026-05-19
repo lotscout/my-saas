@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { resolveStateQuery } from '@/lib/stateMap';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -17,7 +18,11 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(limit);
 
-  if (state) query = query.ilike('target_state', state);
+  if (state) {
+    const vals = resolveStateQuery(state);
+    // Match either the full name or the abbreviation stored in target_state
+    query = query.or(vals.map(v => `target_state.ilike.${v}`).join(','));
+  }
   if (timeline) query = query.eq('timeline', timeline);
 
   const { data: requests, error } = await query;

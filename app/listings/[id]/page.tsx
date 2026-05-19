@@ -1,15 +1,36 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUserTier } from '@/hooks/useUserTier';
 import { createClient } from '@/lib/supabase/client';
 import Header from '@/components/Header';
 import SendMessageModal from '@/components/SendMessageModal';
+import COUNTY_CENTROIDS from '@/lib/county-centroids.json';
 
 const IMAGE_REQUEST_BODY =
   "Hi, I'm interested in this property and would like to request additional images. Thank you!";
+
+const STATE_CENTROIDS: Record<string, [number, number]> = {
+  AL: [32.7990, -86.8073], AK: [64.2008, -153.4937], AZ: [34.2744, -111.6602],
+  AR: [34.8938, -92.4426], CA: [37.1841, -119.4696], CO: [38.9972, -105.5478],
+  CT: [41.6219, -72.7273], DE: [38.9896, -75.5050], FL: [28.6305, -82.4497],
+  GA: [32.6415, -83.4426], HI: [20.2927, -156.3737], ID: [44.3509, -114.6130],
+  IL: [40.0417, -89.1965], IN: [39.8942, -86.2816], IA: [42.0751, -93.4960],
+  KS: [38.5266, -96.7265], KY: [37.5347, -85.3021], LA: [31.0689, -91.9968],
+  ME: [45.3695, -69.2428], MD: [39.0550, -76.7909], MA: [42.2596, -71.8083],
+  MI: [44.3467, -85.4102], MN: [46.2807, -94.3053], MS: [32.7364, -89.6678],
+  MO: [38.3566, -92.4580], MT: [46.8797, -110.3626], NE: [41.5378, -99.7951],
+  NV: [39.3289, -116.6312], NH: [43.6805, -71.5811], NJ: [40.1907, -74.6728],
+  NM: [34.4071, -106.1126], NY: [42.9538, -75.5268], NC: [35.5557, -79.3877],
+  ND: [47.4501, -100.4659], OH: [40.2862, -82.7937], OK: [35.5889, -97.4943],
+  OR: [43.9336, -120.5583], PA: [40.8781, -77.7996], RI: [41.6762, -71.5562],
+  SC: [33.9169, -80.8964], SD: [44.4443, -100.2263], TN: [35.8580, -86.3505],
+  TX: [31.4757, -99.3312], UT: [39.3055, -111.0937], VT: [44.0687, -72.6658],
+  VA: [37.5215, -78.8537], WA: [47.3826, -120.4472], WV: [38.6409, -80.6227],
+  WI: [44.6243, -89.9941], WY: [42.9957, -107.5512], DC: [38.8951, -77.0369],
+};
 
 interface Listing {
   id: string;
@@ -18,6 +39,7 @@ interface Listing {
   ownership_type: string | null;
   title: string | null;
   property_description: string | null;
+  additional_information: string | null;
   state: string | null;
   county: string | null;
   zip_code: string | null;
@@ -30,6 +52,7 @@ interface Listing {
   road_access: string[] | null;
   utilities: string[] | null;
   asking_price: number | null;
+  comparable_market_value: number | null;
   price_negotiable: boolean | null;
   preferred_close_date: string | null;
   contact_methods: string[] | null;
@@ -60,6 +83,63 @@ function fmtCloseDate(dateStr: string): string {
   return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function SingleListingMap({ county, state }: { county: string | null; state: string | null }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<unknown>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+    const centroids = COUNTY_CENTROIDS as unknown as Record<string, [number, number]>;
+    const key = county && state ? `${county}|${state}` : null;
+    let coords: [number, number] | null = null;
+    if (key) coords = centroids[key] ?? null;
+    if (!coords && state) coords = STATE_CENTROIDS[state] ?? null;
+    if (!coords) return;
+    const c = coords;
+
+    import('leaflet').then(L => {
+      import('leaflet/dist/leaflet.css');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+      const map = L.map(mapRef.current!).setView(c, county ? 10 : 6);
+      mapInstanceRef.current = map;
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 18,
+      }).addTo(map);
+
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="background:#1B4332;width:14px;height:14px;border-radius:50%;border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+
+      L.marker(c, { icon }).addTo(map);
+    });
+
+    return () => {
+      if (mapInstanceRef.current) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (mapInstanceRef.current as any).remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [county, state]);
+
+  if (!county && !state) return null;
+
+  return (
+    <div
+      ref={mapRef}
+      className="w-full rounded-xl overflow-hidden border border-outline-variant/20"
+      style={{ height: '300px' }}
+    />
+  );
+}
+
 export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -71,15 +151,16 @@ export default function ListingDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [imageRequestSent, setImageRequestSent] = useState(false);
   const [imageRequestLoading, setImageRequestLoading] = useState(false);
+  const [alreadyMessaged, setAlreadyMessaged] = useState(false);
 
   const { tier, isAdmin, loading: tierLoading } = useUserTier();
 
-  // Auth gate — redirect unauthenticated visitors to /login
   useEffect(() => {
     (async () => {
       const supabase = createClient();
@@ -96,14 +177,12 @@ export default function ListingDetailPage() {
   useEffect(() => {
     if (!id || authed !== true) return;
     (async () => {
-      // Use service-role API route to bypass RLS for published listings
       const res = await fetch(`/api/listings/${id}`);
       if (!res.ok) { setNotFound(true); setLoading(false); return; }
       const data = await res.json() as Listing;
       if (!data || !data.id) { setNotFound(true); setLoading(false); return; }
-      setListing(data as Listing);
+      setListing(data);
 
-      // Only fetch seller contact info for non-test listings with real contact methods
       const isMessagingOnly =
         data.is_test_listing === true ||
         !data.contact_methods?.length ||
@@ -123,7 +202,6 @@ export default function ListingDetailPage() {
     })();
   }, [id, authed]);
 
-  // Check if buyer already sent an image request for this listing's seller
   useEffect(() => {
     if (!listing || !currentUserId) return;
     (async () => {
@@ -138,14 +216,14 @@ export default function ListingDetailPage() {
         .limit(1)
         .maybeSingle();
       if (!conv) return;
-      const { data: msg } = await supabase
-        .from('messages')
-        .select('id')
-        .eq('conversation_id', conv.id)
-        .eq('sender_id', currentUserId)
-        .eq('body', IMAGE_REQUEST_BODY)
-        .maybeSingle();
-      if (msg) setImageRequestSent(true);
+
+      const [{ data: imgMsg }, { data: anyMsg }] = await Promise.all([
+        supabase.from('messages').select('id').eq('conversation_id', conv.id).eq('sender_id', currentUserId).eq('body', IMAGE_REQUEST_BODY).maybeSingle(),
+        supabase.from('messages').select('id').eq('conversation_id', conv.id).eq('sender_id', currentUserId).limit(1).maybeSingle(),
+      ]);
+
+      if (imgMsg) setImageRequestSent(true);
+      if (anyMsg) setAlreadyMessaged(true);
     })();
   }, [listing, currentUserId]);
 
@@ -168,17 +246,14 @@ export default function ListingDetailPage() {
         setToastMsg('Image request sent!');
         setTimeout(() => setToastMsg(''), 3000);
       }
-    } catch {
-      // silent — button stays enabled for retry
-    } finally {
+    } catch { /* silent */ } finally {
       setImageRequestLoading(false);
     }
   }
 
-  // Still checking auth or awaiting redirect
   if (authed === null || (authed && loading)) {
     return (
-      <div className="pt-32 pb-24 max-w-7xl mx-auto px-8 flex items-center justify-center min-h-[60vh]">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -197,13 +272,21 @@ export default function ListingDetailPage() {
 
   const sellerName = [listing.seller_first_name, listing.seller_last_name].filter(Boolean).join(' ') || listing.digital_signature || 'Private Seller';
 
+  const sellerInitials = (() => {
+    const f = listing.seller_first_name?.[0] ?? '';
+    const l = listing.seller_last_name?.[0] ?? '';
+    if (f || l) return (f + l).toUpperCase();
+    if (listing.digital_signature) return listing.digital_signature.slice(0, 2).toUpperCase();
+    return 'PS';
+  })();
+
   const pricePerAcre =
     listing.lot_size_unit === 'acres' && listing.lot_size_acres && listing.asking_price
       ? Math.round(listing.asking_price / listing.lot_size_acres)
       : null;
 
   const lotSizeDisplay = listing.lot_size_acres
-    ? `${listing.lot_size_acres.toLocaleString()} Acres`
+    ? `${listing.lot_size_acres.toLocaleString()} ac`
     : listing.lot_size_sqft
     ? `${listing.lot_size_sqft.toLocaleString()} sq ft`
     : null;
@@ -218,9 +301,51 @@ export default function ListingDetailPage() {
   const hasPhone = contactMethods.some(m => m.toLowerCase().includes('phone') && !m.toLowerCase().includes('text'));
   const hasText  = contactMethods.some(m => m.toLowerCase().includes('text') || m.toLowerCase().includes('sms'));
 
+  const photos = listing.photos_urls ?? [];
+
+  const countyDisplay = listing.county ? `${listing.county} County` : null;
+  const titleLocation = [countyDisplay, listing.state].filter(Boolean).join(', ') || 'Unknown Location';
+  const acreageText = listing.lot_size_acres
+    ? (listing.lot_size_acres % 1 === 0
+        ? listing.lot_size_acres.toLocaleString()
+        : listing.lot_size_acres.toLocaleString(undefined, { maximumFractionDigits: 1 }))
+    : null;
+  const generatedTitle = acreageText ? `${acreageText} Acres in ${titleLocation}` : `Land in ${titleLocation}`;
+  const titleSublineBase = [countyDisplay, listing.state].filter(Boolean).join(', ');
+  const titleSubline = listing.zip_code ? `${titleSublineBase} ${listing.zip_code}` : titleSublineBase;
+
+  const detailItems: [string, string][] = [
+    ...(listing.lot_size_acres ? [['Lot Size', `${listing.lot_size_acres.toLocaleString()} Acres`] as [string, string]] : listing.lot_size_sqft ? [['Lot Size', `${listing.lot_size_sqft.toLocaleString()} sq ft`] as [string, string]] : []),
+    ...(listing.zoning ? [['Zoning', listing.zoning] as [string, string]] : []),
+    ...((listing.road_access?.length ?? 0) > 0 ? [['Road Access', listing.road_access!.join(', ')] as [string, string]] : []),
+    ...((listing.utilities?.length ?? 0) > 0 ? [['Utilities', listing.utilities!.join(', ')] as [string, string]] : []),
+    ...(listing.apn ? [['APN', listing.apn] as [string, string]] : []),
+    ...(listing.county ? [['County', listing.county] as [string, string]] : []),
+    ...(listing.state ? [['State', listing.state] as [string, string]] : []),
+    ...(listing.zip_code ? [['Zip Code', listing.zip_code] as [string, string]] : []),
+    ...(listing.street_address ? [['Street Address', listing.street_address] as [string, string]] : []),
+    ...(listing.preferred_close_date ? [['Preferred Close', fmtCloseDate(listing.preferred_close_date)] as [string, string]] : []),
+    ...(listing.ownership_type ? [['Ownership', listing.ownership_type] as [string, string]] : []),
+    ...(listing.price_negotiable ? [['Price', 'Negotiable'] as [string, string]] : []),
+    ...(listing.comparable_market_value ? [['Market Value', fmtPrice(listing.comparable_market_value)] as [string, string]] : []),
+  ];
+
+  const descriptionParts = [
+    listing.property_description || null,
+    listing.additional_information || null,
+  ].filter(Boolean) as string[];
+
+  const locationItems = [
+    ['State', listing.state],
+    ['County', listing.county],
+    ['Zip Code', listing.zip_code],
+    ['Address', listing.street_address],
+  ].filter(([, v]) => !!v) as [string, string][];
+
   return (
-    <div className="bg-surface text-on-surface">
+    <div className="bg-surface text-on-surface min-h-screen">
       <Header />
+
       {/* Upgrade modal */}
       {showUpgradeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -256,16 +381,42 @@ export default function ListingDetailPage() {
           currentUserId={currentUserId}
           currentUserIsBuyer={true}
           listingId={listing.id}
+          alreadyMessaged={alreadyMessaged}
           onClose={() => setShowMessageModal(false)}
           onSent={() => {
             setShowMessageModal(false);
-            setToastMsg('Message sent successfully');
+            setAlreadyMessaged(true);
+            setToastMsg('Message sent!');
             setTimeout(() => setToastMsg(''), 3000);
           }}
         />
       )}
 
-      {/* Success toast */}
+      {/* All photos modal */}
+      {showAllPhotos && (
+        <div className="fixed inset-0 z-50 bg-black/95 overflow-y-auto">
+          <div className="max-w-5xl mx-auto p-4 md:p-8">
+            <div className="sticky top-0 flex items-center justify-between py-4 bg-black/95 z-10 mb-4">
+              <h2 className="text-white text-xl font-bold font-headline">{photos.length} Photos</h2>
+              <button
+                onClick={() => setShowAllPhotos(false)}
+                className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm font-medium"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+                Close
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {photos.map((url, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={url} alt={`Property photo ${i + 1}`} className="w-full rounded-lg object-cover" />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-700 text-white px-6 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2">
           <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
@@ -273,295 +424,326 @@ export default function ListingDetailPage() {
         </div>
       )}
 
-      <main className="pt-32 pb-24 max-w-7xl mx-auto px-6">
+      {/* Back button — above gallery */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-3">
+        <Link href="/marketplace" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+          ← Back to Marketplace
+        </Link>
+      </div>
 
-        {/* Header */}
-        <header className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 mb-10 shadow-sm border border-outline-variant/15">
-          <div className="flex flex-col gap-6">
-            <Link href="/marketplace" className="flex items-center gap-2 text-secondary font-medium text-sm hover:text-primary transition-colors w-fit">
-              <span className="material-symbols-outlined text-lg">arrow_back</span>
-              Back to Marketplace
-            </Link>
-
-            <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-              <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-extrabold font-headline text-primary mb-2">
-                  {listing.title || 'Untitled Listing'}
-                </h1>
-                <p className="text-secondary font-body">
-                  Seller:{' '}
-                  <Link href={`/sellers/${listing.user_id}`} className="text-primary font-semibold hover:underline">
-                    {sellerName}
-                  </Link>
-                </p>
-                <div className="flex flex-wrap gap-3 mt-4">
-                  <span className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full capitalize">
-                    {listing.status?.replace('_', ' ') ?? 'Active'}
-                  </span>
-                  {listing.ownership_type && (
-                    <span className="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-xs font-bold rounded-full">
-                      {listing.ownership_type}
-                    </span>
-                  )}
-                  {listing.price_negotiable && (
-                    <span className="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-xs font-bold rounded-full">
-                      Price Negotiable
-                    </span>
-                  )}
-                </div>
+      {/* Full-width gallery */}
+      <div>
+        {photos.length > 0 ? (
+          <div className="relative w-full bg-gray-900" style={{ height: 'clamp(300px, 50vh, 540px)' }}>
+            <div
+              className="h-full"
+              style={{
+                display: 'grid',
+                gap: '2px',
+                gridTemplateColumns: photos.length >= 2 ? '2fr 1fr' : '1fr',
+              }}
+            >
+              {/* Primary large image */}
+              <div className="relative overflow-hidden bg-gray-800">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photos[0]}
+                  alt="Primary property photo"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
               </div>
 
-              <div className="text-left md:text-right flex-shrink-0">
-                <div className="text-4xl font-extrabold font-headline text-primary-container">
-                  {fmtPrice(listing.asking_price)}
+              {/* Right stacked pair */}
+              {photos.length >= 2 && (
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: '2px',
+                    gridTemplateRows: photos.length >= 3 ? '1fr 1fr' : '1fr',
+                  }}
+                >
+                  <div className="relative overflow-hidden bg-gray-800">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photos[1]} alt="Property photo 2" className="absolute inset-0 w-full h-full object-cover" />
+                  </div>
+                  {photos.length >= 3 && (
+                    <div className="relative overflow-hidden bg-gray-800">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={photos[2]} alt="Property photo 3" className="absolute inset-0 w-full h-full object-cover" />
+                    </div>
+                  )}
                 </div>
-                {pricePerAcre !== null && (
-                  <div className="text-secondary font-semibold text-lg">~{fmtPrice(pricePerAcre)} / acre</div>
-                )}
-              </div>
+              )}
             </div>
+
+            {/* See all photos button */}
+            <button
+              onClick={() => setShowAllPhotos(true)}
+              className="absolute bottom-4 right-4 bg-white text-gray-900 text-sm font-semibold px-4 py-2.5 rounded-lg shadow-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-base">photo_library</span>
+              See all {photos.length} photo{photos.length !== 1 ? 's' : ''}
+            </button>
           </div>
-        </header>
+        ) : (
+          /* No photos placeholder */
+          <div
+            className="w-full bg-gray-100 flex flex-col items-center justify-center gap-4"
+            style={{ height: 'clamp(240px, 40vh, 380px)' }}
+          >
+            <span className="material-symbols-outlined text-gray-300 text-7xl">photo_camera</span>
+            <p className="text-gray-500 font-medium text-lg">No photos yet</p>
+            <button
+              onClick={handleRequestImages}
+              disabled={imageRequestSent || imageRequestLoading || tierLoading}
+              className="px-6 py-2.5 border-2 border-green-700 text-green-700 font-semibold rounded-lg hover:bg-green-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm"
+            >
+              {imageRequestSent ? 'Request Sent ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
+            </button>
+          </div>
+        )}
+      </div>
 
-        {/* Two column grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      {/* Below-gallery content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-24 pt-6">
 
-          {/* Left column */}
-          <div className="lg:col-span-8 space-y-10">
+        {/* Two-column layout */}
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-            {/* Property Details */}
-            <section className="bg-surface rounded-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg">map</span>
-                <h2 className="text-xl font-bold font-headline text-primary">Property Details</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 p-1 bg-surface-container-low rounded-xl border border-outline-variant/10">
-                {lotSizeDisplay && (
-                  <div className="p-4 bg-surface-container-lowest rounded-lg">
-                    <label className="text-xs font-bold text-outline uppercase tracking-wider block mb-1">Lot Size</label>
-                    <div className="text-on-surface font-semibold">{lotSizeDisplay}</div>
-                  </div>
-                )}
-                {listing.zoning && (
-                  <div className="p-4 bg-surface-container-lowest rounded-lg">
-                    <label className="text-xs font-bold text-outline uppercase tracking-wider block mb-1">Zoning</label>
-                    <div className="text-on-surface font-semibold">{listing.zoning}</div>
-                  </div>
-                )}
-                {(listing.road_access?.length ?? 0) > 0 && (
-                  <div className="p-4 bg-surface-container-lowest rounded-lg">
-                    <label className="text-xs font-bold text-outline uppercase tracking-wider block mb-1">Road Access</label>
-                    <div className="text-on-surface font-semibold">{listing.road_access!.join(', ')}</div>
-                  </div>
-                )}
-                {listing.preferred_close_date && (
-                  <div className="p-4 bg-surface-container-lowest rounded-lg">
-                    <label className="text-xs font-bold text-outline uppercase tracking-wider block mb-1">Preferred Close Date</label>
-                    <div className="text-on-surface font-semibold">{fmtCloseDate(listing.preferred_close_date)}</div>
-                  </div>
-                )}
-                {(listing.utilities?.length ?? 0) > 0 && (
-                  <div className="p-4 bg-surface-container-lowest rounded-lg">
-                    <label className="text-xs font-bold text-outline uppercase tracking-wider block mb-1">Utilities</label>
-                    <div className="text-on-surface font-semibold">{listing.utilities!.join(', ')}</div>
-                  </div>
-                )}
-                {listing.apn && (
-                  <div className="p-4 bg-surface-container-lowest rounded-lg">
-                    <label className="text-xs font-bold text-outline uppercase tracking-wider block mb-1">APN</label>
-                    <div className="text-on-surface font-semibold">{listing.apn}</div>
-                  </div>
-                )}
-              </div>
-            </section>
+          {/* LEFT COLUMN */}
+          <div className="w-full min-w-0 lg:flex-1 space-y-6">
 
-            {/* Location */}
-            <section className="bg-surface rounded-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg">location_on</span>
-                <h2 className="text-xl font-bold font-headline text-primary">Location</h2>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-outline mb-1">State</span>
-                  <span className="text-on-surface font-medium">{listing.state || '—'}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-outline mb-1">County</span>
-                  <span className="text-on-surface font-medium">{listing.county || '—'}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-outline mb-1">Zip Code</span>
-                  <span className="text-on-surface font-medium">{listing.zip_code || '—'}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-outline mb-1">Street Address</span>
-                  <span className="text-on-surface font-medium">{listing.street_address || 'Undisclosed Address'}</span>
-                </div>
-              </div>
-            </section>
+            {/* Title block */}
+            <div className="text-center sm:text-left">
+              <h1 className="text-xl sm:text-3xl font-bold text-green-900 leading-tight">
+                {generatedTitle}
+              </h1>
+              {titleSubline && (
+                <p className="text-gray-500 text-sm mt-1">{titleSubline}</p>
+              )}
+            </div>
 
-            {/* Description */}
-            {listing.property_description && (
-              <section className="bg-surface rounded-xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg">article</span>
-                  <h2 className="text-xl font-bold font-headline text-primary">Property Description</h2>
+            {/* Stats bar — Redfin-style horizontal chips */}
+            <div className="flex flex-wrap border-y border-outline-variant/30 divide-x divide-outline-variant/30">
+              {listing.asking_price != null && listing.asking_price > 0 && (
+                <div className="flex flex-col py-4 px-5 first:pl-0">
+                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
+                    {fmtPrice(listing.asking_price)}
+                  </span>
+                  <span className="text-xs text-secondary font-medium mt-1.5">Price</span>
                 </div>
-                <div className="text-secondary leading-relaxed font-body whitespace-pre-line">
-                  {listing.property_description}
+              )}
+              {lotSizeDisplay && (
+                <div className="flex flex-col py-4 px-5">
+                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
+                    {lotSizeDisplay}
+                  </span>
+                  <span className="text-xs text-secondary font-medium mt-1.5">Lot Size</span>
+                </div>
+              )}
+              {listing.zoning && (
+                <div className="flex flex-col py-4 px-5">
+                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
+                    {listing.zoning}
+                  </span>
+                  <span className="text-xs text-secondary font-medium mt-1.5">Zoning</span>
+                </div>
+              )}
+              {listing.ownership_type && (
+                <div className="flex flex-col py-4 px-5">
+                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
+                    {listing.ownership_type}
+                  </span>
+                  <span className="text-xs text-secondary font-medium mt-1.5">Type</span>
+                </div>
+              )}
+              {pricePerAcre !== null && (
+                <div className="flex flex-col py-4 px-5">
+                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
+                    ~{fmtPrice(pricePerAcre)}
+                  </span>
+                  <span className="text-xs text-secondary font-medium mt-1.5">/ Acre</span>
+                </div>
+              )}
+            </div>
+
+            {/* About this property */}
+            {descriptionParts.length > 0 && (
+              <section>
+                <h2 className="text-base font-semibold text-on-surface mb-3">About this property</h2>
+                <div className="text-secondary leading-relaxed space-y-3">
+                  {descriptionParts.map((part, i) => (
+                    <p key={i} className="whitespace-pre-line">{part}</p>
+                  ))}
                 </div>
               </section>
             )}
 
-            {/* Photos */}
-            <section className="bg-surface rounded-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg">photo_library</span>
-                <h2 className="text-xl font-bold font-headline text-primary">Photos</h2>
-              </div>
-              {listing.photos_urls?.length ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {listing.photos_urls.map((url, i) => (
-                    <div key={i} className="aspect-video rounded-xl overflow-hidden group">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={url}
-                        alt={`Property photo ${i + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+            {/* Property details grid */}
+            {detailItems.length > 0 && (
+              <section>
+                <h2 className="text-base font-semibold text-on-surface mb-3">Property details</h2>
+                <div className="border border-outline-variant/20 rounded-xl overflow-hidden">
+                  <div className="grid grid-cols-1 md:grid-cols-2">
+                    {detailItems.map(([label, value], i) => (
+                      <div
+                        key={i}
+                        className={`flex items-center justify-between px-5 py-2 border-b border-outline-variant/15 bg-surface-container-lowest last:border-b-0 ${
+                          i % 2 === 1 ? 'md:border-l border-outline-variant/15' : ''
+                        }`}
+                      >
+                        <span className="text-sm text-secondary">{label}</span>
+                        <span className="text-sm font-semibold text-on-surface text-right max-w-[55%]">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Location with embedded map */}
+            <section>
+              <h2 className="text-base font-semibold text-on-surface mb-3">Location</h2>
+              <SingleListingMap county={listing.county} state={listing.state} />
+              {locationItems.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 mt-5">
+                  {locationItems.map(([label, value]) => (
+                    <div key={label}>
+                      <div className="text-xs font-bold text-outline uppercase tracking-wider mb-1">{label}</div>
+                      <div className="text-on-surface font-medium text-sm">{value}</div>
                     </div>
                   ))}
-                </div>
-              ) : (
-                <div className="aspect-video rounded-xl bg-surface-container-high border border-outline-variant/15 flex flex-col items-center justify-center gap-3">
-                  <span className="material-symbols-outlined text-5xl text-outline/30">photo_camera</span>
-                  <p className="text-sm text-outline/60 font-medium">No photos provided for this listing</p>
                 </div>
               )}
             </section>
 
+            {/* Direct contact (non-messaging-only listings) */}
+            {!isMessagingOnly && (hasEmail || hasPhone || hasText) && sellerContact && (
+              <section>
+                <h2 className="text-base font-semibold text-on-surface mb-3">Contact seller directly</h2>
+                <div className="flex flex-wrap gap-3">
+                  {hasEmail && sellerContact.email && (
+                    <a
+                      href={`mailto:${sellerContact.email}`}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-outline-variant/30 rounded-lg text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-base text-primary">mail</span>
+                      {sellerContact.email}
+                    </a>
+                  )}
+                  {hasPhone && sellerContact.phone && (
+                    <a
+                      href={`tel:${sellerContact.phone}`}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-outline-variant/30 rounded-lg text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-base text-primary">call</span>
+                      {sellerContact.phone}
+                    </a>
+                  )}
+                  {hasText && sellerContact.phone && (
+                    <a
+                      href={`sms:${sellerContact.phone}`}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-outline-variant/30 rounded-lg text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-base text-primary">sms</span>
+                      Text: {sellerContact.phone}
+                    </a>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
 
-          {/* Sidebar */}
-          <aside className="lg:col-span-4 space-y-8">
+          {/* RIGHT COLUMN — sticky sidebar */}
+          <div className="w-full lg:w-[360px] xl:w-[400px] flex-shrink-0 self-start">
+            <div className="lg:sticky lg:top-24 border border-gray-200 rounded-lg shadow-sm p-4 bg-white">
 
-            {/* CTA Card */}
-            <div className="bg-primary-container text-white rounded-xl p-4 sm:p-8 shadow-xl">
-              <h3 className="text-2xl font-bold font-headline mb-6">Interested in this property?</h3>
-
-              <button
-                onClick={handleMessage}
-                className="w-full py-4 bg-white text-primary-container font-bold rounded-lg hover:bg-emerald-50 transition-colors shadow-lg active:scale-95"
-              >
-                Message Seller
-              </button>
-
-              {/* Request Images button */}
-              {!tierLoading && (tier || isAdmin) ? (
-                <button
-                  onClick={handleRequestImages}
-                  disabled={imageRequestSent || imageRequestLoading}
-                  className="w-full py-3 mt-3 border-2 border-green-700 text-green-700 bg-white font-bold rounded-lg hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {imageRequestSent ? 'Request Sent ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
-                </button>
-              ) : !tierLoading ? (
-                <div className="relative group mt-3">
-                  <button
-                    disabled
-                    className="w-full py-3 border-2 border-green-700/40 text-green-700/40 bg-white font-bold rounded-lg cursor-not-allowed"
-                  >
-                    Request Images
-                  </button>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    Upgrade to request images
-                  </div>
-                </div>
-              ) : null}
-
-              {isMessagingOnly && (
-                <div className="flex items-center justify-center gap-2 mt-4 text-on-primary-container text-xs font-medium uppercase tracking-widest">
-                  <span className="material-symbols-outlined text-sm">lock</span>
-                  LotScout Messaging Only
-                </div>
+              {/* Price */}
+              <div className="flex items-baseline gap-3 flex-wrap mb-1">
+                <span className="text-lg sm:text-2xl font-bold text-green-900">
+                  {fmtPrice(listing.asking_price)}
+                </span>
+                {listing.price_negotiable && (
+                  <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-0.5 rounded-full">
+                    Negotiable
+                  </span>
+                )}
+              </div>
+              {pricePerAcre !== null && (
+                <p className="text-secondary text-sm">~{fmtPrice(pricePerAcre)} / acre</p>
               )}
 
-              <div className="my-6 border-t border-white/10" />
+              <div className="border-t border-outline-variant/15 my-5" />
 
-              <div>
-                <div className="font-bold text-lg font-headline">{sellerName}</div>
-                <Link
-                  href={`/sellers/${listing.user_id}`}
-                  className="text-on-primary-container hover:text-white text-sm font-medium transition-colors"
+              {/* Seller */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-full bg-green-700 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 uppercase tracking-wide">
+                  {sellerInitials}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-on-surface text-sm truncate">{sellerName}</div>
+                  <Link href={`/sellers/${listing.user_id}`} className="text-xs text-primary hover:underline">
+                    View profile →
+                  </Link>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleMessage}
+                  className="w-full py-3 bg-green-700 text-white font-bold text-sm rounded-lg hover:bg-green-800 transition-colors active:scale-95"
                 >
-                  View seller profile
+                  Message Seller
+                </button>
+
+                {!tierLoading && (tier || isAdmin) ? (
+                  <button
+                    onClick={handleRequestImages}
+                    disabled={imageRequestSent || imageRequestLoading}
+                    className="w-full py-3 border border-green-700 text-green-700 font-bold text-sm rounded-lg hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {imageRequestSent ? 'Images Requested ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
+                  </button>
+                ) : !tierLoading ? (
+                  <div className="relative group">
+                    <button
+                      disabled
+                      className="w-full py-3 border border-green-700/30 text-green-700/40 font-bold text-sm rounded-lg cursor-not-allowed"
+                    >
+                      Request Images
+                    </button>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      Upgrade to request images
+                    </div>
+                  </div>
+                ) : null}
+
+                <Link
+                  href={`/property-analysis?listing=${listing.id}`}
+                  className="w-full py-3 border border-outline-variant/40 text-secondary font-bold text-sm rounded-lg hover:bg-surface-container-low transition-colors text-center block"
+                >
+                  Request Analysis
                 </Link>
               </div>
+
+              <div className="border-t border-outline-variant/15 mt-5 pt-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-xs text-secondary">Listed {fmtListingDate(listing.created_at)}</span>
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
+                    listing.status === 'published'
+                      ? 'bg-green-50 text-green-700 border border-green-200'
+                      : listing.status === 'under_contract'
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                      : 'bg-surface-container text-secondary border border-outline-variant/20'
+                  }`}>
+                    {listing.status?.replace(/_/g, ' ') ?? 'Active'}
+                  </span>
+                </div>
+              </div>
             </div>
+          </div>
 
-            {/* Listing Information */}
-            <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 border border-outline-variant/15 shadow-sm">
-              <h4 className="text-xs font-bold text-outline uppercase tracking-widest mb-6">Listing Information</h4>
-              <ul className="space-y-4">
-                <li className="flex justify-between items-center border-b border-surface-container-high pb-4">
-                  <span className="text-secondary text-sm">Listed by</span>
-                  <span className="font-semibold text-primary text-sm">{sellerName}</span>
-                </li>
-                <li className="flex justify-between items-center border-b border-surface-container-high pb-4">
-                  <span className="text-secondary text-sm">Listing Date</span>
-                  <span className="font-semibold text-primary text-sm">{fmtListingDate(listing.created_at)}</span>
-                </li>
-                <li className="flex justify-between items-center border-b border-surface-container-high pb-4">
-                  <span className="text-secondary text-sm">Status</span>
-                  <span className="font-semibold text-primary text-sm capitalize">{listing.ownership_type || '—'}</span>
-                </li>
-
-                {/* Contact methods (non-messaging-only listings) */}
-                {!isMessagingOnly && (
-                  <>
-                    {hasEmail && sellerContact?.email && (
-                      <li className="flex items-center justify-between border-b border-surface-container-high pb-4">
-                        <span className="text-secondary text-sm">Email</span>
-                        <a
-                          href={`mailto:${sellerContact.email}`}
-                          className="flex items-center gap-1.5 font-semibold text-primary text-sm hover:underline"
-                        >
-                          <span className="material-symbols-outlined text-base">mail</span>
-                          {sellerContact.email}
-                        </a>
-                      </li>
-                    )}
-                    {hasPhone && sellerContact?.phone && (
-                      <li className="flex items-center justify-between border-b border-surface-container-high pb-4">
-                        <span className="text-secondary text-sm">Phone</span>
-                        <a
-                          href={`tel:${sellerContact.phone}`}
-                          className="flex items-center gap-1.5 font-semibold text-primary text-sm hover:underline"
-                        >
-                          <span className="material-symbols-outlined text-base">call</span>
-                          {sellerContact.phone}
-                        </a>
-                      </li>
-                    )}
-                    {hasText && sellerContact?.phone && (
-                      <li className="flex items-center justify-between">
-                        <span className="text-secondary text-sm">Text / SMS</span>
-                        <a
-                          href={`sms:${sellerContact.phone}`}
-                          className="flex items-center gap-1.5 font-semibold text-primary text-sm hover:underline"
-                        >
-                          <span className="material-symbols-outlined text-base">sms</span>
-                          {sellerContact.phone}
-                        </a>
-                      </li>
-                    )}
-                  </>
-                )}
-              </ul>
-            </div>
-
-          </aside>
         </div>
       </main>
     </div>

@@ -14,10 +14,18 @@ type ProfileRow = {
 type ListingRow = {
   id: string;
   title: string | null;
+  street_address: string | null;
   county: string | null;
   state: string | null;
   lot_size_acres: number | null;
+  asking_price: number | null;
+  seller_first_name: string | null;
+  seller_last_name: string | null;
 };
+
+function hasStoredName(p: ProfileRow | undefined): boolean {
+  return !!(p?.company_name || p?.first_name || p?.last_name);
+}
 
 export async function GET() {
   const supabase = await createClient();
@@ -36,30 +44,34 @@ export async function GET() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!convs?.length) return NextResponse.json({ conversations: [] });
 
+  // Determine the other participant ID for each conversation (not the current user)
   const otherIds = [
     ...new Set(
       convs
         .map(c => (c.buyer_id === user.id ? c.seller_id : c.buyer_id))
-        .filter((id): id is string => !!id)
+        .filter((id): id is string => !!id && id !== user.id)
     ),
   ];
   const listingIds = [
     ...new Set(convs.map(c => c.listing_id).filter((id): id is string => !!id)),
   ];
 
+  // Fetch other participants' stored profiles
   const { data: profileRows } = await service
     .from('profiles')
     .select('id, first_name, last_name, company_name, avatar_url, email')
     .in('id', otherIds);
 
+  // profileMap is enriched progressively; dbProfileMap captures what came from the DB row only
   const profileMap: Record<string, ProfileRow> = {};
-  for (const p of profileRows ?? []) profileMap[p.id] = p;
+  const dbProfileMap: Record<string, ProfileRow> = {};
+  for (const p of profileRows ?? []) {
+    profileMap[p.id] = { ...p };
+    dbProfileMap[p.id] = { ...p };
+  }
 
-  // For participants with no display name, fall back to auth user data
-  const namelessIds = otherIds.filter(id => {
-    const p = profileMap[id];
-    return !p?.company_name && !p?.first_name && !p?.last_name;
-  });
+  // For participants with no stored name in profiles, fall back to auth user metadata
+  const namelessIds = otherIds.filter(id => !hasStoredName(profileMap[id]));
 
   if (namelessIds.length > 0) {
     await Promise.all(
@@ -69,12 +81,9 @@ export async function GET() {
         if (!profileMap[id]) {
           profileMap[id] = { id, first_name: null, last_name: null, company_name: null, avatar_url: null };
         }
-        // Fill email from auth if not already stored on profile
         if (!profileMap[id].email) {
           profileMap[id].email = authUser?.email ?? null;
         }
-        // Also pull name fields from auth metadata for accounts whose profile
-        // row was created without going through the handle_new_user trigger
         const meta = (authUser?.user_metadata ?? {}) as Record<string, unknown>;
         if (!profileMap[id].company_name && meta.company_name) {
           profileMap[id].company_name = meta.company_name as string;
@@ -89,17 +98,58 @@ export async function GET() {
     );
   }
 
+  // Fetch listings — includes seller name fields for name fallback and address/price for display
   const listingMap: Record<string, ListingRow> = {};
   if (listingIds.length > 0) {
     const { data: listings } = await service
       .from('listings')
-      .select('id, title, county, state, lot_size_acres')
+      .select('id, title, street_address, county, state, lot_size_acres, asking_price, seller_first_name, seller_last_name')
       .in('id', listingIds);
-    for (const l of listings ?? []) listingMap[l.id] = l;
+    for (const l of listings ?? []) listingMap[l.id] = l as ListingRow;
   }
 
   const enriched = convs.map(c => {
     const otherId = c.buyer_id === user.id ? c.seller_id : c.buyer_id;
+    const listing = c.listing_id ? (listingMap[c.listing_id] ?? null) : null;
+
+    // Guard against self-conversations (buyer_id === seller_id === user.id)
+    const resolvedOtherId = otherId && otherId !== user.id ? otherId : null;
+
+    let otherProfile: ProfileRow | null = resolvedOtherId
+      ? (profileMap[resolvedOtherId] ?? {
+          id: resolvedOtherId,
+          first_name: null,
+          last_name: null,
+          company_name: null,
+          avatar_url: null,
+          email: null,
+        })
+      : null;
+
+    // Name priority:
+    //   1. DB-stored profile company_name  (explicit business entity — never overridden)
+    //   2. Listing seller_first_name + seller_last_name  (real deal seller, beats signup-trigger names)
+    //   3. Profile first_name + last_name / auth-metadata name
+    //   4. Email
+    //
+    // The signup trigger copies auth metadata first_name/last_name into the profiles row,
+    // so test accounts like "FB Buyer" have a stored name in the DB. We must NOT let that
+    // block the listing seller name, so we only guard on company_name (a real business entity).
+    if (
+      otherProfile &&
+      resolvedOtherId === c.seller_id &&
+      listing &&
+      (listing.seller_first_name || listing.seller_last_name) &&
+      !dbProfileMap[resolvedOtherId]?.company_name
+    ) {
+      otherProfile = {
+        ...otherProfile,
+        company_name: null, // clear any auth-metadata company_name
+        first_name: listing.seller_first_name,
+        last_name: listing.seller_last_name,
+      };
+    }
+
     return {
       id: c.id,
       buyer_id: c.buyer_id,
@@ -109,17 +159,18 @@ export async function GET() {
       last_message_preview: c.last_message_preview,
       status: c.status,
       listing_id: c.listing_id,
-      other_participant: otherId
-        ? (profileMap[otherId] ?? {
-            id: otherId,
-            first_name: null,
-            last_name: null,
-            company_name: null,
-            avatar_url: null,
-            email: null,
-          })
+      other_participant: otherProfile,
+      listing: listing
+        ? {
+            id: listing.id,
+            title: listing.title,
+            street_address: listing.street_address,
+            county: listing.county,
+            state: listing.state,
+            lot_size_acres: listing.lot_size_acres,
+            asking_price: listing.asking_price,
+          }
         : null,
-      listing: c.listing_id ? (listingMap[c.listing_id] ?? null) : null,
     };
   });
 
