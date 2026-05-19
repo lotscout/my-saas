@@ -37,16 +37,36 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Sort: listings with images first, no-image listings last (stable — preserves DB sort order within each group)
-  const sorted = (data ?? []).sort((a: any, b: any) => {
-    const aHasImg = Array.isArray(a.photos_urls) && a.photos_urls.length > 0;
-    const bHasImg = Array.isArray(b.photos_urls) && b.photos_urls.length > 0;
+  const nowSec = Math.floor(Date.now() / 1000);
+
+  // Strip expired Facebook CDN URLs from photos_urls before sorting/returning.
+  // FB CDN URLs contain `oe=<hex unix timestamp>` — if that timestamp is in the past, the image 404s.
+  function filterPhotos(urls: string[] | null): string[] {
+    if (!Array.isArray(urls)) return [];
+    return urls.filter(u => {
+      if (!u) return false;
+      if (!u.includes('fbcdn') && !u.includes('facebook')) return true; // non-FB URLs always kept
+      const m = u.match(/oe=([0-9a-fA-F]+)/);
+      if (!m) return true; // no expiry param — keep
+      return parseInt(m[1], 16) > nowSec; // keep only if not yet expired
+    });
+  }
+
+  const cleaned = (data ?? []).map((row: any) => ({
+    ...row,
+    photos_urls: filterPhotos(row.photos_urls),
+  }));
+
+  // Sort: listings with valid images first, no-image listings last
+  cleaned.sort((a: any, b: any) => {
+    const aHasImg = a.photos_urls.length > 0;
+    const bHasImg = b.photos_urls.length > 0;
     if (aHasImg && !bHasImg) return -1;
     if (!aHasImg && bHasImg) return 1;
     return 0;
   });
 
-  return NextResponse.json(sorted);
+  return NextResponse.json(cleaned);
 }
 
 export async function POST(request: NextRequest) {
