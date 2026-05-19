@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
       'id,title,property_description,state,county,zip_code,street_address,apn,' +
       'lot_size_acres,lot_size_sqft,zoning,road_access,utilities,asking_price,' +
       'price_negotiable,ownership_type,contact_methods,status,photos_urls,' +
-      'digital_signature,created_at,user_id,promoted,boost_expires_at,lat,lng'
+      'owner_name,digital_signature,created_at,user_id,promoted,boost_expires_at,lat,lng'
     )
-    .eq('status', 'published')
+    .in('status', ['active', 'published'])
     .order(orderCol, { ascending })
     .limit(limit);
 
@@ -37,7 +37,16 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json(data ?? []);
+  // Sort: listings with images first, no-image listings last (stable — preserves DB sort order within each group)
+  const sorted = (data ?? []).sort((a: any, b: any) => {
+    const aHasImg = Array.isArray(a.photos_urls) && a.photos_urls.length > 0;
+    const bHasImg = Array.isArray(b.photos_urls) && b.photos_urls.length > 0;
+    if (aHasImg && !bHasImg) return -1;
+    if (!aHasImg && bHasImg) return 1;
+    return 0;
+  });
+
+  return NextResponse.json(sorted);
 }
 
 export async function POST(request: NextRequest) {

@@ -155,14 +155,15 @@ export default function BuyerRequestPage() {
   const hasIntendedUse = !!request.use_case?.trim();
 
   return (
-    <div className="bg-surface text-on-surface">
+    <div className="bg-surface text-on-surface min-h-screen">
       <Header />
+
       {/* Upgrade modal */}
       {showUpgradeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowUpgradeModal(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
-            <button onClick={() => setShowUpgradeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors">
+            <button onClick={() => setShowUpgradeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface">
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
             <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mb-5">
@@ -173,12 +174,8 @@ export default function BuyerRequestPage() {
               Direct buyer messaging requires a paid LotScout account. Choose a plan to connect with active buyers.
             </p>
             <div className="flex gap-3">
-              <Link href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">
-                View Plans →
-              </Link>
-              <button onClick={() => setShowUpgradeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">
-                Maybe Later
-              </button>
+              <Link href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</Link>
+              <button onClick={() => setShowUpgradeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
             </div>
           </div>
         </div>
@@ -192,15 +189,11 @@ export default function BuyerRequestPage() {
           currentUserId={currentUserId}
           currentUserIsBuyer={false}
           onClose={() => setShowMessageModal(false)}
-          onSent={() => {
-            setShowMessageModal(false);
-            setToastMsg('Message sent successfully');
-            setTimeout(() => setToastMsg(''), 3000);
-          }}
+          onSent={() => { setShowMessageModal(false); setToastMsg('Message sent successfully'); setTimeout(() => setToastMsg(''), 3000); }}
         />
       )}
 
-      {/* Success toast */}
+      {/* Toast */}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-700 text-white px-6 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2">
           <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
@@ -208,216 +201,125 @@ export default function BuyerRequestPage() {
         </div>
       )}
 
-      <main className="pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-8">
+      <main className="pt-20 pb-12 max-w-5xl mx-auto px-4 sm:px-6">
 
         {/* Back */}
-        <div className="mb-8">
-          <Link href="/buyer-directory" className="inline-flex items-center text-secondary hover:text-primary transition-colors font-medium">
-            <span className="material-symbols-outlined mr-2">arrow_back</span>
+        <div className="mb-4">
+          <Link href="/buyer-directory" className="inline-flex items-center gap-1 text-secondary hover:text-primary text-sm font-semibold transition-colors">
+            <span className="material-symbols-outlined text-base">arrow_back</span>
             Back to Buyer Directory
           </Link>
         </div>
 
-        {/* Identity Block */}
-        <section className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl mb-10 flex flex-col md:flex-row items-center md:items-start gap-8 border border-outline-variant/15">
-          <div className="flex-grow text-center md:text-left">
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-primary mb-1">{buyerName}</h1>
-            {companyName && (
-              <p className="text-xl text-secondary font-medium mb-4">{companyName}</p>
-            )}
-            {timelineLabel && (
-              <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-on-surface-variant font-medium mt-3">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">schedule</span>
-                  Timeline: {timelineLabel}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="flex-shrink-0 w-full md:w-auto">
-            <button
-              onClick={handleMessage}
-              className="w-full md:w-auto bg-primary text-on-primary px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
-            >
-              <span className="material-symbols-outlined">chat_bubble</span>
-              Message Buyer
-            </button>
-            <p className="text-[10px] text-center mt-2 text-on-surface-variant uppercase tracking-widest font-bold">LotScout Messaging Only</p>
-          </div>
-        </section>
+        {/* Main card */}
+        <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden">
 
-        {/* Two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-10">
-
-          {/* Main content */}
-          <div className="lg:col-span-7 space-y-10">
-
-            {/* Property Criteria */}
-            <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl border border-outline-variant/15">
-              <div className="flex items-center gap-3 mb-8 border-b border-surface-container-low pb-4">
-                <span className="material-symbols-outlined text-primary">map</span>
-                <h2 className="text-2xl font-bold text-primary">Property Criteria</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
-                <div className="space-y-6">
-                  {(request.zoning_preference?.length ?? 0) > 0 && (
-                    <div>
-                      <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Zoning</label>
-                      <div className="flex flex-wrap gap-2">
-                        {request.zoning_preference!.map(z => (
-                          <span key={z} className="px-3 py-1 bg-primary-fixed/50 text-on-primary-fixed-variant text-sm font-semibold rounded-lg">
-                            {z}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {acreageStr && (
-                    <div>
-                      <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Acreage Range</label>
-                      <p className="text-xl font-bold text-primary">{acreageStr}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-6">
-                  {budgetStr && (
-                    <div>
-                      <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Financial Profile</label>
-                      <div className="bg-surface-container-low p-4 rounded-xl">
-                        <div className="flex justify-between items-end">
-                          <span className="text-sm font-medium text-secondary">Total Budget</span>
-                          <span className="text-xl font-black text-primary">{budgetStr}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {(request.contact_preference?.length ?? 0) > 0 && (
-                    <div>
-                      <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Preferred Contact</label>
-                      <p className="text-lg font-semibold text-secondary">{request.contact_preference!.join(', ')}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+          {/* Header row */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-5 border-b border-outline-variant/15">
+            <div>
+              <h1 className="font-headline text-2xl font-extrabold text-primary leading-tight">{buyerName}</h1>
+              {companyName && <p className="text-secondary text-sm font-medium mt-0.5">{companyName}</p>}
             </div>
-
-            {/* Target Location */}
-            {hasLocation && (
-              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl border border-outline-variant/15">
-                <div className="flex items-center gap-3 mb-8 border-b border-surface-container-low pb-4">
-                  <span className="material-symbols-outlined text-primary">location_on</span>
-                  <h2 className="text-2xl font-bold text-primary">Target Location</h2>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {locationState && (
-                    <div className="p-4 bg-surface-container-low rounded-xl">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">State</span>
-                      <span className="text-lg font-bold text-primary">{locationState}</span>
-                    </div>
-                  )}
-                  {locationCounty && (
-                    <div className="p-4 bg-surface-container-low rounded-xl">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">County</span>
-                      <span className="text-lg font-bold text-primary">{locationCounty}</span>
-                    </div>
-                  )}
-                  {locationCity && (
-                    <div className="p-4 bg-surface-container-low rounded-xl">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">City</span>
-                      <span className="text-lg font-bold text-primary">{locationCity}</span>
-                    </div>
-                  )}
-                  {locationZip && (
-                    <div className="p-4 bg-surface-container-low rounded-xl">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Zip</span>
-                      <span className="text-lg font-bold text-primary">{locationZip}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Intended Use */}
-            {hasIntendedUse && (
-              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl border border-outline-variant/15">
-                <div className="flex items-center gap-3 mb-8 border-b border-surface-container-low pb-4">
-                  <span className="material-symbols-outlined text-primary">agriculture</span>
-                  <h2 className="text-2xl font-bold text-primary">Intended Use</h2>
-                </div>
-                <div className="space-y-6">
-                  {primaryUse && (
-                    <div>
-                      <h3 className="text-xl font-bold text-primary mb-2">{primaryUse}</h3>
-                      {useDescription && (
-                        <p className="text-secondary leading-relaxed">{useDescription}</p>
-                      )}
-                    </div>
-                  )}
-                  {request.additional_notes && (
-                    <div className="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary">
-                      <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Additional Notes</label>
-                      <p className="text-primary font-medium italic whitespace-pre-line">{request.additional_notes}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* View more from this buyer */}
-            <div className="bg-surface-container-low rounded-xl p-6 flex items-center justify-between border border-outline-variant/10">
-              <div>
-                <p className="font-semibold text-on-surface text-sm">Looking for more buyers like this?</p>
-                <p className="text-secondary text-xs mt-0.5">Browse the full directory of active buyers on LotScout.</p>
-              </div>
-              <Link
-                href="/buyer-directory"
-                className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:underline whitespace-nowrap"
-              >
-                View more requests
-                <span className="material-symbols-outlined text-base">arrow_forward</span>
-              </Link>
-            </div>
-
-          </div>
-
-          {/* Sidebar */}
-          <aside className="lg:col-span-3 space-y-8">
-            <div className="bg-primary p-4 sm:p-8 rounded-xl text-on-primary shadow-lg">
-              <h3 className="text-xl font-bold mb-4">Interested in connecting?</h3>
-              <p className="text-on-primary-container text-sm mb-8 leading-relaxed opacity-90">
-                This buyer is actively seeking land on LotScout. Secure direct matching is available for eligible land owners.
-              </p>
+            <div className="flex items-center gap-3 shrink-0">
+              {timelineLabel && (
+                <span className="flex items-center gap-1.5 text-xs font-bold text-secondary bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/20">
+                  <span className="material-symbols-outlined text-sm text-primary">schedule</span>
+                  {timelineLabel}
+                </span>
+              )}
               <button
                 onClick={handleMessage}
-                className="w-full bg-white text-primary py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-opacity-90 transition-all active:scale-95"
+                className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-sm"
               >
-                Send Message
+                <span className="material-symbols-outlined text-base">forum</span>
+                Message Buyer
               </button>
             </div>
-          </aside>
+          </div>
+
+          {/* Key stats row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-outline-variant/15 border-b border-outline-variant/15">
+            {budgetStr && (
+              <div className="px-5 py-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Budget</p>
+                <p className="text-base font-extrabold text-primary">{budgetStr}</p>
+              </div>
+            )}
+            {acreageStr && (
+              <div className="px-5 py-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Acreage</p>
+                <p className="text-base font-extrabold text-primary">{acreageStr}</p>
+              </div>
+            )}
+            {hasLocation && (
+              <div className="px-5 py-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Location</p>
+                <p className="text-base font-extrabold text-primary">
+                  {[locationCity, locationCounty ? `${locationCounty} Co.` : null, locationState, locationZip].filter(Boolean).join(', ')}
+                </p>
+              </div>
+            )}
+            {primaryUse && (
+              <div className="px-5 py-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Use Case</p>
+                <p className="text-base font-extrabold text-primary">{primaryUse}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Details grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-outline-variant/15">
+
+            {/* Left col */}
+            <div className="px-6 py-5 space-y-4">
+              {(request.zoning_preference?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-2">Zoning Preference</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {request.zoning_preference!.map(z => (
+                      <span key={z} className="px-2.5 py-1 bg-primary/8 text-primary text-xs font-bold rounded-lg">{z}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {(request.contact_preference?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Preferred Contact</p>
+                  <p className="text-sm font-semibold text-on-surface">{request.contact_preference!.join(', ')}</p>
+                </div>
+              )}
+              {useDescription && (
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Use Details</p>
+                  <p className="text-sm text-on-surface-variant leading-relaxed">{useDescription}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right col */}
+            <div className="px-6 py-5">
+              {request.additional_notes ? (
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-2">Additional Notes</p>
+                  <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">{request.additional_notes}</p>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-secondary/40 text-sm italic">No additional notes</div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Footer CTA */}
+          <div className="px-6 py-4 bg-surface-container-low border-t border-outline-variant/15 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-secondary">Have land that matches these criteria? Connect directly with this buyer.</p>
+            <Link href="/create-listing" className="text-xs font-bold text-primary hover:underline whitespace-nowrap flex items-center gap-1">
+              List your property <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </Link>
+          </div>
 
         </div>
       </main>
-
-      {/* Footer banner */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-24">
-        <div className="bg-primary-fixed text-on-primary-fixed rounded-xl p-5 sm:p-10 flex flex-col md:flex-row justify-between items-center gap-8 border border-primary/10">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl font-extrabold text-primary mb-2">
-              Are you a seller with land that matches these criteria?
-            </h2>
-            <p className="text-on-primary-fixed-variant text-lg">
-              List your property today and get matched directly with high-intent buyers{companyName ? ` like ${companyName}` : ''}.
-            </p>
-          </div>
-          <Link
-            href="/create-listing"
-            className="bg-primary text-on-primary px-10 py-5 rounded-xl font-black text-sm uppercase tracking-widest hover:opacity-90 shadow-lg whitespace-nowrap"
-          >
-            Create a Listing
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }

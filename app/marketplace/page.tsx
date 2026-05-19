@@ -521,6 +521,15 @@ export default function MarketplacePage() {
       result = [...result].sort((a, b) => scoreListingForUser(b, userCriteria) - scoreListingForUser(a, userCriteria));
     }
 
+    // Always push listings without images to the bottom (stable — preserves ordering within each group)
+    result = [...result].sort((a, b) => {
+      const aHasImg = (a.photos_urls?.length ?? 0) > 0;
+      const bHasImg = (b.photos_urls?.length ?? 0) > 0;
+      if (aHasImg && !bHasImg) return -1;
+      if (!aHasImg && bHasImg) return 1;
+      return 0;
+    });
+
     return result;
   }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeMin, filterLotSizeMax, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]); // eslint-disable-line react-hooks/exhaustive-deps
 
