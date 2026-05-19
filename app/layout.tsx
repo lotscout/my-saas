@@ -27,6 +27,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "LotScout | Off-Market Land Deals",
   description: "The private marketplace connecting land sellers and buyers. Find off-market deals, connect with serious buyers, and close faster.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo.png', type: 'image/png' },
+    ],
+    apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
+  },
 };
 
 export default function RootLayout({
