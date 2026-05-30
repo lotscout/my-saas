@@ -35,7 +35,7 @@ export async function GET() {
     service.from('property_analysis_requests').select('*', { count: 'exact', head: true }),
     service
       .from('property_analysis_requests')
-      .select('created_at, completed_at')
+      .select('submitted_at, completed_at')
       .eq('status', 'completed')
       .not('completed_at', 'is', null),
     service
@@ -57,7 +57,7 @@ export async function GET() {
   let avgDeliveryMinutes: number | null = null;
   if (completedReports && completedReports.length > 0) {
     const totalMs = completedReports.reduce((sum, r) => {
-      const diff = new Date(r.completed_at).getTime() - new Date(r.created_at).getTime();
+      const diff = new Date(r.completed_at).getTime() - new Date(r.submitted_at).getTime();
       return sum + (diff > 0 ? diff : 0);
     }, 0);
     avgDeliveryMinutes = Math.round(totalMs / completedReports.length / 60000);
