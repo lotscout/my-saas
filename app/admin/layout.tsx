@@ -50,6 +50,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     })();
   }, [router]);
 
+  if (pathname === '/admin/live-dashboard') {
+    return <>{children}</>;
+  }
+
   if (!authorized) {
     return (
       <div className="min-h-screen bg-[#012d1d] flex items-center justify-center">
