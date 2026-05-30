@@ -12,11 +12,12 @@ import { isAdminEmail } from '@/lib/admin';
 import Header from '@/components/Header';
 
 const NAV = [
-  { href: '/admin/dashboard', label: 'Overview',         icon: 'dashboard' },
-  { href: '/admin/listings',  label: 'Listings Queue',   icon: 'list_alt' },
-  { href: '/admin/users',     label: 'User Management',  icon: 'group' },
-  { href: '/admin/messaging', label: 'Buyer Messaging',  icon: 'chat' },
-  { href: '/admin/analysis',  label: 'Analysis Queue',   icon: 'analytics' },
+  { href: '/admin/dashboard',          label: 'Overview',         icon: 'dashboard' },
+  { href: '/admin/listings',           label: 'Listings Queue',   icon: 'list_alt'  },
+  { href: '/admin/users',              label: 'User Management',  icon: 'group'      },
+  { href: '/admin/dashboard/messages', label: 'Messages',         icon: 'forum'      },
+  { href: '/admin/messaging',          label: 'Buyer Messaging',  icon: 'chat'       },
+  { href: '/admin/analysis',           label: 'Analysis Queue',   icon: 'analytics'  },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

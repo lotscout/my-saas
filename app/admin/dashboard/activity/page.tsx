@@ -94,7 +94,7 @@ function StatCard({
       <div>
         <p className="text-2xl font-extrabold font-headline text-on-surface">
           {value === null
-            ? <span className="inline-block w-10 h-7 bg-surface-container animate-pulse rounded" />
+            ? <span className="inline-block w-14 h-7 bg-surface-container animate-pulse rounded" />
             : value.toLocaleString()}
         </p>
         <p className="text-sm text-on-surface/60 font-medium mt-0.5">{label}</p>
