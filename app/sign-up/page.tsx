@@ -60,11 +60,27 @@ export default function SignUpPage() {
     }
 
     if (data.user) {
+      const signupSource = localStorage.getItem('utm_source') || 'direct';
+      const signupMedium = localStorage.getItem('utm_medium') || '';
+      const signupCampaign = localStorage.getItem('utm_campaign') || '';
+
       await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: data.user.id, firstName, lastName, email }),
+        body: JSON.stringify({
+          userId: data.user.id,
+          firstName,
+          lastName,
+          email,
+          signupSource,
+          signupMedium,
+          signupCampaign,
+        }),
       });
+
+      localStorage.removeItem('utm_source');
+      localStorage.removeItem('utm_medium');
+      localStorage.removeItem('utm_campaign');
     }
 
     setEmailSent(true);

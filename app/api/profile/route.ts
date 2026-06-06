@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
-  const { userId, firstName, lastName, email } = await request.json();
+  const { userId, firstName, lastName, email, signupSource, signupMedium, signupCampaign } = await request.json();
 
   if (!userId || !email) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
     first_name: firstName ?? null,
     last_name: lastName ?? null,
     full_name: [firstName, lastName].filter(Boolean).join(' ') || null,
+    signup_source: signupSource ?? 'direct',
+    signup_medium: signupMedium ?? '',
+    signup_campaign: signupCampaign ?? '',
   });
 
   if (error) {
