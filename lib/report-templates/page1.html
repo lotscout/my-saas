@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=816px">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+.page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
+.header { background: #1B4332; padding: 28px 40px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header-brand { color: #fff; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+.header-meta { color: #6EE7B7; font-size: 11px; font-weight: 600; text-align: right; letter-spacing: 0.05em; }
+.cover-band { background: #40916C; padding: 14px 40px; }
+.cover-band-text { color: #D1FAE5; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; }
+.body { padding: 36px 40px; flex: 1; }
+.report-label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #40916C; margin-bottom: 10px; }
+.report-title { font-size: 34px; font-weight: 900; color: #1B4332; line-height: 1.1; margin-bottom: 6px; letter-spacing: -1px; }
+.report-subtitle { font-size: 14px; color: #555; margin-bottom: 32px; font-weight: 500; }
+.metrics-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+.metric-card { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 16px; }
+.metric-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #40916C; margin-bottom: 8px; }
+.metric-value { font-size: 26px; font-weight: 900; color: #1B4332; line-height: 1; margin-bottom: 4px; letter-spacing: -0.5px; }
+.metric-note { font-size: 10px; color: #666; font-weight: 500; }
+.divider { height: 1px; background: #E5E7EB; margin: 24px 0; }
+.section-title { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1B4332; margin-bottom: 16px; }
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; }
+.profile-item { padding: 14px 16px; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; }
+.profile-item:nth-child(3n) { border-right: none; }
+.profile-item:nth-last-child(-n+3) { border-bottom: none; }
+.profile-key { font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.profile-val { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+.footer { background: #1B4332; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
+.footer-left { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+.footer-right { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-brand">LotScout</div>
+    <div class="header-meta">The #1 Platform for Land Data and Off-Market Deals<br>lotscout.com</div>
+  </div>
+  <div class="cover-band">
+    <div class="cover-band-text">Land Market Intelligence Report &mdash; {{report_month}}</div>
+  </div>
+  <div class="body">
+    <div class="report-label">County Market Report</div>
+    <div class="report-title">{{county_name}}</div>
+    <div class="report-subtitle">{{metro_area}} &nbsp;&middot;&nbsp; {{report_period}}</div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Median $/Acre</div>
+        <div class="metric-value">{{median_price_per_acre}}</div>
+        <div class="metric-note">{{median_price_trend}}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Active Listings</div>
+        <div class="metric-value">{{active_listings}}</div>
+        <div class="metric-note">{{active_listings_note}}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg Days on Market</div>
+        <div class="metric-value">{{avg_days_on_market}}</div>
+        <div class="metric-note">{{dom_trend_note}}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Closed Sales</div>
+        <div class="metric-value">{{closed_sales}}</div>
+        <div class="metric-note">{{closed_sales_note}}</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">County Profile</div>
+    <div class="profile-grid">
+      <div class="profile-item">
+        <div class="profile-key">Population</div>
+        <div class="profile-val">{{population}}</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-key">Land Area</div>
+        <div class="profile-val">{{land_area}}</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-key">Population Growth</div>
+        <div class="profile-val">{{population_growth}}</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-key">Total Households</div>
+        <div class="profile-val">{{total_households}}</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-key">Median HH Income</div>
+        <div class="profile-val">{{median_household_income}}</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-key">Zoning Authority</div>
+        <div class="profile-val" style="font-size:12px;">{{zoning_authority}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-left">LotScout &mdash; lotscout.com</div>
+    <div class="footer-right">{{report_month}} &nbsp;&middot;&nbsp; Page 1 of 5</div>
+  </div>
+</div>
+</body>
+</html>

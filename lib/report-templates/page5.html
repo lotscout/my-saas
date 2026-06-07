@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+.page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
+.header { background: #1B4332; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-brand { color: #fff; font-size: 18px; font-weight: 900; }
+.header-title { color: #6EE7B7; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.body { padding: 28px 40px; flex: 1; }
+.section-title { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1B4332; margin-bottom: 12px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.divider { height: 1px; background: #E5E7EB; margin: 16px 0; }
+.risk-row { margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.risk-label { font-size: 12px; font-weight: 600; color: #374151; }
+.risk-display { font-size: 11px; font-weight: 700; color: #6B7280; }
+.risk-bar-bg { height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; }
+.risk-bar { height: 8px; border-radius: 4px; }
+.insight-box { background: #F0FDF4; border-left: 4px solid #40916C; border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 14px; }
+.insight-text { font-size: 12px; color: #374151; line-height: 1.65; }
+.watch-list { list-style: none; }
+.watch-item { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid #F3F4F6; font-size: 12px; color: #374151; line-height: 1.5; }
+.watch-item:last-child { border-bottom: none; }
+.watch-num { font-weight: 800; color: #40916C; flex-shrink: 0; }
+.rec-box-buy { background: #1B4332; border-radius: 8px; padding: 16px 18px; }
+.rec-box-hold { background: #92400E; border-radius: 8px; padding: 16px 18px; }
+.rec-box-wait { background: #1E3A8A; border-radius: 8px; padding: 16px 18px; }
+.rec-signal { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 6px; letter-spacing: -0.5px; }
+.rec-body { font-size: 11px; color: rgba(255,255,255,0.85); line-height: 1.6; }
+.sources-table { width: 100%; border-collapse: collapse; }
+.sources-table tr { border-bottom: 1px solid #F3F4F6; }
+.sources-table td { padding: 5px 6px; font-size: 10px; vertical-align: top; }
+.source-name { font-weight: 600; color: #374151; width: 200px; }
+.source-url { color: #40916C; font-size: 9px; word-break: break-all; }
+.source-date { color: #9CA3AF; width: 70px; text-align: right; }
+.disclaimer { background: #F9FAFB; border-radius: 6px; padding: 12px; }
+.disclaimer p { font-size: 9px; color: #9CA3AF; line-height: 1.6; margin-bottom: 6px; }
+.disclaimer p:last-child { margin-bottom: 0; }
+.footer { background: #1B4332; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
+.footer-left { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+.footer-right { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-brand">LotScout</div>
+    <div class="header-title">{{county_name}} &mdash; Risk Assessment &amp; Outlook</div>
+  </div>
+  <div class="body">
+
+    <div class="two-col">
+      <div>
+        <div class="section-title">Risk Assessment</div>
+
+        <div class="risk-row">
+          <div class="risk-header"><span class="risk-label">{{risk_1_label}}</span><span class="risk-display">{{risk_1_display}}</span></div>
+          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_1_pct}}%;background-color:{{risk_1_color}};"></div></div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-header"><span class="risk-label">{{risk_2_label}}</span><span class="risk-display">{{risk_2_display}}</span></div>
+          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_2_pct}}%;background-color:{{risk_2_color}};"></div></div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-header"><span class="risk-label">{{risk_3_label}}</span><span class="risk-display">{{risk_3_display}}</span></div>
+          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_3_pct}}%;background-color:{{risk_3_color}};"></div></div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-header"><span class="risk-label">{{risk_4_label}}</span><span class="risk-display">{{risk_4_display}}</span></div>
+          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_4_pct}}%;background-color:{{risk_4_color}};"></div></div>
+        </div>
+        <div class="risk-row">
+          <div class="risk-header"><span class="risk-label">{{risk_5_label}}</span><span class="risk-display">{{risk_5_display}}</span></div>
+          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_5_pct}}%;background-color:{{risk_5_color}};"></div></div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-title">Investment Signal</div>
+        <div class="rec-box-buy">
+          <div class="rec-signal">{{recommendation_signal}}</div>
+          <div class="rec-body">{{recommendation_body}}</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">AI Investment Outlook</div>
+        <div class="insight-box">
+          <div class="insight-text">{{insight_paragraph}}</div>
+        </div>
+        <div class="section-title">5 Things to Watch</div>
+        <ul class="watch-list">
+          <li class="watch-item"><span class="watch-num">1.</span><span>{{watch_1}}</span></li>
+          <li class="watch-item"><span class="watch-num">2.</span><span>{{watch_2}}</span></li>
+          <li class="watch-item"><span class="watch-num">3.</span><span>{{watch_3}}</span></li>
+          <li class="watch-item"><span class="watch-num">4.</span><span>{{watch_4}}</span></li>
+          <li class="watch-item"><span class="watch-num">5.</span><span>{{watch_5}}</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">Data Sources</div>
+    <table class="sources-table">
+      <tr>
+        <td class="source-name">{{source_1_name}}</td><td class="source-url">{{source_1_url}}</td><td class="source-date">{{source_1_date}}</td>
+        <td class="source-name">{{source_2_name}}</td><td class="source-url">{{source_2_url}}</td><td class="source-date">{{source_2_date}}</td>
+      </tr>
+      <tr>
+        <td class="source-name">{{source_3_name}}</td><td class="source-url">{{source_3_url}}</td><td class="source-date">{{source_3_date}}</td>
+        <td class="source-name">{{source_4_name}}</td><td class="source-url">{{source_4_url}}</td><td class="source-date">{{source_4_date}}</td>
+      </tr>
+      <tr>
+        <td class="source-name">{{source_5_name}}</td><td class="source-url">{{source_5_url}}</td><td class="source-date">{{source_5_date}}</td>
+        <td class="source-name">{{source_6_name}}</td><td class="source-url">{{source_6_url}}</td><td class="source-date">{{source_6_date}}</td>
+      </tr>
+      <tr>
+        <td class="source-name">{{source_7_name}}</td><td class="source-url">{{source_7_url}}</td><td class="source-date">{{source_7_date}}</td>
+        <td class="source-name">{{source_8_name}}</td><td class="source-url">{{source_8_url}}</td><td class="source-date">{{source_8_date}}</td>
+      </tr>
+    </table>
+
+    <div class="divider"></div>
+    <div class="disclaimer">
+      <p>{{disclaimer_para_1}}</p>
+      <p>{{disclaimer_para_2}}</p>
+    </div>
+
+  </div>
+  <div class="footer">
+    <div class="footer-left">LotScout &mdash; lotscout.com &mdash; The #1 Platform for Land Data and Off-Market Deals</div>
+    <div class="footer-right">{{report_month}} &nbsp;&middot;&nbsp; Page 5 of 5</div>
+  </div>
+</div>
+</body>
+</html>

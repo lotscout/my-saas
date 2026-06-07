@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+.page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
+.header { background: #1B4332; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-brand { color: #fff; font-size: 18px; font-weight: 900; }
+.header-title { color: #6EE7B7; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.body { padding: 32px 40px; flex: 1; }
+.section-title { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1B4332; margin-bottom: 14px; }
+.divider { height: 1px; background: #E5E7EB; margin: 20px 0; }
+.rezoning-card { border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.rezoning-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.rezoning-desc { font-size: 12px; color: #555; line-height: 1.55; margin-bottom: 8px; }
+.badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.05em; }
+.badge-approved { background: #D1FAE5; color: #065F46; }
+.badge-warning { background: #FEF3C7; color: #92400E; }
+.badge-status { background: #DBEAFE; color: #1E40AF; }
+.permits-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.permit-box { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; text-align: center; }
+.permit-label { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.permit-value { font-size: 20px; font-weight: 900; color: #1B4332; }
+.infra-card { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+.infra-icon { width: 36px; height: 36px; background: #F0FDF4; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+.infra-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+.infra-detail { font-size: 12px; color: #555; line-height: 1.5; }
+.alert-box { background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 14px 16px; margin-top: 16px; }
+.alert-title { font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 3px; }
+.alert-date { font-size: 11px; font-weight: 700; color: #B45309; margin-bottom: 4px; }
+.alert-text { font-size: 12px; color: #78350F; line-height: 1.5; }
+.footer { background: #1B4332; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
+.footer-left { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+.footer-right { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-brand">LotScout</div>
+    <div class="header-title">{{county_name}} &mdash; Zoning &amp; Development</div>
+  </div>
+  <div class="body">
+
+    <div class="section-title">Recent Rezoning Activity</div>
+
+    <div class="rezoning-card">
+      <div class="rezoning-title">{{rezoning_1_title}}</div>
+      <div class="rezoning-desc">{{rezoning_1_description}}</div>
+      <span class="badge badge-approved">{{rezoning_1_note}}</span>
+    </div>
+
+    <div class="rezoning-card">
+      <div class="rezoning-title">{{rezoning_2_title}}</div>
+      <div class="rezoning-desc">{{rezoning_2_description}}</div>
+      <span class="badge badge-warning">{{rezoning_2_note}}</span>
+    </div>
+
+    <div class="rezoning-card">
+      <div class="rezoning-title">{{rezoning_3_title}}</div>
+      <div class="rezoning-desc">{{rezoning_3_description}}</div>
+      <span class="badge badge-status">{{rezoning_3_status}}</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">Building Permits Issued</div>
+    <div class="permits-grid">
+      <div class="permit-box">
+        <div class="permit-label">Residential</div>
+        <div class="permit-value">{{permits_residential}}</div>
+      </div>
+      <div class="permit-box">
+        <div class="permit-label">Aggregate Value</div>
+        <div class="permit-value" style="font-size:16px;">{{permits_aggregate_value}}</div>
+      </div>
+      <div class="permit-box">
+        <div class="permit-label">Commercial</div>
+        <div class="permit-value">{{permits_commercial}}</div>
+      </div>
+      <div class="permit-box">
+        <div class="permit-label">Avg Sq Ft</div>
+        <div class="permit-value" style="font-size:14px;">{{permits_avg_sqft}}</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">Infrastructure Projects</div>
+
+    <div class="infra-card">
+      <div class="infra-icon">&#128739;</div>
+      <div>
+        <div class="infra-title">{{infra_1_title}}</div>
+        <div class="infra-detail">{{infra_1_detail}}</div>
+      </div>
+    </div>
+    <div class="infra-card" style="border-bottom: none;">
+      <div class="infra-icon">&#128674;</div>
+      <div>
+        <div class="infra-title">{{infra_2_title}}</div>
+        <div class="infra-detail">{{infra_2_detail}}</div>
+      </div>
+    </div>
+
+    <div class="alert-box">
+      <div class="alert-date">Upcoming: {{board_meeting_date}}</div>
+      <div class="alert-title">{{board_meeting_title}}</div>
+      <div class="alert-text">{{board_meeting_warning}}</div>
+    </div>
+
+  </div>
+  <div class="footer">
+    <div class="footer-left">LotScout &mdash; lotscout.com</div>
+    <div class="footer-right">{{report_month}} &nbsp;&middot;&nbsp; Page 3 of 5</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+.page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
+.header { background: #1B4332; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-brand { color: #fff; font-size: 18px; font-weight: 900; }
+.header-title { color: #6EE7B7; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.body { padding: 32px 40px; flex: 1; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.section-title { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1B4332; margin-bottom: 12px; }
+.divider { height: 1px; background: #E5E7EB; margin: 20px 0; }
+.job-card { padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+.job-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+.job-desc { font-size: 11px; color: #666; line-height: 1.5; margin-bottom: 4px; }
+.job-note { font-size: 10px; font-weight: 600; color: #40916C; }
+.job-stat-row { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.job-stat-val { font-size: 22px; font-weight: 900; color: #1B4332; }
+.job-stat-label { font-size: 11px; color: #888; font-weight: 600; }
+.policy-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+.policy-date { font-size: 10px; font-weight: 700; color: #6B7280; margin-bottom: 4px; letter-spacing: 0.05em; }
+.policy-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.policy-desc { font-size: 11px; color: #555; line-height: 1.5; }
+.incentive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.incentive-box { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 12px 14px; }
+.incentive-label { font-size: 10px; font-weight: 700; color: #40916C; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+.incentive-value { font-size: 16px; font-weight: 800; color: #1B4332; }
+.comp-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6; }
+.comp-name { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+.comp-growth { font-size: 14px; font-weight: 800; color: #40916C; }
+.footer { background: #1B4332; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
+.footer-left { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+.footer-right { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-brand">LotScout</div>
+    <div class="header-title">{{county_name}} &mdash; Economic Intelligence</div>
+  </div>
+  <div class="body">
+
+    <div class="two-col">
+      <div>
+        <div class="section-title">Job Market &amp; Employers</div>
+        <div class="job-card">
+          <div class="job-title">{{job_1_title}}</div>
+          <div class="job-desc">{{job_1_description}}</div>
+          <div class="job-note">{{job_1_note}}</div>
+        </div>
+        <div class="job-card">
+          <div class="job-title">{{job_2_title}}</div>
+          <div class="job-desc">{{job_2_description}}</div>
+          <div class="job-note">{{job_2_note}}</div>
+        </div>
+        <div class="job-card" style="border-bottom:none;">
+          <div class="job-title">{{job_3_title}}</div>
+          <div class="job-desc">{{job_3_description}}</div>
+          <div class="job-stat-row">
+            <div class="job-stat-val">{{job_3_stat}}</div>
+            <div class="job-stat-label">{{job_3_stat_label}}</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Policy &amp; Elections</div>
+        <div class="policy-card">
+          <div class="policy-date">{{policy_1_date_badge}}</div>
+          <div class="policy-title">{{policy_1_title}}</div>
+          <div class="policy-desc">{{policy_1_description}}</div>
+        </div>
+        <div class="policy-card">
+          <div class="policy-date">{{policy_2_date_badge}}</div>
+          <div class="policy-title">{{policy_2_title}}</div>
+          <div class="policy-desc">{{policy_2_description}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-title">Local Incentives</div>
+        <div class="incentive-grid">
+          <div class="incentive-box">
+            <div class="incentive-label">{{incentive_1_label}}</div>
+            <div class="incentive-value">{{incentive_1_value}}</div>
+          </div>
+          <div class="incentive-box">
+            <div class="incentive-label">{{incentive_2_label}}</div>
+            <div class="incentive-value">{{incentive_2_value}}</div>
+          </div>
+          <div class="incentive-box">
+            <div class="incentive-label">{{incentive_3_label}}</div>
+            <div class="incentive-value">{{incentive_3_value}}</div>
+          </div>
+          <div class="incentive-box">
+            <div class="incentive-label">{{incentive_4_label}}</div>
+            <div class="incentive-value">{{incentive_4_value}}</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Comparable County Growth</div>
+        <div class="comp-row">
+          <div class="comp-name">{{comp_county_1_name}}</div>
+          <div class="comp-growth">{{comp_county_1_growth}}</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-name">{{comp_county_2_name}}</div>
+          <div class="comp-growth">{{comp_county_2_growth}}</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-name">{{comp_county_3_name}}</div>
+          <div class="comp-growth">{{comp_county_3_growth}}</div>
+        </div>
+        <div class="comp-row" style="border-bottom:none;">
+          <div class="comp-name">{{comp_county_4_name}}</div>
+          <div class="comp-growth">{{comp_county_4_growth}}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">
+    <div class="footer-left">LotScout &mdash; lotscout.com</div>
+    <div class="footer-right">{{report_month}} &nbsp;&middot;&nbsp; Page 4 of 5</div>
+  </div>
+</div>
+</body>
+</html>

@@ -173,5 +173,20 @@ export async function POST(request: NextRequest) {
     console.error('[market-reports] admin email error:', err);
   }
 
+  // Fire-and-forget: trigger report generation in the background
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  const reportMonth = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+  fetch(`${siteUrl}/api/market-reports/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      county:       county.trim(),
+      state:        state.trim(),
+      email:        normalizedEmail,
+      first_name:   first_name.trim(),
+      report_month: reportMonth,
+    }),
+  }).catch(err => console.error('[market-reports/request] trigger generate error:', err));
+
   return NextResponse.json({ success: true, county: county.trim(), state: state.trim() });
 }
