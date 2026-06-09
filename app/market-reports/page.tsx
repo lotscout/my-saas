@@ -79,7 +79,7 @@ export default function MarketReportsPage() {
                 href="/pricing"
                 className="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
               >
-                Subscribe for $9/mo →
+                View Subscription Plans →
               </Link>
             </div>
           ) : (
@@ -151,11 +151,7 @@ export default function MarketReportsPage() {
                 {formState === 'loading' ? 'Sending…' : 'Get My Free Report →'}
               </button>
 
-              <p className="text-center text-xs text-secondary">
-                Free, no credit card required.{' '}
-                <Link href="/pricing" className="text-emerald-600 hover:underline">Subscribe $9/mo</Link>
-                {' '}for monthly updates.
-              </p>
+              <p className="text-center text-xs text-secondary">Free, no credit card required.</p>
             </form>
           )}
         </div>
