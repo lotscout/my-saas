@@ -7,7 +7,9 @@ export async function generatePDF(pages: string[]): Promise<Buffer> {
     args: chromium.args,
     defaultViewport: chromium.defaultViewport,
     executablePath: await chromium.executablePath(),
-    headless: chromium.headless as boolean,
+    // chromium.headless is string in v133+; cast via unknown to satisfy puppeteer-core types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    headless: chromium.headless as unknown as boolean,
   });
 
   const pagePDFs: Buffer[] = [];
