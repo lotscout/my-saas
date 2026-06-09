@@ -1,10 +1,13 @@
-import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium';
+import puppeteer from 'puppeteer-core';
 import { PDFDocument } from 'pdf-lib';
 
 export async function generatePDF(pages: string[]): Promise<Buffer> {
   const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless as boolean,
   });
 
   const pagePDFs: Buffer[] = [];
