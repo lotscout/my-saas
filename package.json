@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
+    "@sparticuz/chromium": "^133.0.0",
     "@stripe/stripe-js": "^9.1.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.0",
@@ -19,7 +20,7 @@
     "next": "16.2.1",
     "pdf-lib": "^1.17.1",
     "pg": "^8.20.0",
-    "puppeteer": "^25.1.0",
+    "puppeteer-core": "^25.1.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-is": "^19.2.6",
