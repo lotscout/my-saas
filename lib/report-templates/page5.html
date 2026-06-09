@@ -4,134 +4,185 @@
 <meta charset="UTF-8">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #111; }
 .page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
-.header { background: #1B4332; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
-.header-brand { color: #fff; font-size: 18px; font-weight: 900; }
-.header-title { color: #6EE7B7; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
-.body { padding: 28px 40px; flex: 1; }
-.section-title { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1B4332; margin-bottom: 12px; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.divider { height: 1px; background: #E5E7EB; margin: 16px 0; }
-.risk-row { margin-bottom: 10px; }
-.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-.risk-label { font-size: 12px; font-weight: 600; color: #374151; }
-.risk-display { font-size: 11px; font-weight: 700; color: #6B7280; }
-.risk-bar-bg { height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; }
-.risk-bar { height: 8px; border-radius: 4px; }
-.insight-box { background: #F0FDF4; border-left: 4px solid #40916C; border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 14px; }
-.insight-text { font-size: 12px; color: #374151; line-height: 1.65; }
-.watch-list { list-style: none; }
-.watch-item { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid #F3F4F6; font-size: 12px; color: #374151; line-height: 1.5; }
-.watch-item:last-child { border-bottom: none; }
-.watch-num { font-weight: 800; color: #40916C; flex-shrink: 0; }
-.rec-box-buy { background: #1B4332; border-radius: 8px; padding: 16px 18px; }
-.rec-box-hold { background: #92400E; border-radius: 8px; padding: 16px 18px; }
-.rec-box-wait { background: #1E3A8A; border-radius: 8px; padding: 16px 18px; }
-.rec-signal { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 6px; letter-spacing: -0.5px; }
-.rec-body { font-size: 11px; color: rgba(255,255,255,0.85); line-height: 1.6; }
-.sources-table { width: 100%; border-collapse: collapse; }
-.sources-table tr { border-bottom: 1px solid #F3F4F6; }
-.sources-table td { padding: 5px 6px; font-size: 10px; vertical-align: top; }
-.source-name { font-weight: 600; color: #374151; width: 200px; }
-.source-url { color: #40916C; font-size: 9px; word-break: break-all; }
-.source-date { color: #9CA3AF; width: 70px; text-align: right; }
-.disclaimer { background: #F9FAFB; border-radius: 6px; padding: 12px; }
-.disclaimer p { font-size: 9px; color: #9CA3AF; line-height: 1.6; margin-bottom: 6px; }
-.disclaimer p:last-child { margin-bottom: 0; }
-.footer { background: #1B4332; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
-.footer-left { color: #6EE7B7; font-size: 10px; font-weight: 600; }
-.footer-right { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+.header { background: #0D1F16; padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-name { color: #fff; font-size: 16px; font-weight: 900; }
+.header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
+.header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.header-county { color: rgba(255,255,255,0.5); font-size: 11px; }
+.body { padding: 22px 40px 14px; flex: 1; }
+.section-title { font-size: 10px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #0D1F16; margin-bottom: 8px; }
+.divider { height: 1px; background: #E5E7EB; margin: 12px 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+/* Job cards */
+.job-item { padding: 8px 0; border-bottom: 1px solid #F3F4F6; }
+.job-item:last-child { border-bottom: none; }
+.job-title { font-size: 12px; font-weight: 700; color: #111; margin-bottom: 2px; }
+.job-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 3px; }
+.job-tag { font-size: 9px; font-weight: 600; color: #6B7280; }
+.job-tag strong { color: #374151; }
+.job-impact { font-size: 10px; color: #40916C; font-weight: 600; }
+/* Policy cards */
+.policy-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 7px; padding: 10px 12px; margin-bottom: 7px; }
+.policy-date { font-size: 9px; font-weight: 700; color: #6B7280; margin-bottom: 3px; }
+.policy-title { font-size: 11px; font-weight: 700; color: #111; margin-bottom: 3px; }
+.policy-desc { font-size: 11px; color: #555; line-height: 1.5; }
+/* Incentives */
+.incentive-card { border: 1px solid #E5E7EB; border-radius: 7px; padding: 9px 12px; margin-bottom: 7px; }
+.incentive-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px; }
+.incentive-label { font-size: 11px; font-weight: 700; color: #0D1F16; }
+.incentive-value { font-size: 11px; font-weight: 800; color: #40916C; text-align: right; }
+.incentive-meta { font-size: 9px; color: #9CA3AF; margin-bottom: 3px; }
+.incentive-meta strong { color: #6B7280; }
+.incentive-explanation { font-size: 10px; color: #4B5563; line-height: 1.5; }
+/* Comparable counties */
+.comp-county-row { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F3F4F6; }
+.comp-county-row:last-child { border-bottom: none; }
+.comp-county-name { font-size: 12px; font-weight: 600; color: #111; min-width: 130px; flex-shrink: 0; }
+.comp-county-growth { font-size: 13px; font-weight: 900; color: #40916C; min-width: 44px; flex-shrink: 0; }
+.comp-county-relevance { font-size: 10px; color: #6B7280; line-height: 1.5; }
+.footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { color: rgba(255,255,255,0.55); font-size: 10px; }
+.footer-center { color: #fff; font-size: 11px; font-weight: 700; }
+.footer-right { color: rgba(255,255,255,0.55); font-size: 10px; }
 </style>
 </head>
 <body>
 <div class="page">
   <div class="header">
-    <div class="header-brand">LotScout</div>
-    <div class="header-title">{{county_name}} &mdash; Risk Assessment &amp; Outlook</div>
+    <div class="header-left">
+      <div class="logo-name">LotScout</div>
+      <div class="header-divider"></div>
+      <div class="header-section">Market Context</div>
+    </div>
+    <div class="header-county">{{county_name}}</div>
   </div>
-  <div class="body">
 
+  <div class="body">
     <div class="two-col">
       <div>
-        <div class="section-title">Risk Assessment</div>
-
-        <div class="risk-row">
-          <div class="risk-header"><span class="risk-label">{{risk_1_label}}</span><span class="risk-display">{{risk_1_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_1_pct}}%;background-color:{{risk_1_color}};"></div></div>
+        <div class="section-title">Job Market Changes</div>
+        <div class="job-item">
+          <div class="job-title">{{job_1_title}}</div>
+          <div class="job-row">
+            <span class="job-tag"><strong>Company:</strong> {{job_1_company}}</span>
+            <span class="job-tag"><strong>Industry:</strong> {{job_1_industry}}</span>
+            <span class="job-tag"><strong>Jobs:</strong> {{job_1_job_count}}</span>
+          </div>
+          <div class="job-row">
+            <span class="job-tag"><strong>Roles:</strong> {{job_1_role_types}}</span>
+            <span class="job-tag"><strong>Timeline:</strong> {{job_1_timeline}}</span>
+          </div>
+          <div class="job-impact">Impact: {{job_1_land_impact}}</div>
         </div>
-        <div class="risk-row">
-          <div class="risk-header"><span class="risk-label">{{risk_2_label}}</span><span class="risk-display">{{risk_2_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_2_pct}}%;background-color:{{risk_2_color}};"></div></div>
+        <div class="job-item">
+          <div class="job-title">{{job_2_title}}</div>
+          <div class="job-row">
+            <span class="job-tag"><strong>Company:</strong> {{job_2_company}}</span>
+            <span class="job-tag"><strong>Industry:</strong> {{job_2_industry}}</span>
+            <span class="job-tag"><strong>Jobs:</strong> {{job_2_job_count}}</span>
+          </div>
+          <div class="job-row">
+            <span class="job-tag"><strong>Roles:</strong> {{job_2_role_types}}</span>
+            <span class="job-tag"><strong>Timeline:</strong> {{job_2_timeline}}</span>
+          </div>
+          <div class="job-impact">Impact: {{job_2_land_impact}}</div>
         </div>
-        <div class="risk-row">
-          <div class="risk-header"><span class="risk-label">{{risk_3_label}}</span><span class="risk-display">{{risk_3_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_3_pct}}%;background-color:{{risk_3_color}};"></div></div>
-        </div>
-        <div class="risk-row">
-          <div class="risk-header"><span class="risk-label">{{risk_4_label}}</span><span class="risk-display">{{risk_4_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_4_pct}}%;background-color:{{risk_4_color}};"></div></div>
-        </div>
-        <div class="risk-row">
-          <div class="risk-header"><span class="risk-label">{{risk_5_label}}</span><span class="risk-display">{{risk_5_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_5_pct}}%;background-color:{{risk_5_color}};"></div></div>
+        <div class="job-item">
+          <div class="job-title">{{job_3_title}}</div>
+          <div class="job-row">
+            <span class="job-tag"><strong>Company:</strong> {{job_3_company}}</span>
+            <span class="job-tag"><strong>Industry:</strong> {{job_3_industry}}</span>
+            <span class="job-tag"><strong>Jobs:</strong> {{job_3_job_count}}</span>
+          </div>
+          <div class="job-row">
+            <span class="job-tag"><strong>Roles:</strong> {{job_3_role_types}}</span>
+            <span class="job-tag"><strong>Timeline:</strong> {{job_3_timeline}}</span>
+          </div>
+          <div class="job-impact">Impact: {{job_3_land_impact}}</div>
         </div>
 
         <div class="divider"></div>
-        <div class="section-title">Investment Signal</div>
-        <div class="rec-box-buy">
-          <div class="rec-signal">{{recommendation_signal}}</div>
-          <div class="rec-body">{{recommendation_body}}</div>
+        <div class="section-title">Elections &amp; Policy</div>
+        <div class="policy-card">
+          <div class="policy-date">{{policy_1_date_badge}}</div>
+          <div class="policy-title">{{policy_1_title}}</div>
+          <div class="policy-desc">{{policy_1_description}}</div>
+        </div>
+        <div class="policy-card">
+          <div class="policy-date">{{policy_2_date_badge}}</div>
+          <div class="policy-title">{{policy_2_title}}</div>
+          <div class="policy-desc">{{policy_2_description}}</div>
         </div>
       </div>
 
       <div>
-        <div class="section-title">AI Investment Outlook</div>
-        <div class="insight-box">
-          <div class="insight-text">{{insight_paragraph}}</div>
+        <div class="section-title">Local Incentives</div>
+        <div class="incentive-card">
+          <div class="incentive-header">
+            <div class="incentive-label">{{incentive_1_label}}</div>
+            <div class="incentive-value">{{incentive_1_value}}</div>
+          </div>
+          <div class="incentive-meta"><strong>Zone:</strong> {{incentive_1_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_1_expiry}}</div>
+          <div class="incentive-explanation">{{incentive_1_explanation}}</div>
         </div>
-        <div class="section-title">5 Things to Watch</div>
-        <ul class="watch-list">
-          <li class="watch-item"><span class="watch-num">1.</span><span>{{watch_1}}</span></li>
-          <li class="watch-item"><span class="watch-num">2.</span><span>{{watch_2}}</span></li>
-          <li class="watch-item"><span class="watch-num">3.</span><span>{{watch_3}}</span></li>
-          <li class="watch-item"><span class="watch-num">4.</span><span>{{watch_4}}</span></li>
-          <li class="watch-item"><span class="watch-num">5.</span><span>{{watch_5}}</span></li>
-        </ul>
+        <div class="incentive-card">
+          <div class="incentive-header">
+            <div class="incentive-label">{{incentive_2_label}}</div>
+            <div class="incentive-value">{{incentive_2_value}}</div>
+          </div>
+          <div class="incentive-meta"><strong>Zone:</strong> {{incentive_2_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_2_expiry}}</div>
+          <div class="incentive-explanation">{{incentive_2_explanation}}</div>
+        </div>
+        <div class="incentive-card">
+          <div class="incentive-header">
+            <div class="incentive-label">{{incentive_3_label}}</div>
+            <div class="incentive-value">{{incentive_3_value}}</div>
+          </div>
+          <div class="incentive-meta"><strong>Zone:</strong> {{incentive_3_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_3_expiry}}</div>
+          <div class="incentive-explanation">{{incentive_3_explanation}}</div>
+        </div>
+        <div class="incentive-card">
+          <div class="incentive-header">
+            <div class="incentive-label">{{incentive_4_label}}</div>
+            <div class="incentive-value">{{incentive_4_value}}</div>
+          </div>
+          <div class="incentive-meta"><strong>Zone:</strong> {{incentive_4_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_4_expiry}}</div>
+          <div class="incentive-explanation">{{incentive_4_explanation}}</div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-title">Comparable Counties to Watch</div>
+        <div class="comp-county-row">
+          <div class="comp-county-name">{{comp_county_1_name}}</div>
+          <div class="comp-county-growth">{{comp_county_1_growth}}</div>
+          <div class="comp-county-relevance">{{comp_county_1_relevance}}</div>
+        </div>
+        <div class="comp-county-row">
+          <div class="comp-county-name">{{comp_county_2_name}}</div>
+          <div class="comp-county-growth">{{comp_county_2_growth}}</div>
+          <div class="comp-county-relevance">{{comp_county_2_relevance}}</div>
+        </div>
+        <div class="comp-county-row">
+          <div class="comp-county-name">{{comp_county_3_name}}</div>
+          <div class="comp-county-growth">{{comp_county_3_growth}}</div>
+          <div class="comp-county-relevance">{{comp_county_3_relevance}}</div>
+        </div>
+        <div class="comp-county-row">
+          <div class="comp-county-name">{{comp_county_4_name}}</div>
+          <div class="comp-county-growth">{{comp_county_4_growth}}</div>
+          <div class="comp-county-relevance">{{comp_county_4_relevance}}</div>
+        </div>
       </div>
     </div>
-
-    <div class="divider"></div>
-    <div class="section-title">Data Sources</div>
-    <table class="sources-table">
-      <tr>
-        <td class="source-name">{{source_1_name}}</td><td class="source-url">{{source_1_url}}</td><td class="source-date">{{source_1_date}}</td>
-        <td class="source-name">{{source_2_name}}</td><td class="source-url">{{source_2_url}}</td><td class="source-date">{{source_2_date}}</td>
-      </tr>
-      <tr>
-        <td class="source-name">{{source_3_name}}</td><td class="source-url">{{source_3_url}}</td><td class="source-date">{{source_3_date}}</td>
-        <td class="source-name">{{source_4_name}}</td><td class="source-url">{{source_4_url}}</td><td class="source-date">{{source_4_date}}</td>
-      </tr>
-      <tr>
-        <td class="source-name">{{source_5_name}}</td><td class="source-url">{{source_5_url}}</td><td class="source-date">{{source_5_date}}</td>
-        <td class="source-name">{{source_6_name}}</td><td class="source-url">{{source_6_url}}</td><td class="source-date">{{source_6_date}}</td>
-      </tr>
-      <tr>
-        <td class="source-name">{{source_7_name}}</td><td class="source-url">{{source_7_url}}</td><td class="source-date">{{source_7_date}}</td>
-        <td class="source-name">{{source_8_name}}</td><td class="source-url">{{source_8_url}}</td><td class="source-date">{{source_8_date}}</td>
-      </tr>
-    </table>
-
-    <div class="divider"></div>
-    <div class="disclaimer">
-      <p>{{disclaimer_para_1}}</p>
-      <p>{{disclaimer_para_2}}</p>
-    </div>
-
   </div>
+
   <div class="footer">
-    <div class="footer-left">LotScout &mdash; lotscout.com &mdash; The #1 Platform for Land Data and Off-Market Deals</div>
-    <div class="footer-right">{{report_month}} &nbsp;&middot;&nbsp; Page 5 of 5</div>
+    <div class="footer-left">The #1 Platform for Land Data and Off-Market Deals</div>
+    <div class="footer-center">lotscout.com</div>
+    <div class="footer-right">5 of 7</div>
   </div>
 </div>
 </body>

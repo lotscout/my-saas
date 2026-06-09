@@ -4,123 +4,153 @@
 <meta charset="UTF-8">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #111; }
 .page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
-.header { background: #1B4332; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
-.header-brand { color: #fff; font-size: 18px; font-weight: 900; }
-.header-title { color: #6EE7B7; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
-.body { padding: 36px 40px; flex: 1; }
-.section-title { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1B4332; margin-bottom: 16px; }
-.section-subtitle { font-size: 11px; color: #888; margin-top: -12px; margin-bottom: 16px; font-weight: 500; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
-thead tr { background: #1B4332; }
-thead th { color: #D1FAE5; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 14px; text-align: left; }
-tbody tr { border-bottom: 1px solid #F3F4F6; }
-tbody tr:nth-child(even) { background: #F9FAFB; }
-tbody td { padding: 12px 14px; font-size: 13px; color: #1a1a1a; }
-tbody td.price { font-weight: 700; color: #1B4332; }
-tbody td.ppa { font-weight: 800; color: #40916C; }
-tbody td.light { color: #666; }
-.divider { height: 1px; background: #E5E7EB; margin: 24px 0; }
-.insight-box { background: #F0FDF4; border-left: 4px solid #40916C; border-radius: 0 8px 8px 0; padding: 16px 20px; margin-bottom: 24px; }
-.insight-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #40916C; margin-bottom: 6px; }
-.insight-text { font-size: 13px; color: #374151; line-height: 1.6; }
-.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0; border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; margin-bottom: 24px; }
-.stat-box { padding: 16px; border-right: 1px solid #E5E7EB; text-align: center; }
-.stat-box:last-child { border-right: none; }
-.stat-label { font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
-.stat-value { font-size: 22px; font-weight: 900; color: #1B4332; }
-.footer { background: #1B4332; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
-.footer-left { color: #6EE7B7; font-size: 10px; font-weight: 600; }
-.footer-right { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+.header { background: #0D1F16; padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-name { color: #fff; font-size: 16px; font-weight: 900; }
+.header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
+.header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.header-county { color: rgba(255,255,255,0.5); font-size: 11px; }
+.body { padding: 28px 40px 20px; flex: 1; }
+.section-title { font-size: 11px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #0D1F16; margin-bottom: 4px; }
+.intro-line { font-size: 12px; color: #6B7280; margin-bottom: 14px; font-style: italic; }
+table.comps { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+table.comps thead tr { background: #0D1F16; }
+table.comps thead th { color: #D1FAE5; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 12px; text-align: left; }
+table.comps tbody tr { border-bottom: 1px solid #F3F4F6; }
+table.comps tbody tr:nth-child(even) { background: #F9FAFB; }
+table.comps tbody td { padding: 10px 12px; font-size: 12px; }
+td.location { color: #1a1a1a; font-weight: 500; }
+td.light { color: #6B7280; }
+td.price { font-weight: 700; color: #0D1F16; }
+td.ppa { font-weight: 800; color: #40916C; font-size: 11px; }
+.divider { height: 1px; background: #E5E7EB; margin: 16px 0; }
+.profile-title { font-size: 11px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #0D1F16; margin-bottom: 12px; }
+.profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; }
+.profile-cell { padding: 12px 14px; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; }
+.profile-cell:nth-child(3n) { border-right: none; }
+.profile-cell:nth-last-child(-n+3) { border-bottom: none; }
+.profile-key { font-size: 9px; font-weight: 700; color: #9CA3AF; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.profile-val { font-size: 14px; font-weight: 700; color: #111; }
+.footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { color: rgba(255,255,255,0.55); font-size: 10px; }
+.footer-center { color: #fff; font-size: 11px; font-weight: 700; }
+.footer-right { color: rgba(255,255,255,0.55); font-size: 10px; }
 </style>
 </head>
 <body>
 <div class="page">
   <div class="header">
-    <div class="header-brand">LotScout</div>
-    <div class="header-title">{{county_name}} &mdash; Comparable Sales</div>
+    <div class="header-left">
+      <div class="logo-name">LotScout</div>
+      <div class="header-divider"></div>
+      <div class="header-section">Comparable Sales</div>
+    </div>
+    <div class="header-county">{{county_name}}</div>
   </div>
-  <div class="body">
-    <div class="section-title">Recent Comparable Land Sales</div>
-    <div class="section-subtitle">Most recent closed transactions within the county</div>
 
-    <table>
+  <div class="body">
+    <div class="section-title">Recent Land Sales</div>
+    <div class="intro-line">Recent land sales in {{county_name}} from {{report_period}}. Vacant land parcels only.</div>
+
+    <table class="comps">
       <thead>
         <tr>
           <th>Location</th>
           <th>Acres</th>
+          <th>Zoning</th>
           <th>Sale Price</th>
-          <th>Price / Acre</th>
+          <th>Price / Acre or Sq Ft</th>
           <th>Date</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>{{comp_1_location}}</td>
+          <td class="location">{{comp_1_location}}</td>
           <td class="light">{{comp_1_acres}}</td>
+          <td class="light">{{comp_1_zoning}}</td>
           <td class="price">{{comp_1_price}}</td>
-          <td class="ppa">{{comp_1_price_per_acre}}</td>
+          <td class="ppa">{{comp_1_price_display}}</td>
           <td class="light">{{comp_1_date}}</td>
         </tr>
         <tr>
-          <td>{{comp_2_location}}</td>
+          <td class="location">{{comp_2_location}}</td>
           <td class="light">{{comp_2_acres}}</td>
+          <td class="light">{{comp_2_zoning}}</td>
           <td class="price">{{comp_2_price}}</td>
-          <td class="ppa">{{comp_2_price_per_acre}}</td>
+          <td class="ppa">{{comp_2_price_display}}</td>
           <td class="light">{{comp_2_date}}</td>
         </tr>
         <tr>
-          <td>{{comp_3_location}}</td>
+          <td class="location">{{comp_3_location}}</td>
           <td class="light">{{comp_3_acres}}</td>
+          <td class="light">{{comp_3_zoning}}</td>
           <td class="price">{{comp_3_price}}</td>
-          <td class="ppa">{{comp_3_price_per_acre}}</td>
+          <td class="ppa">{{comp_3_price_display}}</td>
           <td class="light">{{comp_3_date}}</td>
         </tr>
         <tr>
-          <td>{{comp_4_location}}</td>
+          <td class="location">{{comp_4_location}}</td>
           <td class="light">{{comp_4_acres}}</td>
+          <td class="light">{{comp_4_zoning}}</td>
           <td class="price">{{comp_4_price}}</td>
-          <td class="ppa">{{comp_4_price_per_acre}}</td>
+          <td class="ppa">{{comp_4_price_display}}</td>
           <td class="light">{{comp_4_date}}</td>
+        </tr>
+        <tr>
+          <td class="location">{{comp_5_location}}</td>
+          <td class="light">{{comp_5_acres}}</td>
+          <td class="light">{{comp_5_zoning}}</td>
+          <td class="price">{{comp_5_price}}</td>
+          <td class="ppa">{{comp_5_price_display}}</td>
+          <td class="light">{{comp_5_date}}</td>
+        </tr>
+        <tr>
+          <td class="location">{{comp_6_location}}</td>
+          <td class="light">{{comp_6_acres}}</td>
+          <td class="light">{{comp_6_zoning}}</td>
+          <td class="price">{{comp_6_price}}</td>
+          <td class="ppa">{{comp_6_price_display}}</td>
+          <td class="light">{{comp_6_date}}</td>
         </tr>
       </tbody>
     </table>
 
     <div class="divider"></div>
-    <div class="section-title">Market Activity Summary</div>
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="stat-label">Active Listings</div>
-        <div class="stat-value">{{active_listings}}</div>
+    <div class="profile-title">County Profile</div>
+    <div class="profile-grid">
+      <div class="profile-cell">
+        <div class="profile-key">Population</div>
+        <div class="profile-val">{{population}}</div>
       </div>
-      <div class="stat-box">
-        <div class="stat-label">Closed Sales</div>
-        <div class="stat-value">{{closed_sales}}</div>
+      <div class="profile-cell">
+        <div class="profile-key">Annual Growth</div>
+        <div class="profile-val">{{population_growth}}</div>
       </div>
-      <div class="stat-box">
-        <div class="stat-label">Avg Days on Market</div>
-        <div class="stat-value">{{avg_days_on_market}}</div>
+      <div class="profile-cell">
+        <div class="profile-key">Median HH Income</div>
+        <div class="profile-val">{{median_household_income}}</div>
       </div>
-      <div class="stat-box">
-        <div class="stat-label">Median $/Acre</div>
-        <div class="stat-value" style="font-size:16px;">{{median_price_per_acre}}</div>
+      <div class="profile-cell">
+        <div class="profile-key">Unemployment Rate</div>
+        <div class="profile-val">{{unemployment_rate}}</div>
       </div>
-    </div>
-
-    <div class="insight-box">
-      <div class="insight-label">Market Trend</div>
-      <div class="insight-text">{{median_price_trend}} &mdash; Days on market trending {{dom_trend_direction}}. {{dom_trend_note}}. {{active_listings_note}}.</div>
-    </div>
-
-    <div class="insight-box">
-      <div class="insight-label">Zoning Authority</div>
-      <div class="insight-text">{{zoning_authority}}</div>
+      <div class="profile-cell">
+        <div class="profile-key">Total Land Area</div>
+        <div class="profile-val">{{land_area}}</div>
+      </div>
+      <div class="profile-cell">
+        <div class="profile-key">LotScout Active Listings</div>
+        <div class="profile-val">{{active_listings}}</div>
+      </div>
     </div>
   </div>
+
   <div class="footer">
-    <div class="footer-left">LotScout &mdash; lotscout.com</div>
-    <div class="footer-right">{{report_month}} &nbsp;&middot;&nbsp; Page 2 of 5</div>
+    <div class="footer-left">The #1 Platform for Land Data and Off-Market Deals</div>
+    <div class="footer-center">lotscout.com</div>
+    <div class="footer-right">2 of 7</div>
   </div>
 </div>
 </body>

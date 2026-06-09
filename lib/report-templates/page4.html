@@ -4,134 +4,180 @@
 <meta charset="UTF-8">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #111; }
 .page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
-.header { background: #1B4332; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
-.header-brand { color: #fff; font-size: 18px; font-weight: 900; }
-.header-title { color: #6EE7B7; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
-.body { padding: 32px 40px; flex: 1; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.section-title { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1B4332; margin-bottom: 12px; }
-.divider { height: 1px; background: #E5E7EB; margin: 20px 0; }
-.job-card { padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
-.job-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
-.job-desc { font-size: 11px; color: #666; line-height: 1.5; margin-bottom: 4px; }
-.job-note { font-size: 10px; font-weight: 600; color: #40916C; }
-.job-stat-row { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
-.job-stat-val { font-size: 22px; font-weight: 900; color: #1B4332; }
-.job-stat-label { font-size: 11px; color: #888; font-weight: 600; }
-.policy-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
-.policy-date { font-size: 10px; font-weight: 700; color: #6B7280; margin-bottom: 4px; letter-spacing: 0.05em; }
-.policy-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
-.policy-desc { font-size: 11px; color: #555; line-height: 1.5; }
-.incentive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-.incentive-box { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 12px 14px; }
-.incentive-label { font-size: 10px; font-weight: 700; color: #40916C; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
-.incentive-value { font-size: 16px; font-weight: 800; color: #1B4332; }
-.comp-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6; }
-.comp-name { font-size: 13px; font-weight: 600; color: #1a1a1a; }
-.comp-growth { font-size: 14px; font-weight: 800; color: #40916C; }
-.footer { background: #1B4332; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
-.footer-left { color: #6EE7B7; font-size: 10px; font-weight: 600; }
-.footer-right { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+.header { background: #0D1F16; padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-name { color: #fff; font-size: 16px; font-weight: 900; }
+.header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
+.header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.header-county { color: rgba(255,255,255,0.5); font-size: 11px; }
+.body { padding: 24px 40px 16px; flex: 1; }
+.section-title { font-size: 10px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #0D1F16; margin-bottom: 10px; }
+.sub-note { font-size: 10px; color: #9CA3AF; font-style: italic; margin-top: -6px; margin-bottom: 10px; }
+.divider { height: 1px; background: #E5E7EB; margin: 16px 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+/* Listings breakdown table */
+table.breakdown { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+table.breakdown thead tr { background: #F0FDF4; }
+table.breakdown thead th { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #40916C; padding: 8px 12px; text-align: left; border-bottom: 2px solid #BBF7D0; }
+table.breakdown tbody tr { border-bottom: 1px solid #F3F4F6; }
+table.breakdown tbody td { padding: 9px 12px; font-size: 12px; }
+td.range { color: #374151; font-weight: 500; }
+td.count { font-weight: 700; color: #0D1F16; text-align: right; }
+td.med-price { font-weight: 600; color: #40916C; text-align: right; }
+/* Price trends */
+.price-trend-row { display: flex; gap: 0; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; margin-bottom: 4px; }
+.price-trend-cell { flex: 1; padding: 12px 14px; border-right: 1px solid #E5E7EB; text-align: center; }
+.price-trend-cell:last-child { border-right: none; }
+.trend-label { font-size: 9px; font-weight: 700; color: #9CA3AF; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+.trend-value { font-size: 16px; font-weight: 900; color: #0D1F16; }
+.trend-dir { display: inline-block; margin-left: 4px; font-size: 14px; }
+.trend-up { color: #10B981; }
+.trend-down { color: #EF4444; }
+.trend-stable { color: #6B7280; }
+/* Market velocity */
+.velocity-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 4px; }
+.vel-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; text-align: center; }
+.vel-label { font-size: 9px; font-weight: 700; color: #9CA3AF; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+.vel-value { font-size: 22px; font-weight: 900; color: #0D1F16; }
+/* Land use snapshot */
+.land-use-row { display: flex; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid #F3F4F6; }
+.land-use-row:last-child { border-bottom: none; }
+.land-use-label { font-size: 12px; color: #374151; font-weight: 500; min-width: 110px; }
+.land-use-bar-bg { flex: 1; height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; }
+.land-use-bar { height: 8px; border-radius: 4px; background: #40916C; }
+.land-use-pct { font-size: 11px; font-weight: 700; color: #0D1F16; min-width: 38px; text-align: right; }
+.footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { color: rgba(255,255,255,0.55); font-size: 10px; }
+.footer-center { color: #fff; font-size: 11px; font-weight: 700; }
+.footer-right { color: rgba(255,255,255,0.55); font-size: 10px; }
 </style>
 </head>
 <body>
 <div class="page">
   <div class="header">
-    <div class="header-brand">LotScout</div>
-    <div class="header-title">{{county_name}} &mdash; Economic Intelligence</div>
+    <div class="header-left">
+      <div class="logo-name">LotScout</div>
+      <div class="header-divider"></div>
+      <div class="header-section">Market Intelligence</div>
+    </div>
+    <div class="header-county">{{county_name}}</div>
   </div>
+
   <div class="body">
 
     <div class="two-col">
       <div>
-        <div class="section-title">Job Market &amp; Employers</div>
-        <div class="job-card">
-          <div class="job-title">{{job_1_title}}</div>
-          <div class="job-desc">{{job_1_description}}</div>
-          <div class="job-note">{{job_1_note}}</div>
-        </div>
-        <div class="job-card">
-          <div class="job-title">{{job_2_title}}</div>
-          <div class="job-desc">{{job_2_description}}</div>
-          <div class="job-note">{{job_2_note}}</div>
-        </div>
-        <div class="job-card" style="border-bottom:none;">
-          <div class="job-title">{{job_3_title}}</div>
-          <div class="job-desc">{{job_3_description}}</div>
-          <div class="job-stat-row">
-            <div class="job-stat-val">{{job_3_stat}}</div>
-            <div class="job-stat-label">{{job_3_stat_label}}</div>
-          </div>
-        </div>
+        <div class="section-title">Active Listings Breakdown</div>
+        <div class="sub-note">Vacant land only</div>
+        <table class="breakdown">
+          <thead>
+            <tr>
+              <th>Acreage Range</th>
+              <th style="text-align:right">Listings</th>
+              <th style="text-align:right">Median List Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="range">Under 1 acre</td>
+              <td class="count">{{listings_under_1_acre}}</td>
+              <td class="med-price">{{median_price_under_1_acre}}</td>
+            </tr>
+            <tr>
+              <td class="range">1 to 5 acres</td>
+              <td class="count">{{listings_1_to_5_acres}}</td>
+              <td class="med-price">{{median_price_1_to_5_acres}}</td>
+            </tr>
+            <tr>
+              <td class="range">5 to 20 acres</td>
+              <td class="count">{{listings_5_to_20_acres}}</td>
+              <td class="med-price">{{median_price_5_to_20_acres}}</td>
+            </tr>
+            <tr>
+              <td class="range">Over 20 acres</td>
+              <td class="count">{{listings_over_20_acres}}</td>
+              <td class="med-price">{{median_price_over_20_acres}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div>
-        <div class="section-title">Policy &amp; Elections</div>
-        <div class="policy-card">
-          <div class="policy-date">{{policy_1_date_badge}}</div>
-          <div class="policy-title">{{policy_1_title}}</div>
-          <div class="policy-desc">{{policy_1_description}}</div>
-        </div>
-        <div class="policy-card">
-          <div class="policy-date">{{policy_2_date_badge}}</div>
-          <div class="policy-title">{{policy_2_title}}</div>
-          <div class="policy-desc">{{policy_2_description}}</div>
+        <div class="section-title">Price Trends — Median $/Acre</div>
+        <div class="price-trend-row">
+          <div class="price-trend-cell">
+            <div class="trend-label">6 Months Ago</div>
+            <div class="trend-value">{{price_trend_6_months}}</div>
+          </div>
+          <div class="price-trend-cell">
+            <div class="trend-label">Prior Month</div>
+            <div class="trend-value">{{price_trend_prior_month}}</div>
+          </div>
+          <div class="price-trend-cell">
+            <div class="trend-label">This Month</div>
+            <div class="trend-value">{{price_trend_current}}
+              <span class="trend-dir trend-{{price_trend_direction}}">{{price_trend_direction}}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="divider"></div>
-
-    <div class="two-col">
-      <div>
-        <div class="section-title">Local Incentives</div>
-        <div class="incentive-grid">
-          <div class="incentive-box">
-            <div class="incentive-label">{{incentive_1_label}}</div>
-            <div class="incentive-value">{{incentive_1_value}}</div>
-          </div>
-          <div class="incentive-box">
-            <div class="incentive-label">{{incentive_2_label}}</div>
-            <div class="incentive-value">{{incentive_2_value}}</div>
-          </div>
-          <div class="incentive-box">
-            <div class="incentive-label">{{incentive_3_label}}</div>
-            <div class="incentive-value">{{incentive_3_value}}</div>
-          </div>
-          <div class="incentive-box">
-            <div class="incentive-label">{{incentive_4_label}}</div>
-            <div class="incentive-value">{{incentive_4_value}}</div>
-          </div>
-        </div>
+    <div class="section-title">Market Velocity</div>
+    <div class="velocity-grid">
+      <div class="vel-card">
+        <div class="vel-label">Total Active Listings</div>
+        <div class="vel-value">{{active_listings}}</div>
       </div>
-
-      <div>
-        <div class="section-title">Comparable County Growth</div>
-        <div class="comp-row">
-          <div class="comp-name">{{comp_county_1_name}}</div>
-          <div class="comp-growth">{{comp_county_1_growth}}</div>
-        </div>
-        <div class="comp-row">
-          <div class="comp-name">{{comp_county_2_name}}</div>
-          <div class="comp-growth">{{comp_county_2_growth}}</div>
-        </div>
-        <div class="comp-row">
-          <div class="comp-name">{{comp_county_3_name}}</div>
-          <div class="comp-growth">{{comp_county_3_growth}}</div>
-        </div>
-        <div class="comp-row" style="border-bottom:none;">
-          <div class="comp-name">{{comp_county_4_name}}</div>
-          <div class="comp-growth">{{comp_county_4_growth}}</div>
-        </div>
+      <div class="vel-card">
+        <div class="vel-label">New Listings This Month</div>
+        <div class="vel-value">{{new_listings_this_month}}</div>
+      </div>
+      <div class="vel-card">
+        <div class="vel-label">Under Contract</div>
+        <div class="vel-value">{{listings_under_contract}}</div>
       </div>
     </div>
 
+    <div class="divider"></div>
+    <div class="section-title">Land Use Snapshot</div>
+    <div class="sub-note">Active listed parcels by zoning type — vacant land only</div>
+
+    <div class="land-use-row">
+      <div class="land-use-label">Residential</div>
+      <div class="land-use-bar-bg"><div class="land-use-bar" style="width:{{zoning_residential_pct}}%"></div></div>
+      <div class="land-use-pct">{{zoning_residential_pct}}%</div>
+    </div>
+    <div class="land-use-row">
+      <div class="land-use-label">Agricultural</div>
+      <div class="land-use-bar-bg"><div class="land-use-bar" style="width:{{zoning_agricultural_pct}}%;background:#2D6A4F"></div></div>
+      <div class="land-use-pct">{{zoning_agricultural_pct}}%</div>
+    </div>
+    <div class="land-use-row">
+      <div class="land-use-label">Commercial</div>
+      <div class="land-use-bar-bg"><div class="land-use-bar" style="width:{{zoning_commercial_pct}}%;background:#2563EB"></div></div>
+      <div class="land-use-pct">{{zoning_commercial_pct}}%</div>
+    </div>
+    <div class="land-use-row">
+      <div class="land-use-label">Industrial</div>
+      <div class="land-use-bar-bg"><div class="land-use-bar" style="width:{{zoning_industrial_pct}}%;background:#6B7280"></div></div>
+      <div class="land-use-pct">{{zoning_industrial_pct}}%</div>
+    </div>
+    <div class="land-use-row">
+      <div class="land-use-label">Mixed Use</div>
+      <div class="land-use-bar-bg"><div class="land-use-bar" style="width:{{zoning_mixed_use_pct}}%;background:#7C3AED"></div></div>
+      <div class="land-use-pct">{{zoning_mixed_use_pct}}%</div>
+    </div>
+
   </div>
+
   <div class="footer">
-    <div class="footer-left">LotScout &mdash; lotscout.com</div>
-    <div class="footer-right">{{report_month}} &nbsp;&middot;&nbsp; Page 4 of 5</div>
+    <div class="footer-left">The #1 Platform for Land Data and Off-Market Deals</div>
+    <div class="footer-center">lotscout.com</div>
+    <div class="footer-right">4 of 7</div>
   </div>
 </div>
 </body>
