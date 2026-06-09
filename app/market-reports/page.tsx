@@ -52,10 +52,10 @@ export default function MarketReportsPage() {
         <div className="text-center mb-8">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600 mb-3">LotScout Market Reports</p>
           <h1 className="text-3xl md:text-4xl font-extrabold text-primary tracking-tight mb-3">
-            Free County Land Market Report
+            County Land Development &amp; Zoning Intelligence Report
           </h1>
           <p className="text-secondary text-base max-w-md mx-auto">
-            AI-powered analysis of price trends, permit activity, and investment outlook — delivered to your inbox in minutes.
+            AI-powered analysis of zoning changes, legislation, permit activity, and development trends for your county, delivered to your inbox.
           </p>
         </div>
 
@@ -151,7 +151,7 @@ export default function MarketReportsPage() {
                 {formState === 'loading' ? 'Sending…' : 'Get My Free Report →'}
               </button>
 
-              <p className="text-center text-xs text-secondary">Free, no credit card required.</p>
+              <p className="text-center text-xs text-secondary">No credit card required.</p>
             </form>
           )}
         </div>
