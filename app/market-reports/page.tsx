@@ -80,42 +80,71 @@ export default function MarketReportsPage() {
       <Header />
 
       {/* ── Hero ── */}
-      <section className="pt-28 pb-6 px-4 text-center">
+      <section className="pt-6 pb-4 px-4 text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: '#1D9E75' }}>
           LotScout Market Reports
         </p>
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-4" style={{ color: '#0D1F16' }}>
-          Land Market Reports
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-3" style={{ color: '#0D1F16' }}>
+          LotScout Market Reports
         </h1>
-        <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
-          Get your first county-level land market report for free. No account required.
+        <p className="text-gray-500 text-lg max-w-xl mx-auto">
+          Get your first county-level land market report for free.
+        </p>
+        <p className="text-gray-500 text-lg max-w-xl mx-auto">
+          No account required.
         </p>
       </section>
 
       {/* ── Form card ── */}
-      <section className="px-4 pb-16">
+      <section className="px-4 pb-16 mt-4">
         <div className="max-w-[500px] mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
 
           {formState === 'success' ? (
             /* ── Success state ── */
-            <div className="p-10 text-center">
+            <div className="p-8 text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: '#DCFCE7' }}>
                 <span className="material-symbols-outlined text-3xl" style={{ color: '#1D9E75', fontVariationSettings: "'FILL' 1" }}>
                   check_circle
                 </span>
               </div>
               <h2 className="text-2xl font-extrabold mb-3" style={{ color: '#0D1F16' }}>Check your email!</h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-8">
+              <p className="text-gray-600 text-sm leading-relaxed mb-6">
                 Your <strong>{submittedCounty}, {submittedState}</strong> land market report is on its way.
                 Check your inbox in the next few minutes.
               </p>
               <Link
                 href="/marketplace"
-                className="inline-block w-full text-white font-bold py-3 rounded-xl text-sm"
+                className="inline-block w-full text-white font-bold py-3 rounded-xl text-sm mb-8"
                 style={{ background: '#0D1F16' }}
               >
                 Browse the Marketplace
               </Link>
+
+              {/* Pricing upsell after success */}
+              <div className="border-2 rounded-2xl p-6 text-left" style={{ borderColor: '#1D9E75' }}>
+                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#1D9E75' }}>
+                  Monthly Plan
+                </p>
+                <p className="font-semibold text-sm mb-1" style={{ color: '#0D1F16' }}>
+                  Want monthly reports for {submittedCounty}, {submittedState}?
+                </p>
+                <p className="text-3xl font-extrabold mb-1" style={{ color: '#0D1F16' }}>
+                  $9<span className="text-sm font-semibold text-gray-500">/mo per county</span>
+                </p>
+                <p className="text-gray-500 text-xs mb-4">
+                  Get monthly land market intelligence delivered automatically.
+                </p>
+                <Link
+                  href="/market-reports/subscribe"
+                  className="block w-full text-white font-bold py-2.5 rounded-xl text-sm text-center mb-3"
+                  style={{ background: '#0D1F16' }}
+                >
+                  Subscribe
+                </Link>
+                <p className="text-xs text-gray-400 text-center">
+                  LotScout paid members get monthly reports free.
+                </p>
+              </div>
             </div>
 
           ) : formState === 'already_requested' ? (
@@ -140,10 +169,6 @@ export default function MarketReportsPage() {
           ) : (
             /* ── Form ── */
             <div className="p-8">
-              <h2 className="text-xl font-bold mb-6" style={{ color: '#0D1F16' }}>
-                Request your free report
-              </h2>
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -272,40 +297,6 @@ export default function MarketReportsPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── Pricing card ── */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-md mx-auto text-center">
-          <h2 className="text-2xl font-extrabold mb-2" style={{ color: '#0D1F16' }}>
-            Stay ahead of the market
-          </h2>
-          <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-            After your free report, continue receiving monthly land market intelligence for your target counties.
-          </p>
-
-          <div className="border-2 rounded-2xl p-8 mb-5" style={{ borderColor: '#1D9E75' }}>
-            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#1D9E75' }}>
-              Monthly Plan
-            </p>
-            <p className="text-4xl font-extrabold mb-1" style={{ color: '#0D1F16' }}>
-              $9<span className="text-base font-semibold text-gray-500">/mo per county</span>
-            </p>
-            <p className="text-gray-500 text-sm mb-2">One detailed market report every month</p>
-            <p className="text-xs text-gray-400 mb-6">Cancel anytime</p>
-            <Link
-              href="/market-reports/subscribe"
-              className="block w-full text-white font-bold py-3 rounded-xl text-sm"
-              style={{ background: '#0D1F16' }}
-            >
-              Subscribe
-            </Link>
-          </div>
-
-          <p className="text-xs text-gray-400">
-            LotScout Standard, Priority, and Exclusive members receive monthly reports free.
-          </p>
         </div>
       </section>
 
