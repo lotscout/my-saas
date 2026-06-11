@@ -127,6 +127,8 @@ export default function MarketReportsPage() {
     }
   }
 
+  const displayCounty = submittedCounty.endsWith('County') ? submittedCounty : `${submittedCounty} County`;
+
   return (
     <div className="min-h-screen bg-white font-body pt-16">
       <Header />
@@ -149,76 +151,47 @@ export default function MarketReportsPage() {
 
       {/* ── Form card ── */}
       <section className="px-4 pb-16 mt-4">
-        <div className="max-w-[500px] mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
 
-          {formState === 'success' ? (
-            /* ── Success state ── */
-            <div className="p-8 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: '#DCFCE7' }}>
-                <span className="material-symbols-outlined text-3xl" style={{ color: '#1D9E75', fontVariationSettings: "'FILL' 1" }}>
-                  check_circle
-                </span>
-              </div>
-              <h2 className="text-2xl font-extrabold mb-3" style={{ color: '#0D1F16' }}>Check your email!</h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-6">
-                Your <strong>{submittedCounty}, {submittedState}</strong> land market report is on its way.
-                Check your inbox in the next few minutes.
-              </p>
-              <Link
-                href="/marketplace"
-                className="inline-block w-full text-white font-bold py-3 rounded-xl text-sm mb-8"
-                style={{ background: '#0D1F16' }}
-              >
-                Browse the Marketplace
-              </Link>
-
-              <div className="border-2 rounded-2xl p-6 text-left" style={{ borderColor: '#1D9E75' }}>
-                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#1D9E75' }}>
-                  Monthly Plan
-                </p>
-                <p className="font-semibold text-sm mb-1" style={{ color: '#0D1F16' }}>
-                  Want monthly reports for {submittedCounty}, {submittedState}?
-                </p>
-                <p className="text-3xl font-extrabold mb-1" style={{ color: '#0D1F16' }}>
-                  $9<span className="text-sm font-semibold text-gray-500">/mo per county</span>
-                </p>
-                <p className="text-gray-500 text-xs mb-4">
-                  Get monthly land market intelligence delivered automatically.
-                </p>
-                <Link
-                  href="/market-reports/subscribe"
-                  className="block w-full text-white font-bold py-2.5 rounded-xl text-sm text-center mb-3"
-                  style={{ background: '#0D1F16' }}
-                >
-                  Subscribe
-                </Link>
-                <p className="text-xs text-gray-400 text-center">
-                  LotScout paid members get monthly reports free.
-                </p>
-              </div>
+        {formState === 'success' ? (
+          /* ── Success state ── */
+          <div className="max-w-md mx-auto bg-white rounded-2xl shadow border border-gray-100 p-8 text-center">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: '#DCFCE7' }}>
+              <span className="material-symbols-outlined text-3xl" style={{ color: '#1D9E75', fontVariationSettings: "'FILL' 1" }}>
+                check_circle
+              </span>
             </div>
-
-          ) : formState === 'already_requested' ? (
-            /* ── Already requested state ── */
-            <div className="p-10 text-center">
-              <div className="text-5xl mb-4">📬</div>
-              <h2 className="text-xl font-bold mb-3" style={{ color: '#0D1F16' }}>
-                Free report already sent
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-6">
-                You have already received your free report. Subscribe for $9/mo to keep getting monthly updates.
+            <h2 className="text-2xl font-extrabold mb-3" style={{ color: '#0D1F16' }}>Check your email!</h2>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Your <strong>{displayCounty}, {submittedState}</strong> land market report is on its way.
+            </p>
+            <div className="border-t border-gray-100 mt-6 pt-6">
+              <p className="text-sm text-gray-500 mb-2">
+                Want monthly reports for {displayCounty}, {submittedState}?
               </p>
-              <Link
-                href="/market-reports/subscribe"
-                className="inline-block w-full text-white font-bold py-3 rounded-xl text-sm"
-                style={{ background: '#0D1F16' }}
-              >
-                Subscribe for $9/mo
+              <p className="text-lg font-bold mt-1" style={{ color: '#0D1F16' }}>$9/mo</p>
+              <p className="text-xs text-gray-400 mt-1 mb-3">Monthly land market intelligence delivered automatically.</p>
+              <Link href="/market-reports/subscribe" className="text-sm font-semibold" style={{ color: '#1D9E75' }}>
+                Subscribe →
               </Link>
+              <p className="text-xs text-gray-400 italic mt-4">LotScout paid members get monthly reports free.</p>
             </div>
+          </div>
 
-          ) : (
-            /* ── Form ── */
+        ) : formState === 'already_requested' ? (
+          /* ── Already requested state ── */
+          <div className="max-w-md mx-auto bg-white rounded-2xl shadow border border-gray-100 p-8 text-center">
+            <h2 className="text-xl font-bold mb-3" style={{ color: '#0D1F16' }}>You have already received your free report.</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Subscribe for $9/mo to keep getting monthly updates for {displayCounty}, {submittedState}.
+            </p>
+            <Link href="/market-reports/subscribe" className="text-sm font-semibold" style={{ color: '#1D9E75' }}>
+              Subscribe →
+            </Link>
+          </div>
+
+        ) : (
+          /* ── Form ── */
+          <div className="max-w-[500px] mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <div className="p-5">
               <form onSubmit={handleSubmit} className="space-y-2">
 
@@ -344,8 +317,9 @@ export default function MarketReportsPage() {
                 We value your privacy and do not share your data with third-party brokers.
               </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
       </section>
 
       {/* ── Value props ── */}
