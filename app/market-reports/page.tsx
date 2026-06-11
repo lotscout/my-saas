@@ -1,11 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { STATE_MAP } from '@/lib/stateMap';
+import COUNTY_CENTROIDS from '@/lib/county-centroids.json';
 
 const STATE_ENTRIES = Object.entries(STATE_MAP).sort(([a], [b]) => a.localeCompare(b));
+
+// Build stateAbbr → sorted county names map from centroids data
+const COUNTY_DATA: Record<string, string[]> = {};
+for (const key of Object.keys(COUNTY_CENTROIDS as Record<string, unknown>)) {
+  const [countyName, stateAbbr] = key.split('|');
+  if (!COUNTY_DATA[stateAbbr]) COUNTY_DATA[stateAbbr] = [];
+  COUNTY_DATA[stateAbbr].push(countyName);
+}
+for (const abbr of Object.keys(COUNTY_DATA)) {
+  COUNTY_DATA[abbr].sort();
+}
 
 const VALUE_PROPS = [
   {
@@ -31,20 +43,60 @@ export default function MarketReportsPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName]   = useState('');
   const [email, setEmail]         = useState('');
-  const [county, setCounty]       = useState('');
   const [state, setState]         = useState('');
+  const [county, setCounty]       = useState('');        // validated county name
+  const [countyInput, setCountyInput] = useState('');    // raw input text
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [formState, setFormState] = useState<FormState>('idle');
   const [errorMsg, setErrorMsg]   = useState('');
 
-  // Capture submitted county/state for use in success message
   const [submittedCounty, setSubmittedCounty] = useState('');
   const [submittedState, setSubmittedState]   = useState('');
 
+  const comboboxRef = useRef<HTMLDivElement>(null);
+
+  const stateAbbr = state ? STATE_MAP[state] : '';
+  const availableCounties = stateAbbr ? (COUNTY_DATA[stateAbbr] ?? []) : [];
+  const filteredCounties = countyInput.trim()
+    ? availableCounties.filter(c => c.toLowerCase().includes(countyInput.trim().toLowerCase()))
+    : availableCounties;
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function handleStateChange(newState: string) {
+    setState(newState);
+    setCounty('');
+    setCountyInput('');
+    setShowSuggestions(false);
+  }
+
+  function handleCountyInput(value: string) {
+    setCountyInput(value);
+    setCounty('');
+    setShowSuggestions(true);
+  }
+
+  function selectCounty(name: string) {
+    setCounty(name);
+    setCountyInput(name);
+    setShowSuggestions(false);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!county) return;
     setFormState('loading');
     setErrorMsg('');
-    setSubmittedCounty(county.trim());
+    setSubmittedCounty(county);
     setSubmittedState(state);
 
     try {
@@ -55,7 +107,7 @@ export default function MarketReportsPage() {
           first_name: firstName.trim(),
           last_name:  lastName.trim(),
           email:      email.trim(),
-          county:     county.trim(),
+          county,
           state,
         }),
       });
@@ -80,17 +132,17 @@ export default function MarketReportsPage() {
       <Header />
 
       {/* ── Hero ── */}
-      <section className="pt-6 pb-4 px-4 text-center">
+      <section className="pt-24 pb-3 px-4 text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: '#1D9E75' }}>
           LotScout Market Reports
         </p>
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-3" style={{ color: '#0D1F16' }}>
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight mb-2" style={{ color: '#0D1F16' }}>
           LotScout Market Reports
         </h1>
-        <p className="text-gray-500 text-lg max-w-xl mx-auto">
+        <p className="text-gray-500 text-base max-w-xl mx-auto">
           Get your first county-level land market report for free.
         </p>
-        <p className="text-gray-500 text-lg max-w-xl mx-auto">
+        <p className="text-gray-500 text-base max-w-xl mx-auto">
           No account required.
         </p>
       </section>
@@ -120,7 +172,6 @@ export default function MarketReportsPage() {
                 Browse the Marketplace
               </Link>
 
-              {/* Pricing upsell after success */}
               <div className="border-2 rounded-2xl p-6 text-left" style={{ borderColor: '#1D9E75' }}>
                 <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#1D9E75' }}>
                   Monthly Plan
@@ -168,8 +219,10 @@ export default function MarketReportsPage() {
 
           ) : (
             /* ── Form ── */
-            <div className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="p-5">
+              <form onSubmit={handleSubmit} className="space-y-2">
+
+                {/* 1. First Name + Last Name */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1.5">First Name</label>
@@ -179,7 +232,7 @@ export default function MarketReportsPage() {
                       value={firstName}
                       onChange={e => setFirstName(e.target.value)}
                       placeholder="Jane"
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
                       style={{ '--tw-ring-color': '#1D9E75' } as React.CSSProperties}
                     />
                   </div>
@@ -191,11 +244,12 @@ export default function MarketReportsPage() {
                       value={lastName}
                       onChange={e => setLastName(e.target.value)}
                       placeholder="Smith"
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
                     />
                   </div>
                 </div>
 
+                {/* 2. Email Address */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1.5">Email Address</label>
                   <input
@@ -204,29 +258,18 @@ export default function MarketReportsPage() {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="jane@example.com"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">County Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={county}
-                    onChange={e => setCounty(e.target.value)}
-                    placeholder="e.g. Travis County"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
-                  />
-                </div>
-
+                {/* 3. State */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1.5">State</label>
                   <select
                     required
                     value={state}
-                    onChange={e => setState(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent"
+                    onChange={e => handleStateChange(e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent"
                   >
                     <option value="">Select a state&hellip;</option>
                     {STATE_ENTRIES.map(([name, abbr]) => (
@@ -235,16 +278,52 @@ export default function MarketReportsPage() {
                   </select>
                 </div>
 
+                {/* 4. County combobox */}
+                <div ref={comboboxRef} className="relative">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">County</label>
+                  <input
+                    type="text"
+                    required
+                    disabled={!state}
+                    value={countyInput}
+                    onChange={e => handleCountyInput(e.target.value)}
+                    onFocus={() => state && setShowSuggestions(true)}
+                    placeholder={state ? 'Type to search counties…' : 'Select a state first'}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ '--tw-ring-color': '#1D9E75' } as React.CSSProperties}
+                    autoComplete="off"
+                  />
+                  {showSuggestions && filteredCounties.length > 0 && (
+                    <ul className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg text-sm">
+                      {filteredCounties.map(name => (
+                        <li
+                          key={name}
+                          onMouseDown={() => selectCounty(name)}
+                          className="px-3 py-2 cursor-pointer hover:bg-gray-50 text-gray-900"
+                        >
+                          {name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {showSuggestions && state && filteredCounties.length === 0 && (
+                    <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg px-3 py-2 text-sm text-gray-400">
+                      No counties found
+                    </div>
+                  )}
+                </div>
+
                 {formState === 'error' && (
                   <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
                     {errorMsg}
                   </p>
                 )}
 
+                {/* 5. Submit */}
                 <button
                   type="submit"
-                  disabled={formState === 'loading'}
-                  className="w-full text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={formState === 'loading' || !county}
+                  className="w-full text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ background: '#0D1F16' }}
                 >
                   {formState === 'loading' ? (
@@ -260,7 +339,7 @@ export default function MarketReportsPage() {
                 </button>
               </form>
 
-              <p className="text-center text-xs text-gray-400 mt-4 leading-relaxed">
+              <p className="text-center text-xs text-gray-400 mt-3 leading-relaxed">
                 By submitting, you agree to receive automated land market insights.
                 We value your privacy and do not share your data with third-party brokers.
               </p>
