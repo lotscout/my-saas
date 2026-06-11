@@ -128,11 +128,11 @@ export default function MarketReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white font-body">
+    <div className="min-h-screen bg-white font-body pt-16">
       <Header />
 
       {/* ── Hero ── */}
-      <section className="pt-24 pb-3 px-4 text-center">
+      <section className="pt-8 pb-3 px-4 text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: '#1D9E75' }}>
           LotScout Market Reports
         </p>
