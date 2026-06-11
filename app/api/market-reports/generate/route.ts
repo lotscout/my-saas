@@ -132,15 +132,15 @@ export async function POST(request: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY);
     try {
       await resend.emails.send({
-        from: 'reports@lotscout.com',
+        from: 'LotScout <hello@lotscout.com>',
         to: email.trim(),
-        subject: `Your LotScout Market Report for ${county}, ${state} is here`,
+        subject: `Your LotScout Market Report for ${county} County, ${state} is here`,
         html: buildDeliveryEmail(first_name.trim(), county, state, reportUrl, siteUrl),
       });
       await logEmail({
         to_email:   email.trim(),
         from_email: 'reports@lotscout.com',
-        subject:    `Your LotScout Market Report for ${county}, ${state} is here`,
+        subject:    `Your LotScout Market Report for ${county} County, ${state} is here`,
         email_type: 'market_report_delivery',
       });
     } catch (emailErr) {
