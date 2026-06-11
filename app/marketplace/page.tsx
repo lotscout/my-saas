@@ -1455,10 +1455,12 @@ export default function MarketplacePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBuyerRequests.map(req => {
                   const stateAbbrev = req.target_state ? (STATE_NAMES[req.target_state.toLowerCase()] ?? null) : null;
-                  let location: string;
-                  if (req.target_city && req.target_state) location = `${req.target_city}, ${stateAbbrev ?? req.target_state}`;
-                  else if (req.target_county && req.target_state) location = `${req.target_county} County, ${stateAbbrev ?? req.target_state}`;
-                  else location = req.target_state || 'Location not specified';
+                  const location: string =
+                    (req.target_regions?.length ? req.target_regions.join(', ') : null) ||
+                    (req.target_city && req.target_state ? `${req.target_city}, ${stateAbbrev ?? req.target_state}` : null) ||
+                    (req.target_county && req.target_state ? `${req.target_county} County, ${stateAbbrev ?? req.target_state}` : null) ||
+                    req.target_state ||
+                    'Location not specified';
                   const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
                   const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
 

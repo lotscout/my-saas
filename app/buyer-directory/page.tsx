@@ -109,7 +109,8 @@ function getInitials(req: BuyerRequest) {
   return ([p?.first_name?.[0], p?.last_name?.[0]].filter(Boolean).join('').toUpperCase()) || 'AB';
 }
 
-function fmtLocation(city: string | null, county: string | null, state: string | null): string {
+function fmtLocation(city: string | null, county: string | null, state: string | null, regions?: string[] | null): string {
+  if (regions?.length) return regions.join(', ');
   const abbrev = state ? (STATE_ABBREV[state.toLowerCase()] ?? null) : null;
   if (city && state) return `${city}, ${abbrev ?? state}`;
   if (county && state) return `${county} County, ${abbrev ?? state}`;
@@ -205,7 +206,7 @@ function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }:
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs shrink-0">
         <span className="flex items-center gap-1 text-secondary">
           <span className="material-symbols-outlined text-sm">location_on</span>
-          {fmtLocation(req.target_city, req.target_county, req.target_state)}
+          {fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions)}
         </span>
         <span className="font-semibold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</span>
         {req.use_case && (
@@ -228,7 +229,7 @@ interface BuyerCardProps {
 }
 
 function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProps) {
-  const location = fmtLocation(req.target_city, req.target_county, req.target_state);
+  const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
   const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
   const listedBy = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || req.profiles?.company_name || 'Anonymous Buyer';
