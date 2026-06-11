@@ -135,10 +135,7 @@ export default function MarketReportsPage() {
 
       {/* ── Hero ── */}
       <section className="pt-24 pb-3 px-4 text-center">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: '#1D9E75' }}>
-          LotScout Market Reports
-        </p>
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight mb-2" style={{ color: '#0D1F16' }}>
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight mb-2 text-green-700">
           LotScout Market Reports
         </h1>
         <p className="text-gray-500 text-base max-w-xl mx-auto">
@@ -296,8 +293,7 @@ export default function MarketReportsPage() {
                 <button
                   type="submit"
                   disabled={formState === 'loading' || !county}
-                  className="w-full text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ background: '#0D1F16' }}
+                  className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {formState === 'loading' ? (
                     'Sending…'
