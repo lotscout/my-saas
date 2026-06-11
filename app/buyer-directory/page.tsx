@@ -99,9 +99,8 @@ function fmtTimeline(t: string): string {
 }
 
 function getBuyerName(req: BuyerRequest) {
-  if (req.display_name) return req.display_name;
   const p = req.profiles;
-  return [p?.first_name, p?.last_name].filter(Boolean).join(' ') || req.display_company || 'Anonymous Buyer';
+  return [p?.first_name, p?.last_name].filter(Boolean).join(' ') || p?.company_name || req.display_company || 'Anonymous Buyer';
 }
 
 function getInitials(req: BuyerRequest) {
@@ -232,7 +231,7 @@ function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProp
   const location = fmtLocation(req.target_city, req.target_county, req.target_state);
   const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
-  const listedBy = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ');
+  const listedBy = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || req.profiles?.company_name || 'Anonymous Buyer';
 
   return (
     <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden">
@@ -253,9 +252,7 @@ function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProp
         )}
       </div>
 
-      {listedBy && (
-        <p className="text-xs text-secondary italic mt-3">Listed by {listedBy}</p>
-      )}
+      <p className="text-xs text-secondary italic mt-3">Listed by {listedBy}</p>
 
       <div className="flex gap-2 mt-3">
         {canViewContact ? (

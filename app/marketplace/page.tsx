@@ -192,7 +192,7 @@ interface BuyerRequest {
   additional_notes: string | null;
   contact_preference: string[];
   created_at: string;
-  profiles: { first_name: string | null; last_name: string | null; avatar_url: string | null } | null;
+  profiles: { first_name: string | null; last_name: string | null; company_name: string | null; avatar_url: string | null } | null;
 }
 
 function fmtPerAcreMkt(budgetMax: number | null, minAcreage: number | null, budgetMin: number | null): string {
@@ -1462,7 +1462,7 @@ export default function MarketplacePage() {
                   const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
                   const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
 
-                  const listedByMkt = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ');
+                  const listedByMkt = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || req.profiles?.company_name || 'Anonymous Buyer';
                   return (
                     <div
                       key={req.id}
@@ -1473,9 +1473,7 @@ export default function MarketplacePage() {
                         <div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Budget</p><p className="text-base font-bold text-on-surface">{perAcre}</p></div>
                         {timeline && (<div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Timeline</p><p className="text-base font-bold text-on-surface">{timeline}</p></div>)}
                       </div>
-                      {listedByMkt && (
-                        <p className="text-xs text-secondary italic mt-3">Listed by {listedByMkt}</p>
-                      )}
+                      <p className="text-xs text-secondary italic mt-3">Listed by {listedByMkt}</p>
                       <div className="flex gap-2 mt-3">
                         {canViewContact ? (
                           <Link
