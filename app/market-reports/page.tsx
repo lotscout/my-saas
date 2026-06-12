@@ -123,17 +123,6 @@ export default function MarketReportsPage() {
             <p className="text-gray-600 text-sm leading-relaxed">
               Your <strong>{displayCounty}, {submittedState}</strong> land market report is on its way.
             </p>
-            <div className="border-t border-gray-100 mt-6 pt-6">
-              <p className="text-sm text-gray-500 mb-2">
-                Want monthly reports for {displayCounty}, {submittedState}?
-              </p>
-              <p className="text-lg font-bold mt-1" style={{ color: '#0D1F16' }}>$9/mo</p>
-              <p className="text-xs text-gray-400 mt-1 mb-3">Monthly land market intelligence delivered automatically.</p>
-              <Link href="/market-reports/subscribe" className="text-sm font-semibold" style={{ color: '#1D9E75' }}>
-                Subscribe →
-              </Link>
-              <p className="text-xs text-gray-400 italic mt-4">LotScout paid members get monthly reports free.</p>
-            </div>
           </div>
 
         ) : formState === 'already_requested' ? (
