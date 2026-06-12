@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { logEmail } from '@/lib/email-logger';
 import { STATE_MAP } from '@/lib/stateMap';
-import { STATE_FIPS } from '@/lib/stateFIPS';
+import { COUNTY_VALIDATION } from '@/lib/countyValidation';
 
 function buildAdminEmail(
   firstName: string,
@@ -55,38 +55,28 @@ export async function POST(request: NextRequest) {
 
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Validate county against US Census Bureau county list
-  try {
-    const stateAbbr = STATE_MAP[state.trim()];
-    const stateFips = stateAbbr ? STATE_FIPS[stateAbbr] : null;
-    if (stateFips) {
-      const censusRes = await fetch(
-        `https://api.census.gov/data/2020/dec/pl?get=NAME&for=county:*&in=state:${stateFips}`,
-        { signal: AbortSignal.timeout(5000) },
+  // Validate county against static county list
+  const stateAbbr = STATE_MAP[state.trim()];
+  const validCounties = stateAbbr ? (COUNTY_VALIDATION[stateAbbr] ?? []) : [];
+  if (validCounties.length > 0) {
+    const strip = (s: string) =>
+      s.toLowerCase()
+        .replace(/\s+county$/i, '')
+        .replace(/\s+parish$/i, '')
+        .replace(/\s+borough$/i, '')
+        .replace(/\s+census area$/i, '')
+        .trim();
+    const inputBase = strip(county.trim());
+    const isValid = validCounties.some(n => strip(n) === inputBase || n.toLowerCase() === county.trim().toLowerCase());
+    if (!isValid) {
+      return NextResponse.json(
+        {
+          error: 'invalid_county',
+          message: `We could not find "${county.trim()}" in ${state.trim()}. Please check the spelling and include the word "County" (e.g. Denver County).`,
+        },
+        { status: 422 },
       );
-      if (censusRes.ok) {
-        const censusData: string[][] = await censusRes.json();
-        const countyNames = censusData.slice(1).map(row => row[0].split(',')[0].trim().toLowerCase());
-        const inputNorm = county.trim().toLowerCase();
-        const inputBase = inputNorm.replace(/\s+county$/i, '').replace(/\s+parish$/i, '').replace(/\s+borough$/i, '').trim();
-        const isValid = countyNames.some(n => {
-          const base = n.replace(/\s+county$/i, '').replace(/\s+parish$/i, '').replace(/\s+borough$/i, '').trim();
-          return base === inputBase || n === inputNorm;
-        });
-        if (!isValid) {
-          return NextResponse.json(
-            {
-              error: 'invalid_county',
-              message: `We could not find "${county.trim()}" in ${state.trim()}. Please check the spelling and include the word "County" (e.g. Denver County).`,
-            },
-            { status: 422 },
-          );
-        }
-      }
     }
-  } catch (censusErr) {
-    // Census API unavailable — proceed rather than block submission
-    console.warn('[market-reports] Census validation skipped:', censusErr);
   }
 
   // Deduplicate — one free report per email
