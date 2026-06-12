@@ -56,8 +56,10 @@ export async function POST(request: NextRequest) {
   const normalizedEmail = email.toLowerCase().trim();
 
   // Validate county against static county list
-  const stateAbbr = STATE_MAP[state.trim()];
-  const validCounties = stateAbbr ? (COUNTY_VALIDATION[stateAbbr] ?? []) : [];
+  // STATE_MAP maps full names ("Colorado" → "CO"); fall back to direct lookup if abbr was sent
+  const stateAbbr = STATE_MAP[state.trim()] ?? state.trim().toUpperCase();
+  const validCounties = COUNTY_VALIDATION[stateAbbr] ?? [];
+  console.log(`[market-reports/request] county validation: stateAbbr=${stateAbbr} validCounties.length=${validCounties.length} county="${county.trim()}"`);
   if (validCounties.length > 0) {
     const strip = (s: string) =>
       s.toLowerCase()
@@ -68,6 +70,7 @@ export async function POST(request: NextRequest) {
         .trim();
     const inputBase = strip(county.trim());
     const isValid = validCounties.some(n => strip(n) === inputBase || n.toLowerCase() === county.trim().toLowerCase());
+    console.log(`[market-reports/request] inputBase="${inputBase}" isValid=${isValid}`);
     if (!isValid) {
       return NextResponse.json(
         {
