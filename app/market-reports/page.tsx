@@ -1,23 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { STATE_MAP } from '@/lib/stateMap';
-import COUNTY_CENTROIDS from '@/lib/county-centroids.json';
 
 const STATE_ENTRIES = Object.entries(STATE_MAP).sort(([a], [b]) => a.localeCompare(b));
-
-// Build stateAbbr → sorted county names map from centroids data
-const COUNTY_DATA: Record<string, string[]> = {};
-for (const key of Object.keys(COUNTY_CENTROIDS as Record<string, unknown>)) {
-  const [countyName, stateAbbr] = key.split('|');
-  if (!COUNTY_DATA[stateAbbr]) COUNTY_DATA[stateAbbr] = [];
-  COUNTY_DATA[stateAbbr].push(countyName);
-}
-for (const abbr of Object.keys(COUNTY_DATA)) {
-  COUNTY_DATA[abbr].sort();
-}
 
 const VALUE_PROPS = [
   {
@@ -44,58 +32,25 @@ export default function MarketReportsPage() {
   const [lastName, setLastName]   = useState('');
   const [email, setEmail]         = useState('');
   const [state, setState]         = useState('');
-  const [county, setCounty]       = useState('');        // validated county name
-  const [countyInput, setCountyInput] = useState('');    // raw input text
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [county, setCounty]       = useState('');
+  const [countyError, setCountyError] = useState('');
   const [formState, setFormState] = useState<FormState>('idle');
   const [errorMsg, setErrorMsg]   = useState('');
 
   const [submittedCounty, setSubmittedCounty] = useState('');
   const [submittedState, setSubmittedState]   = useState('');
 
-  const comboboxRef = useRef<HTMLDivElement>(null);
-
-  const stateAbbr = state ? STATE_MAP[state] : '';
-  const availableCounties = stateAbbr ? (COUNTY_DATA[stateAbbr] ?? []) : [];
-  const filteredCounties = countyInput.trim()
-    ? availableCounties.filter(c => c.toLowerCase().includes(countyInput.trim().toLowerCase()))
-    : availableCounties;
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
-        setShowSuggestions(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
-
   function handleStateChange(newState: string) {
     setState(newState);
     setCounty('');
-    setCountyInput('');
-    setShowSuggestions(false);
-  }
-
-  function handleCountyInput(value: string) {
-    setCountyInput(value);
-    setCounty('');
-    setShowSuggestions(true);
-  }
-
-  function selectCounty(name: string) {
-    setCounty(name);
-    setCountyInput(name);
-    setShowSuggestions(false);
+    setCountyError('');
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!county) return;
     setFormState('loading');
     setErrorMsg('');
+    setCountyError('');
     setSubmittedCounty(county);
     setSubmittedState(state);
 
@@ -107,7 +62,7 @@ export default function MarketReportsPage() {
           first_name: firstName.trim(),
           last_name:  lastName.trim(),
           email:      email.trim(),
-          county,
+          county:     county.trim(),
           state,
         }),
       });
@@ -118,7 +73,12 @@ export default function MarketReportsPage() {
         setFormState('already_requested');
       } else {
         const data = await res.json().catch(() => ({}));
-        setErrorMsg(data?.error || 'Something went wrong. Please try again.');
+        if (data?.error === 'invalid_county') {
+          setCountyError(data.message);
+          setFormState('idle');
+          return;
+        }
+        setErrorMsg(data?.message || data?.error || 'Something went wrong. Please try again.');
         setFormState('error');
       }
     } catch {
@@ -127,7 +87,9 @@ export default function MarketReportsPage() {
     }
   }
 
-  const displayCounty = submittedCounty.endsWith('County') ? submittedCounty : `${submittedCounty} County`;
+  const displayCounty = submittedCounty.toLowerCase().includes('county')
+    ? submittedCounty
+    : `${submittedCounty} County`;
 
   return (
     <div className="min-h-screen bg-white font-body">
@@ -248,38 +210,22 @@ export default function MarketReportsPage() {
                   </select>
                 </div>
 
-                {/* 4. County combobox */}
-                <div ref={comboboxRef} className="relative">
+                {/* 4. County free-text */}
+                <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1.5">County</label>
                   <input
                     type="text"
                     required
                     disabled={!state}
-                    value={countyInput}
-                    onChange={e => handleCountyInput(e.target.value)}
-                    onFocus={() => state && setShowSuggestions(true)}
-                    placeholder={state ? 'Type to search counties…' : 'Select a state first'}
+                    value={county}
+                    onChange={e => { setCounty(e.target.value); setCountyError(''); }}
+                    placeholder={state ? 'e.g. Denver County, Douglas County' : 'Select a state first'}
                     className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ '--tw-ring-color': '#1D9E75' } as React.CSSProperties}
                     autoComplete="off"
                   />
-                  {showSuggestions && filteredCounties.length > 0 && (
-                    <ul className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg text-sm">
-                      {filteredCounties.map(name => (
-                        <li
-                          key={name}
-                          onMouseDown={() => selectCounty(name)}
-                          className="px-3 py-2 cursor-pointer hover:bg-gray-50 text-gray-900"
-                        >
-                          {name}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {showSuggestions && state && filteredCounties.length === 0 && (
-                    <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg px-3 py-2 text-sm text-gray-400">
-                      No counties found
-                    </div>
+                  {countyError && (
+                    <p className="text-xs text-red-600 mt-1">{countyError}</p>
                   )}
                 </div>
 
@@ -292,7 +238,7 @@ export default function MarketReportsPage() {
                 {/* 5. Submit */}
                 <button
                   type="submit"
-                  disabled={formState === 'loading' || !county}
+                  disabled={formState === 'loading'}
                   className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {formState === 'loading' ? (
