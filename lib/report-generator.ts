@@ -266,7 +266,38 @@ function buildUserPrompt(county: string, state: string, reportMonth: string): st
   return `Research and compile a complete land market report for ${county}, ${state} for the period ${reportMonth}.
 
 Gather publicly available data on the following topics:
-1. Recent vacant land sales in ${county} — find at least 6 comparable sales with location, acreage, zoning, total sale price, and date. For each comp, calculate price_display as: price per acre for parcels 0.25 acres and above (e.g. "$60,000/acre"); price per sq ft for parcels under 0.25 acres (e.g. "$1.38/sq ft").
+1. COMPARABLE LAND SALES AND PRICE TRENDS:
+Search the following sources in this exact order for vacant land sold in ${county}, ${state} in the last 30 to 90 days:
+
+Source 1 — LandWatch: Search landwatch.com for recently sold land listings in ${county}, ${state}. Use search URL pattern: landwatch.com/\${state-slug}/land/sold. Filter to ${county} specifically. Record each sold listing: address or location, acreage, sale price, price per acre, and sale date.
+
+Source 2 — Land.com: Search land.com for recently sold parcels in ${county}, ${state}. Use search URL pattern: land.com/land/sold/${county}-county-\${state-slug}. Record each sold listing with the same fields.
+
+Source 3 — Zillow: Search zillow.com for recently sold lots and land in ${county}, ${state}. Filter by home type: lots and land. Filter by sold in last 90 days. Record each sold listing with address, acreage if listed, sale price, and sale date.
+
+Source 4 — Redfin: Search redfin.com for recently sold land in ${county}, ${state}. Filter by property type: land. Filter by sold in last 90 days. Record each result.
+
+Source 5 — County Assessor: Search the ${county} assessor or recorder website for deed transfers recorded in the last 60 days for vacant land parcels. This is the most accurate source — prioritize these results if available.
+
+From all sources combined, compile the 6 most recent verified sold land parcels in ${county}, ${state}. For each parcel record:
+- Location (address, street, or nearest intersection)
+- Acreage
+- Zoning designation if available
+- Sale price (recorded sale price only — not list price)
+- Price per acre (calculate as sale price divided by acreage)
+- For parcels under 0.25 acres also calculate price per sq ft (sale price divided by acreage times 43560)
+- Sale or recording date
+- Source website URL
+
+PRICE TREND CALCULATION:
+After collecting all sold parcels, calculate:
+- Current period median price per acre: median of all parcels sold in the last 30 days
+- Prior period median price per acre: median of all parcels sold 31 to 60 days ago
+- 6 month median price per acre: median of all parcels sold 150 to 180 days ago if available
+- Trend direction: if current median is more than 3 percent above prior period write 'Increasing'. If more than 3 percent below write 'Decreasing'. If within 3 percent write 'Stable'.
+- If fewer than 3 sold parcels are found for any period write 'Insufficient data for this period' for that period's median.
+
+If no sold land data can be found for ${county} from any of these sources, write 'No verified sold land data found for ${county} in the last 90 days. Price trend data is not available for this county at this time.' Do not substitute metro or state data.
 2. Median price per acre for vacant land parcels, plus median prices broken down by size range: under 1 acre, 1-5 acres, 5-20 acres, over 20 acres.
 3. Number of active vacant land listings (broken down by size range) and average days on market.
 4. Recent rezoning approvals from county planning records — for each rezoning include: parcel address, previous zoning code and type, new zoning code and type, acreage, approving body, date approved, a 1-2 sentence description, and a short note on vote outcome (rezonings 1 and 2) or effective date (rezoning 3).
@@ -279,7 +310,7 @@ Gather publicly available data on the following topics:
 11. Population, income, unemployment, and household data from public sources.
 12. Four comparable neighboring counties with their growth rate and a 1-2 sentence comparison to ${county}.
 13. Active listing count broken down by acreage range.
-14. Price per acre trend compared to prior month and six months ago.
+13. PRICE TRENDS: Use the data already collected in task 1. Report the current period median, prior period median, and 6 month median calculated from actual sold parcels. Report the trend direction. If data was insufficient for any period, report that clearly.
 15. Land use breakdown by zoning category as a percentage.
 
 DATA ACCURACY REQUIREMENTS — YOU MUST FOLLOW THESE:
