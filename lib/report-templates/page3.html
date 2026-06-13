@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #111; }
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #0D1F16; }
 .page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
 .header { background: #0D1F16; padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; }
 .header-left { display: flex; align-items: center; gap: 12px; }
@@ -13,37 +13,26 @@ body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSys
 .header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 .header-county { color: rgba(255,255,255,0.5); font-size: 11px; }
 .body { padding: 22px 40px 14px; flex: 1; }
-.section-title-wrap { margin-bottom: 10px; }
-.section-title { font-size: 36px; font-family: Georgia, 'Times New Roman', serif; font-weight: 900; color: #0D1F16; line-height: 1.1; letter-spacing: -0.5px; }
-.section-accent { height: 3px; background: linear-gradient(90deg, #1D9E75 0%, rgba(29,158,117,0) 100%); margin-top: 6px; border-radius: 2px; }
-.divider { height: 1px; background: #E5E7EB; margin: 12px 0; }
-.rezoning-card { border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 14px; margin-bottom: 7px; }
-.rezoning-title { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 3px; }
-.rezoning-meta { display: flex; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
-.rezoning-meta-item { font-size: 10px; color: #6B7280; }
-.rezoning-meta-item strong { color: #374151; font-weight: 600; }
-.rezoning-desc { font-size: 13px; color: #4B5563; line-height: 1.6; margin-bottom: 5px; }
-.badge { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px; border: 1px solid; }
-.badge-approved { border-color: #40916C; color: #065F46; background: #fff; }
-.badge-warning { border-color: #D97706; color: #92400E; background: #fff; }
-.badge-status { border-color: #2563EB; color: #1E40AF; background: #fff; }
-.permits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
-.permit-cell { padding: 10px 14px; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; }
+.section-title-wrap { margin-bottom: 20px; }
+.section-title { font-size: 28px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #0D1F16; line-height: 1.15; }
+.section-accent { height: 3px; background: linear-gradient(90deg, #1D9E75 0%, rgba(29,158,117,0) 100%); margin-top: 8px; border-radius: 2px; }
+.divider { height: 1px; background: #E5E7EB; margin: 18px 0; }
+.rezoning-card { border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+.rezoning-title { font-size: 18px; font-weight: 700; color: #0D1F16; margin-bottom: 5px; }
+.rezoning-meta { display: flex; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+.rezoning-meta-item { font-size: 14px; color: #0D1F16; font-weight: 600; }
+.rezoning-meta-item strong { color: #6B7280; font-weight: 700; }
+.rezoning-desc { font-size: 15px; color: #000; line-height: 1.6; margin-bottom: 6px; }
+.badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; border: 1px solid; }
+.badge-approved { border-color: #0D1F16; color: #0D1F16; background: #fff; }
+.badge-warning { border-color: #0D1F16; color: #0D1F16; background: #fff; }
+.badge-status { border-color: #0D1F16; color: #0D1F16; background: #fff; }
+.permits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; }
+.permit-cell { padding: 12px 16px; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; }
 .permit-cell:nth-child(2n) { border-right: none; }
 .permit-cell:nth-last-child(-n+2) { border-bottom: none; }
-.permit-key { font-size: 10px; font-weight: 700; color: #9CA3AF; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
-.permit-val { font-size: 18px; font-weight: 800; color: #0D1F16; }
-.infra-item { padding: 9px 0; border-bottom: 1px solid #F3F4F6; }
-.infra-item:last-child { border-bottom: none; }
-.infra-title { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 3px; }
-.infra-row { display: flex; gap: 0; flex-wrap: wrap; }
-.infra-tag { font-size: 10px; color: #6B7280; margin-right: 14px; }
-.infra-tag strong { color: #374151; font-weight: 600; }
-.infra-impact { font-size: 13px; color: #4B5563; line-height: 1.6; margin-top: 3px; }
-.board-box { border: 2px solid #40916C; border-radius: 8px; padding: 10px 14px; background: #fff; margin-top: 12px; }
-.board-date { font-size: 10px; font-weight: 700; color: #40916C; margin-bottom: 2px; letter-spacing: 0.05em; }
-.board-title { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 3px; }
-.board-warning { font-size: 13px; color: #374151; line-height: 1.6; }
+.permit-key { font-size: 11px; font-weight: 700; color: #374151; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.permit-val { font-size: 20px; font-weight: 800; color: #0D1F16; }
 .no-break { page-break-inside: avoid; break-inside: avoid; }
 @media print { .no-break { page-break-inside: avoid; break-inside: avoid; } }
 .footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
@@ -124,54 +113,12 @@ body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSys
       <div class="permit-cell"><div class="permit-key">Average Sq Ft</div><div class="permit-val">{{permits_avg_sqft}}</div></div>
     </div>
 
-    <div class="divider"></div>
-    <div class="section-title-wrap">
-      <div class="section-title">Infrastructure Projects</div>
-      <div class="section-accent"></div>
-    </div>
-    <div class="infra-item no-break">
-      <div class="infra-title">{{infra_1_title}}</div>
-      <div class="infra-row">
-        <span class="infra-tag"><strong>Agency:</strong> {{infra_1_agency}}</span>
-        <span class="infra-tag"><strong>Budget:</strong> {{infra_1_budget}}</span>
-        <span class="infra-tag"><strong>Timeline:</strong> {{infra_1_timeline}}</span>
-        <span class="infra-tag"><strong>Area:</strong> {{infra_1_affected_area}}</span>
-      </div>
-      <div class="infra-impact">{{infra_1_impact}}</div>
-    </div>
-    <div class="infra-item no-break">
-      <div class="infra-title">{{infra_2_title}}</div>
-      <div class="infra-row">
-        <span class="infra-tag"><strong>Agency:</strong> {{infra_2_agency}}</span>
-        <span class="infra-tag"><strong>Budget:</strong> {{infra_2_budget}}</span>
-        <span class="infra-tag"><strong>Timeline:</strong> {{infra_2_timeline}}</span>
-        <span class="infra-tag"><strong>Area:</strong> {{infra_2_affected_area}}</span>
-      </div>
-      <div class="infra-impact">{{infra_2_impact}}</div>
-    </div>
-    <div class="infra-item no-break">
-      <div class="infra-title">{{infra_3_title}}</div>
-      <div class="infra-row">
-        <span class="infra-tag"><strong>Agency:</strong> {{infra_3_agency}}</span>
-        <span class="infra-tag"><strong>Budget:</strong> {{infra_3_budget}}</span>
-        <span class="infra-tag"><strong>Timeline:</strong> {{infra_3_timeline}}</span>
-        <span class="infra-tag"><strong>Area:</strong> {{infra_3_affected_area}}</span>
-      </div>
-      <div class="infra-impact">{{infra_3_impact}}</div>
-    </div>
-
-    <div class="board-box no-break">
-      <div class="board-date">Upcoming: {{board_meeting_date}}</div>
-      <div class="board-title">{{board_meeting_title}}</div>
-      <div class="board-warning">{{board_meeting_warning}}</div>
-    </div>
-
   </div>
 
   <div class="footer">
     <div class="footer-left">The #1 Platform for Land Data and Off-Market Deals</div>
     <div class="footer-center">lotscout.com</div>
-    <div class="footer-right">3 of 7</div>
+    <div class="footer-right">3 of 8</div>
   </div>
 </div>
 </body>

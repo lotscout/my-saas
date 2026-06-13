@@ -20,6 +20,6 @@ export function fillTemplate(templatePath: string, data: ReportData): string {
   return html;
 }
 
-export function getTemplatePath(page: 1 | 2 | 3 | 4 | 5 | 6 | 7): string {
+export function getTemplatePath(page: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): string {
   return path.join(process.cwd(), 'lib', 'report-templates', `page${page}.html`);
 }
