@@ -120,8 +120,11 @@ export default function MarketReportsPage() {
               </span>
             </div>
             <h2 className="text-2xl font-extrabold mb-3" style={{ color: '#0D1F16' }}>Check your email!</h2>
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">
               Your <strong>{displayCounty}, {submittedState}</strong> land market report is on its way.
+            </p>
+            <p className="text-gray-500 text-sm text-center leading-relaxed">
+              Your report will be delivered within 20 to 30 minutes. Our system carefully gathers and analyzes real county data, zoning records, permit activity, and market intelligence to give you the most accurate and useful report possible. Sit tight and check your inbox soon.
             </p>
           </div>
 
