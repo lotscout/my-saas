@@ -14,22 +14,26 @@ body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSys
 .header-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.2); }
 .header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 .header-right { color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 500; }
-.body { padding: 40px 40px 28px; flex: 1; }
-.county-label { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #40916C; margin-bottom: 8px; }
-.county-name { font-size: 38px; font-weight: 900; color: #0D1F16; line-height: 1.05; letter-spacing: -1px; margin-bottom: 6px; }
-.report-meta { font-size: 13px; color: #6B7280; font-weight: 500; margin-bottom: 36px; }
-.metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px; }
+.body { padding: 32px 40px 24px; flex: 1; }
+.county-label { font-size: 13px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #1D9E75; margin-bottom: 8px; }
+.county-name { font-size: 52px; font-family: Georgia, 'Times New Roman', serif; font-weight: 900; color: #0D1F16; line-height: 1.05; letter-spacing: -1px; margin-bottom: 6px; }
+.report-meta { font-size: 14px; color: #6B7280; font-weight: 500; margin-bottom: 24px; }
+.metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
 .metric-card { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 16px 18px; }
-.metric-label { font-size: 9px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #40916C; margin-bottom: 8px; }
+.metric-label { font-size: 10px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #40916C; margin-bottom: 8px; }
 .metric-value { font-size: 28px; font-weight: 900; color: #0D1F16; line-height: 1; letter-spacing: -0.5px; margin-bottom: 5px; }
-.metric-note { font-size: 10px; color: #6B7280; font-weight: 500; }
-.divider { height: 1px; background: #E5E7EB; margin: 0 0 28px; }
-.exec-label { font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #0D1F16; margin-bottom: 12px; }
-.exec-body { font-size: 14px; color: #111; line-height: 1.75; font-weight: 400; }
-.footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
-.footer-left { color: rgba(255,255,255,0.55); font-size: 10px; font-weight: 500; }
-.footer-center { color: #fff; font-size: 11px; font-weight: 700; }
-.footer-right { color: rgba(255,255,255,0.55); font-size: 10px; font-weight: 500; }
+.metric-note { font-size: 11px; color: #6B7280; font-weight: 500; }
+.divider { height: 1px; background: #E5E7EB; margin: 0 0 20px; }
+.section-title-wrap { margin-bottom: 14px; }
+.section-title { font-size: 36px; font-family: Georgia, 'Times New Roman', serif; font-weight: 900; color: #0D1F16; line-height: 1.1; letter-spacing: -0.5px; }
+.section-accent { height: 3px; background: linear-gradient(90deg, #1D9E75 0%, rgba(29,158,117,0) 100%); margin-top: 6px; border-radius: 2px; }
+.exec-body { font-size: 16px; color: #111; line-height: 1.8; font-weight: 400; }
+.no-break { page-break-inside: avoid; break-inside: avoid; }
+@media print { .no-break { page-break-inside: avoid; break-inside: avoid; } }
+.footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500; }
+.footer-center { color: #fff; font-size: 13px; font-weight: 700; }
+.footer-right { color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -52,22 +56,22 @@ body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSys
     <div class="report-meta">{{metro_area}} &nbsp;&middot;&nbsp; {{report_period}}</div>
 
     <div class="metrics-grid">
-      <div class="metric-card">
+      <div class="metric-card no-break">
         <div class="metric-label">Median $/Acre</div>
         <div class="metric-value">{{median_price_per_acre}}</div>
         <div class="metric-note">{{median_price_trend}}</div>
       </div>
-      <div class="metric-card">
+      <div class="metric-card no-break">
         <div class="metric-label">Active Listings</div>
         <div class="metric-value">{{active_listings}}</div>
         <div class="metric-note">{{active_listings_note}}</div>
       </div>
-      <div class="metric-card">
+      <div class="metric-card no-break">
         <div class="metric-label">Avg Days on Market</div>
         <div class="metric-value">{{avg_days_on_market}}</div>
         <div class="metric-note">{{dom_trend_note}}</div>
       </div>
-      <div class="metric-card">
+      <div class="metric-card no-break">
         <div class="metric-label">Closed Sales</div>
         <div class="metric-value">{{closed_sales}}</div>
         <div class="metric-note">{{closed_sales_note}}</div>
@@ -75,7 +79,10 @@ body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSys
     </div>
 
     <div class="divider"></div>
-    <div class="exec-label">Executive Summary</div>
+    <div class="section-title-wrap">
+      <div class="section-title">Executive Summary</div>
+      <div class="section-accent"></div>
+    </div>
     <div class="exec-body">{{executive_summary}}</div>
   </div>
 
