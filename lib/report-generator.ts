@@ -282,6 +282,14 @@ Gather publicly available data on the following topics:
 14. Price per acre trend compared to prior month and six months ago.
 15. Land use breakdown by zoning category as a percentage.
 
+DATA ACCURACY REQUIREMENTS — YOU MUST FOLLOW THESE:
+
+Price per acre and comparable sales: Only use data from verified public sources including county assessor records, MLS public data, Zillow land listings, LandWatch, Land.com, or Realtor.com. Do not estimate or interpolate prices. If you cannot find verified recent land sale prices for this specific county, state that data is limited and provide the best available public estimate with a clear note that it is an estimate. Never fabricate sale prices. Always cite the source for each comparable sale.
+
+Market velocity data (days on market, new listings count, listings under contract): Only use data from publicly available real estate sources for vacant land specifically. If exact figures are not available for this county, provide a range based on regional data and note it is a regional estimate. Never fabricate specific numbers.
+
+Sources: For every statistic, price, permit count, or market figure you include in the report, add the corresponding source to the sources array (source_1 through source_8). Include the website URL and the date you accessed it. If a figure comes from a regional estimate rather than county-specific data, note this clearly in the relevant section.
+
 Based on this research, provide:
 - A 2-3 sentence executive summary of market conditions
 - Risk assessment scores from 1 to 100 for: entitlement difficulty, price variability, supply availability, demand level, and policy uncertainty. Include a color (#10B981 green for low, #F59E0B amber for moderate, #EF4444 red for high) and a display label (Low, Low-Moderate, Moderate, High-Moderate, High).
