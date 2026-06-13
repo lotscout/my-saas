@@ -12,28 +12,22 @@ body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSys
 .header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
 .header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 .header-county { color: rgba(255,255,255,0.5); font-size: 11px; }
-.body { padding: 22px 40px 14px; flex: 1; }
+.body { padding: 28px 40px 20px; flex: 1; }
 .section-title-wrap { margin-bottom: 20px; }
-.section-title { font-size: 28px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #0D1F16; line-height: 1.15; }
+.section-title { font-size: 22px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #0D1F16; line-height: 1.15; }
 .section-accent { height: 3px; background: linear-gradient(90deg, #1D9E75 0%, rgba(29,158,117,0) 100%); margin-top: 8px; border-radius: 2px; }
-.divider { height: 1px; background: #E5E7EB; margin: 14px 0; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.method-note { font-size: 12px; color: #9CA3AF; line-height: 1.6; margin-bottom: 16px; font-style: italic; }
-.risk-row { margin-bottom: 10px; }
-.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.risk-label { font-size: 15px; font-weight: 600; color: #0D1F16; }
-.risk-display { font-size: 13px; font-weight: 700; color: #6B7280; }
-.risk-bar-bg { height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; }
-.risk-bar { height: 8px; border-radius: 4px; }
-.insight-text { font-size: 15px; color: #000; line-height: 1.8; margin-bottom: 4px; }
-.watch-list { list-style: none; }
-.watch-item { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid #F3F4F6; font-size: 15px; color: #000; line-height: 1.6; }
-.watch-item:last-child { border-bottom: none; }
-.watch-bullet { width: 18px; height: 18px; background: #0D1F16; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-.watch-bullet-inner { width: 6px; height: 6px; background: #fff; border-radius: 50%; }
-.rec-block { border-left: 4px solid #0D1F16; padding: 14px 16px; background: transparent; }
-.rec-signal { font-size: 22px; font-weight: 900; color: #0D1F16; margin-bottom: 8px; letter-spacing: -0.3px; }
-.rec-body { font-size: 15px; color: #000; line-height: 1.7; }
+.divider { height: 1px; background: #E5E7EB; margin: 22px 0; }
+.policy-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 7px; padding: 12px 14px; margin-bottom: 10px; }
+.policy-date { font-size: 11px; font-weight: 700; color: #6B7280; margin-bottom: 3px; letter-spacing: 0.05em; text-transform: uppercase; }
+.policy-title { font-size: 18px; font-weight: 700; color: #0D1F16; margin-bottom: 5px; }
+.policy-desc { font-size: 15px; color: #000; line-height: 1.6; }
+.incentive-card { border: 1px solid #E5E7EB; border-radius: 7px; padding: 12px 14px; margin-bottom: 10px; }
+.incentive-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; gap: 8px; }
+.incentive-label { font-size: 15px; font-weight: 700; color: #0D1F16; }
+.incentive-value { font-size: 15px; font-weight: 800; color: #0D1F16; text-align: right; white-space: nowrap; }
+.incentive-meta { font-size: 11px; color: #9CA3AF; margin-bottom: 5px; }
+.incentive-meta strong { color: #6B7280; }
+.incentive-explanation { font-size: 15px; color: #000; line-height: 1.55; }
 .no-break { page-break-inside: avoid; break-inside: avoid; }
 @media print { .no-break { page-break-inside: avoid; break-inside: avoid; } }
 .footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
@@ -48,79 +42,72 @@ body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSys
     <div class="header-left">
       <div class="logo-name">LotScout</div>
       <div class="header-divider"></div>
-      <div class="header-section">Our Recommendation</div>
+      <div class="header-section">Policy &amp; Incentives</div>
     </div>
     <div class="header-county">{{county_name}}</div>
   </div>
 
   <div class="body">
-    <div class="method-note">The following indicators are scored based on publicly available data including permit volume, rezoning activity, employment trends, election schedules, and price momentum. Lower scores on Entitlement Risk, Price Volatility, and Election Risk are better. Higher scores on Demand Strength are better.</div>
+    <div class="section-title-wrap">
+      <div class="section-title">Elections &amp; Policy</div>
+      <div class="section-accent"></div>
+    </div>
 
-    <div class="two-col">
-      <div>
-        <div class="section-title-wrap">
-          <div class="section-title">Risk Indicators</div>
-          <div class="section-accent"></div>
-        </div>
-        <div class="risk-row no-break">
-          <div class="risk-header"><span class="risk-label">{{risk_1_label}}</span><span class="risk-display">{{risk_1_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_1_pct}}%;background-color:{{risk_1_color}};"></div></div>
-        </div>
-        <div class="risk-row no-break">
-          <div class="risk-header"><span class="risk-label">{{risk_2_label}}</span><span class="risk-display">{{risk_2_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_2_pct}}%;background-color:{{risk_2_color}};"></div></div>
-        </div>
-        <div class="risk-row no-break">
-          <div class="risk-header"><span class="risk-label">{{risk_3_label}}</span><span class="risk-display">{{risk_3_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_3_pct}}%;background-color:{{risk_3_color}};"></div></div>
-        </div>
-        <div class="risk-row no-break">
-          <div class="risk-header"><span class="risk-label">{{risk_4_label}}</span><span class="risk-display">{{risk_4_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_4_pct}}%;background-color:{{risk_4_color}};"></div></div>
-        </div>
-        <div class="risk-row no-break">
-          <div class="risk-header"><span class="risk-label">{{risk_5_label}}</span><span class="risk-display">{{risk_5_display}}</span></div>
-          <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_5_pct}}%;background-color:{{risk_5_color}};"></div></div>
-        </div>
+    <div class="policy-card no-break">
+      <div class="policy-date">{{policy_1_date_badge}}</div>
+      <div class="policy-title">{{policy_1_title}}</div>
+      <div class="policy-desc">{{policy_1_description}}</div>
+    </div>
+    <div class="policy-card no-break">
+      <div class="policy-date">{{policy_2_date_badge}}</div>
+      <div class="policy-title">{{policy_2_title}}</div>
+      <div class="policy-desc">{{policy_2_description}}</div>
+    </div>
 
-        <div class="divider"></div>
-        <div class="section-title-wrap">
-          <div class="section-title">What to Watch For</div>
-          <div class="section-accent"></div>
-        </div>
-        <ul class="watch-list">
-          <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_1}}</span></li>
-          <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_2}}</span></li>
-          <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_3}}</span></li>
-          <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_4}}</span></li>
-          <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_5}}</span></li>
-        </ul>
+    <div class="divider"></div>
+    <div class="section-title-wrap">
+      <div class="section-title">Local Incentives</div>
+      <div class="section-accent"></div>
+    </div>
+
+    <div class="incentive-card no-break">
+      <div class="incentive-header">
+        <div class="incentive-label">{{incentive_1_label}}</div>
+        <div class="incentive-value">{{incentive_1_value}}</div>
       </div>
-
-      <div>
-        <div class="section-title-wrap">
-          <div class="section-title">LotScout Insight</div>
-          <div class="section-accent"></div>
-        </div>
-        <div class="insight-text">{{insight_paragraph}}</div>
-
-        <div class="divider"></div>
-        <div class="section-title-wrap">
-          <div class="section-title">Our Recommendation</div>
-          <div class="section-accent"></div>
-        </div>
-        <div class="rec-block no-break">
-          <div class="rec-signal">{{recommendation_signal}}</div>
-          <div class="rec-body">{{recommendation_body}}</div>
-        </div>
+      <div class="incentive-meta"><strong>Zone:</strong> {{incentive_1_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_1_expiry}}</div>
+      <div class="incentive-explanation">{{incentive_1_explanation}}</div>
+    </div>
+    <div class="incentive-card no-break">
+      <div class="incentive-header">
+        <div class="incentive-label">{{incentive_2_label}}</div>
+        <div class="incentive-value">{{incentive_2_value}}</div>
       </div>
+      <div class="incentive-meta"><strong>Zone:</strong> {{incentive_2_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_2_expiry}}</div>
+      <div class="incentive-explanation">{{incentive_2_explanation}}</div>
+    </div>
+    <div class="incentive-card no-break">
+      <div class="incentive-header">
+        <div class="incentive-label">{{incentive_3_label}}</div>
+        <div class="incentive-value">{{incentive_3_value}}</div>
+      </div>
+      <div class="incentive-meta"><strong>Zone:</strong> {{incentive_3_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_3_expiry}}</div>
+      <div class="incentive-explanation">{{incentive_3_explanation}}</div>
+    </div>
+    <div class="incentive-card no-break">
+      <div class="incentive-header">
+        <div class="incentive-label">{{incentive_4_label}}</div>
+        <div class="incentive-value">{{incentive_4_value}}</div>
+      </div>
+      <div class="incentive-meta"><strong>Zone:</strong> {{incentive_4_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_4_expiry}}</div>
+      <div class="incentive-explanation">{{incentive_4_explanation}}</div>
     </div>
   </div>
 
   <div class="footer">
     <div class="footer-left">The #1 Platform for Land Data and Off-Market Deals</div>
     <div class="footer-center">lotscout.com</div>
-    <div class="footer-right">7 of 8</div>
+    <div class="footer-right">7 of 10</div>
   </div>
 </div>
 </body>

@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     const reportData = await generateReportData(county, state, report_month);
 
     // Step 2: Fill templates
-    const filledPages = ([1, 2, 3, 4, 5, 6, 7, 8] as const).map(n =>
+    const filledPages = ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map(n =>
       fillTemplate(getTemplatePath(n), reportData),
     );
 
