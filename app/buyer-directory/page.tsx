@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
+import { getBuyerName } from '@/lib/getBuyerName';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,21 +101,6 @@ function fmtTimeline(t: string): string {
   return t;
 }
 
-function getBuyerName(req: BuyerRequest): string {
-  // Prefer name fields on the row itself (real user submissions)
-  if (req.first_name && req.last_name) {
-    return `${req.first_name} ${req.last_name.charAt(0)}.`;
-  }
-  if (req.display_company) return req.display_company;
-  if (req.first_name) return req.first_name;
-  // Fall back to profile — but never show seeded/sample profile names
-  const profileName = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ');
-  if (profileName && !profileName.toLowerCase().includes('sample')) return profileName;
-  if (req.profiles?.company_name && !req.profiles.company_name.toLowerCase().includes('sample')) {
-    return req.profiles.company_name;
-  }
-  return 'Anonymous Buyer';
-}
 
 function getInitials(req: BuyerRequest): string {
   const name = getBuyerName(req);

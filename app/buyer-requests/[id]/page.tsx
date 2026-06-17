@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useUserTier } from '@/hooks/useUserTier';
 import Header from '@/components/Header';
 import SendMessageModal from '@/components/SendMessageModal';
+import { getBuyerName } from '@/lib/getBuyerName';
 
 interface BuyerRequest {
   id: string;
@@ -113,10 +114,7 @@ export default function BuyerRequestPage() {
   }
 
   const profile = request.profiles;
-  const buyerName = request.display_name ||
-    [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
-    request.display_company ||
-    'Anonymous Buyer';
+  const buyerName = getBuyerName({ ...request, profiles: profile });
   const companyName = request.display_company || profile?.company_name?.trim() || null;
 
   const timelineLabel = request.timeline

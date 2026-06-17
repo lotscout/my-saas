@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import BoostModal from '@/components/BoostModal';
 import SendMessageModal from '@/components/SendMessageModal';
+import { getBuyerName } from '@/lib/getBuyerName';
 
 const STATE_NAMES: Record<string, string> = {
   'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
@@ -1464,7 +1465,7 @@ export default function MarketplacePage() {
                   const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
                   const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
 
-                  const listedByMkt = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || req.profiles?.company_name || 'Anonymous Buyer';
+                  const listedByMkt = getBuyerName(req);
                   return (
                     <div
                       key={req.id}
