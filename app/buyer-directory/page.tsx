@@ -27,6 +27,8 @@ interface BuyerRequest {
   zoning_preference: string[] | null;
   timeline: string | null;
   additional_notes: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
   display_name: string | null;
   display_company: string | null;
   contact_phone: string | null;
@@ -98,15 +100,31 @@ function fmtTimeline(t: string): string {
   return t;
 }
 
-function getBuyerName(req: BuyerRequest) {
-  const p = req.profiles;
-  return [p?.first_name, p?.last_name].filter(Boolean).join(' ') || p?.company_name || req.display_company || 'Anonymous Buyer';
+function getBuyerName(req: BuyerRequest): string {
+  // Prefer name fields on the row itself (real user submissions)
+  if (req.first_name && req.last_name) {
+    return `${req.first_name} ${req.last_name.charAt(0)}.`;
+  }
+  if (req.display_company) return req.display_company;
+  if (req.first_name) return req.first_name;
+  // Fall back to profile — but never show seeded/sample profile names
+  const profileName = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ');
+  if (profileName && !profileName.toLowerCase().includes('sample')) return profileName;
+  if (req.profiles?.company_name && !req.profiles.company_name.toLowerCase().includes('sample')) {
+    return req.profiles.company_name;
+  }
+  return 'Anonymous Buyer';
 }
 
-function getInitials(req: BuyerRequest) {
+function getInitials(req: BuyerRequest): string {
+  if (req.first_name && req.last_name) {
+    return `${req.first_name[0]}${req.last_name[0]}`.toUpperCase();
+  }
   if (req.display_company) return req.display_company.substring(0, 2).toUpperCase();
   const p = req.profiles;
-  return ([p?.first_name?.[0], p?.last_name?.[0]].filter(Boolean).join('').toUpperCase()) || 'AB';
+  const initials = [p?.first_name?.[0], p?.last_name?.[0]].filter(Boolean).join('').toUpperCase();
+  if (initials && !getBuyerName(req).toLowerCase().includes('sample')) return initials;
+  return 'AB';
 }
 
 function fmtLocation(city: string | null, county: string | null, state: string | null, regions?: string[] | null): string {
@@ -232,7 +250,7 @@ function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProp
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
   const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
-  const listedBy = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ') || req.profiles?.company_name || 'Anonymous Buyer';
+  const listedBy = getBuyerName(req);
 
   return (
     <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden">
