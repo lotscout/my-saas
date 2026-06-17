@@ -117,14 +117,10 @@ function getBuyerName(req: BuyerRequest): string {
 }
 
 function getInitials(req: BuyerRequest): string {
-  if (req.first_name && req.last_name) {
-    return `${req.first_name[0]}${req.last_name[0]}`.toUpperCase();
-  }
-  if (req.display_company) return req.display_company.substring(0, 2).toUpperCase();
-  const p = req.profiles;
-  const initials = [p?.first_name?.[0], p?.last_name?.[0]].filter(Boolean).join('').toUpperCase();
-  if (initials && !getBuyerName(req).toLowerCase().includes('sample')) return initials;
-  return 'AB';
+  const name = getBuyerName(req);
+  if (name === 'Anonymous Buyer') return 'AB';
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || 'AB';
 }
 
 function fmtLocation(city: string | null, county: string | null, state: string | null, regions?: string[] | null): string {
