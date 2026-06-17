@@ -158,6 +158,7 @@ export async function POST(request: NextRequest) {
       state:        state.trim(),
       email:        normalizedEmail,
       first_name:   first_name.trim(),
+      last_name:    last_name.trim(),
       report_month: reportMonth,
     }),
   }).catch(err => console.error('[market-reports/request] trigger generate error:', err));

@@ -1,44 +1,29 @@
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
-import { PDFDocument } from 'pdf-lib';
 
-export async function generatePDF(pages: string[]): Promise<Buffer> {
+// Renders a single HTML document to PDF, honoring CSS page-break-before rules.
+// Waits for networkidle0 to ensure Tailwind CDN and Google Fonts are fully applied.
+export async function generatePDF(html: string): Promise<Buffer> {
   const browser = await puppeteer.launch({
     args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
+    defaultViewport: { width: 816, height: 1056 },
     executablePath: await chromium.executablePath(),
     // chromium.headless is string in v133+; cast via unknown to satisfy puppeteer-core types
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     headless: chromium.headless as unknown as boolean,
   });
 
-  const pagePDFs: Buffer[] = [];
-
   try {
-    for (const pageHtml of pages) {
-      const tab = await browser.newPage();
-      await tab.setContent(pageHtml, { waitUntil: 'domcontentloaded' });
-      await tab.emulateMediaType('screen');
-      const pdfBytes = await tab.pdf({
-        width: '816px',
-        printBackground: true,
-        margin: { top: '0', bottom: '0', left: '0', right: '0' },
-      });
-      pagePDFs.push(Buffer.from(pdfBytes));
-      await tab.close();
-    }
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'load', timeout: 60000 });
+    await page.emulateMediaType('print');
+    const pdfBytes = await page.pdf({
+      format: 'Letter',
+      printBackground: true,
+      margin: { top: '0', bottom: '0', left: '0', right: '0' },
+    });
+    return Buffer.from(pdfBytes);
   } finally {
     await browser.close();
   }
-
-  // Merge all page PDFs into one document using pdf-lib
-  const merged = await PDFDocument.create();
-  for (const pdfBuffer of pagePDFs) {
-    const doc = await PDFDocument.load(pdfBuffer);
-    const copiedPages = await merged.copyPages(doc, doc.getPageIndices());
-    copiedPages.forEach(p => merged.addPage(p));
-  }
-
-  const mergedBytes = await merged.save();
-  return Buffer.from(mergedBytes);
 }

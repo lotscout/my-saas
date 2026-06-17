@@ -1,336 +1,191 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { ReportData } from './report-schema';
+import type { AIReportData } from './report-schema';
 
-const SYSTEM_PROMPT = `You are a professional real estate market research analyst preparing a factual, data-driven county land market report. Your role is to compile publicly available information and present it objectively in the style of an institutional market research document. All analysis must be neutral, factual, and based on publicly available data sources.`;
+const SYSTEM_PROMPT = `You are a professional real estate market research analyst preparing a factual, data-driven county land market report for a general investor audience. Your role is to compile publicly available information and present it objectively in the style of an institutional market research document. All analysis must be neutral, factual, and based on publicly available data sources. Write at the county and market level — never as a single-parcel appraisal.`;
 
+// ── OUTPUT SCHEMA ─────────────────────────────────────────────────────────────
 const OUTPUT_SCHEMA = `{
-  "county_name": "e.g. Denver County, Colorado",
-  "metro_area": "e.g. Denver-Aurora-Lakewood, CO Metro",
-  "report_period": "e.g. May/June 2026",
-  "report_month": "e.g. June 2026",
-  "median_price_per_acre": "formatted dollar amount, e.g. $85,000",
-  "median_price_trend": "e.g. +4.2% year-over-year",
-  "active_listings": "integer count as string",
-  "active_listings_note": "e.g. Up 8% from prior month",
-  "avg_days_on_market": "integer as string",
-  "dom_trend_note": "e.g. Down 5 days from Q1 average",
-  "dom_trend_direction": "up or down",
-  "closed_sales": "integer as string",
-  "closed_sales_note": "e.g. Highest month since October 2024",
-  "executive_summary": "2-3 sentence market summary",
+  "median_price_acre": "formatted dollar amount e.g. $85,000 — median price per acre for vacant land in this county",
+  "active_listings": "integer count of currently active vacant land listings as a string",
+  "avg_dom": "average days on market for vacant land listings as a string",
+  "yoy_change": "year-over-year price change e.g. +4.2% or -1.8%",
 
-  "population": "e.g. 715,522",
-  "land_area": "e.g. 153 sq mi",
-  "population_growth": "e.g. +1.4% annually",
-  "total_households": "e.g. 310,800",
-  "median_household_income": "e.g. $72,100",
-  "unemployment_rate": "e.g. 3.4%",
-  "zoning_authority": "e.g. County Planning and Development Department",
+  "county_overview_prose": "2–4 paragraphs of HTML prose (<p> tags only) covering: county geography and demographics, key economic drivers, land market context, and what makes this county notable for land investors. Write at the county/market level. Do not describe individual parcels.",
 
-  "comp_1_location": "neighborhood or intersection",
-  "comp_1_acres": "e.g. 2.5",
-  "comp_1_zoning": "e.g. A-1 (Agricultural)",
-  "comp_1_price": "e.g. $150,000",
-  "comp_1_price_display": "price per acre for parcels 0.25 acres and above (e.g. $60,000/acre); price per sq ft for parcels under 0.25 acres (e.g. $1.38/sq ft)",
-  "comp_1_date": "e.g. May 2026",
-  "comp_2_location": "string",
+  "land_area_sqmi": "total county land area in square miles, numeric as a plain string e.g. 1250",
+  "land_use_res_pct": "residential zoning percentage as a string including percent sign e.g. 45%",
+  "land_use_ag_pct": "agricultural zoning percentage as a string including percent sign e.g. 35%",
+  "land_use_com_pct": "commercial/industrial/other zoning percentage as a string including percent sign e.g. 20% — this value must make res+ag+com total exactly 100%",
+
+  "comp_1_location": "address or nearest intersection of the sold parcel",
+  "comp_1_acres": "acreage as a decimal string e.g. 2.5",
+  "comp_1_price": "recorded sale price e.g. $187,500",
+  "comp_1_price_per_acre": "price per acre for parcels 0.25 acres and above e.g. $75,000/acre; price per sq ft for smaller parcels e.g. $1.72/sq ft",
+  "comp_1_date": "month and year of sale e.g. May 2026",
+
+  "comp_2_location": "string — empty string if fewer than 2 verified comps found",
   "comp_2_acres": "string",
-  "comp_2_zoning": "string",
   "comp_2_price": "string",
-  "comp_2_price_display": "string",
+  "comp_2_price_per_acre": "string",
   "comp_2_date": "string",
-  "comp_3_location": "string",
+
+  "comp_3_location": "string — empty string if fewer than 3 verified comps found",
   "comp_3_acres": "string",
-  "comp_3_zoning": "string",
   "comp_3_price": "string",
-  "comp_3_price_display": "string",
+  "comp_3_price_per_acre": "string",
   "comp_3_date": "string",
+
   "comp_4_location": "string",
   "comp_4_acres": "string",
-  "comp_4_zoning": "string",
   "comp_4_price": "string",
-  "comp_4_price_display": "string",
+  "comp_4_price_per_acre": "string",
   "comp_4_date": "string",
+
   "comp_5_location": "string",
   "comp_5_acres": "string",
-  "comp_5_zoning": "string",
   "comp_5_price": "string",
-  "comp_5_price_display": "string",
+  "comp_5_price_per_acre": "string",
   "comp_5_date": "string",
+
   "comp_6_location": "string",
   "comp_6_acres": "string",
-  "comp_6_zoning": "string",
   "comp_6_price": "string",
-  "comp_6_price_display": "string",
+  "comp_6_price_per_acre": "string",
   "comp_6_date": "string",
 
-  "rezoning_1_title": "short descriptive title for the rezoning",
-  "rezoning_1_address": "full street address of the parcel",
-  "rezoning_1_prev_zoning": "e.g. A-2 (Agricultural)",
-  "rezoning_1_new_zoning": "e.g. R-3 (Multi-Family Residential)",
-  "rezoning_1_acreage": "numeric as string, e.g. 4.5",
-  "rezoning_1_approving_body": "e.g. County Planning Board",
-  "rezoning_1_date_approved": "e.g. May 15, 2026",
-  "rezoning_1_description": "1-2 sentence description of what was approved and why it matters",
-  "rezoning_1_note": "short vote or outcome, e.g. Approved 7-1",
-  "rezoning_2_title": "string",
-  "rezoning_2_address": "string",
-  "rezoning_2_prev_zoning": "string",
-  "rezoning_2_new_zoning": "string",
-  "rezoning_2_acreage": "string",
-  "rezoning_2_approving_body": "string",
-  "rezoning_2_date_approved": "string",
-  "rezoning_2_description": "string",
-  "rezoning_2_note": "short note, e.g. Under appeal or Approved unanimously",
-  "rezoning_3_title": "string",
-  "rezoning_3_address": "string",
-  "rezoning_3_prev_zoning": "string",
-  "rezoning_3_new_zoning": "string",
-  "rezoning_3_acreage": "string",
-  "rezoning_3_approving_body": "string",
-  "rezoning_3_date_approved": "string",
-  "rezoning_3_description": "string",
-  "rezoning_3_status": "short effective date or status, e.g. Effective August 2026",
+  "listing_no_data_note": "if NO real active listings were found, write a brief honest note e.g. 'No active vacant land listings found for this county at this time. Check Zillow and LandWatch directly for the latest inventory.' — if listings ARE found below, set this to empty string",
 
-  "permits_residential": "integer count as string",
-  "permits_commercial": "integer count as string",
-  "permits_aggregate_value": "total value of all permits issued, e.g. $48.2M",
-  "permits_avg_sqft": "average square footage per residential permit, e.g. 2,400 sq ft",
+  "listing_1_location": "address or area description of real active listing — empty string if not found",
+  "listing_1_acres": "acreage string",
+  "listing_1_price": "asking price e.g. $275,000",
+  "listing_1_price_per_acre": "asking price per acre e.g. $55,000/acre",
+  "listing_1_status": "listing status e.g. Active or Price Reduced",
 
-  "infra_1_title": "project name",
-  "infra_1_agency": "responsible agency name",
-  "infra_1_budget": "e.g. $42M",
-  "infra_1_timeline": "e.g. Completion Q2 2027",
-  "infra_1_affected_area": "neighborhoods or geographic description",
-  "infra_1_impact": "1-2 sentences on land market impact",
-  "infra_2_title": "string",
-  "infra_2_agency": "string",
-  "infra_2_budget": "string",
-  "infra_2_timeline": "string",
-  "infra_2_affected_area": "string",
-  "infra_2_impact": "string",
-  "infra_3_title": "string",
-  "infra_3_agency": "string",
-  "infra_3_budget": "string",
-  "infra_3_timeline": "string",
-  "infra_3_affected_area": "string",
-  "infra_3_impact": "string",
+  "listing_2_location": "string — empty string if fewer than 2 real listings found",
+  "listing_2_acres": "string",
+  "listing_2_price": "string",
+  "listing_2_price_per_acre": "string",
+  "listing_2_status": "string",
 
-  "board_meeting_date": "e.g. July 22, 2026",
-  "board_meeting_title": "meeting name and agenda focus",
-  "board_meeting_warning": "key agenda items relevant to land investors, 1-2 sentences",
+  "listing_3_location": "string",
+  "listing_3_acres": "string",
+  "listing_3_price": "string",
+  "listing_3_price_per_acre": "string",
+  "listing_3_status": "string",
 
-  "listings_under_1_acre": "integer count",
-  "listings_1_to_5_acres": "integer count",
-  "listings_5_to_20_acres": "integer count",
-  "listings_over_20_acres": "integer count",
-  "median_price_under_1_acre": "e.g. $410,000",
-  "median_price_1_to_5_acres": "e.g. $285,000",
-  "median_price_5_to_20_acres": "e.g. $198,000",
-  "median_price_over_20_acres": "e.g. $145,000",
-  "price_trend_current": "current median price per acre, e.g. $85,000",
-  "price_trend_prior_month": "prior month median, e.g. $81,000",
-  "price_trend_6_months": "six months ago median, e.g. $74,000",
-  "price_trend_direction": "up or down",
-  "new_listings_this_month": "integer count",
-  "listings_under_contract": "integer count",
-  "zoning_residential_pct": "integer percentage, e.g. 45",
-  "zoning_agricultural_pct": "integer percentage",
-  "zoning_commercial_pct": "integer percentage",
-  "zoning_industrial_pct": "integer percentage",
-  "zoning_mixed_use_pct": "integer percentage",
+  "listing_4_location": "string",
+  "listing_4_acres": "string",
+  "listing_4_price": "string",
+  "listing_4_price_per_acre": "string",
+  "listing_4_status": "string",
 
-  "job_1_title": "announcement headline, e.g. Amazon Distribution Center Expansion",
-  "job_1_company": "company name",
-  "job_1_industry": "industry sector, e.g. Technology / E-Commerce",
-  "job_1_job_count": "e.g. 500 jobs",
-  "job_1_role_types": "types of roles, e.g. warehouse associates, logistics managers",
-  "job_1_timeline": "e.g. Hiring begins Q3 2026",
-  "job_1_land_impact": "1-2 sentences on how this affects land demand in the county",
-  "job_2_title": "string",
-  "job_2_company": "string",
-  "job_2_industry": "string",
-  "job_2_job_count": "string",
-  "job_2_role_types": "string",
-  "job_2_timeline": "string",
-  "job_2_land_impact": "string",
-  "job_3_title": "string",
-  "job_3_company": "string",
-  "job_3_industry": "string",
-  "job_3_job_count": "string",
-  "job_3_role_types": "string",
-  "job_3_timeline": "string",
-  "job_3_land_impact": "string",
+  "listing_5_location": "string",
+  "listing_5_acres": "string",
+  "listing_5_price": "string",
+  "listing_5_price_per_acre": "string",
+  "listing_5_status": "string",
 
-  "policy_1_title": "policy or legislation name",
-  "policy_1_date_badge": "e.g. Signed June 2026 or Nov 2026 Ballot",
-  "policy_1_description": "2-3 sentences explaining the policy and its land market impact",
-  "policy_2_title": "string",
-  "policy_2_date_badge": "string",
-  "policy_2_description": "string",
+  "listing_6_location": "string",
+  "listing_6_acres": "string",
+  "listing_6_price": "string",
+  "listing_6_price_per_acre": "string",
+  "listing_6_status": "string",
 
-  "incentive_1_label": "incentive program name",
-  "incentive_1_value": "e.g. Up to $10,000 per acre or Capital gains deferral + 15% reduction",
-  "incentive_1_zone": "applicable zone or area, e.g. Opportunity Zone Census Tract 12",
-  "incentive_1_expiry": "e.g. December 2026 or Ongoing or Annual allocation cycle",
-  "incentive_1_explanation": "plain-English explanation of how a landowner or developer benefits, 1-2 sentences",
-  "incentive_2_label": "string",
-  "incentive_2_value": "string",
-  "incentive_2_zone": "string",
-  "incentive_2_expiry": "string",
-  "incentive_2_explanation": "string",
-  "incentive_3_label": "string",
-  "incentive_3_value": "string",
-  "incentive_3_zone": "string",
-  "incentive_3_expiry": "string",
-  "incentive_3_explanation": "string",
-  "incentive_4_label": "string",
-  "incentive_4_value": "string",
-  "incentive_4_zone": "string",
-  "incentive_4_expiry": "string",
-  "incentive_4_explanation": "string",
+  "rezoning_prose": "HTML prose (<p> and <ul><li> allowed) covering recent rezoning activity in this county. Describe 2–3 specific recent approvals or pending decisions with addresses, zoning changes, and investor relevance. If data is unavailable, note that clearly rather than fabricating examples.",
 
-  "comp_county_1_name": "county name",
-  "comp_county_1_growth": "e.g. +2.8%",
-  "comp_county_1_relevance": "1-2 sentences on how this county compares to the target county",
-  "comp_county_2_name": "string",
-  "comp_county_2_growth": "string",
-  "comp_county_2_relevance": "string",
-  "comp_county_3_name": "string",
-  "comp_county_3_growth": "string",
-  "comp_county_3_relevance": "string",
-  "comp_county_4_name": "string",
-  "comp_county_4_growth": "string",
-  "comp_county_4_relevance": "string",
+  "permits_prose": "HTML prose (<p> tags) covering building permit activity this period. Include residential count, commercial count, aggregate value, and what the permit volume signals for land demand. Write at county scale.",
 
-  "risk_1_label": "Entitlement Difficulty",
-  "risk_1_pct": "integer 1-100",
-  "risk_1_color": "#10B981 for low, #F59E0B for moderate, #EF4444 for high",
-  "risk_1_display": "Low, Low-Moderate, Moderate, High-Moderate, or High",
-  "risk_2_label": "Price Variability",
-  "risk_2_pct": "integer 1-100",
-  "risk_2_color": "string",
-  "risk_2_display": "string",
-  "risk_3_label": "Supply Availability",
-  "risk_3_pct": "integer 1-100",
-  "risk_3_color": "string",
-  "risk_3_display": "string",
-  "risk_4_label": "Demand Level",
-  "risk_4_pct": "integer 1-100",
-  "risk_4_color": "string",
-  "risk_4_display": "string",
-  "risk_5_label": "Policy Uncertainty",
-  "risk_5_pct": "integer 1-100",
-  "risk_5_color": "string",
-  "risk_5_display": "string",
+  "policy_prose": "HTML prose (<p> and <ul><li> allowed) covering: recent or pending legislation affecting land use, election items relevant to land investors, and available financial incentives (opportunity zones, tax abatements, TIF districts, etc.) for this county. Be specific to this county and state.",
 
-  "insight_paragraph": "3-4 sentence market outlook paragraph synthesizing key findings",
-  "watch_1": "specific item for analysts to monitor in coming months",
-  "watch_2": "string",
-  "watch_3": "string",
-  "watch_4": "string",
-  "watch_5": "string",
-  "recommendation_signal": "one of: BUY, BUY — Selective, NEUTRAL, CAUTIOUS, or HOLD",
-  "recommendation_body": "2-3 sentences with specific actionable guidance for land investors",
+  "risk_prose": "HTML prose (<p> tags) assessing market risk factors for land investors in this county. Cover entitlement difficulty, price volatility, supply/demand balance, and policy uncertainty. Write 2–3 paragraphs at the market level.",
 
-  "source_1_name": "string",
-  "source_1_url": "string",
-  "source_1_date": "string",
-  "source_2_name": "string",
+  "insight_prose": "HTML prose (<p> tags) synthesizing the market outlook: what the data signals for the next 12–24 months, where the opportunity is, and what the overall investment signal is (BUY / BUY Selective / NEUTRAL / CAUTIOUS / HOLD). 2–3 paragraphs.",
+
+  "watch_prose": "HTML unordered list (<ul><li> format) of 4–6 specific events, decisions, or data points that land investors should monitor in this county over the next 6–12 months. Each item should be concrete and actionable.",
+
+  "source_1_name": "name of a source ACTUALLY USED in this report",
+  "source_1_url": "URL of that source",
+  "source_1_date": "date accessed e.g. June 2026",
+
+  "source_2_name": "empty string if fewer than 2 sources used",
   "source_2_url": "string",
   "source_2_date": "string",
+
   "source_3_name": "string",
   "source_3_url": "string",
   "source_3_date": "string",
+
   "source_4_name": "string",
   "source_4_url": "string",
   "source_4_date": "string",
+
   "source_5_name": "string",
   "source_5_url": "string",
   "source_5_date": "string",
+
   "source_6_name": "string",
   "source_6_url": "string",
   "source_6_date": "string",
+
   "source_7_name": "string",
   "source_7_url": "string",
   "source_7_date": "string",
+
   "source_8_name": "string",
   "source_8_url": "string",
-  "source_8_date": "string",
-
-  "disclaimer_para_1": "string",
-  "disclaimer_para_2": "string"
+  "source_8_date": "string"
 }`;
 
 function buildUserPrompt(county: string, state: string, reportMonth: string): string {
   return `Research and compile a complete land market report for ${county}, ${state} for the period ${reportMonth}.
 
-Gather publicly available data on the following topics:
-1. COMPARABLE LAND SALES AND PRICE TRENDS:
-Search the following sources in this exact order for vacant land sold in ${county}, ${state} in the last 30 to 90 days:
+TASK 1 — COMPARABLE LAND SALES (search in this order):
 
-Source 1 — LandWatch: Search landwatch.com for recently sold land listings in ${county}, ${state}. Use search URL pattern: landwatch.com/\${state-slug}/land/sold. Filter to ${county} specifically. Record each sold listing: address or location, acreage, sale price, price per acre, and sale date.
+1a. LandWatch (landwatch.com): Search for recently sold vacant land in ${county}, ${state} in the last 90 days. Look for the sold/recently sold section. Record each result: location, acreage, sale price, price per acre, and date.
 
-Source 2 — Land.com: Search land.com for recently sold parcels in ${county}, ${state}. Use search URL pattern: land.com/land/sold/${county}-county-\${state-slug}. Record each sold listing with the same fields.
+1b. Zillow (zillow.com): Filter by property type "lots and land" and sold in last 90 days for ${county}, ${state}. Record sold listings with the same fields.
 
-Source 3 — Zillow: Search zillow.com for recently sold lots and land in ${county}, ${state}. Filter by home type: lots and land. Filter by sold in last 90 days. Record each sold listing with address, acreage if listed, sale price, and sale date.
+1c. Redfin (redfin.com): Filter by property type "land" and sold in last 90 days for ${county}, ${state}. Record results.
 
-Source 4 — Redfin: Search redfin.com for recently sold land in ${county}, ${state}. Filter by property type: land. Filter by sold in last 90 days. Record each result.
+1d. ${county} Assessor or Recorder website: Search for deed transfers for vacant land parcels recorded in the last 60 days. This is the most authoritative source — prioritize these if available.
 
-Source 5 — County Assessor: Search the ${county} assessor or recorder website for deed transfers recorded in the last 60 days for vacant land parcels. This is the most accurate source — prioritize these results if available.
+From all sources: compile the 6 most recent verified sold land parcels in ${county}, ${state}. For each parcel record location, acreage, sale price, price per acre (or price per sq ft for parcels under 0.25 acres), sale date, and source URL.
 
-From all sources combined, compile the 6 most recent verified sold land parcels in ${county}, ${state}. For each parcel record:
-- Location (address, street, or nearest intersection)
-- Acreage
-- Zoning designation if available
-- Sale price (recorded sale price only — not list price)
-- Price per acre (calculate as sale price divided by acreage)
-- For parcels under 0.25 acres also calculate price per sq ft (sale price divided by acreage times 43560)
-- Sale or recording date
-- Source website URL
+HONESTY RULE — COMPARABLE SALES: Only include sales you can verify from a real public source. Do not estimate or fabricate sale prices. If fewer than 6 verified sales are found, leave the remaining comp fields empty. If no verified sales are found at all, state this clearly in the rezoning_prose section and leave all comp fields empty.
 
-PRICE TREND CALCULATION:
-After collecting all sold parcels, calculate:
-- Current period median price per acre: median of all parcels sold in the last 30 days
-- Prior period median price per acre: median of all parcels sold 31 to 60 days ago
-- 6 month median price per acre: median of all parcels sold 150 to 180 days ago if available
-- Trend direction: if current median is more than 3 percent above prior period write 'Increasing'. If more than 3 percent below write 'Decreasing'. If within 3 percent write 'Stable'.
-- If fewer than 3 sold parcels are found for any period write 'Insufficient data for this period' for that period's median.
+TASK 2 — ACTIVE LISTINGS (search all three sources):
 
-If no sold land data can be found for ${county} from any of these sources, write 'No verified sold land data found for ${county} in the last 90 days. Price trend data is not available for this county at this time.' Do not substitute metro or state data.
-2. Median price per acre for vacant land parcels, plus median prices broken down by size range: under 1 acre, 1-5 acres, 5-20 acres, over 20 acres.
-3. Number of active vacant land listings (broken down by size range) and average days on market.
-4. Recent rezoning approvals from county planning records — for each rezoning include: parcel address, previous zoning code and type, new zoning code and type, acreage, approving body, date approved, a 1-2 sentence description, and a short note on vote outcome (rezonings 1 and 2) or effective date (rezoning 3).
-5. Building permits issued this period — residential count, commercial count, aggregate total value of all permits, and average square footage per residential permit.
-6. Three infrastructure projects underway or announced — for each include: agency responsible, budget, timeline, affected geographic area, and land market impact.
-7. Upcoming planning board or zoning board meeting — date, meeting title/agenda, and key items relevant to land investors.
-8. Three major employer announcements affecting land demand — for each include: company name, industry, job count, role types, timeline, and land market impact in 1-2 sentences.
-9. Two pending or recently passed policies or legislation affecting land use — for each include title, a date badge (e.g. "Signed June 2026" or "Nov 2026 Ballot"), and a 2-3 sentence description of land market impact.
-10. Four local financial incentives available to landowners or developers — for each include: program name, value, applicable zone or geographic area, expiry date, and a plain-English explanation of how a landowner benefits.
-11. Population, income, unemployment, and household data from public sources.
-12. Four comparable neighboring counties with their growth rate and a 1-2 sentence comparison to ${county}.
-13. Active listing count broken down by acreage range.
-13. PRICE TRENDS: Use the data already collected in task 1. Report the current period median, prior period median, and 6 month median calculated from actual sold parcels. Report the trend direction. If data was insufficient for any period, report that clearly.
-15. Land use breakdown by zoning category as a percentage.
+Search Zillow, Redfin, and LandWatch for currently active vacant land listings in ${county}, ${state}. Find 4–6 specific real listings. For each record: location/address, acreage, asking price, price per acre, and listing status (Active or Price Reduced).
 
-DATA ACCURACY REQUIREMENTS — YOU MUST FOLLOW THESE:
+HONESTY RULE — ACTIVE LISTINGS: These must be real listings you found, not invented. If the county has sparse inventory and you cannot find 4 real listings, return only what you actually found (even 1–2 is fine). If you find none at all, leave all listing fields empty and set listing_no_data_note to an honest explanation. Never fabricate a listing.
 
-Price per acre and comparable sales: Only use data from verified public sources including county assessor records, MLS public data, Zillow land listings, LandWatch, Land.com, or Realtor.com. Do not estimate or interpolate prices. If you cannot find verified recent land sale prices for this specific county, state that data is limited and provide the best available public estimate with a clear note that it is an estimate. Never fabricate sale prices. Always cite the source for each comparable sale.
+TASK 3 — MARKET STATS: Research current active listing count, average days on market, year-over-year price change, and median price per acre for vacant land in ${county}, ${state}. Use Zillow, Redfin, LandWatch, or county assessor data.
 
-Market velocity data (days on market, new listings count, listings under contract): Only use data from publicly available real estate sources for vacant land specifically. If exact figures are not available for this county, provide a range based on regional data and note it is a regional estimate. Never fabricate specific numbers.
+TASK 4 — LAND AREA AND ZONING: Find the total land area of ${county} in square miles (from Census Bureau, county website, or similar). Find the zoning breakdown (residential %, agricultural %, commercial/industrial/other %). The three percentages must sum to exactly 100.
 
-Sources: For every statistic, price, permit count, or market figure you include in the report, add the corresponding source to the sources array (source_1 through source_8). Include the website URL and the date you accessed it. If a figure comes from a regional estimate rather than county-specific data, note this clearly in the relevant section.
+TASK 5 — COUNTY OVERVIEW: Research the county's geography, population, key economic drivers, and land market context. Write 2–4 paragraphs suitable for an investor-facing market report. County/market level — not a parcel description.
 
-Based on this research, provide:
-- A 2-3 sentence executive summary of market conditions
-- Risk assessment scores from 1 to 100 for: entitlement difficulty, price variability, supply availability, demand level, and policy uncertainty. Include a color (#10B981 green for low, #F59E0B amber for moderate, #EF4444 red for high) and a display label (Low, Low-Moderate, Moderate, High-Moderate, High).
-- A market outlook paragraph (3-4 sentences) synthesizing key findings
-- Five specific items for analysts to monitor in the coming months
-- A market recommendation using one of: BUY, BUY — Selective, NEUTRAL, CAUTIOUS, or HOLD, with 2-3 sentences of specific actionable guidance
-- Eight sources with name, URL, and access date
-- Two disclaimer paragraphs (standard real estate research disclaimers)
+TASK 6 — DEVELOPMENT INTELLIGENCE:
+- Recent rezoning approvals or pending applications (last 60 days)
+- Building permit volume this period (residential count, commercial count, aggregate value)
+- Elections, policies, or legislation affecting land use in ${county} or ${state}
+- Financial incentives available to land developers or buyers (opportunity zones, TIF, enterprise zones, tax credits)
 
-Return ONLY a valid JSON object. No preamble, no explanation, no markdown formatting. The JSON must match this schema exactly:
+TASK 7 — RISK AND OUTLOOK:
+- Assess market risk factors: entitlement difficulty, price volatility, supply/demand balance, policy uncertainty
+- Write a market outlook synthesizing what the data signals for the next 12–24 months
+- Identify 4–6 specific events or decisions for investors to monitor
+
+TASK 8 — SOURCES:
+Record every source you actually retrieved data from. Include the website name, URL, and the date accessed. Only include sources where you actually found and used data from — do not list sources you searched but found nothing useful from.
+
+DATA ACCURACY REQUIREMENTS:
+- Only use verified public sources: county assessor, Zillow, Redfin, LandWatch, Land.com, Census Bureau, BLS, county government websites
+- Do not fabricate prices, addresses, or listing details
+- If a metric is unavailable, say so clearly in the relevant prose section — do not invent a number
+- Every statistic must be traceable to a real source listed in your sources section
+
+Return ONLY a valid JSON object. No preamble, no explanation, no markdown code fences. The JSON must match this schema exactly:
 ${OUTPUT_SCHEMA}`;
 }
 
@@ -338,7 +193,7 @@ export async function generateReportData(
   county: string,
   state: string,
   reportMonth: string,
-): Promise<ReportData> {
+): Promise<AIReportData> {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -391,7 +246,7 @@ export async function generateReportData(
     const match = jsonStr.match(/\{[\s\S]*\}/);
     if (match) jsonStr = match[0];
 
-    return JSON.parse(jsonStr) as ReportData;
+    return JSON.parse(jsonStr) as AIReportData;
 
   } catch (err: unknown) {
     const error = err as { status?: number; message?: string; error?: { type?: string; message?: string } };
