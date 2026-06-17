@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import LockedFeature from '@/components/LockedFeature';
-import CreateListingGate from '@/components/CreateListingGate';
 import { createClient } from '@/lib/supabase/client';
 import type { Tier } from '@/lib/permissions';
 
@@ -13,24 +11,6 @@ function getGreeting() {
   if (h < 12) return 'Good Morning';
   if (h < 17) return 'Good Afternoon';
   return 'Good Evening';
-}
-
-function relativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days === 1) return 'Yesterday';
-  return `${days} days ago`;
-}
-
-function formatPrice(price: number): string {
-  if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(1)}M`;
-  if (price >= 1_000) return `$${Math.round(price / 1_000)}K`;
-  return `$${price}`;
 }
 
 function matchScore(listing: any, criteria: any): number {
@@ -56,81 +36,31 @@ function listingMatchesCriteria(listing: any, criteria: any): boolean {
   return true;
 }
 
-interface Message {
-  id: any;
-  body: any;
-  created_at: any;
-  listing_id: any;
-  sender: any;
-  listing: any;
-}
-
-interface FeedListing {
-  id: any;
-  title: any;
-  location: any;
-  county: any;
-  acreage: any;
-  price: any;
-  land_type: any;
-  created_at: any;
-}
-
-interface Report {
-  id: any;
-  created_at: any;
-  address: any;
-  score: any;
-  status: any;
-  title?: any;
-}
-
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-surface-container-high rounded-xl ${className ?? ''}`} />;
 }
 
-function buyerName(b: any): string {
-  if (!b.buyer) return 'Anonymous Buyer';
-  const { first_name, last_name } = b.buyer;
-  return [first_name, last_name].filter(Boolean).join(' ') || 'Anonymous Buyer';
-}
-
-function criteriaLabel(b: any): string {
-  const parts: string[] = [];
-  if (b.land_type) parts.push(b.land_type.charAt(0).toUpperCase() + b.land_type.slice(1));
-  if (b.min_acreage != null || b.max_acreage != null) {
-    const lo = b.min_acreage != null ? `${b.min_acreage}` : '0';
-    const hi = b.max_acreage != null ? `${b.max_acreage}` : '+';
-    parts.push(`${lo}–${hi} Acres`);
-  }
-  if (b.location) parts.push(b.location);
-  return parts.join(' • ') || 'Open criteria';
-}
+const QUICK_ACTIONS = [
+  { label: 'Analyze a Property', href: '/property-analysis' },
+  { label: 'Browse Marketplace', href: '/marketplace' },
+  { label: 'Find Buyers', href: '/buyer-directory' },
+  { label: 'Create Listing', href: '/create-listing' },
+  { label: 'Find a Property', href: '/marketplace' },
+];
 
 export default function DashboardPage() {
   const router = useRouter();
   const [firstName, setFirstName] = useState<string | null>(null);
   const [tier, setTier] = useState<Tier | null>(null);
-  const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [hasAnalysisReady, setHasAnalysisReady] = useState(false);
-  const [hasDraftListing, setHasDraftListing] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [matchedBuyers, setMatchedBuyers] = useState<any[]>([]);
-  const [reports, setReports] = useState<Report[]>([]);
-  const [newListings, setNewListings] = useState<FeedListing[]>([]);
-  const [hasBuyerCriteria, setHasBuyerCriteria] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [bannerDismissed, setBannerDismissed] = useState(false);
-  const [showSubmittedToast, setShowSubmittedToast] = useState(false);
-  const [profileState, setProfileState] = useState<string | null>(null);
-  const [profileCounty, setProfileCounty] = useState<string | null>(null);
-  const [geoBannerDismissed, setGeoBannerDismissed] = useState(false);
-  const [geoSaving, setGeoSaving] = useState(false);
-  const [geoToast, setGeoToast] = useState<string | null>(null);
+  const [newListings, setNewListings] = useState<any[]>([]);
   const [nearbyListings, setNearbyListings] = useState<any[]>([]);
-  const [nearbyBuyers, setNearbyBuyers] = useState<any[]>([]);
-  const currentUserIdRef = useRef<string | null>(null);
+  const [marketReport, setMarketReport] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showSubmittedToast, setShowSubmittedToast] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && sessionStorage.getItem('listing_submitted')) {
@@ -147,35 +77,13 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      currentUserIdRef.current = user.id;
-
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-      const [profileRes, subRes, messagesRes, reportsRes, userListingsRes, userCriteriaRes, unreadRes, analysisRes, draftListingsRes] = await Promise.all([
-        supabase.from('profiles').select('first_name, last_name, avatar_url, bio, phone, company_name, state, county, is_admin').eq('id', user.id).single(),
+      const [profileRes, subRes, unreadRes, analysisRes, userListingsRes, userCriteriaRes] = await Promise.all([
+        supabase.from('profiles').select('first_name, state, county, is_admin').eq('id', user.id).single(),
         supabase.from('subscriptions').select('tier').eq('user_id', user.id).eq('status', 'active').single(),
-        supabase.from('messages')
-          .select('id, body, created_at, listing_id, sender:sender_id(first_name, last_name), listing:listing_id(title)')
-          .eq('recipient_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(3),
-        supabase.from('reports')
-          .select('id, title, score, created_at')
-          .eq('user_id', user.id)
-          .eq('status', 'completed')
-          .gte('created_at', sevenDaysAgo)
-          .order('created_at', { ascending: false }),
-        supabase.from('listings')
-          .select('id, acreage, price, county, land_type')
-          .eq('user_id', user.id)
-          .eq('status', 'active'),
-        supabase.from('buyer_criteria')
-          .select('id, location, min_acreage, max_acreage, min_budget, max_budget, land_type')
-          .eq('user_id', user.id)
-          .eq('active', true),
         supabase.from('messages').select('id', { count: 'exact', head: true }).eq('recipient_id', user.id).is('read_at', null),
         supabase.from('property_analysis_requests').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'complete'),
-        supabase.from('listings').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'draft'),
+        supabase.from('listings').select('id, acreage, price, county, land_type').eq('user_id', user.id).eq('status', 'active'),
+        supabase.from('buyer_criteria').select('id, location, min_acreage, max_acreage, min_budget, max_budget, land_type').eq('user_id', user.id).eq('active', true),
       ]);
 
       if (profileRes.data?.is_admin) {
@@ -189,27 +97,14 @@ export default function DashboardPage() {
         null
       );
       setTier((subRes?.data?.tier as Tier) ?? null);
-
-      const p = profileRes.data;
-      setProfileIncomplete(!p?.first_name || !p?.last_name);
       setUnreadCount(unreadRes.count ?? 0);
       setHasAnalysisReady((analysisRes.count ?? 0) > 0);
-      setHasDraftListing((draftListingsRes.count ?? 0) > 0);
-      setMessages((messagesRes.data as any[]) ?? []);
-      setReports((reportsRes.data as any[]) ?? []);
 
-      const userState = p?.state ?? null;
-      const userCounty = p?.county ?? null;
-      setProfileState(userState);
-      setProfileCounty(userCounty);
-
-      setGeoBannerDismissed(localStorage.getItem('geo_banner_dismissed') === '1');
-
+      const userState = profileRes.data?.state ?? null;
       const userListings: any[] = (userListingsRes.data as any[]) ?? [];
       const userCriteria: any[] = (userCriteriaRes.data as any[]) ?? [];
-      setHasBuyerCriteria(userCriteria.length > 0);
 
-      // Matched buyers: find other users' active criteria that match user's listings
+      // Matched buyers: other users' criteria that match this user's listed properties
       if (userListings.length > 0) {
         const { data: allCriteria } = await supabase
           .from('buyer_criteria')
@@ -219,18 +114,15 @@ export default function DashboardPage() {
 
         if (allCriteria) {
           const scored = (allCriteria as any[])
-            .filter(criteria => userListings.some(l => listingMatchesCriteria(l, criteria)))
-            .map(criteria => ({
-              criteria,
-              score: matchScore(userListings.find(l => listingMatchesCriteria(l, criteria))!, criteria),
-            }))
+            .filter(c => userListings.some(l => listingMatchesCriteria(l, c)))
+            .map(c => ({ c, score: matchScore(userListings.find(l => listingMatchesCriteria(l, c))!, c) }))
             .sort((a, b) => b.score - a.score)
             .slice(0, 5);
           setMatchedBuyers(scored);
         }
       }
 
-      // New listings for user: fetch listings from others matching user's criteria
+      // New listings matching user's buyer criteria
       if (userCriteria.length > 0) {
         const { data: feedListings } = await supabase
           .from('listings')
@@ -248,108 +140,40 @@ export default function DashboardPage() {
         }
       }
 
-      // Nearby listings and buyers filtered by profile state
+      // Nearby listings by profile state (fallback for "new properties" card)
       if (userState) {
-        const [nearbyListingsRes, nearbyBuyersRes] = await Promise.all([
-          supabase.from('listings')
-            .select('id, title, state, county, street_address, lot_size_acres, asking_price, zoning, created_at')
-            .eq('status', 'active')
-            .eq('state', userState)
-            .neq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(3),
-          supabase.from('buyer_criteria')
-            .select('id, user_id, location, min_acreage, max_acreage, min_budget, max_budget, land_type, buyer:user_id(first_name, last_name, state)')
-            .eq('active', true)
-            .neq('user_id', user.id),
-        ]);
-        setNearbyListings((nearbyListingsRes.data as any[]) ?? []);
-        if (nearbyBuyersRes.data) {
-          setNearbyBuyers(
-            (nearbyBuyersRes.data as any[])
-              .filter(b => (b.buyer as any)?.state === userState)
-              .slice(0, 3)
-          );
-        }
+        const { data: nearbyRes } = await supabase
+          .from('listings')
+          .select('id, title, state, county, created_at')
+          .eq('status', 'active')
+          .eq('state', userState)
+          .neq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(3);
+        setNearbyListings((nearbyRes as any[]) ?? []);
+      }
+
+      // User's most recent delivered market report
+      if (user.email) {
+        const { data: mrData } = await supabase
+          .from('market_report_requests')
+          .select('id, county, state, report_month, report_url')
+          .eq('email', user.email)
+          .eq('status', 'delivered')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        setMarketReport(mrData ?? null);
       }
 
       setLoading(false);
     }
 
     load();
-  }, []);
+  }, [router]);
 
-  async function handleEnableLocation() {
-    if (!navigator.geolocation) {
-      localStorage.setItem('geo_banner_dismissed', '1');
-      setGeoBannerDismissed(true);
-      return;
-    }
-    setGeoSaving(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude: lat, longitude: lng } = pos.coords;
-          const res = await fetch(
-            `https://geocoding.geo.census.gov/geocoder/geographies/coordinates?x=${lng}&y=${lat}&benchmark=Public_AR_Current&vintage=Current_Current&format=json`
-          );
-          const json = await res.json();
-          const countyName: string | null = json.result?.geographies?.Counties?.[0]?.NAME ?? null;
-          const stateName: string | null = json.result?.geographies?.States?.[0]?.NAME ?? null;
-
-          const uid = currentUserIdRef.current;
-          if (uid) {
-            const supabase = createClient();
-            await supabase.from('profiles')
-              .upsert({ id: uid, state: stateName, county: countyName }, { onConflict: 'id' });
-
-            if (stateName) {
-              const [nearbyListingsRes, nearbyBuyersRes] = await Promise.all([
-                supabase.from('listings')
-                  .select('id, title, state, county, street_address, lot_size_acres, asking_price, zoning, created_at')
-                  .eq('status', 'active')
-                  .eq('state', stateName)
-                  .neq('user_id', uid)
-                  .order('created_at', { ascending: false })
-                  .limit(3),
-                supabase.from('buyer_criteria')
-                  .select('id, user_id, location, min_acreage, max_acreage, min_budget, max_budget, land_type, buyer:user_id(first_name, last_name, state)')
-                  .eq('active', true)
-                  .neq('user_id', uid),
-              ]);
-              setNearbyListings((nearbyListingsRes.data as any[]) ?? []);
-              if (nearbyBuyersRes.data) {
-                setNearbyBuyers(
-                  (nearbyBuyersRes.data as any[])
-                    .filter(b => (b.buyer as any)?.state === stateName)
-                    .slice(0, 3)
-                );
-              }
-            }
-          }
-
-          setProfileState(stateName);
-          setProfileCounty(countyName);
-          setGeoBannerDismissed(true);
-
-          if (stateName || countyName) {
-            setGeoToast(`Location set to ${[countyName, stateName].filter(Boolean).join(', ')}`);
-            setTimeout(() => setGeoToast(null), 5000);
-          }
-        } catch (e) {
-          console.warn('[geolocation] reverse geocode failed', e);
-          setGeoBannerDismissed(true);
-        }
-        setGeoSaving(false);
-      },
-      () => {
-        localStorage.setItem('geo_banner_dismissed', '1');
-        setGeoBannerDismissed(true);
-        setGeoSaving(false);
-      },
-      { timeout: 10000 }
-    );
-  }
+  const hasNewListings = newListings.length > 0 || nearbyListings.length > 0;
+  const hasMatchedBuyers = matchedBuyers.length > 0;
 
   return (
     <div className="bg-surface text-on-surface antialiased font-body">
@@ -360,7 +184,7 @@ export default function DashboardPage() {
           <span className="material-symbols-outlined text-emerald-300" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
           <div>
             <p className="font-bold text-sm">Listing submitted for review!</p>
-            <p className="text-white/70 text-xs">You'll receive an email confirmation shortly.</p>
+            <p className="text-white/70 text-xs">You&apos;ll receive an email confirmation shortly.</p>
           </div>
           <button onClick={() => setShowSubmittedToast(false)} className="ml-2 text-white/60 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-lg">close</span>
@@ -368,333 +192,105 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {geoToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-2xl">
-          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>location_on</span>
-          <span className="text-sm font-semibold">{geoToast}</span>
-        </div>
-      )}
+      <main className="max-w-4xl mx-auto pt-24 pb-16 px-4 sm:px-8">
 
-      <main className="max-w-[1440px] mx-auto pt-24 pb-12 px-4 sm:px-8">
-
-        {/* Dashboard Header */}
-        <header className="mb-10">
-          <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Overview</p>
+        {/* SECTION 1 — GREETING */}
+        <header className="mb-8">
           {loading ? (
             <div className="flex items-center gap-3">
-              <span className="font-headline text-3xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter">{getGreeting()},</span>
-              <Skeleton className="h-12 w-40 rounded-2xl" />
+              <span className="font-headline text-3xl sm:text-4xl font-extrabold text-primary tracking-tighter">{getGreeting()},</span>
+              <Skeleton className="h-10 w-36" />
             </div>
           ) : (
-            <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+            <h1 className="font-headline text-3xl sm:text-4xl font-extrabold text-primary tracking-tighter leading-tight">
               {getGreeting()},{' '}
               <span className="text-emerald-600">{firstName ?? 'there'}</span>
             </h1>
           )}
         </header>
 
-        {/* Quick Actions */}
-        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
-          {[
-            { icon: 'analytics', label: 'Analyze a Property', href: '/property-analysis' },
-            { icon: 'explore',   label: 'Browse Marketplace', href: '/marketplace'        },
-            { icon: 'groups',    label: 'Find Buyers',        href: '/buyer-directory'    },
-          ].map(({ icon, label, href }) => (
-            <a
-              key={label}
-              href={href}
-              className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/10 text-center"
-            >
-              <span className="material-symbols-outlined text-lg sm:text-xl text-primary">{icon}</span>
-              <span className="text-xs sm:text-sm font-semibold text-primary leading-tight">{label}</span>
-            </a>
-          ))}
-          <CreateListingGate className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/10 text-center w-full">
-            <span className="material-symbols-outlined text-lg sm:text-xl text-primary">add_circle</span>
-            <span className="text-xs sm:text-sm font-semibold text-primary leading-tight">Create Listing</span>
-          </CreateListingGate>
-          {!loading && (
-            tier ? (
+        {/* SECTION 2 — QUICK ACTIONS */}
+        <section className="mb-10">
+          <div
+            className="flex flex-row gap-3 overflow-x-auto pb-2"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
+          >
+            {QUICK_ACTIONS.map(({ label, href }) => (
               <a
-                href="/create-buyer-request"
-                className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/10 text-center"
+                key={label}
+                href={href}
+                className="flex-none bg-white border border-green-700 text-green-700 font-semibold rounded-xl px-6 py-3 whitespace-nowrap hover:bg-green-50 transition-colors text-sm"
               >
-                <span className="material-symbols-outlined text-lg sm:text-xl text-primary">search</span>
-                <span className="text-xs sm:text-sm font-semibold text-primary leading-tight">Find a Property</span>
+                {label}
               </a>
-            ) : (
-              <a
-                href="/pricing"
-                className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/10 text-center"
-              >
-                <span className="material-symbols-outlined text-lg sm:text-xl text-primary">search</span>
-                <span className="text-xs sm:text-sm font-semibold text-primary leading-tight">Find a Property</span>
-              </a>
-            )
+            ))}
+          </div>
+        </section>
+
+        {/* SECTION 3 — FOR YOU */}
+        <section className="mb-16">
+          <h2 className="font-headline font-bold text-on-surface text-xl sm:text-2xl mb-4">For You</h2>
+          {loading ? (
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {unreadCount > 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                  <p className="text-sm font-semibold text-on-surface">
+                    You have {unreadCount} new message{unreadCount !== 1 ? 's' : ''}
+                  </p>
+                  <a
+                    href="/messaging"
+                    className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
+                  >
+                    View Messages
+                  </a>
+                </div>
+              )}
+              {hasMatchedBuyers && (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                  <p className="text-sm font-semibold text-on-surface">New buyers are looking in your area</p>
+                  <a
+                    href="/buyer-directory"
+                    className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
+                  >
+                    View Buyers
+                  </a>
+                </div>
+              )}
+              {hasNewListings && (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                  <p className="text-sm font-semibold text-on-surface">New properties in your area</p>
+                  <a
+                    href="/marketplace"
+                    className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
+                  >
+                    View Listings
+                  </a>
+                </div>
+              )}
+              {hasAnalysisReady && (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                  <p className="text-sm font-semibold text-on-surface">Your property report is ready</p>
+                  <a
+                    href="/property-analysis"
+                    className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
+                  >
+                    View Report
+                  </a>
+                </div>
+              )}
+            </div>
           )}
         </section>
 
-        {/* Geolocation Banner */}
-        {!loading && !profileState && !geoBannerDismissed && (
-          <section className="mb-8">
-            <div className="flex items-center gap-4 px-5 py-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-sm">
-              <span className="material-symbols-outlined text-primary text-2xl shrink-0">my_location</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-on-surface">Enable location for personalized listings</p>
-                <p className="text-xs text-secondary">See nearby listings and active buyers in your area.</p>
-              </div>
-              <button
-                onClick={handleEnableLocation}
-                disabled={geoSaving}
-                className="shrink-0 bg-primary text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
-                {geoSaving ? 'Detecting…' : 'Enable'}
-              </button>
-              <button
-                onClick={() => { localStorage.setItem('geo_banner_dismissed', '1'); setGeoBannerDismissed(true); }}
-                className="shrink-0 text-secondary hover:text-on-surface transition-colors"
-                aria-label="Dismiss"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
-          </section>
-        )}
-
-        {/* To-Do */}
-        {!loading && (() => {
-          const items: { label: string; href: string; done: boolean }[] = [
-            ...(profileIncomplete ? [{ label: 'Complete your profile', href: '/edit-profile', done: false }] : []),
-            ...(unreadCount > 0 ? [{ label: `You have ${unreadCount} unread message${unreadCount !== 1 ? 's' : ''}`, href: '/messaging', done: false }] : []),
-            ...(hasAnalysisReady ? [{ label: 'Your property analysis is ready', href: '/property-analysis', done: false }] : []),
-            ...(hasDraftListing ? [{ label: 'You have a listing draft to complete', href: '/create-listing', done: false }] : []),
-          ];
-          return (
-            <section className="mb-10 bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-6 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-primary text-xl">checklist</span>
-                <h2 className="font-headline font-bold text-primary text-base sm:text-lg">To-Do</h2>
-              </div>
-              <ul className="space-y-2">
-                {items.map(item => (
-                  <li key={item.label}>
-                    <a href={item.href} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-colors group">
-                      <span
-                        className={`material-symbols-outlined text-xl shrink-0 ${item.done ? 'text-emerald-500' : 'text-secondary'}`}
-                        style={item.done ? { fontVariationSettings: "'FILL' 1" } : undefined}
-                      >
-                        {item.done ? 'check_circle' : 'radio_button_unchecked'}
-                      </span>
-                      <span className="text-xs sm:text-sm font-medium text-on-surface group-hover:text-primary transition-colors">{item.label}</span>
-                      <span className="material-symbols-outlined text-secondary group-hover:text-primary ml-auto text-base transition-colors">arrow_forward</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })()}
-
-        {/* Stats Row — always 3 columns */}
-        <section className="grid grid-cols-3 gap-2 sm:gap-6 mb-12">
-
-          {/* New Messages */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-2 sm:p-8 text-center">
-            <span className="material-symbols-outlined text-xl sm:text-4xl text-primary mb-1 sm:mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>mail</span>
-            {loading ? (
-              <>
-                <Skeleton className="h-7 w-12 mb-1" />
-                <Skeleton className="h-3 w-20" />
-              </>
-            ) : unreadCount === 0 ? (
-              <>
-                <p className="text-lg sm:text-3xl font-bold text-on-surface font-headline">0</p>
-                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1">New Messages</p>
-              </>
-            ) : (
-              <>
-                <p className="text-lg sm:text-5xl font-extrabold text-primary font-headline">{unreadCount}</p>
-                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1 mb-1 sm:mb-4">New Messages</p>
-                <a href="/messaging" className="text-[10px] sm:text-xs font-bold text-primary hover:underline">View all →</a>
-              </>
-            )}
-          </div>
-
-          {/* Completed Reports */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-2 sm:p-8 text-center">
-            <span className="material-symbols-outlined text-xl sm:text-4xl text-primary mb-1 sm:mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
-            {loading ? (
-              <>
-                <Skeleton className="h-7 w-12 mb-1" />
-                <Skeleton className="h-3 w-20" />
-              </>
-            ) : reports.length === 0 ? (
-              <>
-                <p className="text-lg sm:text-3xl font-bold text-on-surface font-headline">0</p>
-                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1">Reports</p>
-              </>
-            ) : (
-              <>
-                <p className="text-lg sm:text-5xl font-extrabold text-primary font-headline">{reports.length}</p>
-                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1 mb-1 sm:mb-4">Reports</p>
-                <a href="/property-analysis" className="text-[10px] sm:text-xs font-bold text-primary hover:underline">View →</a>
-              </>
-            )}
-          </div>
-
-          {/* Matched Buyers */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center p-2 sm:p-8 text-center">
-            <span className="material-symbols-outlined text-xl sm:text-4xl text-primary mb-1 sm:mb-3" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
-            {loading ? (
-              <>
-                <Skeleton className="h-7 w-12 mb-1" />
-                <Skeleton className="h-3 w-20" />
-              </>
-            ) : matchedBuyers.length === 0 ? (
-              <>
-                <p className="text-lg sm:text-3xl font-bold text-on-surface font-headline">0</p>
-                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1">Matched Buyers</p>
-              </>
-            ) : (
-              <>
-                <p className="text-lg sm:text-5xl font-extrabold text-primary font-headline">{matchedBuyers.length}</p>
-                <p className="text-xs sm:text-sm font-semibold text-secondary mt-0.5 sm:mt-1 mb-1 sm:mb-4">Matched Buyers</p>
-                <a href="/buyer-directory" className="text-[10px] sm:text-xs font-bold text-primary hover:underline">View →</a>
-              </>
-            )}
-          </div>
-
-        </section>
-
-        {/* New Listings For You (by buyer criteria) */}
-        {(loading || hasBuyerCriteria) && (
-          <section className="mb-12">
-            <div className="flex justify-between items-center mb-6 px-2">
-              <h3 className="text-primary font-bold tracking-tight text-base sm:text-xl font-headline">New Listings For You</h3>
-              <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/marketplace">See all matches</a>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {loading ? (
-                [0, 1].map(i => (
-                  <div key={i} className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm">
-                    <Skeleton className="h-48 rounded-none" />
-                    <div className="p-5 space-y-2">
-                      <Skeleton className="h-4 w-36" />
-                      <Skeleton className="h-3 w-24" />
-                    </div>
-                  </div>
-                ))
-              ) : newListings.length === 0 ? (
-                <div className="md:col-span-2 flex flex-col items-center justify-center text-center gap-3 py-12 bg-surface-container-lowest rounded-2xl">
-                  <span className="material-symbols-outlined text-4xl text-on-surface-variant">explore</span>
-                  <p className="text-secondary text-sm">No matching listings right now.<br />Check back soon or <a href="/marketplace" className="text-primary font-semibold hover:underline">browse the marketplace</a>.</p>
-                </div>
-              ) : (
-                newListings.map(listing => (
-                  <div key={listing.id} className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
-                    <div className="relative h-48 overflow-hidden bg-surface-container-high flex items-center justify-center">
-                      <span className="material-symbols-outlined text-6xl text-on-surface-variant/30">landscape</span>
-                      {listing.price && (
-                        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-primary font-bold text-sm">
-                          {formatPrice(listing.price)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-5">
-                      <h4 className="font-bold text-on-surface mb-1">{listing.title}</h4>
-                      <p className="text-xs text-secondary mb-4">{listing.location ?? listing.county ?? 'Location TBD'}</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {listing.acreage != null && (
-                          <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-1 rounded-md text-[10px] font-bold uppercase">{listing.acreage} Acres</span>
-                        )}
-                        {listing.land_type && (
-                          <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-1 rounded-md text-[10px] font-bold uppercase">{listing.land_type}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* New Listings Near You (by profile state) */}
-        {!loading && nearbyListings.length > 0 && (
-          <section className="mb-12">
-            <div className="flex justify-between items-center mb-6 px-2">
-              <div>
-                <h3 className="text-primary font-bold tracking-tight text-base sm:text-xl font-headline">New Listings Near You</h3>
-                <p className="text-xs text-secondary mt-0.5">{profileCounty ? `${profileCounty}, ` : ''}{profileState}</p>
-              </div>
-              <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/marketplace">See all</a>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {nearbyListings.map(listing => (
-                <a key={listing.id} href={`/marketplace/${listing.id}`} className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
-                  <div className="relative h-40 overflow-hidden bg-surface-container-high flex items-center justify-center">
-                    <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">landscape</span>
-                    {listing.asking_price && (
-                      <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-2 py-0.5 rounded-lg text-primary font-bold text-xs">
-                        {formatPrice(listing.asking_price)}
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-bold text-on-surface text-sm mb-1 truncate">{listing.title ?? listing.street_address ?? 'Untitled'}</h4>
-                    <p className="text-xs text-secondary mb-3">{[listing.county, listing.state].filter(Boolean).join(', ')}</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {listing.lot_size_acres != null && (
-                        <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-0.5 rounded-md text-[10px] font-bold uppercase">{listing.lot_size_acres} Acres</span>
-                      )}
-                      {listing.zoning && (
-                        <span className="bg-secondary-fixed-dim text-on-secondary-fixed px-2 py-0.5 rounded-md text-[10px] font-bold uppercase">{listing.zoning}</span>
-                      )}
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Active Buyers in Your Area (by profile state) */}
-        {!loading && nearbyBuyers.length > 0 && (
-          <section className="mb-12">
-            <div className="flex justify-between items-center mb-6 px-2">
-              <div>
-                <h3 className="text-primary font-bold tracking-tight text-base sm:text-xl font-headline">Active Buyers in Your Area</h3>
-                <p className="text-xs text-secondary mt-0.5">{profileState}</p>
-              </div>
-              <a className="text-secondary font-semibold text-sm hover:text-primary transition-colors" href="/buyer-directory">See all</a>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {nearbyBuyers.map(b => (
-                <div key={b.id} className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-outline-variant/10">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>account_circle</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-on-surface truncate">{buyerName(b)}</p>
-                      <p className="text-xs text-secondary truncate">{criteriaLabel(b)}</p>
-                    </div>
-                  </div>
-                  {(b.min_budget || b.max_budget) && (
-                    <p className="text-xs text-secondary">
-                      Budget: {b.min_budget ? formatPrice(b.min_budget) : '—'} – {b.max_budget ? formatPrice(b.max_budget) : '—'}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* Upgrade Banner — standard tier only, dismissible */}
         {!loading && tier === 'standard' && !bannerDismissed && (
-          <section className="mb-12">
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-emerald-800 to-emerald-600 p-8 shadow-lg">
+          <section className="mb-16">
+            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-emerald-800 to-emerald-600 p-6 shadow-lg">
               <button
                 onClick={() => setBannerDismissed(true)}
                 className="absolute top-4 right-4 text-emerald-200/70 hover:text-white transition-colors"
@@ -702,59 +298,76 @@ export default function DashboardPage() {
               >
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pr-8">
                 <span className="material-symbols-outlined text-4xl text-emerald-300 shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-black text-xl tracking-tight mb-1">Unlock the Full Power of LotScout</h3>
+                <div className="flex-1">
+                  <h3 className="text-white font-black text-lg tracking-tight mb-1">Unlock the Full Power of LotScout</h3>
                   <p className="text-emerald-100/80 text-sm leading-relaxed">Upgrade your plan to access financing partners, a dedicated account manager, early access to listings and buyers, and quarterly market reports.</p>
                 </div>
                 <a
                   href="/pricing"
-                  className="shrink-0 bg-white text-emerald-800 font-black text-xs uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-emerald-50 transition-colors shadow-sm whitespace-nowrap"
+                  className="shrink-0 bg-white text-emerald-800 font-black text-xs uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors shadow-sm whitespace-nowrap"
                 >
-                  View Pricing Plans
+                  View Pricing
                 </a>
               </div>
             </div>
           </section>
         )}
 
-        {/* Monthly Market Report */}
-        <section className="bg-primary rounded-[2rem] p-5 sm:p-10 relative overflow-hidden text-white shadow-2xl">
-          <div className="absolute top-0 right-0 w-1/2 h-full opacity-10">
-            <div className="w-full h-full bg-gradient-to-l from-emerald-400 to-transparent" />
-          </div>
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-[0.2em] border border-emerald-500/30">Monthly Report</span>
-                <span className="text-emerald-100/60 text-xs font-medium italic">May 2026</span>
-              </div>
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tighter mb-6 leading-none font-headline">LotScout Land Market Report</h2>
-              <p className="text-emerald-100/70 text-lg font-body max-w-xl mb-8 leading-relaxed">
-                This month's report covers national farmland values, top 5 states by market activity, and notable shifts in recreational and agricultural land demand. U.S. farmland averaged $4,350/acre in 2025, up 4.3% year over year.
+        {/* SECTION 4 — MARKET UPDATES (below the fold) */}
+        <section className="mt-16 pt-8 border-t border-outline-variant/10">
+          <h2 className="font-headline font-bold text-on-surface text-xl sm:text-2xl mb-6">Market Updates</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Left: Monthly Market Update */}
+            <div>
+              <h3 className="text-base font-semibold text-on-surface mb-3">Monthly Market Update</h3>
+              <p className="text-sm text-on-surface/70 leading-relaxed mb-3">
+                The US vacant land market continues to show strong demand in Sun Belt states with median prices up 4.2% year over year. Days on market have increased slightly in Q2 2026 as inventory normalizes. Western markets remain supply-constrained with premium pricing near transit corridors.
               </p>
+              <p className="text-xs text-on-surface/40">Updated monthly by LotScout</p>
             </div>
-            <div className="lg:col-span-5">
-              <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
-                <h4 className="text-emerald-300 font-bold uppercase tracking-widest text-xs mb-6">Land Type Spotlight</h4>
-                <div className="space-y-4">
-                  {[
-                    { label: 'Light Industrial', icon: 'trending_up',   iconColor: 'text-emerald-400' },
-                    { label: 'Multi-Family',      icon: 'trending_up',   iconColor: 'text-emerald-400' },
-                    { label: 'Agricultural',      icon: 'trending_flat', iconColor: 'text-white/40'    },
-                  ].map(({ label, icon, iconColor }) => (
-                    <div key={label} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl">
-                      <span className="font-bold">{label}</span>
-                      <span className={`material-symbols-outlined ${iconColor}`}>{icon}</span>
-                    </div>
-                  ))}
+
+            {/* Right: Local Market Update */}
+            <div>
+              <h3 className="text-base font-semibold text-on-surface mb-3">Local Market Update</h3>
+              {loading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-9 w-36 mt-2" />
                 </div>
-                <a href="/market-report/april-2026" className="block w-full mt-8 bg-emerald-500 hover:bg-emerald-400 text-primary font-extrabold py-4 rounded-2xl transition-all text-center">
-                  Read Full Market Analysis
-                </a>
-              </div>
+              ) : marketReport ? (
+                <div>
+                  <p className="text-sm font-semibold text-on-surface mb-1">
+                    {marketReport.county} County, {marketReport.state} — {marketReport.report_month}
+                  </p>
+                  <p className="text-sm text-on-surface/70 leading-relaxed mb-4">
+                    Your county-level land market intelligence report is ready to view. Click below to access your full analysis.
+                  </p>
+                  <a
+                    href={marketReport.report_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
+                  >
+                    View Full Report
+                  </a>
+                </div>
+              ) : (
+                <div>
+                  <a
+                    href="/market-reports"
+                    className="inline-block bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors mb-3"
+                  >
+                    Get Local Market Updates
+                  </a>
+                  <p className="text-xs text-on-surface/40">Receive monthly county-level land market intelligence for $9/mo.</p>
+                </div>
+              )}
             </div>
+
           </div>
         </section>
 
