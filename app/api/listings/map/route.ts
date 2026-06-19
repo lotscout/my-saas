@@ -32,7 +32,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from('listings')
     .select('id,title,state,county,lot_size_acres,lot_size_sqft,asking_price,zoning,ownership_type')
-    .eq('status', 'published');
+    .in('status', ['active', 'published']);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
