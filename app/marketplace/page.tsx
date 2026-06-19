@@ -187,6 +187,10 @@ interface BuyerRequest {
   budget_max: number | null;
   min_acreage: number | null;
   max_acreage: number | null;
+  target_cities: string | null;
+  lot_size_min: number | null;
+  lot_size_max: number | null;
+  lot_size_label: string | null;
   use_case: string;
   zoning_preference: string[];
   timeline: string;
@@ -1472,7 +1476,16 @@ export default function MarketplacePage() {
                       className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
                     >
                       <div className="space-y-2">
-                        <div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p><p className={`text-base font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p></div>
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p>
+                          <p className={`text-base font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p>
+                          {(() => {
+                            const city = (req.target_cities ?? '').split(',')[0]?.trim() || req.target_city || null;
+                            return (city || req.lot_size_label) ? (
+                              <p className="text-xs text-secondary mt-0.5">{[city, req.lot_size_label].filter(Boolean).join(' · ')}</p>
+                            ) : null;
+                          })()}
+                        </div>
                         <div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Budget</p><p className="text-base font-bold text-on-surface">{perAcre}</p></div>
                         {timeline && (<div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Timeline</p><p className="text-base font-bold text-on-surface">{timeline}</p></div>)}
                       </div>

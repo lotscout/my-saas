@@ -25,6 +25,10 @@ interface BuyerRequest {
   budget_max: number | null;
   min_acreage: number | null;
   max_acreage: number | null;
+  target_cities: string | null;
+  lot_size_min: number | null;
+  lot_size_max: number | null;
+  lot_size_label: string | null;
   use_case: string | null;
   zoning_preference: string[] | null;
   timeline: string | null;
@@ -108,6 +112,12 @@ function getInitials(req: BuyerRequest): string {
   if (name === 'Anonymous Buyer') return 'AB';
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || 'AB';
+}
+
+// First city from the comma-separated target_cities list (falls back to target_city).
+function primaryCity(req: { target_cities?: string | null; target_city?: string | null }): string | null {
+  const first = (req.target_cities ?? '').split(',')[0]?.trim();
+  return first || req.target_city || null;
 }
 
 function fmtLocation(city: string | null, county: string | null, state: string | null, regions?: string[] | null): string {
@@ -245,6 +255,11 @@ function BuyerRequestCard({ req }: BuyerCardProps) {
         <div>
           <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p>
           <p className={`text-base font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p>
+          {(primaryCity(req) || req.lot_size_label) && (
+            <p className="text-xs text-secondary mt-0.5">
+              {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
+            </p>
+          )}
         </div>
         <div>
           <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Budget</p>
@@ -283,6 +298,11 @@ function NationalBuyerCard({ req, blurred, onUpgrade }: { req: BuyerRequest; blu
         <span className="material-symbols-outlined text-sm">location_on</span>
         <span className="truncate">{location}</span>
       </div>
+      {(primaryCity(req) || req.lot_size_label) && (
+        <p className={`text-[11px] text-secondary truncate ${blurCls}`}>
+          {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
+        </p>
+      )}
       <p className={`text-sm font-bold text-on-surface mt-auto ${blurCls}`}>{budget}</p>
       {timeline && <p className={`text-[11px] text-secondary ${blurCls}`}>{timeline}</p>}
       {blurred && (

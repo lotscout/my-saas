@@ -22,6 +22,10 @@ interface BuyerRequest {
   budget_max: number | null;
   min_acreage: number | null;
   max_acreage: number | null;
+  target_cities: string | null;
+  lot_size_min: number | null;
+  lot_size_max: number | null;
+  lot_size_label: string | null;
   use_case: string | null;
   zoning_preference: string[] | null;
   timeline: string | null;
@@ -278,6 +282,18 @@ export default function BuyerRequestPage() {
                       <span key={z} className="px-2.5 py-1 bg-primary/8 text-primary text-xs font-bold rounded-lg">{z}</span>
                     ))}
                   </div>
+                </div>
+              )}
+              {request.target_cities && (
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Target Cities</p>
+                  <p className="text-sm font-semibold text-on-surface">{request.target_cities}</p>
+                </div>
+              )}
+              {request.lot_size_label && (
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Lot Size</p>
+                  <p className="text-sm font-semibold text-on-surface">{request.lot_size_label}</p>
                 </div>
               )}
               {(request.contact_preference?.length ?? 0) > 0 && (
