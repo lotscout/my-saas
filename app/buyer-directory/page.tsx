@@ -161,7 +161,7 @@ function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }:
     return (
       <Link
         href={`/buyer-requests/${req.id}`}
-        className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 px-4 py-3 flex items-center hover:shadow-md hover:border-primary/20 transition-all"
+        className="bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 px-4 py-3 flex items-center hover:shadow-md transition-all duration-200"
       >
         <div className="min-w-0">
           <p className={`font-bold text-primary text-sm truncate ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
@@ -176,7 +176,7 @@ function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }:
   return (
     <Link
       href={`/buyer-requests/${req.id}`}
-      className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-md hover:border-primary/20 transition-all"
+      className="bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-md transition-all duration-200"
     >
       {/* Avatar + identity */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -229,7 +229,7 @@ interface BuyerCardProps {
   onUpgradeClick?: () => void;
 }
 
-function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProps) {
+function BuyerRequestCard({ req }: BuyerCardProps) {
   const router = useRouter();
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
   const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
@@ -239,7 +239,7 @@ function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProp
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col cursor-pointer hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
+      className="bg-surface-container-lowest rounded-2xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-4 flex flex-col cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden"
     >
       <div className="space-y-2">
         <div>
@@ -259,32 +259,6 @@ function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProp
       </div>
 
       <p className="text-xs text-secondary italic mt-3">Listed by {listedBy}</p>
-
-      <div className="flex gap-2 mt-3">
-        {canViewContact ? (
-          <Link
-            href={`/buyer-requests/${req.id}`}
-            onClick={e => e.stopPropagation()}
-            className="w-1/2 bg-green-700 text-white text-sm font-semibold rounded-xl py-2 text-center hover:bg-green-800 transition-colors"
-          >
-            Contact Buyer
-          </Link>
-        ) : (
-          <button
-            onClick={e => { e.stopPropagation(); onUpgradeClick?.(); }}
-            className="w-1/2 bg-green-700 text-white text-sm font-semibold rounded-xl py-2 hover:bg-green-800 transition-colors"
-          >
-            Contact Buyer
-          </button>
-        )}
-        <Link
-          href={`/buyer-requests/${req.id}`}
-          onClick={e => e.stopPropagation()}
-          className="w-1/2 border border-green-700 text-green-700 text-sm font-semibold rounded-xl py-2 text-center hover:bg-green-50 transition-colors"
-        >
-          See More
-        </Link>
-      </div>
     </div>
   );
 }
