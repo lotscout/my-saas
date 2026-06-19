@@ -33,6 +33,7 @@ export default function EditProfilePage() {
   const [state, setState] = useState('');
   const [county, setCounty] = useState('');
   const [tier, setTier] = useState('');
+  const [contactVisible, setContactVisible] = useState(false);
   const [toastOk, setToastOk] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -62,6 +63,13 @@ export default function EditProfilePage() {
       setCounty(data?.county ?? '');
       setTier(data?.subscription_tier ?? '');
       setAvatarUrl(data?.avatar_url ?? meta.avatar_url ?? null);
+      // Load contact visibility separately so a not-yet-migrated column can't break the main load.
+      const { data: visRow } = await supabase
+        .from('profiles')
+        .select('contact_visible')
+        .eq('id', user.id)
+        .single();
+      setContactVisible(visRow?.contact_visible === true);
       setLoading(false);
     }
     load();
@@ -73,7 +81,7 @@ export default function EditProfilePage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
-    const payload = {
+    const basePayload = {
       id: user.id,
       email: user.email,
       first_name: firstName.trim() || null,
@@ -85,12 +93,23 @@ export default function EditProfilePage() {
       county: county.trim() || null,
       updated_at: new Date().toISOString(),
     };
+    const payload = { ...basePayload, contact_visible: contactVisible };
 
-    const { data: result, error } = await supabase
+    let { error } = await supabase
       .from('profiles')
       .upsert(payload, { onConflict: 'id' })
       .select('id, first_name, last_name, email')
       .single();
+
+    // If the contact_visible column hasn't been migrated yet, save the rest so profile editing still works.
+    if (error && /contact_visible/i.test(error.message)) {
+      console.warn('[edit-profile] contact_visible column missing — saving without it. Run the migration to enable this preference.');
+      ({ error } = await supabase
+        .from('profiles')
+        .upsert(basePayload, { onConflict: 'id' })
+        .select('id, first_name, last_name, email')
+        .single());
+    }
 
     setSaving(false);
     if (error) {
@@ -307,6 +326,20 @@ export default function EditProfilePage() {
                       onChange={e => setCounty(e.target.value)}
                     />
                   </div>
+                  <label className="flex items-start gap-3 pt-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
+                      checked={contactVisible}
+                      onChange={e => setContactVisible(e.target.checked)}
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold text-primary">Visible to other users</span>
+                      <span className="block text-[11px] text-secondary leading-relaxed">
+                        When on, your phone, email, website, and company are shown to other users on your profile and buyer requests. When off, your contact info stays private and others contact you through platform messaging.
+                      </span>
+                    </span>
+                  </label>
                 </div>
               </div>
 

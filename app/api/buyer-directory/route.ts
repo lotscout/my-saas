@@ -35,20 +35,35 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ requests: [] });
   }
 
-  // Manually join profiles
+  // Manually join profiles. Try to include contact_visible; fall back gracefully if the
+  // column hasn't been migrated yet (older databases). Missing column => treated as private.
   const userIds = [...new Set(requests.map((r) => r.user_id).filter(Boolean))];
-  const { data: profiles } = await service
-    .from('profiles')
-    .select('id, first_name, last_name, company_name, avatar_url, is_test_profile')
-    .in('id', userIds);
+  const baseCols = 'id, first_name, last_name, company_name, avatar_url, is_test_profile';
+  let profiles: Array<Record<string, unknown>> | null = null;
+  const withVisible = await service.from('profiles').select(`${baseCols}, contact_visible`).in('id', userIds);
+  if (withVisible.error) {
+    const fallback = await service.from('profiles').select(baseCols).in('id', userIds);
+    profiles = fallback.data as Array<Record<string, unknown>> | null;
+  } else {
+    profiles = withVisible.data as Array<Record<string, unknown>> | null;
+  }
 
-  const profileMap: Record<string, { first_name: string | null; last_name: string | null; company_name: string | null; avatar_url: string | null; is_test_profile: boolean | null }> = {};
-  (profiles ?? []).forEach((p) => { profileMap[p.id] = p; });
+  const profileMap: Record<string, Record<string, unknown>> = {};
+  (profiles ?? []).forEach((p) => { profileMap[p.id as string] = p; });
 
-  const enriched = requests.map((r) => ({
-    ...r,
-    profiles: profileMap[r.user_id] ?? null,
-  }));
+  // Respect each buyer's contact visibility preference (default: private).
+  const enriched = requests.map((r) => {
+    const prof = profileMap[r.user_id] ?? null;
+    const contactVisible = prof?.contact_visible === true;
+    return {
+      ...r,
+      profiles: prof,
+      contact_phone: contactVisible ? r.contact_phone : null,
+      contact_phone_type: contactVisible ? r.contact_phone_type : null,
+      contact_email: contactVisible ? r.contact_email : null,
+      contact_website: contactVisible ? r.contact_website : null,
+    };
+  });
 
   return NextResponse.json({ requests: enriched });
 }

@@ -112,60 +112,32 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Grid Layout for Bio & Criteria */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          {/* About Section */}
-          <section className="md:col-span-7 bg-white p-5 sm:p-10 rounded-[2.5rem] border border-outline-variant/30 shadow-sm">
-            <h2 className="text-2xl font-bold text-primary mb-6 font-headline">About</h2>
-            <div className="space-y-4 text-on-surface-variant leading-relaxed font-body text-lg">
-              {profile?.bio ? (
-                <p>{profile.bio}</p>
-              ) : (
-                <p className="text-secondary italic">No bio added yet. <Link href="/edit-profile" className="text-primary hover:underline">Add one now →</Link></p>
-              )}
-            </div>
-          </section>
-
-          {/* Acquisition Criteria Section */}
-          <section className="md:col-span-5 bg-primary p-5 sm:p-10 rounded-[2.5rem] text-white shadow-sm relative overflow-hidden">
-            <div className="absolute -top-4 -right-4 opacity-10">
-              <span className="material-symbols-outlined" style={{ fontSize: '96px' }}>analytics</span>
-            </div>
-            <h2 className="text-2xl font-bold mb-8 text-white/90 font-headline">Account Details</h2>
-            <div className="space-y-8">
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-white/50">Email</p>
-                <p className="text-lg font-headline font-semibold break-all">{email ?? '—'}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-white/50">Membership</p>
-                <p className="text-2xl font-headline font-semibold">{profile?.tier ? (TIER_LABELS[profile.tier] ?? profile.tier) : 'Free'}</p>
-              </div>
-              {profile?.company_name && (
-                <div className="space-y-1">
-                  <p className="text-xs font-bold uppercase tracking-widest text-white/50">Company</p>
-                  <p className="text-xl font-headline font-semibold">{profile.company_name}</p>
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
-
-        {/* Active Portfolio Section */}
-        <section className="space-y-10">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-bold text-primary font-headline">Active Portfolio</h2>
-              <p className="text-secondary text-sm font-medium">Your public marketplace listings</p>
-            </div>
-            <div className="h-[1px] flex-1 bg-outline-variant/30 mx-8 hidden md:block"></div>
-            <Link href="/marketplace" className="text-primary font-bold text-sm flex items-center gap-2 hover:translate-x-1 transition-transform bg-primary/5 px-4 py-2 rounded-lg">
-              View Marketplace <span className="material-symbols-outlined">arrow_forward</span>
-            </Link>
+        {/* Combined About & Account Details */}
+        <section className="bg-white p-5 sm:p-10 rounded-[2.5rem] border border-outline-variant/30 shadow-sm">
+          <h2 className="text-2xl font-bold text-primary mb-6 font-headline">About</h2>
+          <div className="space-y-4 text-on-surface-variant leading-relaxed font-body text-lg">
+            {profile?.bio ? (
+              <p>{profile.bio}</p>
+            ) : (
+              <p className="text-secondary italic">No bio added yet. <Link href="/edit-profile" className="text-primary hover:underline">Add one now →</Link></p>
+            )}
           </div>
 
-          <div className="bg-surface-container-high/30 border border-dashed border-outline-variant rounded-2xl p-6 text-center">
-            <p className="text-secondary text-xs font-medium italic">NOTE: Listing gallery is only displayed for profiles with active, public marketplace listings.</p>
+          <div className="mt-10 pt-8 border-t border-outline-variant/30 grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <div className="space-y-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary">Email</p>
+              <p className="text-base font-headline font-semibold text-on-surface break-all">{email ?? '—'}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary">Membership</p>
+              <p className="text-base font-headline font-semibold text-on-surface">{profile?.tier ? (TIER_LABELS[profile.tier] ?? profile.tier) : 'Free'}</p>
+            </div>
+            {profile?.company_name && (
+              <div className="space-y-1">
+                <p className="text-xs font-bold uppercase tracking-widest text-secondary">Company</p>
+                <p className="text-base font-headline font-semibold text-on-surface">{profile.company_name}</p>
+              </div>
+            )}
           </div>
         </section>
       </main>
