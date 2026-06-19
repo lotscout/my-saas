@@ -42,6 +42,32 @@ function Dash() {
 const ANNUAL_PRICES  = { standard: 97,  priority: 329, exclusive: 579 };
 const MONTHLY_PRICES = { standard: 113, priority: 384, exclusive: 675 };
 
+// Per-tier feature lists for the mobile stacked cards.
+const STANDARD_FEATURES = [
+  'Land Marketplace Access',
+  'Buyer Directory Access',
+  'Custom Company Profile',
+  'Lot Analysis Reports',
+  '5 Property Analysis Reports / mo',
+  '$4.99 per additional report',
+];
+const PRIORITY_FEATURES = [
+  'Unlimited Listings',
+  '15 Property Reports / mo',
+  '24h Report Delivery',
+  'Lot to Buyer Match AI',
+  'Promoted Lot Requests',
+  'Financing Partners Access',
+  '24/7 Premium Support',
+];
+const EXCLUSIVE_FEATURES = [
+  'Unlimited Property Reports',
+  '15 min Report Delivery',
+  'Hands-On Listing Support',
+  'Lot to Buyer Match AI',
+  'Promoted Lot Requests',
+];
+
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [loading, setLoading] = useState<string | null>(null);
@@ -83,7 +109,110 @@ export default function PricingPage() {
       <Header />
 
       <main className="flex-grow pt-20 pb-4 px-4 sm:px-6 max-w-6xl mx-auto w-full">
-        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
+
+        {/* ── Mobile stacked tier cards ── */}
+        <div className="md:hidden space-y-5">
+          {/* Billing toggle (shares isAnnual with the desktop table) */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full">
+              <button
+                onClick={() => setIsAnnual(false)}
+                className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${!isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary'}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setIsAnnual(true)}
+                className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary'}`}
+              >
+                Annual
+              </button>
+            </div>
+            <span className="text-emerald-700 text-xs font-bold text-center">Get two months free when switching to annual</span>
+          </div>
+
+          {/* STANDARD */}
+          <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
+            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Standard</p>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
+              <span className="text-secondary font-medium text-sm">/mo</span>
+            </div>
+            <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
+            <button
+              onClick={() => handleCheckout(getPriceKey('standard'))}
+              disabled={!!loading || userTier === 'standard'}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
+            >
+              {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
+            </button>
+            <ul className="mt-5 space-y-3">
+              {STANDARD_FEATURES.map(f => (
+                <li key={f} className="flex items-center gap-3 text-sm text-on-surface">
+                  <span className="material-symbols-outlined text-emerald-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* PRIORITY — Most Popular */}
+          <div className="rounded-3xl p-6 shadow-lg relative text-white" style={{ backgroundColor: '#1b4332' }}>
+            <span className="absolute top-5 right-5 bg-emerald-400 text-emerald-950 text-[10px] font-black px-3 py-1 rounded-full tracking-wide uppercase">Most Popular</span>
+            <p className="text-emerald-200 font-bold text-sm tracking-widest uppercase mb-2">Priority</p>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-4xl font-extrabold text-white font-headline">${prices.priority}</span>
+              <span className="text-emerald-200 font-medium text-sm">/mo</span>
+            </div>
+            <p className="text-xs text-emerald-200/70 mb-4">{billingSubtext()}</p>
+            <button
+              onClick={() => handleCheckout(getPriceKey('priority'))}
+              disabled={!!loading || userTier === 'priority'}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-emerald-900 text-emerald-200 cursor-default' : 'bg-emerald-300 text-emerald-950 hover:bg-emerald-200'}`}
+            >
+              {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
+            </button>
+            <p className="mt-5 mb-3 text-sm font-bold text-emerald-100">Everything in Standard Plus:</p>
+            <ul className="space-y-3">
+              {PRIORITY_FEATURES.map(f => (
+                <li key={f} className="flex items-center gap-3 text-sm text-emerald-50">
+                  <span className="material-symbols-outlined text-emerald-300 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* EXCLUSIVE */}
+          <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
+            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Exclusive</p>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
+              <span className="text-secondary font-medium text-sm">/mo</span>
+            </div>
+            <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
+            <button
+              onClick={() => handleCheckout(getPriceKey('exclusive'))}
+              disabled={!!loading || userTier === 'exclusive'}
+              className={`w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'hover:opacity-90'}`}
+              style={userTier === 'exclusive' ? undefined : { backgroundColor: '#1b4332' }}
+            >
+              {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
+            </button>
+            <p className="mt-5 mb-3 text-sm font-bold text-on-surface">Everything in Priority Plus:</p>
+            <ul className="space-y-3">
+              {EXCLUSIVE_FEATURES.map(f => (
+                <li key={f} className="flex items-center gap-3 text-sm text-on-surface">
+                  <span className="material-symbols-outlined text-emerald-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* ── Desktop comparison table ── */}
+        <div className="hidden md:block bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
 
           {/* ── Column headers ── */}
           <div className={`${GRID_CLS} border-b border-outline-variant/10`}>
@@ -226,6 +355,20 @@ export default function PricingPage() {
             );
           })}
 
+        </div>
+
+        {/* Enterprise / custom solution */}
+        <div className="mt-8 bg-surface-container-low rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div>
+            <h3 className="font-headline text-lg font-bold text-primary mb-1">Need a custom solution?</h3>
+            <p className="text-secondary text-sm">Large brokerage or enterprise team? Let&apos;s build a plan that fits your volume.</p>
+          </div>
+          <a
+            href="mailto:support@lotscout.com"
+            className="shrink-0 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all active:scale-95"
+          >
+            Contact Sales
+          </a>
         </div>
       </main>
 
