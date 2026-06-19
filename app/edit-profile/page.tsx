@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
@@ -34,17 +34,22 @@ export default function EditProfilePage() {
   const [county, setCounty] = useState('');
   const [tier, setTier] = useState('');
   const [toastOk, setToastOk] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function load() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/sign-in'); return; }
+      setUserId(user.id);
       setEmail(user.email ?? '');
       const meta = (user.user_metadata ?? {}) as Record<string, string>;
       const { data, error: profileError } = await supabase
         .from('profiles')
-        .select('first_name, last_name, phone, bio, company_name, subscription_tier, state, county')
+        .select('first_name, last_name, phone, bio, company_name, subscription_tier, state, county, avatar_url')
         .eq('id', user.id)
         .single();
       if (profileError) console.warn('[edit-profile] load error:', profileError.message);
@@ -56,6 +61,7 @@ export default function EditProfilePage() {
       setState(data?.state ?? '');
       setCounty(data?.county ?? '');
       setTier(data?.subscription_tier ?? '');
+      setAvatarUrl(data?.avatar_url ?? meta.avatar_url ?? null);
       setLoading(false);
     }
     load();
@@ -94,6 +100,46 @@ export default function EditProfilePage() {
       setToastOk(true);
       setToast('Profile saved successfully!');
       setTimeout(() => { setToast(null); router.push('/profile'); }, 2000);
+    }
+  }
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setToastOk(false);
+      setToast('Image must be under 5MB.');
+      e.target.value = '';
+      return;
+    }
+    if (!userId) return;
+    setUploading(true);
+    const supabase = createClient();
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+      const newAvatarUrl = urlData.publicUrl;
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: newAvatarUrl })
+        .eq('id', userId);
+      if (updateError) throw updateError;
+      setAvatarUrl(newAvatarUrl);
+      setToastOk(true);
+      setToast('Profile picture updated!');
+      setTimeout(() => setToast(null), 2000);
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+      setToastOk(false);
+      setToast('Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
     }
   }
 
@@ -146,13 +192,42 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined text-primary-container">badge</span>
                   Profile Identity
                 </h3>
-                <div className="relative group w-40 h-40 mx-auto flex items-center justify-center bg-surface rounded-full border-4 border-surface shadow-md">
-                  <span className="material-symbols-outlined text-primary/30" style={{ fontSize: '80px' }}>account_circle</span>
-                  <button className="absolute bottom-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform">
+                <div className="relative group w-40 h-40 mx-auto flex items-center justify-center bg-surface rounded-full border-4 border-surface shadow-md overflow-hidden">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                  ) : (firstName || lastName) ? (
+                    <span className="text-primary/60 font-headline font-extrabold" style={{ fontSize: '52px' }}>
+                      {`${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || firstName.charAt(0).toUpperCase()}
+                    </span>
+                  ) : (
+                    <span className="material-symbols-outlined text-primary/30" style={{ fontSize: '80px' }}>account_circle</span>
+                  )}
+                  {uploading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                      <span className="material-symbols-outlined text-white animate-spin" style={{ fontSize: '36px' }}>progress_activity</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    aria-label="Upload profile picture"
+                    className="absolute bottom-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
                     <span className="material-symbols-outlined text-sm">photo_camera</span>
                   </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
                 </div>
-                <p className="text-xs text-center text-secondary leading-relaxed">JPG, GIF or PNG. Max size of 2MB.</p>
+                <p className="text-xs text-center text-secondary leading-relaxed">
+                  {uploading ? 'Uploading...' : 'JPG, GIF or PNG. Max size of 5MB.'}
+                </p>
               </div>
 
               <div className="lg:col-span-8 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6">
