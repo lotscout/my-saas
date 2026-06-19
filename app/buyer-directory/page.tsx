@@ -161,11 +161,10 @@ interface BuyerRowProps {
   minimal?: boolean;
 }
 
-function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }: BuyerRowProps) {
+function BuyerRow({ req, showTimeline = true, minimal = false }: BuyerRowProps) {
   const name = getBuyerName(req);
   const initials = getInitials(req);
   const company = req.display_company || req.profiles?.company_name || null;
-  const blur = !canViewContact;
 
   if (minimal) {
     return (
@@ -174,9 +173,9 @@ function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }:
         className="bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 px-4 py-3 flex items-center hover:shadow-md transition-all duration-200"
       >
         <div className="min-w-0">
-          <p className={`font-bold text-primary text-sm truncate ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
+          <p className={`font-bold text-primary text-sm truncate`}>{name}</p>
           {company && (
-            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{company}</p>
+            <p className={`text-xs text-secondary truncate`}>{company}</p>
           )}
         </div>
       </Link>
@@ -190,7 +189,7 @@ function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }:
     >
       {/* Avatar + identity */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 ${blur ? 'blur-sm' : ''}`}>
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
           {req.profiles?.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={req.profiles.avatar_url} alt="Buyer" className="w-full h-full object-cover rounded-full" />
@@ -199,9 +198,9 @@ function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }:
           )}
         </div>
         <div className="min-w-0">
-          <p className={`font-bold text-primary text-sm truncate ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
+          <p className={`font-bold text-primary text-sm truncate`}>{name}</p>
           {company && (
-            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{company}</p>
+            <p className={`text-xs text-secondary truncate`}>{company}</p>
           )}
           {req.contact_website && (
             <a href={`https://${req.contact_website}`} target="_blank" rel="noopener noreferrer"
@@ -280,37 +279,30 @@ function BuyerRequestCard({ req }: BuyerCardProps) {
 
 // ─── Compact national buyer card ──────────────────────────────────────────────
 
-function NationalBuyerCard({ req, blurred, onUpgrade }: { req: BuyerRequest; blurred: boolean; onUpgrade: () => void }) {
+function NationalBuyerCard({ req }: { req: BuyerRequest }) {
   const router = useRouter();
   const name = getBuyerName(req);
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
   const budget = fmtBudget(req.budget_min, req.budget_max);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
-  const blurCls = blurred ? 'blur-sm select-none' : '';
 
   return (
     <div
-      onClick={() => (blurred ? onUpgrade() : router.push(`/buyer-requests/${req.id}`))}
+      onClick={() => router.push(`/buyer-requests/${req.id}`)}
       className="relative bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-3 flex flex-col gap-1 cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden min-h-[116px]"
     >
-      <p className={`font-bold text-primary text-sm leading-tight line-clamp-2 ${blurCls}`}>{name}</p>
-      <div className={`flex items-center gap-0.5 text-xs text-secondary ${blurCls}`}>
+      <p className="font-bold text-primary text-sm leading-tight line-clamp-2">{name}</p>
+      <div className="flex items-center gap-0.5 text-xs text-secondary">
         <span className="material-symbols-outlined text-sm">location_on</span>
         <span className="truncate">{location}</span>
       </div>
       {(primaryCity(req) || req.lot_size_label) && (
-        <p className={`text-[11px] text-secondary truncate ${blurCls}`}>
+        <p className="text-[11px] text-secondary truncate">
           {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
         </p>
       )}
-      <p className={`text-sm font-bold text-on-surface mt-auto ${blurCls}`}>{budget}</p>
-      {timeline && <p className={`text-[11px] text-secondary ${blurCls}`}>{timeline}</p>}
-      {blurred && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-surface-container-lowest/30 backdrop-blur-[1px]">
-          <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-          <span className="text-[11px] font-bold text-primary">Upgrade to view</span>
-        </div>
-      )}
+      <p className="text-sm font-bold text-on-surface mt-auto">{budget}</p>
+      {timeline && <p className="text-[11px] text-secondary">{timeline}</p>}
     </div>
   );
 }
@@ -346,9 +338,6 @@ export default function BuyerDirectoryPage() {
   const { isAdmin, isAtLeast, loading: permLoading } = useUserTier();
 
   const canViewContact = !permLoading && (isAtLeast('standard') || !!isAdmin);
-  // Priority/Exclusive (or admin) members can see every national buyer beyond the free first 5.
-  const canViewAllBuyers = !permLoading && (isAtLeast('priority') || !!isAdmin);
-
   // ── Navigation state ──
   const [tab, setTab] = useState<MainTab>('directory');
   const [view, setView] = useState<DirectoryView>('grid');
@@ -713,13 +702,8 @@ export default function BuyerDirectoryPage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                      {filteredNational.map((req, i) => (
-                        <NationalBuyerCard
-                          key={req.id}
-                          req={req}
-                          blurred={i >= 5 && !canViewAllBuyers}
-                          onUpgrade={() => setShowUpgradeModal(true)}
-                        />
+                      {filteredNational.map((req) => (
+                        <NationalBuyerCard key={req.id} req={req} />
                       ))}
                     </div>
                   )}
