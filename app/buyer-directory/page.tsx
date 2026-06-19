@@ -107,13 +107,6 @@ function fmtTimeline(t: string): string {
 }
 
 
-function getInitials(req: BuyerRequest): string {
-  const name = getBuyerName(req);
-  if (name === 'Anonymous Buyer') return 'AB';
-  const parts = name.trim().split(/\s+/);
-  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || 'AB';
-}
-
 // First city from the comma-separated target_cities list (falls back to target_city).
 function primaryCity(req: { target_cities?: string | null; target_city?: string | null }): string | null {
   const first = (req.target_cities ?? '').split(',')[0]?.trim();
@@ -150,84 +143,6 @@ function applyAcreageFilter(req: BuyerRequest, f: string): boolean {
   if (f === '100-500') return acres >= 100 && acres < 500;
   if (f === '500+') return acres >= 500;
   return true;
-}
-
-// ─── Shared BuyerRow ─────────────────────────────────────────────────────────
-
-interface BuyerRowProps {
-  req: BuyerRequest;
-  canViewContact: boolean;
-  showTimeline?: boolean;
-  minimal?: boolean;
-}
-
-function BuyerRow({ req, showTimeline = true, minimal = false }: BuyerRowProps) {
-  const name = getBuyerName(req);
-  const initials = getInitials(req);
-  const company = req.display_company || req.profiles?.company_name || null;
-
-  if (minimal) {
-    return (
-      <Link
-        href={`/buyer-requests/${req.id}`}
-        className="bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 px-4 py-3 flex items-center hover:shadow-md transition-all duration-200"
-      >
-        <div className="min-w-0">
-          <p className={`font-bold text-primary text-sm truncate`}>{name}</p>
-          {company && (
-            <p className={`text-xs text-secondary truncate`}>{company}</p>
-          )}
-        </div>
-      </Link>
-    );
-  }
-
-  return (
-    <Link
-      href={`/buyer-requests/${req.id}`}
-      className="bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-md transition-all duration-200"
-    >
-      {/* Avatar + identity */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-          {req.profiles?.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={req.profiles.avatar_url} alt="Buyer" className="w-full h-full object-cover rounded-full" />
-          ) : (
-            <span className="text-primary font-bold text-sm">{initials}</span>
-          )}
-        </div>
-        <div className="min-w-0">
-          <p className={`font-bold text-primary text-sm truncate`}>{name}</p>
-          {company && (
-            <p className={`text-xs text-secondary truncate`}>{company}</p>
-          )}
-          {req.contact_website && (
-            <a href={`https://${req.contact_website}`} target="_blank" rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              className="text-xs text-primary/70 hover:text-primary font-medium transition-colors">
-              {req.contact_website}
-            </a>
-          )}
-        </div>
-      </div>
-
-      {/* Meta chips */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs shrink-0">
-        <span className="flex items-center gap-1 text-secondary">
-          <span className="material-symbols-outlined text-sm">location_on</span>
-          {fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions)}
-        </span>
-        <span className="font-semibold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</span>
-        {req.use_case && (
-          <span className="bg-primary/8 text-primary px-2 py-0.5 rounded-full font-bold capitalize">{req.use_case.split(' — ')[0]}</span>
-        )}
-        {showTimeline && req.timeline && (
-          <span className="text-secondary hidden md:inline">{fmtTimeline(req.timeline)}</span>
-        )}
-      </div>
-    </Link>
-  );
 }
 
 // ─── BuyerRequestCard (for Requests tab) ──────────────────────────────────────
@@ -396,7 +311,7 @@ export default function BuyerDirectoryPage() {
     if (!state) return;
     setStateLoading(true);
     setStateSearched(state);
-    fetch(`/api/buyer-directory?status=active&state=${encodeURIComponent(state)}&limit=50`)
+    fetch(`/api/buyer-directory?status=active&state=${encodeURIComponent(state)}&limit=10`)
       .then(r => r.json())
       .then(({ requests }) => { setStateBuyers((requests ?? []) as BuyerRequest[]); setStateLoading(false); })
       .catch(() => setStateLoading(false));
@@ -701,7 +616,7 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try adjusting your search or filters</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
                       {filteredNational.map((req) => (
                         <NationalBuyerCard key={req.id} req={req} />
                       ))}
@@ -777,14 +692,9 @@ export default function BuyerDirectoryPage() {
                             <p className="text-sm mt-1">Try a different state or clear your filters</p>
                           </div>
                         ) : (
-                          <div className="space-y-2">
-                            {filteredState.map((req, i) => (
-                              <div key={req.id} className="flex items-center gap-3">
-                                <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
-                                <div className="flex-1">
-                                  <BuyerRow req={req} canViewContact={canViewContact} showTimeline />
-                                </div>
-                              </div>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
+                            {filteredState.map((req) => (
+                              <NationalBuyerCard key={req.id} req={req} />
                             ))}
                           </div>
                         )}
