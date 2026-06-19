@@ -57,8 +57,10 @@ export default function FundingPartnersPage() {
         {/* Section heading */}
         <h2 className="font-headline text-xl font-bold text-primary mb-5">Business Credit &amp; Capital</h2>
 
-        {/* Partner card */}
-        <div className="max-w-sm">
+        {/* Partner cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+
+          {/* Let's Get Funded */}
           <div className="bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col hover:shadow-lg hover:border-primary/20 transition-all">
 
             {/* Category badge — always visible */}
@@ -95,6 +97,60 @@ export default function FundingPartnersPage() {
             {hasAccess ? (
               <a
                 href="https://affiliate.lvlgroupny.com/affil-optin-new?am_id=bobby5005"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-[#012d1d] text-white font-bold text-sm py-2.5 rounded-xl hover:bg-[#012d1d]/90 transition-colors"
+              >
+                Get Started
+              </a>
+            ) : (
+              <a
+                href="/pricing"
+                className="flex items-center justify-center gap-2 bg-surface-container-high text-secondary font-bold text-sm py-2.5 rounded-xl border border-outline-variant/20 hover:bg-surface-container-highest transition-colors"
+              >
+                <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                Upgrade to Access
+              </a>
+            )}
+          </div>
+
+          {/* Damen Capital */}
+          <div className="bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col hover:shadow-lg hover:border-primary/20 transition-all">
+
+            {/* Category badge — always visible */}
+            <div className="mb-4">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-700 text-white">
+                Lending &amp; Note Buying
+              </span>
+            </div>
+
+            {/* Company name — blurred for locked users */}
+            <h3
+              className={`font-headline text-lg font-extrabold text-[#012d1d] mb-1 leading-tight transition-all ${
+                !hasAccess ? 'blur-sm select-none pointer-events-none' : ''
+              }`}
+            >
+              Damen Capital
+            </h3>
+
+            {/* Contact — blurred for locked users */}
+            <p
+              className={`text-secondary text-sm mb-4 transition-all ${
+                !hasAccess ? 'blur-sm select-none pointer-events-none' : ''
+              }`}
+            >
+              Eric Scharaga
+            </p>
+
+            {/* Description — always visible to entice upgrade */}
+            <p className="text-secondary text-sm leading-relaxed flex-1 mb-5">
+              Lending and note buying for vacant land investors.
+            </p>
+
+            {/* CTA — locked state for non-access users */}
+            {hasAccess ? (
+              <a
+                href="https://damencapital.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 bg-[#012d1d] text-white font-bold text-sm py-2.5 rounded-xl hover:bg-[#012d1d]/90 transition-colors"
