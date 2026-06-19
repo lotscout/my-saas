@@ -28,7 +28,6 @@ export default function FundingPartnersPage() {
 
         {/* Page heading */}
         <header className="mb-10">
-          <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Partner Access</p>
           <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-3">
             Funding <span className="text-emerald-600">Partners</span>
           </h1>
