@@ -114,29 +114,23 @@ export default function EditProfilePage() {
     }
     if (!userId) return;
     setUploading(true);
-    const supabase = createClient();
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
-      if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
-      const newAvatarUrl = urlData.publicUrl;
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: newAvatarUrl })
-        .eq('id', userId);
-      if (updateError) throw updateError;
-      setAvatarUrl(newAvatarUrl);
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/avatar', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error('Avatar upload error:', data.error);
+        throw new Error(data.error ?? 'Upload failed');
+      }
+      setAvatarUrl(data.url);
       setToastOk(true);
       setToast('Profile picture updated!');
       setTimeout(() => setToast(null), 2000);
     } catch (err) {
       console.error('Avatar upload failed:', err);
       setToastOk(false);
-      setToast('Failed to upload image. Please try again.');
+      setToast(err instanceof Error && err.message ? err.message : 'Failed to upload image. Please try again.');
     } finally {
       setUploading(false);
       e.target.value = '';
