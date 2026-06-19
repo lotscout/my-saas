@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
+import { resolveStateQuery } from '@/lib/stateMap';
 import type { Tier } from '@/lib/permissions';
 
 function getGreeting() {
@@ -11,29 +12,6 @@ function getGreeting() {
   if (h < 12) return 'Good Morning';
   if (h < 17) return 'Good Afternoon';
   return 'Good Evening';
-}
-
-function matchScore(listing: any, criteria: any): number {
-  let score = 70;
-  if (criteria.land_type && listing.land_type && criteria.land_type === listing.land_type) score += 10;
-  if (criteria.location && listing.county && listing.county.toLowerCase().includes(criteria.location.toLowerCase())) score += 10;
-  if (listing.acreage != null && criteria.min_acreage != null && criteria.max_acreage != null) {
-    const mid = (criteria.min_acreage + criteria.max_acreage) / 2;
-    if (Math.abs(listing.acreage - mid) < mid * 0.3) score += 5;
-  }
-  if (listing.price != null && criteria.max_budget != null) {
-    if (listing.price < criteria.max_budget * 0.8) score += 5;
-  }
-  return Math.min(score, 100);
-}
-
-function listingMatchesCriteria(listing: any, criteria: any): boolean {
-  if (criteria.min_acreage != null && listing.acreage != null && listing.acreage < criteria.min_acreage) return false;
-  if (criteria.max_acreage != null && listing.acreage != null && listing.acreage > criteria.max_acreage) return false;
-  if (criteria.min_budget != null && listing.price != null && listing.price < criteria.min_budget) return false;
-  if (criteria.max_budget != null && listing.price != null && listing.price > criteria.max_budget) return false;
-  if (criteria.land_type && listing.land_type && criteria.land_type !== listing.land_type) return false;
-  return true;
 }
 
 function Skeleton({ className }: { className?: string }) {
@@ -52,11 +30,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const [firstName, setFirstName] = useState<string | null>(null);
   const [tier, setTier] = useState<Tier | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [hasAnalysisReady, setHasAnalysisReady] = useState(false);
-  const [matchedBuyers, setMatchedBuyers] = useState<any[]>([]);
-  const [newListings, setNewListings] = useState<any[]>([]);
-  const [nearbyListings, setNearbyListings] = useState<any[]>([]);
+  const [profile, setProfile] = useState<{ first_name: string | null; last_name: string | null; state: string | null; county: string | null } | null>(null);
+  const [locNewListings, setLocNewListings] = useState<any[]>([]);
+  const [locNewBuyers, setLocNewBuyers] = useState<any[]>([]);
   const [marketReport, setMarketReport] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSubmittedToast, setShowSubmittedToast] = useState(false);
@@ -78,13 +54,9 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [profileRes, subRes, unreadRes, analysisRes, userListingsRes, userCriteriaRes] = await Promise.all([
-        supabase.from('profiles').select('first_name, state, county, is_admin').eq('id', user.id).single(),
+      const [profileRes, subRes] = await Promise.all([
+        supabase.from('profiles').select('first_name, last_name, state, county, is_admin').eq('id', user.id).single(),
         supabase.from('subscriptions').select('tier').eq('user_id', user.id).eq('status', 'active').single(),
-        supabase.from('messages').select('id', { count: 'exact', head: true }).eq('recipient_id', user.id).is('read_at', null),
-        supabase.from('property_analysis_requests').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'complete'),
-        supabase.from('listings').select('id, acreage, price, county, land_type').eq('user_id', user.id).eq('status', 'active'),
-        supabase.from('buyer_criteria').select('id, location, min_acreage, max_acreage, min_budget, max_budget, land_type').eq('user_id', user.id).eq('active', true),
       ]);
 
       if (profileRes.data?.is_admin) {
@@ -92,66 +64,46 @@ export default function DashboardPage() {
         return;
       }
 
+      const prof = profileRes.data ?? null;
+      setProfile(prof ? {
+        first_name: prof.first_name ?? null,
+        last_name: prof.last_name ?? null,
+        state: prof.state ?? null,
+        county: prof.county ?? null,
+      } : null);
+
       setFirstName(
-        profileRes.data?.first_name ??
+        prof?.first_name ??
         (user.user_metadata?.first_name as string | undefined) ??
         null
       );
       setTier((subRes?.data?.tier as Tier) ?? null);
-      setUnreadCount(unreadRes.count ?? 0);
-      setHasAnalysisReady((analysisRes.count ?? 0) > 0);
 
-      const userState = profileRes.data?.state ?? null;
-      const userListings: any[] = (userListingsRes.data as any[]) ?? [];
-      const userCriteria: any[] = (userCriteriaRes.data as any[]) ?? [];
+      // CASE B data — location-based matches from the last 30 days, only when a location is set.
+      if (prof?.state && prof?.county) {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        // profiles.state holds a full name (e.g. "Idaho") while listings/buyer_requests
+        // store 2-letter codes — resolveStateQuery returns both so .in() matches either.
+        const stateForms = resolveStateQuery(prof.state);
 
-      // Matched buyers: other users' criteria that match this user's listed properties
-      if (userListings.length > 0) {
-        const { data: allCriteria } = await supabase
-          .from('buyer_criteria')
-          .select('id, user_id, location, min_acreage, max_acreage, min_budget, max_budget, land_type, buyer:user_id(first_name, last_name)')
-          .eq('active', true)
-          .neq('user_id', user.id);
-
-        if (allCriteria) {
-          const scored = (allCriteria as any[])
-            .filter(c => userListings.some(l => listingMatchesCriteria(l, c)))
-            .map(c => ({ c, score: matchScore(userListings.find(l => listingMatchesCriteria(l, c))!, c) }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5);
-          setMatchedBuyers(scored);
-        }
-      }
-
-      // New listings matching user's buyer criteria
-      if (userCriteria.length > 0) {
-        const { data: feedListings } = await supabase
-          .from('listings')
-          .select('id, title, location, county, acreage, price, land_type, created_at')
-          .eq('status', 'active')
-          .neq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(50);
-
-        if (feedListings) {
-          const matched = (feedListings as any[])
-            .filter(listing => userCriteria.some(c => listingMatchesCriteria(listing, c)))
-            .slice(0, 4);
-          setNewListings(matched);
-        }
-      }
-
-      // Nearby listings by profile state (fallback for "new properties" card)
-      if (userState) {
-        const { data: nearbyRes } = await supabase
-          .from('listings')
-          .select('id, title, state, county, created_at')
-          .eq('status', 'active')
-          .eq('state', userState)
-          .neq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(3);
-        setNearbyListings((nearbyRes as any[]) ?? []);
+        const [listingsRes, buyersRes] = await Promise.all([
+          supabase
+            .from('listings')
+            .select('id, title, county, state, created_at')
+            .in('state', stateForms)
+            .eq('status', 'active')
+            .gte('created_at', thirtyDaysAgo)
+            .limit(5),
+          supabase
+            .from('buyer_requests')
+            .select('id, target_state, created_at')
+            .in('target_state', stateForms)
+            .eq('status', 'active')
+            .gte('created_at', thirtyDaysAgo)
+            .limit(5),
+        ]);
+        setLocNewListings((listingsRes.data as any[]) ?? []);
+        setLocNewBuyers((buyersRes.data as any[]) ?? []);
       }
 
       // User's most recent delivered market report
@@ -173,8 +125,8 @@ export default function DashboardPage() {
     load();
   }, [router]);
 
-  const hasNewListings = newListings.length > 0 || nearbyListings.length > 0;
-  const hasMatchedBuyers = matchedBuyers.length > 0;
+  const profileComplete = !!(profile?.first_name && profile?.last_name);
+  const hasLocation = !!(profile?.state && profile?.county);
 
   return (
     <div className="bg-surface text-on-surface antialiased font-body">
@@ -242,35 +194,40 @@ export default function DashboardPage() {
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </div>
+          ) : !profileComplete ? (
+            /* CASE A — profile not complete */
+            <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <p className="text-sm font-semibold text-on-surface">
+                Complete your profile to get personalized listings and buyer matches in your area.
+              </p>
+              <a
+                href="/edit-profile"
+                className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors text-center"
+              >
+                Complete Profile
+              </a>
+            </div>
+          ) : !hasLocation ? (
+            /* CASE C — profile complete but no location */
+            <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <p className="text-sm font-semibold text-on-surface">
+                Add your location to see new listings and buyers in your area.
+              </p>
+              <a
+                href="/edit-profile"
+                className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors text-center"
+              >
+                Add Location
+              </a>
+            </div>
           ) : (
+            /* CASE B — profile complete with location: location-based matches (may be empty) */
             <div className="flex flex-col gap-3">
-              {unreadCount > 0 && (
+              {locNewListings.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4">
                   <p className="text-sm font-semibold text-on-surface">
-                    You have {unreadCount} new message{unreadCount !== 1 ? 's' : ''}
+                    New listings in {profile?.county}, {profile?.state}
                   </p>
-                  <a
-                    href="/messaging"
-                    className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
-                  >
-                    View Messages
-                  </a>
-                </div>
-              )}
-              {hasMatchedBuyers && (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4">
-                  <p className="text-sm font-semibold text-on-surface">New buyers are looking in your area</p>
-                  <a
-                    href="/buyer-directory"
-                    className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
-                  >
-                    View Buyers
-                  </a>
-                </div>
-              )}
-              {hasNewListings && (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4">
-                  <p className="text-sm font-semibold text-on-surface">New properties in your area</p>
                   <a
                     href="/marketplace"
                     className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
@@ -279,14 +236,16 @@ export default function DashboardPage() {
                   </a>
                 </div>
               )}
-              {hasAnalysisReady && (
+              {locNewBuyers.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4">
-                  <p className="text-sm font-semibold text-on-surface">Your property report is ready</p>
+                  <p className="text-sm font-semibold text-on-surface">
+                    New buyers looking in {profile?.state}
+                  </p>
                   <a
-                    href="/property-analysis"
+                    href="/buyer-directory"
                     className="flex-none bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
                   >
-                    View Report
+                    View Buyers
                   </a>
                 </div>
               )}
