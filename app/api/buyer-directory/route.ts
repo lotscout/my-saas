@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { createClient } from '@/lib/supabase/server';
 import { resolveStateQuery } from '@/lib/stateMap';
 
 export async function GET(request: NextRequest) {
+  const auth = await createClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status') ?? 'active';
   const state = searchParams.get('state');

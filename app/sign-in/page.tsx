@@ -55,6 +55,19 @@ export default function SignInPage() {
       body: JSON.stringify({ rememberMe }),
     });
 
+    // Return the user to the page they were trying to reach (set by the proxy).
+    // Only allow internal paths to avoid open-redirect abuse.
+    const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+    const safeRedirect =
+      redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+        ? redirectParam
+        : null;
+
+    if (safeRedirect) {
+      router.push(safeRedirect);
+      return;
+    }
+
     const { data: { user: signedInUser } } = await supabase.auth.getUser();
     if (signedInUser) {
       const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', signedInUser.id).single();

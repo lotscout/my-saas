@@ -1,25 +1,31 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PROTECTED = [
-  '/dashboard',
-  '/create-listing',
-  '/create-buyer-request',
-  '/marketplace',
-  '/buyer-directory',
-  '/messaging',
-  '/profile',
-  '/edit-profile',
-  '/property-analysis',
-  '/deal-analysis',
-  '/admin',
+// Default-deny: every page route requires a session EXCEPT these public ones.
+// (API routes authenticate themselves and are bypassed below.)
+const PUBLIC_ROUTES = [
+  '/',
+  '/home',
+  '/login',
+  '/sign-in',
+  '/signup',
+  '/sign-up',
+  '/reset-password',
+  '/auth',            // OAuth / email-confirm callbacks
+  '/pricing',
+  '/market-reports',
+  '/market-report',
+  '/success',         // post-checkout redirect
+  '/terms',
+  '/privacy',
 ]
 
-function isProtected(pathname: string) {
-  return PROTECTED.some(p => pathname === p || pathname.startsWith(p + '/'))
+function isPublic(pathname: string) {
+  return PUBLIC_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'))
 }
 
 export async function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -44,18 +50,37 @@ export async function proxy(request: NextRequest) {
   )
 
   // getUser() validates the JWT server-side — never trust only the cookie value.
-  const { data: { user }, error } = await supabase.auth.getUser()
+  // Always called so the session cookie is refreshed, even on public routes.
+  const { data: { user } } = await supabase.auth.getUser()
 
-  console.log('[proxy] path:', request.nextUrl.pathname)
-  console.log('[proxy] user:', user?.id ?? 'null')
-  console.log('[proxy] getUser error:', error?.message ?? 'none')
-  console.log('[proxy] cookies:', request.cookies.getAll().map(c => c.name).join(', '))
+  // API routes return JSON and enforce their own auth — never redirect them.
+  if (path.startsWith('/api')) return supabaseResponse
 
-  if (isProtected(request.nextUrl.pathname) && !user) {
-    console.log('[proxy] REDIRECTING to /sign-in — no user on protected route')
+  // Public pages are always allowed.
+  if (isPublic(path)) return supabaseResponse
+
+  // Internal page with no session → send to sign-in, remembering where they wanted to go.
+  if (!user) {
     const signIn = request.nextUrl.clone()
     signIn.pathname = '/sign-in'
+    signIn.search = ''
+    signIn.searchParams.set('redirect', path)
     return NextResponse.redirect(signIn)
+  }
+
+  // Admin area requires the admin flag (this app uses profiles.is_admin).
+  if (path === '/admin' || path.startsWith('/admin/')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+    if (!profile?.is_admin) {
+      const dashboard = request.nextUrl.clone()
+      dashboard.pathname = '/dashboard'
+      dashboard.search = ''
+      return NextResponse.redirect(dashboard)
+    }
   }
 
   return supabaseResponse
