@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
@@ -229,13 +230,17 @@ interface BuyerCardProps {
 }
 
 function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProps) {
+  const router = useRouter();
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
   const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
   const listedBy = getBuyerName(req);
 
   return (
-    <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden">
+    <div
+      onClick={() => router.push(`/buyer-requests/${req.id}`)}
+      className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col cursor-pointer hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
+    >
       <div className="space-y-2">
         <div>
           <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p>
@@ -259,13 +264,14 @@ function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProp
         {canViewContact ? (
           <Link
             href={`/buyer-requests/${req.id}`}
+            onClick={e => e.stopPropagation()}
             className="w-1/2 bg-green-700 text-white text-sm font-semibold rounded-xl py-2 text-center hover:bg-green-800 transition-colors"
           >
             Contact Buyer
           </Link>
         ) : (
           <button
-            onClick={onUpgradeClick}
+            onClick={e => { e.stopPropagation(); onUpgradeClick?.(); }}
             className="w-1/2 bg-green-700 text-white text-sm font-semibold rounded-xl py-2 hover:bg-green-800 transition-colors"
           >
             Contact Buyer
@@ -273,6 +279,7 @@ function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProp
         )}
         <Link
           href={`/buyer-requests/${req.id}`}
+          onClick={e => e.stopPropagation()}
           className="w-1/2 border border-green-700 text-green-700 text-sm font-semibold rounded-xl py-2 text-center hover:bg-green-50 transition-colors"
         >
           See More
