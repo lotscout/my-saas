@@ -4,7 +4,9 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
 
-const GRID = { display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr' } as const;
+// Shared responsive grid: feature-label column + 3 tier columns.
+// fr units always fit the container width, so the table never overflows horizontally.
+const GRID_CLS = 'grid grid-cols-[1.3fr_1fr_1fr_1fr]';
 
 const FEATURES = [
   { name: 'Land Marketplace Access',     standard: true,          priority: true,          exclusive: true          },
@@ -77,22 +79,14 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="bg-background text-on-surface antialiased min-h-screen flex flex-col">
+    <div className="bg-background text-on-surface antialiased min-h-screen flex flex-col overflow-x-hidden">
       <Header />
 
-      <main className="flex-grow pt-20 pb-4 px-4 sm:px-6 max-w-7xl mx-auto w-full">
-        {/* Page heading */}
-        <header className="mb-4">
-          <h1 className="font-headline text-3xl font-extrabold text-primary tracking-tighter leading-tight">
-            <span className="text-emerald-600">Pricing</span>
-          </h1>
-        </header>
-
-        <div className="overflow-x-auto rounded-2xl">
-        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5 min-w-[560px]">
+      <main className="flex-grow pt-20 pb-4 px-4 sm:px-6 max-w-6xl mx-auto w-full">
+        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
 
           {/* ── Column headers ── */}
-          <div style={GRID} className="border-b border-outline-variant/10">
+          <div className={`${GRID_CLS} border-b border-outline-variant/10`}>
 
             {/* Top-left: billing toggle */}
             <div className="p-4 flex flex-col justify-center gap-2">
@@ -100,7 +94,7 @@ export default function PricingPage() {
                 <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full self-start">
                   <button
                     onClick={() => setIsAnnual(false)}
-                    className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                    className={`px-3 sm:px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                       !isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
                     }`}
                   >
@@ -108,7 +102,7 @@ export default function PricingPage() {
                   </button>
                   <button
                     onClick={() => setIsAnnual(true)}
-                    className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                    className={`px-3 sm:px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                       isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
                     }`}
                   >
@@ -120,7 +114,7 @@ export default function PricingPage() {
             </div>
 
             {/* Standard */}
-            <div className="p-4 flex flex-col border-l border-outline-variant/10">
+            <div className="p-3 sm:p-4 flex flex-col border-l border-outline-variant/10">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-secondary font-bold text-sm tracking-widest uppercase">Standard</span>
                 {userTier === 'standard' && (
@@ -128,14 +122,14 @@ export default function PricingPage() {
                 )}
               </div>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-extrabold text-primary font-headline">${prices.standard}</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-primary font-headline">${prices.standard}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
               <p className="text-xs text-secondary/70 mb-2">{billingSubtext()}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading || userTier === 'standard'}
-                className={`mt-auto w-full py-2 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-2 px-2 sm:px-4 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'standard'
                     ? 'bg-surface-container-high text-secondary cursor-default'
                     : 'bg-emerald-600 text-white hover:bg-emerald-700'
@@ -146,7 +140,7 @@ export default function PricingPage() {
             </div>
 
             {/* Priority */}
-            <div className="p-4 flex flex-col border-l border-outline-variant/10">
+            <div className="p-3 sm:p-4 flex flex-col border-l border-outline-variant/10">
               {/* Badge row — in normal flow, right-aligned, above tier name */}
               <div className="flex justify-end mb-1">
                 {userTier === 'priority' ? (
@@ -161,14 +155,14 @@ export default function PricingPage() {
                 <span className="text-secondary font-bold text-sm tracking-widest uppercase">Priority</span>
               </div>
               <div className="flex items-baseline gap-1 mb-1 justify-center">
-                <span className="text-3xl font-extrabold text-primary font-headline">${prices.priority}</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-primary font-headline">${prices.priority}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
               <p className="text-xs text-secondary/70 mb-2 text-center">{billingSubtext()}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
-                className={`mt-auto w-full py-2 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-2 px-2 sm:px-4 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'priority'
                     ? 'bg-surface-container-high text-secondary cursor-default'
                     : 'bg-emerald-600 text-white hover:bg-emerald-700'
@@ -179,7 +173,7 @@ export default function PricingPage() {
             </div>
 
             {/* Exclusive */}
-            <div className="p-4 flex flex-col border-l border-outline-variant/10">
+            <div className="p-3 sm:p-4 flex flex-col border-l border-outline-variant/10">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-secondary font-bold text-sm tracking-widest uppercase">Exclusive</span>
                 {userTier === 'exclusive' && (
@@ -187,14 +181,14 @@ export default function PricingPage() {
                 )}
               </div>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
               <p className="text-xs text-secondary/70 mb-2">{billingSubtext()}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading || userTier === 'exclusive'}
-                className={`mt-auto w-full py-2 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-2 px-2 sm:px-4 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'exclusive'
                     ? 'bg-surface-container-high text-secondary cursor-default'
                     : 'bg-emerald-600 text-white hover:bg-emerald-700'
@@ -214,10 +208,9 @@ export default function PricingPage() {
             return (
               <div
                 key={fi}
-                style={GRID}
-                className={fi > 0 ? 'border-t border-outline-variant/5' : 'border-t border-outline-variant/10'}
+                className={`${GRID_CLS} ${fi > 0 ? 'border-t border-outline-variant/5' : 'border-t border-outline-variant/10'}`}
               >
-                <div className="py-0.5 pl-8 pr-4 text-sm text-secondary flex items-center">
+                <div className="py-0.5 pl-4 pr-2 sm:pl-8 sm:pr-4 text-sm text-secondary flex items-center">
                   {feature.name}
                 </div>
                 <div className="py-0.5 px-4 flex justify-center items-center border-l border-outline-variant/10">
@@ -233,7 +226,6 @@ export default function PricingPage() {
             );
           })}
 
-        </div>
         </div>
       </main>
 
