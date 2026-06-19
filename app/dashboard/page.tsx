@@ -61,6 +61,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showSubmittedToast, setShowSubmittedToast] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && sessionStorage.getItem('listing_submitted')) {
@@ -211,20 +212,26 @@ export default function DashboardPage() {
 
         {/* SECTION 2 — QUICK ACTIONS */}
         <section className="mb-10">
-          <div
-            className="flex flex-row gap-3 overflow-x-auto pb-2"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
+          <button
+            onClick={() => setQuickActionsOpen(!quickActionsOpen)}
+            className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold rounded-xl px-6 py-4 flex items-center justify-between transition-all"
           >
-            {QUICK_ACTIONS.map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                className="flex-none bg-white border border-green-700 text-green-700 font-semibold rounded-xl px-6 py-3 whitespace-nowrap hover:bg-green-50 transition-colors text-sm"
-              >
-                {label}
-              </a>
-            ))}
-          </div>
+            Quick Actions
+            <span>{quickActionsOpen ? '▲' : '▼'}</span>
+          </button>
+          {quickActionsOpen && (
+            <div className="mt-2 flex flex-col gap-2">
+              {QUICK_ACTIONS.map(({ label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  className="block w-full bg-white border border-green-700 text-green-700 font-semibold rounded-xl px-6 py-4 hover:bg-green-50 transition-colors"
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* SECTION 3 — FOR YOU */}
