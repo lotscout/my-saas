@@ -33,7 +33,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<{ first_name: string | null; last_name: string | null; state: string | null; county: string | null } | null>(null);
   const [locNewListings, setLocNewListings] = useState<any[]>([]);
   const [locNewBuyers, setLocNewBuyers] = useState<any[]>([]);
-  const [marketReport, setMarketReport] = useState<any | null>(null);
+  const [marketUpdate, setMarketUpdate] = useState<{ preview: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSubmittedToast, setShowSubmittedToast] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -106,18 +106,12 @@ export default function DashboardPage() {
         setLocNewBuyers((buyersRes.data as any[]) ?? []);
       }
 
-      // User's most recent delivered market report
-      if (user.email) {
-        const { data: mrData } = await supabase
-          .from('market_report_requests')
-          .select('id, county, state, report_month, report_url')
-          .eq('email', user.email)
-          .eq('status', 'delivered')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        setMarketReport(mrData ?? null);
-      }
+      // Latest AI-generated land market update (for the preview card)
+      try {
+        const res = await fetch('/api/market-updates/latest');
+        const { update } = await res.json();
+        setMarketUpdate(update ?? null);
+      } catch { /* leave null — card shows the "being prepared" copy */ }
 
       setLoading(false);
     }
@@ -281,59 +275,31 @@ export default function DashboardPage() {
           </section>
         )}
 
-        {/* SECTION 4 — MARKET UPDATES (below the fold) */}
+        {/* SECTION 4 — LATEST LAND MARKET UPDATES */}
         <section className="mt-16 pt-8 border-t border-outline-variant/10">
-          <h2 className="font-headline font-bold text-on-surface text-xl sm:text-2xl mb-6">Market Updates</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            {/* Left: Monthly Market Update */}
-            <div>
-              <h3 className="text-base font-semibold text-on-surface mb-3">Monthly Market Update</h3>
-              <p className="text-sm text-on-surface/70 leading-relaxed mb-3">
-                The US vacant land market continues to show strong demand in Sun Belt states with median prices up 4.2% year over year. Days on market have increased slightly in Q2 2026 as inventory normalizes. Western markets remain supply-constrained with premium pricing near transit corridors.
+          <div className="bg-white border border-outline-variant/20 rounded-xl p-6">
+            <h2 className="font-headline font-bold text-on-surface text-lg sm:text-xl mb-3">Latest Land Market Updates</h2>
+            {loading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-9 w-32 mt-3" />
+              </div>
+            ) : marketUpdate?.preview ? (
+              <>
+                <p className="text-sm text-on-surface/70 leading-relaxed mb-5">{marketUpdate.preview}</p>
+                <a
+                  href="/market-updates"
+                  className="inline-block bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
+                >
+                  Read More
+                </a>
+              </>
+            ) : (
+              <p className="text-sm text-on-surface/60 leading-relaxed">
+                This month&apos;s market update is being prepared. Check back soon.
               </p>
-              <p className="text-xs text-on-surface/40">Updated monthly by LotScout</p>
-            </div>
-
-            {/* Right: Local Market Update */}
-            <div>
-              <h3 className="text-base font-semibold text-on-surface mb-3">Local Market Update</h3>
-              {loading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-48" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-9 w-36 mt-2" />
-                </div>
-              ) : marketReport ? (
-                <div>
-                  <p className="text-sm font-semibold text-on-surface mb-1">
-                    {marketReport.county} County, {marketReport.state} — {marketReport.report_month}
-                  </p>
-                  <p className="text-sm text-on-surface/70 leading-relaxed mb-4">
-                    Your county-level land market intelligence report is ready to view. Click below to access your full analysis.
-                  </p>
-                  <a
-                    href={marketReport.report_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors"
-                  >
-                    View Full Report
-                  </a>
-                </div>
-              ) : (
-                <div>
-                  <a
-                    href="/market-reports"
-                    className="inline-block bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-800 transition-colors mb-3"
-                  >
-                    Get Local Market Updates
-                  </a>
-                  <p className="text-xs text-on-surface/40">Receive monthly county-level land market intelligence for $9/mo.</p>
-                </div>
-              )}
-            </div>
-
+            )}
           </div>
         </section>
 
