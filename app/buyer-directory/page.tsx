@@ -263,6 +263,38 @@ function BuyerRequestCard({ req }: BuyerCardProps) {
   );
 }
 
+// ─── Compact national buyer card ──────────────────────────────────────────────
+
+function NationalBuyerCard({ req, blurred, onUpgrade }: { req: BuyerRequest; blurred: boolean; onUpgrade: () => void }) {
+  const router = useRouter();
+  const name = getBuyerName(req);
+  const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
+  const budget = fmtBudget(req.budget_min, req.budget_max);
+  const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
+  const blurCls = blurred ? 'blur-sm select-none' : '';
+
+  return (
+    <div
+      onClick={() => (blurred ? onUpgrade() : router.push(`/buyer-requests/${req.id}`))}
+      className="relative bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-3 flex flex-col gap-1 cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden min-h-[116px]"
+    >
+      <p className={`font-bold text-primary text-sm leading-tight line-clamp-2 ${blurCls}`}>{name}</p>
+      <div className={`flex items-center gap-0.5 text-xs text-secondary ${blurCls}`}>
+        <span className="material-symbols-outlined text-sm">location_on</span>
+        <span className="truncate">{location}</span>
+      </div>
+      <p className={`text-sm font-bold text-on-surface mt-auto ${blurCls}`}>{budget}</p>
+      {timeline && <p className={`text-[11px] text-secondary ${blurCls}`}>{timeline}</p>}
+      {blurred && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-surface-container-lowest/30 backdrop-blur-[1px]">
+          <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+          <span className="text-[11px] font-bold text-primary">Upgrade to view</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Sub-view back header ─────────────────────────────────────────────────────
 
 function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitle: string; count?: number; onBack: () => void }) {
@@ -294,6 +326,8 @@ export default function BuyerDirectoryPage() {
   const { isAdmin, isAtLeast, loading: permLoading } = useUserTier();
 
   const canViewContact = !permLoading && (isAtLeast('standard') || !!isAdmin);
+  // Priority/Exclusive (or admin) members can see every national buyer beyond the free first 5.
+  const canViewAllBuyers = !permLoading && (isAtLeast('priority') || !!isAdmin);
 
   // ── Navigation state ──
   const [tab, setTab] = useState<MainTab>('directory');
@@ -658,9 +692,14 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try adjusting your search or filters</p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {filteredNational.map(req => (
-                        <BuyerRow key={req.id} req={req} canViewContact={canViewContact} minimal />
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                      {filteredNational.map((req, i) => (
+                        <NationalBuyerCard
+                          key={req.id}
+                          req={req}
+                          blurred={i >= 5 && !canViewAllBuyers}
+                          onUpgrade={() => setShowUpgradeModal(true)}
+                        />
                       ))}
                     </div>
                   )}
