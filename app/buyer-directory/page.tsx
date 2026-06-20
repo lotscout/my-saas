@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import { useUserTier } from '@/hooks/useUserTier';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
 import { getBuyerName } from '@/lib/getBuyerName';
 
@@ -145,61 +144,62 @@ function applyAcreageFilter(req: BuyerRequest, f: string): boolean {
   return true;
 }
 
-// ─── BuyerRequestCard (for Requests tab) ──────────────────────────────────────
+// ─── DirectoryCard — contact info only (Buyer Directory) ──────────────────────
 
-interface BuyerCardProps {
-  req: BuyerRequest;
-  canViewContact: boolean;
-  onUpgradeClick?: () => void;
-}
-
-function BuyerRequestCard({ req }: BuyerCardProps) {
+function DirectoryCard({ req }: { req: BuyerRequest }) {
   const router = useRouter();
-  const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
-  const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
-  const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
-  const listedBy = getBuyerName(req);
+  const name = getBuyerName(req);
+  const website = req.contact_website;
+  const phone = req.contact_phone;
+  const email = req.contact_email;
+  const reachable = !!(phone || email);
 
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="bg-surface-container-lowest rounded-2xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-4 flex flex-col cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden"
+      className="relative bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-3 flex flex-col gap-1.5 cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden min-h-[116px]"
     >
-      <div className="space-y-2">
-        <div>
-          <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p>
-          <p className={`text-base font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p>
-          {(primaryCity(req) || req.lot_size_label) && (
-            <p className="text-xs text-secondary mt-0.5">
-              {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
+      <p className="font-bold text-primary text-sm leading-tight line-clamp-2">{name}</p>
+      {website && (
+        <a
+          href={`https://${website.replace(/^https?:\/\//, '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="flex items-center gap-1 text-xs text-primary/80 hover:text-primary font-medium truncate"
+        >
+          <span className="material-symbols-outlined text-sm">language</span>
+          <span className="truncate">{website.replace(/^https?:\/\//, '')}</span>
+        </a>
+      )}
+      {reachable ? (
+        <div className="mt-auto space-y-0.5">
+          {phone && (
+            <p className="flex items-center gap-1 text-[11px] text-secondary truncate">
+              <span className="material-symbols-outlined text-sm">call</span>{phone}
+            </p>
+          )}
+          {email && (
+            <p className="flex items-center gap-1 text-[11px] text-secondary truncate">
+              <span className="material-symbols-outlined text-sm">mail</span>{email}
             </p>
           )}
         </div>
-        <div>
-          <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Budget</p>
-          <p className="text-base font-bold text-on-surface">{perAcre}</p>
-        </div>
-        {timeline && (
-          <div>
-            <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Timeline</p>
-            <p className="text-base font-bold text-on-surface">{timeline}</p>
-          </div>
-        )}
-      </div>
-
-      <p className="text-xs text-secondary italic mt-3">Listed by {listedBy}</p>
+      ) : (
+        <p className="mt-auto text-[11px] text-secondary/70 italic">Contact via platform</p>
+      )}
     </div>
   );
 }
 
-// ─── Compact national buyer card ──────────────────────────────────────────────
+// ─── RequestCard — active-search criteria (Buyer Requests) ────────────────────
 
-function NationalBuyerCard({ req }: { req: BuyerRequest }) {
+function RequestCard({ req }: { req: BuyerRequest }) {
   const router = useRouter();
   const name = getBuyerName(req);
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
-  const budget = fmtBudget(req.budget_min, req.budget_max);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
+  const useCase = req.use_case ? req.use_case.split(' — ')[0].trim() : null;
 
   return (
     <div
@@ -216,8 +216,8 @@ function NationalBuyerCard({ req }: { req: BuyerRequest }) {
           {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
         </p>
       )}
-      <p className="text-sm font-bold text-on-surface mt-auto">{budget}</p>
-      {timeline && <p className="text-[11px] text-secondary">{timeline}</p>}
+      {useCase && <p className="text-[11px] text-secondary truncate capitalize">{useCase}</p>}
+      {timeline && <p className="text-[11px] text-secondary mt-auto">{timeline}</p>}
     </div>
   );
 }
@@ -250,9 +250,6 @@ function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitl
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function BuyerDirectoryPage() {
-  const { isAdmin, isAtLeast, loading: permLoading } = useUserTier();
-
-  const canViewContact = !permLoading && (isAtLeast('standard') || !!isAdmin);
   // ── Navigation state ──
   const [tab, setTab] = useState<MainTab>('directory');
   const [view, setView] = useState<DirectoryView>('grid');
@@ -618,7 +615,7 @@ export default function BuyerDirectoryPage() {
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
                       {filteredNational.map((req) => (
-                        <NationalBuyerCard key={req.id} req={req} />
+                        <DirectoryCard key={req.id} req={req} />
                       ))}
                     </div>
                   )}
@@ -694,7 +691,7 @@ export default function BuyerDirectoryPage() {
                         ) : (
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
                             {filteredState.map((req) => (
-                              <NationalBuyerCard key={req.id} req={req} />
+                              <DirectoryCard key={req.id} req={req} />
                             ))}
                           </div>
                         )}
@@ -804,9 +801,9 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try clearing your filters or check back soon</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                       {filteredActiveBR.map(req => (
-                        <BuyerRequestCard key={req.id} req={req} canViewContact={canViewContact} onUpgradeClick={() => setShowUpgradeModal(true)} />
+                        <RequestCard key={req.id} req={req} />
                       ))}
                     </div>
                   )}
@@ -907,14 +904,9 @@ export default function BuyerDirectoryPage() {
                   <p className="text-sm">Try adjusting your search or clearing filters</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                   {filteredBR.map(req => (
-                    <BuyerRequestCard
-                      key={req.id}
-                      req={req}
-                      canViewContact={canViewContact}
-                      onUpgradeClick={() => setShowUpgradeModal(true)}
-                    />
+                    <RequestCard key={req.id} req={req} />
                   ))}
                 </div>
               )}

@@ -66,7 +66,8 @@ export async function GET(request: NextRequest) {
       contact_phone: contactVisible ? r.contact_phone : null,
       contact_phone_type: contactVisible ? r.contact_phone_type : null,
       contact_email: contactVisible ? r.contact_email : null,
-      contact_website: contactVisible ? r.contact_website : null,
+      // Website is public-facing company info — shown regardless of contact visibility.
+      contact_website: r.contact_website,
     };
   });
 
