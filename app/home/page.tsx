@@ -423,52 +423,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 5: The Problem */}
-      <section className="py-16 bg-surface px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary mb-8 tracking-tight">Sound Familiar?</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Before LotScout */}
-            <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
-              <h3 className="font-headline text-2xl font-bold text-on-error-container mb-5">Before LotScout</h3>
-              <ul className="space-y-4">
-                {[
-                  "You've been waiting 6–12 months and still haven't found the right buyer or property",
-                  "You're paying out 5–10% in commissions on every deal and watching your profits shrink",
-                  "You're not confident in the land value or data — every analysis takes days and costs hundreds",
-                  "You're spending hours scrolling through MLS listings that have nothing to do with land",
-                  "You found the perfect lot but someone else already closed on it before you even knew it existed",
-                ].map((text) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-error text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
-                    <span className="text-on-surface-variant font-medium text-base leading-snug">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {/* With LotScout */}
-            <div className="bg-primary-fixed/20 rounded-2xl p-6 md:p-8 border border-primary/5">
-              <h3 className="font-headline text-2xl font-bold text-primary mb-5">With LotScout</h3>
-              <ul className="space-y-4">
-                {[
-                  'Find a verified buyer or seller in under 30 days — 6x faster than the traditional market',
-                  'Save thousands on realtor commissions and closing costs — keep 100% of your proceeds',
-                  'Every listing includes an in-depth AI analysis so you never spend hours researching a property again',
-                  'Get instantly matched with hundreds of active buyers or sellers the moment you join',
-                  '24/7 support from real people who know land — always someone in your corner on every deal',
-                  'Higher profits, faster closes — the average LotScout deal closes 6x faster than the MLS',
-                ].map((text) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-primary text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    <span className="text-on-surface font-semibold text-base leading-snug">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* SECTION 6: Who It's For */}
       <section className="py-16 bg-surface-container-low px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
@@ -603,6 +557,10 @@ export default function HomePage() {
               <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
           </div>
+          <p className="mt-8 sm:mt-10 text-center text-secondary text-base sm:text-lg">
+            Enterprise: Looking for something else related to land development, market updates, or economic data? Contact us at{' '}
+            <a href="mailto:support@lotscout.com" className="font-semibold text-emerald-600 hover:underline">support@lotscout.com</a>
+          </p>
         </div>
       </section>
 
