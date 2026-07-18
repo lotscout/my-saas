@@ -338,6 +338,59 @@ export default function PricingPage() {
             Contact Sales
           </a>
         </div>
+
+        {/* ── Search Pro Add-On ── */}
+        <div className="mt-8 rounded-2xl overflow-hidden shadow-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6">
+            {/* Left: icon + name */}
+            <div className="flex items-center gap-3 min-w-[160px]">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center flex-none">
+                <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>search</span>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-0.5">Add-On</div>
+                <div className="font-headline text-lg font-extrabold text-primary">Search Pro</div>
+              </div>
+            </div>
+
+            {/* Middle: price + description + features */}
+            <div className="flex-grow">
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-2xl font-extrabold text-primary font-headline">$20</span>
+                <span className="text-secondary font-medium text-sm">/mo</span>
+              </div>
+              <p className="text-sm text-secondary mb-2">
+                Unlimited AI Search questions and saved reports. Ask our land investment advisor anything, as much as you want.
+              </p>
+              <div className="flex flex-wrap gap-x-5 gap-y-1">
+                {[
+                  'Unlimited Search questions',
+                  'Save reports and conversations',
+                  'Full access to the AI Land Advisor',
+                ].map((f) => (
+                  <span key={f} className="flex items-center gap-1.5 text-xs text-secondary">
+                    <span className="material-symbols-outlined text-emerald-600 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    {f}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-emerald-700 font-semibold">
+                ✦ Included free with any LotScout paid plan (Standard, Priority, or Exclusive).
+              </p>
+            </div>
+
+            {/* Right: CTA */}
+            <div className="flex-none">
+              <button
+                onClick={() => handleCheckout('searchProMonthly')}
+                disabled={!!loading}
+                className="py-2.5 px-6 font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-60 whitespace-nowrap"
+              >
+                {loading === 'searchProMonthly' ? 'Loading…' : 'Get Search Pro'}
+              </button>
+            </div>
+          </div>
+        </div>
       </main>
 
       {/* Footer */}

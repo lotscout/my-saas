@@ -28,6 +28,7 @@ const tierFromPriceKey: Record<string, string | undefined> = {
   exclusiveMonthly: 'exclusive',
   exclusiveAnnual: 'exclusive',
   additionalReport: undefined,
+  searchProMonthly: 'search_pro',
 };
 
 export async function POST(request: NextRequest) {
@@ -64,13 +65,9 @@ export async function POST(request: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: user.id,
       ...(existingCustomerId ? { customer: existingCustomerId } : {}),
-      ...(isSearchPro ? { metadata: { type: 'search_pro' } } : isOneTime ? {} : { metadata: { tier } }),
-      success_url: isSearchPro
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}/advisor?pro=1`
-        : `${process.env.NEXT_PUBLIC_BASE_URL}/property-analysis`,
-      cancel_url: isSearchPro
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}/advisor`
-        : `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
+      ...(isOneTime ? {} : { metadata: { tier: tier ?? '', ...(isSearchPro ? { type: 'search_pro' } : {}) } }),
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing?search_pro=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
     });
 
     return NextResponse.json({ url: session.url });
