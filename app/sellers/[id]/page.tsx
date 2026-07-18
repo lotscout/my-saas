@@ -88,7 +88,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
                 <h1 className="font-headline text-3xl font-black text-primary">{displayName}</h1>
                 <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest self-center sm:self-auto">
                   <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                  Wholesaler
+                  Owner
                 </span>
               </div>
               <p className="text-on-surface-variant text-sm leading-relaxed max-w-prose">
