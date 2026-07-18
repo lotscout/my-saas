@@ -34,7 +34,7 @@ async function logWebhookEvent(
 
 // The ONLY profile fields this webhook is ever permitted to write.
 // If this set changes, it must be reviewed explicitly.
-const ALLOWED_PROFILE_FIELDS = new Set(['subscription_tier']);
+const ALLOWED_PROFILE_FIELDS = new Set(['subscription_tier', 'has_search_pro']);
 
 function safeProfileUpdate(fields: Record<string, unknown>): Record<string, unknown> {
   const safe: Record<string, unknown> = {};
@@ -108,6 +108,40 @@ export async function POST(request: NextRequest) {
           boostErr || listingErr ? 'error' : 'processed',
           `listing_boost listing=${listing_id}`
         );
+        break;
+      }
+
+      // --- Search Pro subscription ($20/mo standalone) ---
+      if (metadata.type === 'search_pro') {
+        if (session.payment_status !== 'paid') {
+          await logWebhookEvent(supabase, event.type, session.client_reference_id, 'skipped', `search_pro payment_status=${session.payment_status}`);
+          break;
+        }
+        const spUserId = session.client_reference_id;
+        if (!spUserId) {
+          await logWebhookEvent(supabase, event.type, null, 'error', 'search_pro missing userId');
+          break;
+        }
+        const { error: spSubErr } = await supabase
+          .from('subscriptions')
+          .upsert({
+            user_id: spUserId,
+            stripe_customer_id: session.customer as string,
+            stripe_subscription_id: session.subscription as string,
+            tier: 'search_pro',
+            status: 'active',
+            cancel_at_period_end: false,
+            updated_at: new Date(),
+          }, { onConflict: 'user_id' });
+        if (spSubErr) console.error('Failed to upsert search_pro subscription:', spSubErr);
+
+        const { error: spProfErr } = await supabase
+          .from('profiles')
+          .update(safeProfileUpdate({ has_search_pro: true }))
+          .eq('id', spUserId);
+        if (spProfErr) console.error('Failed to set has_search_pro:', spProfErr);
+
+        await logWebhookEvent(supabase, event.type, spUserId, spSubErr || spProfErr ? 'error' : 'processed', 'search_pro activated');
         break;
       }
 
@@ -274,7 +308,7 @@ export async function POST(request: NextRequest) {
       // Security: use .update() and only touch subscription_tier.
       const { error: profileDowngradeError } = await supabase
         .from('profiles')
-        .update(safeProfileUpdate({ subscription_tier: 'standard' }))
+        .update(safeProfileUpdate({ subscription_tier: 'standard', has_search_pro: false }))
         .eq('id', subRow.user_id);
 
       if (profileDowngradeError) console.error('Failed to sync tier downgrade to profiles:', profileDowngradeError);
