@@ -8,20 +8,26 @@ import { useUserTier } from '@/hooks/useUserTier';
 // fr units always fit the container width, so the table never overflows horizontally.
 const GRID_CLS = 'grid grid-cols-[1.5fr_1fr_1fr_1fr]';
 
+// Full feature list — every tier shows all rows; unavailable rows render dimmed.
 const FEATURES = [
-  { name: 'Land Marketplace Access',     standard: true,          priority: true,          exclusive: true          },
-  { name: 'Buyer Directory Access',      standard: true,          priority: true,          exclusive: true          },
-  { name: 'Custom Company Profile',      standard: true,          priority: true,          exclusive: true          },
-  { name: 'Lot Analysis Reports',        standard: true,          priority: true,          exclusive: true          },
-  { name: 'Property Analysis Reports',   standard: '5/month',     priority: '15/month',    exclusive: 'Unlimited'   },
-  { name: 'Additional Analysis Reports', standard: '$4.99 each',  priority: '$4.99 each',  exclusive: false         },
-  { name: 'Lot to Buyer Match AI',       standard: true,          priority: true,          exclusive: true          },
-  { name: 'Report Delivery',             standard: '24 hours',    priority: '24 hours',    exclusive: '15 min'      },
-  { name: 'Unlimited Listings',          standard: false,         priority: true,          exclusive: true          },
-  { name: 'Promoted Lot Requests',       standard: false,         priority: true,          exclusive: true          },
-  { name: 'Financing Partners Access',   standard: false,         priority: true,          exclusive: true          },
-  { name: '24/7 Support',               standard: false,         priority: true,          exclusive: true          },
-  { name: 'Hands-On Listing Support',   standard: false,         priority: false,         exclusive: true          },
+  { name: 'Land Marketplace Access',                         standard: true,  priority: true,  exclusive: true  },
+  { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  exclusive: true  },
+  { name: 'Custom Company Profile',                          standard: true,  priority: true,  exclusive: true  },
+  { name: 'Buyer Directory Access',                          standard: true,  priority: true,  exclusive: true  },
+  { name: 'Property Analysis Reports',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  exclusive: true  },
+  { name: 'Unlimited Listings',                              standard: false, priority: true,  exclusive: true  },
+  { name: 'Promoted Lot Requests',                           standard: false, priority: true,  exclusive: true  },
+  { name: 'Financing Partners Access',                       standard: false, priority: true,  exclusive: true  },
+  { name: '24/7 Support',                                    standard: false, priority: true,  exclusive: true  },
+  { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, exclusive: true  },
+  { name: 'Early Access to New Listings Before Anyone Else', standard: false, priority: false, exclusive: true  },
+  { name: 'Early Access to New Buyers Before Anyone Else',   standard: false, priority: false, exclusive: true  },
+  { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, exclusive: true  },
+  { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, exclusive: true  },
+  { name: 'Priority Deal Matching with Top-Tier Buyers',     standard: false, priority: false, exclusive: true  },
+  { name: 'Quarterly Market Intelligence Reports',           standard: false, priority: false, exclusive: true  },
+  { name: "Direct Line to LotScout's Land Experts",          standard: false, priority: false, exclusive: true  },
 ];
 
 function Check() {
@@ -39,34 +45,36 @@ function Dash() {
   return <span className="text-outline-variant text-base">—</span>;
 }
 
-const ANNUAL_PRICES  = { standard: 97,  priority: 329, exclusive: 579 };
-const MONTHLY_PRICES = { standard: 113, priority: 384, exclusive: 675 };
+// Monthly = round(annual x 7/6) to preserve the existing "2 months free" annual
+// discount. Standard is unchanged; priority/enterprise repriced to $199/$529 annual.
+const ANNUAL_PRICES  = { standard: 97,  priority: 199, exclusive: 529 };
+const MONTHLY_PRICES = { standard: 113, priority: 232, exclusive: 617 };
 
-// Per-tier feature lists for the mobile stacked cards.
-const STANDARD_FEATURES = [
-  'Land Marketplace Access',
-  'Buyer Directory Access',
-  'Custom Company Profile',
-  'Lot Analysis Reports',
-  '5 Property Analysis Reports / mo',
-  '$4.99 per additional report',
-];
-const PRIORITY_FEATURES = [
-  'Unlimited Listings',
-  '15 Property Reports / mo',
-  '24h Report Delivery',
-  'Lot to Buyer Match AI',
-  'Promoted Lot Requests',
-  'Financing Partners Access',
-  '24/7 Premium Support',
-];
-const EXCLUSIVE_FEATURES = [
-  'Unlimited Property Reports',
-  '15 min Report Delivery',
-  'Hands-On Listing Support',
-  'Lot to Buyer Match AI',
-  'Promoted Lot Requests',
-];
+// Full feature list rendered in every mobile pricing card. Features not included
+// in the tier are dimmed (opacity-40) with a dash instead of a green check.
+function TierFeatures({ tier, dark = false }: { tier: 'standard' | 'priority' | 'exclusive'; dark?: boolean }) {
+  return (
+    <ul className="mt-5 space-y-3">
+      {FEATURES.map((f) => {
+        const included = f[tier] === true;
+        return (
+          <li
+            key={f.name}
+            className={`flex items-center gap-3 text-sm ${dark ? 'text-emerald-50' : 'text-on-surface'} ${included ? '' : 'opacity-40'}`}
+          >
+            <span
+              className={`material-symbols-outlined text-xl ${included ? (dark ? 'text-emerald-300' : 'text-emerald-600') : (dark ? 'text-emerald-200' : 'text-secondary')}`}
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              {included ? 'check_circle' : 'remove'}
+            </span>
+            {f.name}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
@@ -146,14 +154,7 @@ export default function PricingPage() {
             >
               {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
             </button>
-            <ul className="mt-5 space-y-3">
-              {STANDARD_FEATURES.map(f => (
-                <li key={f} className="flex items-center gap-3 text-sm text-on-surface">
-                  <span className="material-symbols-outlined text-emerald-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
+            <TierFeatures tier="standard" />
           </div>
 
           {/* PRIORITY — Most Popular */}
@@ -172,20 +173,12 @@ export default function PricingPage() {
             >
               {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
             </button>
-            <p className="mt-5 mb-3 text-sm font-bold text-emerald-100">Everything in Standard Plus:</p>
-            <ul className="space-y-3">
-              {PRIORITY_FEATURES.map(f => (
-                <li key={f} className="flex items-center gap-3 text-sm text-emerald-50">
-                  <span className="material-symbols-outlined text-emerald-300 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
+            <TierFeatures tier="priority" dark />
           </div>
 
           {/* EXCLUSIVE */}
           <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
-            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Exclusive</p>
+            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Enterprise</p>
             <div className="flex items-baseline gap-1 mb-1">
               <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
               <span className="text-secondary font-medium text-sm">/mo</span>
@@ -199,15 +192,7 @@ export default function PricingPage() {
             >
               {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
             </button>
-            <p className="mt-5 mb-3 text-sm font-bold text-on-surface">Everything in Priority Plus:</p>
-            <ul className="space-y-3">
-              {EXCLUSIVE_FEATURES.map(f => (
-                <li key={f} className="flex items-center gap-3 text-sm text-on-surface">
-                  <span className="material-symbols-outlined text-emerald-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
+            <TierFeatures tier="exclusive" />
           </div>
         </div>
 
@@ -291,7 +276,7 @@ export default function PricingPage() {
 
             {/* Exclusive */}
             <div className="p-5 flex flex-col border-l border-outline-variant/10">
-              <span className="text-secondary font-bold text-xs tracking-widest uppercase mb-2">Exclusive</span>
+              <span className="text-secondary font-bold text-xs tracking-widest uppercase mb-2">Enterprise</span>
               <div className="flex items-baseline gap-1 mb-0.5">
                 <span className="text-3xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>

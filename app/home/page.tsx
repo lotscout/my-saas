@@ -4,6 +4,50 @@ import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import CreateListingGate from '@/components/CreateListingGate';
 
+// Full feature list shown in every pricing card. Features not included in a
+// tier are dimmed (opacity-40) with a dash instead of a green check.
+const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; enterprise: boolean }[] = [
+  { name: 'Land Marketplace Access',                         standard: true,  priority: true,  enterprise: true  },
+  { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  enterprise: true  },
+  { name: 'Custom Company Profile',                          standard: true,  priority: true,  enterprise: true  },
+  { name: 'Buyer Directory Access',                          standard: true,  priority: true,  enterprise: true  },
+  { name: 'Property Analysis Reports',                       standard: true,  priority: true,  enterprise: true  },
+  { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  enterprise: true  },
+  { name: 'Unlimited Listings',                              standard: false, priority: true,  enterprise: true  },
+  { name: 'Promoted Lot Requests',                           standard: false, priority: true,  enterprise: true  },
+  { name: 'Financing Partners Access',                       standard: false, priority: true,  enterprise: true  },
+  { name: '24/7 Support',                                    standard: false, priority: true,  enterprise: true  },
+  { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, enterprise: true  },
+  { name: 'Early Access to New Listings Before Anyone Else', standard: false, priority: false, enterprise: true  },
+  { name: 'Early Access to New Buyers Before Anyone Else',   standard: false, priority: false, enterprise: true  },
+  { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, enterprise: true  },
+  { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, enterprise: true  },
+  { name: 'Priority Deal Matching with Top-Tier Buyers',     standard: false, priority: false, enterprise: true  },
+  { name: 'Quarterly Market Intelligence Reports',           standard: false, priority: false, enterprise: true  },
+  { name: "Direct Line to LotScout's Land Experts",          standard: false, priority: false, enterprise: true  },
+];
+
+function PlanFeatures({ tier }: { tier: 'standard' | 'priority' | 'enterprise' }) {
+  return (
+    <ul className="space-y-3 mb-8 flex-grow">
+      {ALL_FEATURES.map((f) => {
+        const included = f[tier];
+        return (
+          <li
+            key={f.name}
+            className={`flex items-start gap-3 text-sm ${included ? 'text-on-surface' : 'text-secondary opacity-40'}`}
+          >
+            <span className={`material-symbols-outlined text-lg flex-none mt-0.5 ${included ? 'text-primary' : 'text-secondary'}`}>
+              {included ? 'check' : 'remove'}
+            </span>
+            {f.name}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 
 const HERO_SELLERS = [
   { city: 'Austin, TX',         lat: 30.27,  lng: -97.74,   count: 24 },
@@ -487,20 +531,7 @@ export default function HomePage() {
                 <span className="text-4xl font-extrabold text-primary">$97</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Land Marketplace Access',
-                  'Lot to Buyer Match AI',
-                  'Custom Company Profile',
-                  'Buyer Directory Access',
-                  'Property Analysis Reports (24hr delivery)',
-                  'Lot Analysis Reports (24hr delivery)',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
+              <PlanFeatures tier="standard" />
               <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
             {/* Priority */}
@@ -508,52 +539,20 @@ export default function HomePage() {
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$329</span>
+                <span className="text-4xl font-extrabold text-primary">$199</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Everything in Standard',
-                  'Unlimited Listings',
-                  'Promoted Lot Requests',
-                  'Financing Partners Access',
-                  '24/7 Support',
-                  'Property Analysis Reports (24hr delivery)',
-                  'Lot Analysis Reports (24hr delivery)',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface font-semibold text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
+              <PlanFeatures tier="priority" />
               <Link href="/sign-up" className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all text-center block">Get Started</Link>
             </div>
             {/* Exclusive */}
             <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
+              <h3 className="font-headline text-xl font-bold text-primary mb-2">Enterprise</h3>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$799</span>
+                <span className="text-4xl font-extrabold text-primary">$529</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Everything in Priority',
-                  'Property Analysis Reports (15 min delivery)',
-                  'Lot Analysis Reports (15 min delivery)',
-                  'Dedicated Full-Time Account Manager',
-                  'Early Access to New Listings Before Anyone Else',
-                  'Early Access to New Buyers Before Anyone Else',
-                  'Hands-On Listing Support and Deal Guidance',
-                  'White-Glove Onboarding and Setup',
-                  'Priority Deal Matching with Top-Tier Buyers',
-                  'Quarterly Market Intelligence Reports',
-                  "Direct Line to LotScout's Land Experts",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
+              <PlanFeatures tier="enterprise" />
               <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
           </div>
