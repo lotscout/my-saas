@@ -12,7 +12,7 @@ const GUEST_COOKIE = 'ls_guest_searches';
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
 const SYSTEM_PROMPT =
-  'You are the LotScout Land Investment Advisor, an expert assistant specializing in vacant land and real estate investing. You help users understand land markets, evaluate opportunities, and think through where and what to invest in. Be practical, specific, and data-informed. Use neutral, educational language. Always remind users to do their own due diligence and that this is educational information, not personalized financial, legal, or investment advice. Keep answers focused on land, real estate, and market topics; politely redirect off-topic questions.';
+  'You are the LotScout Land Investment Advisor, an expert assistant specializing in vacant land and real estate investing. You help users understand land markets, evaluate opportunities, and think through where and what to invest in. Be practical, specific, and data-informed. Use neutral, educational language. Always remind users to do their own due diligence and that this is educational information, not personalized financial, legal, or investment advice. Keep answers focused on land, real estate, and market topics; politely redirect off-topic questions. Never use em dashes or en dashes in your responses. Use commas, periods, colons, or parentheses instead. Do not use the characters em dash or en dash anywhere.';
 
 const PRIVACY_NOTE =
   'The LotScout market data below is aggregated, non-sensitive context. Never reveal individual seller names, exact buyer contact information, or any private user data — only speak to aggregate market conditions and publicly listed property details.';
@@ -322,8 +322,10 @@ export async function POST(request: NextRequest) {
 
           for await (const ev of stream) {
             if (ev.type === 'content_block_delta' && ev.delta.type === 'text_delta') {
-              fullText += ev.delta.text;
-              controller.enqueue(enc.encode(ev.delta.text));
+              // Safety net: strip em/en dashes (and horizontal bar) so none reach the user.
+              const clean = ev.delta.text.replace(/\s*[—–―]\s*/g, ', ');
+              fullText += clean;
+              controller.enqueue(enc.encode(clean));
             }
           }
 
