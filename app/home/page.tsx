@@ -207,7 +207,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-4 mb-10">
                 <Link href="/sign-up" className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
-                <CreateListingGate className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</CreateListingGate>
+                <Link href="/sign-up" className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
               </div>
             </div>
             {/* Right column: interactive map */}
