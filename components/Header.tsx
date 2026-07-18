@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import NotificationBell from '@/components/NotificationBell';
 
 const NAV_LINKS = [
-  { label: 'AI Advisor', href: '/advisor' },
+  { label: 'Search', href: '/advisor' },
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Buyer Directory', href: '/buyer-directory' },
   { label: 'Deal Analysis', href: '/property-analysis' },

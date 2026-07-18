@@ -17,6 +17,8 @@ const SUGGESTIONS = [
   'What is driving land prices in 2026?',
 ];
 
+const DISCLAIMER = 'Educational information only — not financial, legal, or investment advice.';
+
 export default function AdvisorPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
@@ -91,93 +93,93 @@ export default function AdvisorPage() {
   const isEmpty = messages.length === 0;
   const streaming = loading && messages.length > 0 && messages[messages.length - 1].role === 'assistant' && !messages[messages.length - 1].content;
 
+  const searchForm = (large: boolean) => (
+    <form
+      onSubmit={e => { e.preventDefault(); send(input); }}
+      className={`w-full flex items-center gap-2 bg-white border border-outline-variant/30 rounded-2xl p-2 ${large ? 'shadow-md' : 'shadow-sm sticky bottom-2'}`}
+    >
+      <input
+        ref={inputRef}
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        placeholder="Ask about land markets, where to invest, what to look for…"
+        className={`flex-grow bg-transparent px-3 py-2.5 text-on-surface placeholder:text-secondary focus:outline-none ${large ? 'text-lg' : 'text-base'}`}
+        aria-label="Search"
+      />
+      <button
+        type="submit"
+        disabled={loading || !input.trim()}
+        className={`shrink-0 flex items-center gap-1.5 bg-green-700 text-white rounded-xl font-bold hover:bg-green-800 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${large ? 'px-6 py-3 text-base' : 'px-5 py-2.5 text-sm'}`}
+      >
+        <span className="material-symbols-outlined text-base">search</span>
+        Search
+      </button>
+    </form>
+  );
+
   return (
     <div className="bg-surface text-on-surface min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-20 pb-4">
-        {/* Intro */}
-        <div className="py-4 text-center">
-          <h1 className="font-headline text-2xl sm:text-3xl font-black text-primary tracking-tight">AI Land Investment Advisor</h1>
-          <p className="text-secondary text-sm mt-1">Ask about land markets, where to invest, and what to look for — grounded in LotScout data.</p>
-        </div>
+      {isEmpty ? (
+        /* ── Centered search-home (empty state) ── */
+        <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-4">
+          <div className="flex-grow flex flex-col items-center justify-center gap-8">
+            <h1 className="font-headline text-4xl sm:text-5xl font-black text-primary tracking-tight text-center">
+              Search
+            </h1>
 
-        {/* Message history */}
-        <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-4 py-4">
-          {isEmpty && (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-6 py-10">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>forum</span>
-              </div>
-              <p className="text-secondary text-sm max-w-md">
-                I&apos;m your LotScout land investment advisor. This is educational information, not personalized financial, legal, or investment advice — always do your own due diligence.
-              </p>
+            <div className="w-full max-w-2xl">
+              {searchForm(true)}
             </div>
-          )}
 
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                  m.role === 'user'
-                    ? 'bg-green-700 text-white rounded-br-md'
-                    : 'bg-white border border-outline-variant/20 text-on-surface rounded-bl-md shadow-sm'
-                }`}
-              >
-                {m.content || (streaming && i === messages.length - 1 ? (
-                  <span className="inline-flex gap-1 py-1">
-                    <span className="w-2 h-2 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </span>
-                ) : '')}
-              </div>
+            <div className="flex flex-wrap gap-2.5 justify-center max-w-2xl">
+              {SUGGESTIONS.map(s => (
+                <button
+                  key={s}
+                  onClick={() => send(s)}
+                  disabled={loading}
+                  className="text-base font-semibold text-primary bg-white border border-primary/20 rounded-full px-4 py-2 hover:bg-primary/5 transition-colors disabled:opacity-50"
+                >
+                  {s}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Suggested questions (first load) */}
-        {isEmpty && (
-          <div className="flex flex-wrap gap-2 justify-center pb-3">
-            {SUGGESTIONS.map(s => (
-              <button
-                key={s}
-                onClick={() => send(s)}
-                disabled={loading}
-                className="text-xs font-semibold text-primary bg-white border border-primary/20 rounded-full px-3.5 py-2 hover:bg-primary/5 transition-colors disabled:opacity-50"
-              >
-                {s}
-              </button>
+          <p className="text-[11px] text-secondary/70 text-center mt-2">{DISCLAIMER}</p>
+        </main>
+      ) : (
+        /* ── Standard chat view (after first message) ── */
+        <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-20 pb-4">
+          <h1 className="font-headline text-2xl font-black text-primary tracking-tight py-3">Search</h1>
+
+          <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-4 py-2">
+            {messages.map((m, i) => (
+              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                    m.role === 'user'
+                      ? 'bg-green-700 text-white rounded-br-md'
+                      : 'bg-white border border-outline-variant/20 text-on-surface rounded-bl-md shadow-sm'
+                  }`}
+                >
+                  {m.content || (streaming && i === messages.length - 1 ? (
+                    <span className="inline-flex gap-1 py-1">
+                      <span className="w-2 h-2 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </span>
+                  ) : '')}
+                </div>
+              </div>
             ))}
           </div>
-        )}
 
-        {/* Input */}
-        <form
-          onSubmit={e => { e.preventDefault(); send(input); }}
-          className="flex items-end gap-2 bg-white border border-outline-variant/30 rounded-2xl p-2 shadow-sm sticky bottom-2"
-        >
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Ask about land markets, where to invest, what to look for…"
-            className="flex-grow bg-transparent px-3 py-2.5 text-sm text-on-surface placeholder:text-secondary focus:outline-none"
-            aria-label="Ask the advisor"
-          />
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            className="shrink-0 flex items-center gap-1.5 bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-green-800 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span className="material-symbols-outlined text-base">send</span>
-            Send
-          </button>
-        </form>
-        <p className="text-[11px] text-secondary/70 text-center mt-2">
-          Educational information only — not financial, legal, or investment advice.
-        </p>
-      </main>
+          {searchForm(false)}
+          <p className="text-[11px] text-secondary/70 text-center mt-2">{DISCLAIMER}</p>
+        </main>
+      )}
     </div>
   );
 }
