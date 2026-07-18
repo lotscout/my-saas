@@ -11,6 +11,7 @@ const PUBLIC_ROUTES = [
   '/signup',
   '/sign-up',
   '/reset-password',
+  '/advisor',         // public AI Land Investment Advisor (logged-out allowed)
   '/auth',            // OAuth / email-confirm callbacks
   '/pricing',
   '/market-reports',
