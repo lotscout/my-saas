@@ -56,7 +56,14 @@
       "Bash(python3 -c \"import sys,json; p=json.load\\(sys.stdin\\); deps={**p.get\\('dependencies',{}\\), **p.get\\('devDependencies',{}\\)}; print\\('\\\\n'.join\\(f'{k}: {v}' for k,v in deps.items\\(\\) if any\\(x in k for x in ['recharts','chart','d3']\\)\\)\\)\")",
       "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\bobby\\\\my-saas\" -Recurse -Directory -Filter \"migrations\")",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(supabase projects *)",
+      "Bash(grep -v \"//\\\\|import\\\\|interface\\\\|type\\\\|profile\\\\b\")",
+      "Bash(grep -E \"\\\\.\\(tsx?|test|spec|md\\)$\")",
+      "Bash(powershell *)",
+      "mcp__plugin_supabase_supabase__restore_project",
+      "mcp__plugin_supabase_supabase__get_project",
+      "PowerShell(npm run *)"
     ]
   }
 }

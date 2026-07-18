@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
   // All other flows (email confirmation, OAuth) default to /dashboard or the next param.
   const next = type === 'recovery'
     ? '/reset-password'
-    : (searchParams.get('next') ?? '/dashboard')
+    : (searchParams.get('next') ?? searchParams.get('redirect') ?? '/dashboard')
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? origin
 
