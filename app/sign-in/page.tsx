@@ -76,7 +76,7 @@ export default function SignInPage() {
         return;
       }
     }
-    router.push('/dashboard');
+    router.push('/marketplace');
   }
 
   async function handleForgotPassword(e: React.FormEvent<HTMLFormElement>) {

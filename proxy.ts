@@ -26,6 +26,15 @@ function isPublic(pathname: string) {
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
+
+  // The user dashboard was removed — send any hit to the marketplace.
+  if (path === '/dashboard' || path.startsWith('/dashboard/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/marketplace'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(

@@ -144,9 +144,9 @@ export default function ProfilePage() {
 
       {/* Bottom Nav Bar (Mobile only) */}
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-outline-variant/30 px-6 py-3 flex justify-between items-center z-50">
-        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-secondary">
-          <span className="material-symbols-outlined">dashboard</span>
-          <span className="text-[10px] font-bold">Overview</span>
+        <Link href="/marketplace" className="flex flex-col items-center gap-1 text-secondary">
+          <span className="material-symbols-outlined">storefront</span>
+          <span className="text-[10px] font-bold">Market</span>
         </Link>
         <button className="flex flex-col items-center gap-1 text-secondary">
           <span className="material-symbols-outlined">filter_alt</span>

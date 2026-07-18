@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           .single();
 
         const isAdmin = profile?.is_admin === true || isAdminEmail(user.email);
-        if (!isAdmin) { router.replace('/dashboard'); return; }
+        if (!isAdmin) { router.replace('/marketplace'); return; }
 
         if (profile?.first_name) setAdminName(profile.first_name);
         setAuthorized(true);
@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Footer nav */}
         <div className="border-t border-white/10 py-3">
           <a
-            href="/dashboard"
+            href="/marketplace"
             className="flex items-center gap-3 px-6 py-2.5 text-sm font-semibold text-white/50 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>
