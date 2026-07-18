@@ -64,7 +64,8 @@
       "mcp__plugin_supabase_supabase__restore_project",
       "mcp__plugin_supabase_supabase__get_project",
       "PowerShell(npm run *)",
-      "Skill(claude-api)"
+      "Skill(claude-api)",
+      "Bash(xargs -I{} echo \"unique commit tips: {}\")"
     ]
   }
 }

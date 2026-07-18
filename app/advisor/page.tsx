@@ -27,6 +27,12 @@ const SUGGESTIONS = [
 
 const DISCLAIMER = 'Educational information only, not financial, legal, or investment advice.';
 
+// Stitch palette
+const INK = '#0D1F16';       // heading / body text
+const MUTED = '#717973';     // subheading / muted
+const GREEN = '#1D9E75';     // primary green (send button, accents)
+const CHIP_BG = '#E7F3EC';   // light green chip / user bubble
+
 export default function AdvisorPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
@@ -180,20 +186,20 @@ export default function AdvisorPage() {
   const showRemaining = access && !access.unlimited && typeof access.remaining === 'number';
 
   const blockedCard = limitHit && (
-    <div className="w-full max-w-xl mx-auto bg-white border border-primary/20 rounded-2xl p-6 text-center shadow-sm">
+    <div className="w-full max-w-xl mx-auto bg-white border border-black/10 rounded-2xl p-6 text-center shadow-sm">
       {limitHit === 'guest' ? (
         <>
-          <p className="text-on-surface text-lg font-semibold mb-1">You have reached the guest limit.</p>
-          <p className="text-secondary text-base mb-4">Sign up free to continue.</p>
-          <a href="/signup" className="inline-block bg-green-700 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-green-800 transition-colors">
+          <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached the guest limit.</p>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Sign up free to continue.</p>
+          <a href="/signup" className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
             Sign Up Free
           </a>
         </>
       ) : (
         <>
-          <p className="text-on-surface text-lg font-semibold mb-1">You have reached today&apos;s free limit.</p>
-          <p className="text-secondary text-base mb-4">Upgrade to Search Pro for unlimited questions and saved reports.</p>
-          <button onClick={upgrade} disabled={upgrading} className="inline-block bg-green-700 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-green-800 transition-colors disabled:opacity-60">
+          <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to Search Pro for unlimited questions and saved reports.</p>
+          <button onClick={upgrade} disabled={upgrading} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: GREEN }}>
             {upgrading ? 'Starting checkout…' : 'Upgrade to Search Pro, $20/mo'}
           </button>
         </>
@@ -204,7 +210,8 @@ export default function AdvisorPage() {
   const composer = (large: boolean) => (
     <form
       onSubmit={e => { e.preventDefault(); send(input); }}
-      className={`w-full flex items-end gap-2 bg-white border border-outline-variant/30 rounded-2xl p-2 ${large ? 'shadow-md' : 'shadow-sm sticky bottom-2'} ${limitHit ? 'opacity-60' : ''}`}
+      className={`w-full flex items-end gap-2 bg-white rounded-2xl border border-black/10 px-3 py-2.5 ${large ? 'shadow-lg' : 'shadow-md sticky bottom-2'} ${limitHit ? 'opacity-60' : ''}`}
+      style={large ? { minHeight: '4rem' } : undefined}
     >
       <textarea
         ref={inputRef}
@@ -213,39 +220,45 @@ export default function AdvisorPage() {
         onKeyDown={onKeyDown}
         disabled={!!limitHit}
         rows={1}
-        placeholder={limitHit ? 'Limit reached' : 'Ask about land markets, where to invest, what to look for…'}
-        className="flex-grow resize-none bg-transparent px-3 py-2.5 text-lg leading-relaxed text-on-surface placeholder:text-secondary focus:outline-none disabled:cursor-not-allowed max-h-40"
+        placeholder={limitHit ? 'Limit reached' : 'Ask anything about land investing...'}
+        className="flex-grow resize-none bg-transparent px-2 py-2 text-lg leading-relaxed placeholder:text-[#717973] focus:outline-none disabled:cursor-not-allowed max-h-40"
+        style={{ color: INK }}
         aria-label="Search"
       />
       <button
         type="submit"
         disabled={loading || !!limitHit || !input.trim()}
-        className="shrink-0 flex items-center gap-1.5 bg-green-700 text-white rounded-xl font-bold px-5 py-3 text-base hover:bg-green-800 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label="Send"
+        className="shrink-0 w-11 h-11 flex items-center justify-center rounded-full text-white transition-transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ backgroundColor: GREEN }}
       >
-        <span className="material-symbols-outlined text-lg">send</span>
-        Send
+        <span className="material-symbols-outlined text-xl">arrow_upward</span>
       </button>
     </form>
   );
 
   const remainingLine = showRemaining && !limitHit && (
-    <p className="text-sm text-secondary/80 text-center mt-2">
+    <p className="text-sm text-center mt-2" style={{ color: MUTED }}>
       {access!.remaining} {access!.remaining === 1 ? 'question' : 'questions'} left
       {access!.status === 'guest' ? ' as a guest' : ' today'}.
       {access!.status === 'free' && (
-        <button onClick={upgrade} className="ml-1 text-primary font-semibold hover:underline">Upgrade for unlimited</button>
+        <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Upgrade for unlimited</button>
       )}
     </p>
   );
 
   return (
-    <div className="bg-surface text-on-surface min-h-screen flex flex-col">
+    <div className="bg-surface min-h-screen flex flex-col">
       <Header />
 
       {isEmpty ? (
-        <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-4">
-          <div className="flex-grow flex flex-col items-center justify-center gap-8">
-            <h1 className="font-headline text-4xl sm:text-5xl font-black text-primary tracking-tight text-center">Search</h1>
+        /* ── Stitch centered empty state ── */
+        <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-6">
+          <div className="flex-grow flex flex-col items-center justify-center gap-6">
+            <div className="text-center">
+              <h1 className="font-['Manrope'] font-bold tracking-tight" style={{ color: INK, fontSize: '40px', lineHeight: 1.1 }}>Search</h1>
+              <p className="mt-2 text-lg" style={{ color: MUTED }}>Ask about land markets, where to invest, and what to look for.</p>
+            </div>
 
             {limitHit ? (
               <div className="w-full max-w-2xl">{blockedCard}</div>
@@ -262,7 +275,8 @@ export default function AdvisorPage() {
                       key={s}
                       onClick={() => send(s)}
                       disabled={loading}
-                      className="text-base font-semibold text-primary bg-white border border-primary/20 rounded-full px-4 py-2 hover:bg-primary/5 transition-colors disabled:opacity-50"
+                      className="text-base font-semibold rounded-full px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50"
+                      style={{ backgroundColor: CHIP_BG, color: INK }}
                     >
                       {s}
                     </button>
@@ -272,34 +286,34 @@ export default function AdvisorPage() {
             )}
           </div>
 
-          <p className="text-xs text-secondary/70 text-center mt-2">{DISCLAIMER}</p>
+          <p className="text-xs text-center mt-4" style={{ color: MUTED }}>{DISCLAIMER}</p>
         </main>
       ) : (
-        <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-20 pb-4">
-          <h1 className="font-headline text-2xl font-black text-primary tracking-tight py-3">Search</h1>
-
+        /* ── Stitch active chat state ── */
+        <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-20 pb-6">
           <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-6 py-2">
             {messages.map((m, i) => (
               <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
                 {m.role === 'assistant' && (
-                  <div className="flex items-center gap-1.5 mb-1.5 text-secondary">
-                    <span className="material-symbols-outlined text-lg text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>travel_explore</span>
-                    <span className="text-sm font-bold">LotScout Search</span>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: GREEN }}>
+                      <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>travel_explore</span>
+                    </span>
+                    <span className="text-sm font-bold" style={{ color: INK }}>LotScout Search</span>
                   </div>
                 )}
 
                 <div
                   className={`rounded-2xl px-4 py-3 text-lg leading-relaxed whitespace-pre-wrap ${
-                    m.role === 'user'
-                      ? 'max-w-[75%] bg-green-100 text-green-950 rounded-br-md'
-                      : 'max-w-[85%] bg-white border border-outline-variant/20 text-on-surface rounded-bl-md shadow-sm'
+                    m.role === 'user' ? 'max-w-[75%] rounded-br-md' : 'max-w-[85%] rounded-bl-md border border-black/5 shadow-sm'
                   }`}
+                  style={m.role === 'user' ? { backgroundColor: CHIP_BG, color: INK } : { backgroundColor: '#ffffff', color: INK }}
                 >
                   {m.content || (streaming && i === messages.length - 1 ? (
                     <span className="inline-flex gap-1 py-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2.5 h-2.5 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2.5 h-2.5 rounded-full bg-secondary/50 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '300ms' }} />
                     </span>
                   ) : '')}
                 </div>
@@ -310,7 +324,8 @@ export default function AdvisorPage() {
                     <button
                       onClick={() => saveReport(m.content, i)}
                       disabled={!!saved[i]}
-                      className="mt-1.5 flex items-center gap-1 text-sm font-semibold text-primary hover:underline disabled:text-secondary disabled:no-underline"
+                      className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
+                      style={{ color: saved[i] ? MUTED : GREEN }}
                     >
                       <span className="material-symbols-outlined text-base">{saved[i] ? 'check' : 'bookmark_add'}</span>
                       {saved[i] ? 'Saved' : 'Save report'}
@@ -319,7 +334,8 @@ export default function AdvisorPage() {
                     <button
                       onClick={upgrade}
                       title="Upgrade to Search Pro to save reports"
-                      className="mt-1.5 flex items-center gap-1 text-sm font-semibold text-secondary/70 hover:text-primary"
+                      className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:opacity-80"
+                      style={{ color: MUTED }}
                     >
                       <span className="material-symbols-outlined text-base">lock</span>
                       Save (Search Pro)
@@ -338,7 +354,7 @@ export default function AdvisorPage() {
               {remainingLine}
             </>
           )}
-          <p className="text-xs text-secondary/70 text-center mt-2">{DISCLAIMER}</p>
+          <p className="text-xs text-center mt-3" style={{ color: MUTED }}>{DISCLAIMER}</p>
         </main>
       )}
     </div>
