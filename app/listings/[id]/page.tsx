@@ -678,9 +678,11 @@ export default function ListingDetailPage() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-on-surface text-sm truncate">{sellerName}</div>
-                  <Link href={`/sellers/${listing.user_id}`} className="text-xs text-primary hover:underline">
-                    View profile →
-                  </Link>
+                  {listing.owner_name && (
+                    <Link href={`/sellers/${encodeURIComponent(listing.owner_name)}`} className="text-xs text-primary hover:underline">
+                      View seller profile →
+                    </Link>
+                  )}
                 </div>
               </div>
 

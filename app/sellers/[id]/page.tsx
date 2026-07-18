@@ -3,18 +3,9 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import { createServiceClient } from '@/lib/supabase/service';
 
-interface SellerProfile {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  full_name: string | null;
-  bio: string | null;
-  avatar_url: string | null;
-  created_at: string;
-}
-
 interface Listing {
   id: string;
+  user_id: string;
   title: string | null;
   state: string | null;
   county: string | null;
@@ -36,43 +27,45 @@ function formatSize(acres: number | null, sqft: number | null): string {
   return 'Size not listed';
 }
 
-function getInitials(firstName: string | null, lastName: string | null): string {
-  const f = firstName?.[0] ?? '';
-  const l = lastName?.[0] ?? '';
-  return (f + l).toUpperCase() || '?';
+// The real seller is stored per-listing in owner_name; the uploader account only
+// manages the listing and is never shown. Display first name + last initial.
+function formatSellerName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return name.trim();
+  return `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`;
 }
 
-function formatMemberSince(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export default async function SellerProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  // The route param carries the real seller name (owner_name value), NOT a user id.
   const { id } = await params;
+  const sellerName = decodeURIComponent(id);
   const supabase = createServiceClient();
 
-  const [profileResult, listingsResult] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('id, first_name, last_name, full_name, bio, avatar_url, created_at')
-      .eq('id', id)
-      .single(),
-    supabase
-      .from('listings')
-      .select('id, title, state, county, lot_size_acres, lot_size_sqft, asking_price')
-      .eq('user_id', id)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false }),
-  ]);
+  // Every active listing that shares this real seller name (matched on owner_name).
+  const { data: listingsData, error } = await supabase
+    .from('listings')
+    .select('id, user_id, title, state, county, lot_size_acres, lot_size_sqft, asking_price')
+    .eq('owner_name', sellerName)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
 
-  if (profileResult.error || !profileResult.data) {
+  const listings = (listingsData ?? []) as Listing[];
+  if (error || listings.length === 0) {
     notFound();
   }
 
-  const profile = profileResult.data as SellerProfile;
-  const listings = (listingsResult.data ?? []) as Listing[];
-  const displayName = profile.full_name || [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Anonymous';
-  const initials = getInitials(profile.first_name, profile.last_name);
-  const bio = profile.bio || 'Active land wholesaler on LotScout';
+  const displayName = formatSellerName(sellerName);
+  const initials = getInitials(sellerName);
+  const firstName = displayName.split(' ')[0];
+  // Messaging is routed to the account that manages the listing; it is not displayed.
+  const contactUserId = listings[0].user_id;
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
@@ -82,20 +75,11 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
         {/* Profile Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-4 sm:p-8 mb-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            {/* Avatar */}
+            {/* Avatar (initials only — the real seller is not a platform account) */}
             <div className="shrink-0">
-              {profile.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={profile.avatar_url}
-                  alt={displayName}
-                  className="w-24 h-24 rounded-full object-cover ring-4 ring-primary/10"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center ring-4 ring-primary/10">
-                  <span className="text-primary font-black text-3xl">{initials}</span>
-                </div>
-              )}
+              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center ring-4 ring-primary/10">
+                <span className="text-primary font-black text-3xl">{initials}</span>
+              </div>
             </div>
 
             {/* Info */}
@@ -107,20 +91,19 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
                   Wholesaler
                 </span>
               </div>
-              <p className="text-secondary text-sm mb-3">
-                Member since {formatMemberSince(profile.created_at)}
+              <p className="text-on-surface-variant text-sm leading-relaxed max-w-prose">
+                Active land seller on LotScout
               </p>
-              <p className="text-on-surface-variant text-sm leading-relaxed max-w-prose">{bio}</p>
             </div>
 
-            {/* Contact Button */}
+            {/* Contact Button — messaging only */}
             <div className="shrink-0">
               <Link
-                href={`/messaging?to=${id}`}
+                href={`/messaging?to=${contactUserId}`}
                 className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/10 whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-base">mail</span>
-                Contact {profile.first_name || displayName}
+                Contact {firstName}
               </Link>
             </div>
           </div>
@@ -135,55 +118,47 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
             </span>
           </div>
 
-          {listings.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-outline-variant/20 p-12 text-center">
-              <span className="material-symbols-outlined text-5xl text-primary/20 mb-4 block">landscape</span>
-              <p className="font-headline text-lg font-bold text-primary mb-1">No active listings at this time</p>
-              <p className="text-secondary text-sm">Check back later for new properties from this seller.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {listings.map(listing => (
-                <div
-                  key={listing.id}
-                  className="bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 hover:shadow-md transition-shadow"
-                >
-                  <div>
-                    <h3 className="font-headline font-black text-primary text-lg leading-tight mb-1">
-                      {listing.title || 'Untitled Property'}
-                    </h3>
-                    {(listing.county || listing.state) && (
-                      <p className="text-secondary text-sm flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">location_on</span>
-                        {[listing.county, listing.state].filter(Boolean).join(', ')}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-3 text-sm">
-                    <span className="flex items-center gap-1.5 bg-surface-container-low px-3 py-1.5 rounded-lg text-on-surface-variant font-medium">
-                      <span className="material-symbols-outlined text-sm text-secondary">landscape</span>
-                      {formatSize(listing.lot_size_acres, listing.lot_size_sqft)}
-                    </span>
-                    <span className="flex items-center gap-1.5 bg-primary/8 px-3 py-1.5 rounded-lg text-primary font-black">
-                      <span className="material-symbols-outlined text-sm">payments</span>
-                      {formatPrice(listing.asking_price)}
-                    </span>
-                  </div>
-
-                  <div className="mt-auto pt-2">
-                    <Link
-                      href="/marketplace"
-                      className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
-                    >
-                      View Listing
-                      <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                    </Link>
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {listings.map(listing => (
+              <div
+                key={listing.id}
+                className="bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 hover:shadow-md transition-shadow"
+              >
+                <div>
+                  <h3 className="font-headline font-black text-primary text-lg leading-tight mb-1">
+                    {listing.title || 'Untitled Property'}
+                  </h3>
+                  {(listing.county || listing.state) && (
+                    <p className="text-secondary text-sm flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">location_on</span>
+                      {[listing.county, listing.state].filter(Boolean).join(', ')}
+                    </p>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
+
+                <div className="flex flex-wrap gap-3 text-sm">
+                  <span className="flex items-center gap-1.5 bg-surface-container-low px-3 py-1.5 rounded-lg text-on-surface-variant font-medium">
+                    <span className="material-symbols-outlined text-sm text-secondary">landscape</span>
+                    {formatSize(listing.lot_size_acres, listing.lot_size_sqft)}
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-primary/8 px-3 py-1.5 rounded-lg text-primary font-black">
+                    <span className="material-symbols-outlined text-sm">payments</span>
+                    {formatPrice(listing.asking_price)}
+                  </span>
+                </div>
+
+                <div className="mt-auto pt-2">
+                  <Link
+                    href={`/listings/${listing.id}`}
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
+                  >
+                    View Listing
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
       </main>
 
