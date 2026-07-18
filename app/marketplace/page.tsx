@@ -57,6 +57,7 @@ interface Listing {
   contact_methods: string[];
   status: string;
   photos_urls: string[] | null;
+  owner_name: string | null;
   digital_signature: string | null;
   created_at: string;
   user_id?: string | null;
@@ -148,6 +149,13 @@ const _LISTINGS_LEGACY = [
     imgAlt: 'Foggy forest',
   },
 ];
+
+// Show a stored seller name as first name + last initial (e.g. "Marcus Thompson" -> "Marcus T.").
+function formatSellerLabel(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return name.trim();
+  return `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`;
+}
 
 function SellerContact({ name, listingId }: { name: string | null; listingId: string }) {
   return (
@@ -1261,6 +1269,9 @@ export default function MarketplacePage() {
                     listing.county ? `${listing.county} County` : null,
                     listing.state,
                   ].filter(Boolean).join(', ');
+                  const sellerRaw = listing.owner_name || listing.digital_signature;
+                  const sellerLabel = sellerRaw ? formatSellerLabel(sellerRaw) : null;
+                  const sellerHref = listing.owner_name ? `/sellers/${encodeURIComponent(listing.owner_name)}` : null;
                   const isHighlighted = hoveredListingId === listing.id;
                   return (
                     <Link
@@ -1315,6 +1326,22 @@ export default function MarketplacePage() {
                           <div className="mt-3">
                             <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
                           </div>
+                        )}
+                        {sellerLabel && (
+                          sellerHref ? (
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(sellerHref); }}
+                              className="mt-3 self-start flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                            >
+                              <span className="material-symbols-outlined text-sm">person</span>
+                              {sellerLabel}
+                            </button>
+                          ) : (
+                            <p className="mt-3 flex items-center gap-1 text-xs font-bold text-secondary">
+                              <span className="material-symbols-outlined text-sm">person</span>
+                              {sellerLabel}
+                            </p>
+                          )
                         )}
                         {profile?.id && listing.user_id === profile.id && (
                           <button
