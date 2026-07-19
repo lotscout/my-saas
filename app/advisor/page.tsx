@@ -33,6 +33,71 @@ const MUTED = '#717973';     // subheading / muted
 const GREEN = '#1D9E75';     // primary green (send button, accents)
 const CHIP_BG = '#E7F3EC';   // light green chip / user bubble
 
+// Lightweight markdown for AI messages: strips leading # from headings and renders
+// them bold (no raw hashtags), plus **bold** inline and bullet/numbered lists.
+function renderInline(text: string, keyBase: string): React.ReactNode[] {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+    if (/^\*\*[^*]+\*\*$/.test(part)) {
+      return <strong key={`${keyBase}-b${i}`} className="font-bold">{part.slice(2, -2)}</strong>;
+    }
+    return <span key={`${keyBase}-t${i}`}>{part}</span>;
+  });
+}
+
+function Markdown({ text }: { text: string }) {
+  const lines = text.replace(/\r/g, '').split('\n');
+  const blocks: React.ReactNode[] = [];
+  let listItems: string[] = [];
+  let para: string[] = [];
+  let key = 0;
+
+  const flushPara = () => {
+    if (para.length) {
+      const k = key++;
+      blocks.push(<p key={`p${k}`} className="mb-2 last:mb-0">{renderInline(para.join(' '), `p${k}`)}</p>);
+      para = [];
+    }
+  };
+  const flushList = () => {
+    if (listItems.length) {
+      const k = key++;
+      const items = listItems;
+      blocks.push(
+        <ul key={`u${k}`} className="list-disc pl-5 mb-2 last:mb-0 space-y-1">
+          {items.map((li, i) => <li key={i}>{renderInline(li, `u${k}-${i}`)}</li>)}
+        </ul>
+      );
+      listItems = [];
+    }
+  };
+
+  for (const raw of lines) {
+    const trimmed = raw.trim();
+    if (!trimmed) { flushPara(); flushList(); continue; }
+
+    const heading = trimmed.match(/^#{1,6}\s+(.*)$/);
+    if (heading) {
+      flushPara(); flushList();
+      const k = key++;
+      blocks.push(<p key={`h${k}`} className="font-bold text-[1.05em] mt-3 first:mt-0 mb-1">{renderInline(heading[1], `h${k}`)}</p>);
+      continue;
+    }
+
+    const item = trimmed.match(/^(?:[-*]|\d+\.)\s+(.*)$/);
+    if (item) {
+      flushPara();
+      listItems.push(item[1]);
+      continue;
+    }
+
+    flushList();
+    para.push(trimmed);
+  }
+  flushPara();
+  flushList();
+  return <>{blocks}</>;
+}
+
 export default function AdvisorPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
@@ -304,18 +369,20 @@ export default function AdvisorPage() {
                 )}
 
                 <div
-                  className={`rounded-2xl px-4 py-3 text-lg leading-relaxed whitespace-pre-wrap ${
-                    m.role === 'user' ? 'max-w-[75%] rounded-br-md' : 'max-w-[85%] rounded-bl-md border border-black/5 shadow-sm'
+                  className={`rounded-2xl px-4 py-3 text-lg leading-relaxed ${
+                    m.role === 'user' ? 'max-w-[75%] rounded-br-md whitespace-pre-wrap' : 'max-w-[85%] rounded-bl-md border border-black/5 shadow-sm'
                   }`}
                   style={m.role === 'user' ? { backgroundColor: CHIP_BG, color: INK } : { backgroundColor: '#ffffff', color: INK }}
                 >
-                  {m.content || (streaming && i === messages.length - 1 ? (
-                    <span className="inline-flex gap-1 py-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </span>
-                  ) : '')}
+                  {m.content
+                    ? (m.role === 'assistant' ? <Markdown text={m.content} /> : m.content)
+                    : (streaming && i === messages.length - 1 ? (
+                      <span className="inline-flex gap-1 py-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </span>
+                    ) : '')}
                 </div>
 
                 {/* Save (paid/pro only) */}
