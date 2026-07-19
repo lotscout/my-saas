@@ -239,6 +239,12 @@ export default function AdvisorPage() {
     }
   }
 
+  function handleSaveClick(content: string, idx: number) {
+    if (access?.canSave) { saveReport(content, idx); return; }
+    if (access?.status === 'free') { upgrade(); return; }
+    alert('Saving reports is a Search Pro feature. Sign up free, then upgrade to Search Pro to save market reports.');
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -385,29 +391,20 @@ export default function AdvisorPage() {
                     ) : '')}
                 </div>
 
-                {/* Save (paid/pro only) */}
+                {/* Save as Report */}
                 {m.role === 'assistant' && m.content && !streaming && access && (
-                  access.canSave ? (
-                    <button
-                      onClick={() => saveReport(m.content, i)}
-                      disabled={!!saved[i]}
-                      className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
-                      style={{ color: saved[i] ? MUTED : GREEN }}
-                    >
-                      <span className="material-symbols-outlined text-base">{saved[i] ? 'check' : 'bookmark_add'}</span>
-                      {saved[i] ? 'Saved' : 'Save report'}
-                    </button>
-                  ) : access.status === 'free' ? (
-                    <button
-                      onClick={upgrade}
-                      title="Upgrade to Search Pro to save reports"
-                      className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:opacity-80"
-                      style={{ color: MUTED }}
-                    >
-                      <span className="material-symbols-outlined text-base">lock</span>
-                      Save (Search Pro)
-                    </button>
-                  ) : null
+                  <button
+                    onClick={() => handleSaveClick(m.content, i)}
+                    disabled={!!saved[i]}
+                    title={access.canSave ? 'Save this as a report' : 'Saving reports is a Search Pro feature'}
+                    className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
+                    style={{ color: saved[i] ? MUTED : access.canSave ? GREEN : MUTED }}
+                  >
+                    <span className="material-symbols-outlined text-base">
+                      {saved[i] ? 'check' : access.canSave ? 'bookmark_add' : 'lock'}
+                    </span>
+                    {saved[i] ? 'Saved' : 'Save as Report'}
+                  </button>
                 )}
               </div>
             ))}
