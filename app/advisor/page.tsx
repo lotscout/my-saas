@@ -17,12 +17,12 @@ interface Access {
 }
 
 const SUGGESTIONS = [
-  'Where is land demand growing fastest right now?',
-  'What should I look for in a good land investment?',
-  'Is now a good time to buy vacant land?',
-  'What states have the best land opportunities?',
-  'How do I evaluate a land parcel?',
-  'What is driving land prices in 2026?',
+  'What is the real estate market doing right now?',
+  'Is it a good time to buy or sell?',
+  'How do I evaluate an investment property?',
+  'What should builders know about the current market?',
+  'Where are the best markets to invest in 2026?',
+  'How do I price my property to sell?',
 ];
 
 const DISCLAIMER = 'Educational information only, not financial, legal, or investment advice.';
@@ -285,7 +285,7 @@ export default function AdvisorPage() {
         onKeyDown={onKeyDown}
         disabled={!!limitHit}
         rows={1}
-        placeholder={limitHit ? 'Limit reached' : 'Ask anything about land investing...'}
+        placeholder={limitHit ? 'Limit reached' : 'Ask anything about real estate...'}
         className="flex-grow resize-none bg-transparent px-2 py-2 text-lg leading-relaxed placeholder:text-[#717973] focus:outline-none disabled:cursor-not-allowed max-h-40"
         style={{ color: INK }}
         aria-label="Search"
@@ -322,7 +322,7 @@ export default function AdvisorPage() {
           <div className="flex-grow flex flex-col items-center justify-center gap-6">
             <div className="text-center">
               <h1 className="font-['Manrope'] font-bold tracking-tight" style={{ color: INK, fontSize: '40px', lineHeight: 1.1 }}>Search</h1>
-              <p className="mt-2 text-lg" style={{ color: MUTED }}>Ask about land markets, where to invest, and what to look for.</p>
+              <p className="mt-2 text-lg" style={{ color: MUTED }}>Ask about real estate markets, buying, selling, investing, building, and more.</p>
             </div>
 
             {limitHit ? (
