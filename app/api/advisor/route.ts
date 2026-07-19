@@ -180,7 +180,20 @@ async function buildLotScoutContext(userId: string | null): Promise<string> {
   return parts.join('\n\n') || 'No LotScout market data is currently available.';
 }
 
-// Access status + persisted history for the client to render.
+async function insertMessage(userId: string, role: string, content: string, conversationId: string | null) {
+  const svc = createServiceClient();
+  try {
+    const payload: Record<string, any> = { user_id: userId, role, content };
+    if (conversationId) payload.conversation_id = conversationId;
+    const { error } = await svc.from('advisor_conversations').insert(payload);
+    if (error && conversationId) {
+      // conversation_id column may not exist yet — retry without it so history still persists.
+      await svc.from('advisor_conversations').insert({ user_id: userId, role, content });
+    }
+  } catch { /* table may not exist yet */ }
+}
+
+// Access status + persisted history (grouped into conversations) for the client to render.
 export async function GET(request: NextRequest) {
   const auth = await createClient();
   const { data: { user } } = await auth.auth.getUser();
@@ -188,23 +201,49 @@ export async function GET(request: NextRequest) {
   if (!user) {
     const used = guestCount(request);
     return Response.json({
-      messages: [],
+      conversations: [],
       access: { status: 'guest', unlimited: false, remaining: Math.max(0, GUEST_LIMIT - used), limit: GUEST_LIMIT, canSave: false },
     });
   }
 
   const access = await getUserAccess(user.id);
 
-  let messages: any[] = [];
+  let conversations: any[] = [];
   try {
     const supabase = createServiceClient();
-    const { data } = await supabase
+    let rows: any[] = [];
+    const r = await supabase
       .from('advisor_conversations')
-      .select('role, content, created_at')
+      .select('role, content, created_at, conversation_id')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
-      .limit(200);
-    messages = ((data ?? []) as any[]).map(m => ({ role: m.role, content: m.content }));
+      .limit(1000);
+    if (r.error) {
+      // conversation_id column may not exist yet — fall back to one group.
+      const r2 = await supabase
+        .from('advisor_conversations')
+        .select('role, content, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .limit(1000);
+      rows = ((r2.data ?? []) as any[]).map(m => ({ ...m, conversation_id: null }));
+    } else {
+      rows = (r.data ?? []) as any[];
+    }
+    const groups = new Map<string, { messages: any[]; updated: string }>();
+    for (const row of rows) {
+      const cid = (row.conversation_id as string) || 'legacy';
+      if (!groups.has(cid)) groups.set(cid, { messages: [], updated: row.created_at });
+      const g = groups.get(cid)!;
+      g.messages.push({ role: row.role, content: row.content });
+      g.updated = row.created_at;
+    }
+    conversations = [...groups.entries()].map(([id, g]) => ({
+      id,
+      title: (g.messages.find(m => m.role === 'user')?.content ?? 'New chat').slice(0, 80),
+      messages: g.messages,
+      updatedAt: g.updated,
+    })).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   } catch { /* table may not exist yet */ }
 
   let remaining: number | null = null, limit: number | null = null;
@@ -214,7 +253,7 @@ export async function GET(request: NextRequest) {
     remaining = Math.max(0, FREE_DAILY_LIMIT - used);
   }
 
-  return Response.json({ messages, access: { ...access, remaining, limit } });
+  return Response.json({ conversations, access: { ...access, remaining, limit } });
 }
 
 export async function POST(request: NextRequest) {
@@ -253,6 +292,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'A user message is required.' }, { status: 400 });
   }
   const lastUser = history[history.length - 1].content;
+  const conversationId = typeof body.conversationId === 'string' && body.conversationId ? body.conversationId : null;
 
   // --- Enforce access limits BEFORE calling the model ---
   let statusLabel: Access['status'] = 'guest';
@@ -297,9 +337,7 @@ export async function POST(request: NextRequest) {
 
   // Persist the user's message for conversation history (logged-in only).
   if (user) {
-    try {
-      await createServiceClient().from('advisor_conversations').insert({ user_id: user.id, role: 'user', content: lastUser });
-    } catch { /* table may not exist yet */ }
+    await insertMessage(user.id, 'user', lastUser, conversationId);
   }
 
   const tools = [{ type: 'web_search_20260209', name: 'web_search', max_uses: 6 }] as any;
@@ -344,9 +382,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (user && fullText.trim()) {
-        try {
-          await createServiceClient().from('advisor_conversations').insert({ user_id: user.id, role: 'assistant', content: fullText });
-        } catch { /* table may not exist yet */ }
+        await insertMessage(user.id, 'assistant', fullText, conversationId);
       }
 
       controller.close();

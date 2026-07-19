@@ -8,6 +8,13 @@ interface Msg {
   content: string;
 }
 
+interface Conversation {
+  id: string;
+  title: string;
+  messages: Msg[];
+  updatedAt: number;
+}
+
 interface Access {
   status: 'guest' | 'free' | 'pro';
   unlimited: boolean;
@@ -28,10 +35,18 @@ const SUGGESTIONS = [
 const DISCLAIMER = 'Educational information only, not financial, legal, or investment advice.';
 
 // Stitch palette
-const INK = '#0D1F16';       // heading / body text
-const MUTED = '#717973';     // subheading / muted
-const GREEN = '#1D9E75';     // primary green (send button, accents)
-const CHIP_BG = '#E7F3EC';   // light green chip / user bubble
+const INK = '#0D1F16';
+const MUTED = '#717973';
+const GREEN = '#1D9E75';
+const CHIP_BG = '#E7F3EC';
+
+function newId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
 
 // Lightweight markdown for AI messages: strips leading # from headings and renders
 // them bold (no raw hashtags), plus **bold** inline and bullet/numbered lists.
@@ -100,12 +115,15 @@ function Markdown({ text }: { text: string }) {
 
 export default function AdvisorPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentId, setCurrentId] = useState<string>(() => newId());
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [access, setAccess] = useState<Access | null>(null);
   const [limitHit, setLimitHit] = useState<null | 'guest' | 'free'>(null);
   const [saved, setSaved] = useState<Record<number, boolean>>({});
   const [upgrading, setUpgrading] = useState(false);
+  const [mobileSidebar, setMobileSidebar] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -114,12 +132,25 @@ export default function AdvisorPage() {
       .then(r => (r.ok ? r.json() : null))
       .then(j => {
         if (!j) return;
-        if (Array.isArray(j.messages) && j.messages.length) setMessages(j.messages);
         if (j.access) {
           setAccess(j.access);
           if (!j.access.unlimited && j.access.remaining !== null && j.access.remaining <= 0) {
             setLimitHit(j.access.status === 'guest' ? 'guest' : 'free');
           }
+        }
+        const convs: Conversation[] = Array.isArray(j.conversations)
+          ? j.conversations.map((c: any) => ({
+              id: c.id,
+              title: c.title || 'New chat',
+              messages: Array.isArray(c.messages) ? c.messages : [],
+              updatedAt: Date.parse(c.updatedAt) || Date.now(),
+            }))
+          : [];
+        if (convs.length) {
+          convs.sort((a, b) => b.updatedAt - a.updatedAt);
+          setConversations(convs);
+          setCurrentId(convs[0].id);
+          setMessages(convs[0].messages);
         }
       })
       .catch(() => {});
@@ -130,10 +161,16 @@ export default function AdvisorPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
 
+  const upsertConversation = useCallback((id: string, msgs: Msg[]) => {
+    const title = (msgs.find(m => m.role === 'user')?.content ?? 'New chat').slice(0, 80);
+    setConversations(prev => [{ id, title, messages: msgs, updatedAt: Date.now() }, ...prev.filter(c => c.id !== id)]);
+  }, []);
+
   const send = useCallback(async (text: string) => {
     const q = text.trim();
     if (!q || loading || limitHit) return;
     setInput('');
+    setSaved({});
 
     const prior = messages;
     const withUser: Msg[] = [...prior, { role: 'user', content: q }];
@@ -144,7 +181,7 @@ export default function AdvisorPage() {
       const res = await fetch('/api/advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: withUser }),
+        body: JSON.stringify({ messages: withUser, conversationId: currentId }),
       });
 
       if (res.status === 429) {
@@ -169,13 +206,10 @@ export default function AdvisorPage() {
           return copy;
         });
       }
-      if (!acc.trim()) {
-        setMessages(m => {
-          const copy = [...m];
-          copy[copy.length - 1] = { role: 'assistant', content: 'Sorry, I could not generate a response. Please try again.' };
-          return copy;
-        });
-      }
+      const finalContent = acc.trim() ? acc : 'Sorry, I could not generate a response. Please try again.';
+      const finalMessages: Msg[] = [...withUser, { role: 'assistant', content: finalContent }];
+      setMessages(finalMessages);
+      upsertConversation(currentId, finalMessages);
 
       const remainingHdr = res.headers.get('X-Advisor-Remaining');
       const statusHdr = (res.headers.get('X-Advisor-Status') as Access['status']) || access?.status || 'guest';
@@ -202,7 +236,22 @@ export default function AdvisorPage() {
       setLoading(false);
       inputRef.current?.focus();
     }
-  }, [messages, loading, limitHit, access]);
+  }, [messages, loading, limitHit, access, currentId, upsertConversation]);
+
+  function newChat() {
+    setCurrentId(newId());
+    setMessages([]);
+    setSaved({});
+    setMobileSidebar(false);
+    inputRef.current?.focus();
+  }
+
+  function loadConversation(c: Conversation) {
+    setCurrentId(c.id);
+    setMessages(c.messages);
+    setSaved({});
+    setMobileSidebar(false);
+  }
 
   async function upgrade() {
     if (upgrading) return;
@@ -281,7 +330,7 @@ export default function AdvisorPage() {
   const composer = (large: boolean) => (
     <form
       onSubmit={e => { e.preventDefault(); send(input); }}
-      className={`w-full flex items-end gap-2 bg-white rounded-2xl border border-black/10 px-3 py-2.5 ${large ? 'shadow-lg' : 'shadow-md sticky bottom-2'} ${limitHit ? 'opacity-60' : ''}`}
+      className={`w-full flex items-end gap-2 bg-white rounded-2xl border border-black/10 px-3 py-2.5 ${large ? 'shadow-lg' : 'shadow-md'} ${limitHit ? 'opacity-60' : ''}`}
       style={large ? { minHeight: '4rem' } : undefined}
     >
       <textarea
@@ -318,109 +367,177 @@ export default function AdvisorPage() {
     </p>
   );
 
-  return (
-    <div className="bg-surface min-h-screen flex flex-col">
-      <Header />
-
-      {isEmpty ? (
-        /* ── Stitch centered empty state ── */
-        <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-6">
-          <div className="flex-grow flex flex-col items-center justify-center gap-6">
-            <div className="text-center">
-              <h1 className="font-['Manrope'] font-bold tracking-tight" style={{ color: INK, fontSize: '40px', lineHeight: 1.1 }}>Search</h1>
-              <p className="mt-2 text-lg" style={{ color: MUTED }}>Ask about real estate markets, buying, selling, investing, building, and more.</p>
-            </div>
-
-            {limitHit ? (
-              <div className="w-full max-w-2xl">{blockedCard}</div>
-            ) : (
-              <>
-                <div className="w-full max-w-2xl">
-                  {composer(true)}
-                  {remainingLine}
-                </div>
-
-                <div className="flex flex-wrap gap-2.5 justify-center max-w-2xl">
-                  {SUGGESTIONS.map(s => (
-                    <button
-                      key={s}
-                      onClick={() => send(s)}
-                      disabled={loading}
-                      className="text-base font-semibold rounded-full px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50"
-                      style={{ backgroundColor: CHIP_BG, color: INK }}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </>
+  const sidebarInner = (
+    <div className="flex flex-col h-full">
+      <div className="p-3">
+        <button
+          onClick={newChat}
+          className="w-full flex items-center justify-center gap-2 bg-green-700 text-white rounded-xl font-bold py-2.5 text-sm hover:bg-green-800 transition-colors"
+        >
+          <span className="material-symbols-outlined text-lg">add</span>
+          New Chat
+        </button>
+      </div>
+      <div className="flex-grow overflow-y-auto px-2 pb-3">
+        {conversations.length === 0 ? (
+          <p className="text-xs text-center px-2 py-4" style={{ color: MUTED }}>
+            {access?.status === 'guest' ? 'Sign in to save your chat history.' : 'No saved chats yet.'}
+          </p>
+        ) : (
+          <>
+            {conversations.map(c => (
+              <button
+                key={c.id}
+                onClick={() => loadConversation(c)}
+                title={c.title}
+                className={`w-full text-left truncate rounded-lg px-3 py-2 text-sm mb-0.5 transition-colors ${c.id === currentId ? 'font-semibold' : 'hover:bg-black/5'}`}
+                style={{ color: INK, backgroundColor: c.id === currentId ? CHIP_BG : undefined }}
+              >
+                {c.title || 'New chat'}
+              </button>
+            ))}
+            {access?.status === 'guest' && (
+              <p className="text-[11px] px-3 pt-3" style={{ color: MUTED }}>Sign in to keep your history across visits.</p>
             )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="bg-surface h-screen flex flex-col overflow-hidden">
+      <Header />
+      <div className="h-16 shrink-0" aria-hidden />
+
+      <div className="flex-grow flex w-full min-h-0">
+        {/* Desktop sidebar (always visible) */}
+        <aside className="hidden md:flex md:flex-col w-64 shrink-0 border-r border-black/10 bg-white overflow-hidden">
+          {sidebarInner}
+        </aside>
+
+        {/* Mobile slide-in sidebar */}
+        {mobileSidebar && (
+          <div className="md:hidden fixed inset-0 z-40">
+            <div className="absolute inset-0 bg-black/30" onClick={() => setMobileSidebar(false)} />
+            <div className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-xl">{sidebarInner}</div>
+          </div>
+        )}
+
+        <div className="flex-grow flex flex-col min-w-0 min-h-0">
+          {/* Mobile controls (history + new chat) */}
+          <div className="md:hidden flex items-center justify-between px-4 py-2 border-b border-black/10 bg-white shrink-0">
+            <button onClick={() => setMobileSidebar(true)} className="flex items-center gap-1 text-sm font-semibold" style={{ color: INK }}>
+              <span className="material-symbols-outlined text-lg">history</span>
+              History
+            </button>
+            <button onClick={newChat} className="flex items-center gap-1 text-sm font-semibold" style={{ color: GREEN }}>
+              <span className="material-symbols-outlined text-lg">add</span>
+              New Chat
+            </button>
           </div>
 
-          <p className="text-xs text-center mt-4" style={{ color: MUTED }}>{DISCLAIMER}</p>
-        </main>
-      ) : (
-        /* ── Stitch active chat state ── */
-        <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pt-20 pb-6">
-          <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-6 py-2">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
-                {m.role === 'assistant' && (
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: GREEN }}>
-                      <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>travel_explore</span>
-                    </span>
-                    <span className="text-sm font-bold" style={{ color: INK }}>LotScout Search</span>
-                  </div>
-                )}
-
-                <div
-                  className={`rounded-2xl px-4 py-3 text-lg leading-relaxed ${
-                    m.role === 'user' ? 'max-w-[75%] rounded-br-md whitespace-pre-wrap' : 'max-w-[85%] rounded-bl-md border border-black/5 shadow-sm'
-                  }`}
-                  style={m.role === 'user' ? { backgroundColor: CHIP_BG, color: INK } : { backgroundColor: '#ffffff', color: INK }}
-                >
-                  {m.content
-                    ? (m.role === 'assistant' ? <Markdown text={m.content} /> : m.content)
-                    : (streaming && i === messages.length - 1 ? (
-                      <span className="inline-flex gap-1 py-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </span>
-                    ) : '')}
+          {isEmpty ? (
+            /* ── Centered empty state ── */
+            <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pb-6 min-h-0">
+              <div className="flex-grow flex flex-col items-center justify-center gap-6">
+                <div className="text-center">
+                  <h1 className="font-['Manrope'] font-bold tracking-tight" style={{ color: INK, fontSize: '40px', lineHeight: 1.1 }}>Search</h1>
+                  <p className="mt-2 text-lg" style={{ color: MUTED }}>Ask about real estate markets, buying, selling, investing, building, and more.</p>
                 </div>
 
-                {/* Save as Report */}
-                {m.role === 'assistant' && m.content && !streaming && access && (
-                  <button
-                    onClick={() => handleSaveClick(m.content, i)}
-                    disabled={!!saved[i]}
-                    title={access.canSave ? 'Save this as a report' : 'Saving reports is a Search Pro feature'}
-                    className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
-                    style={{ color: saved[i] ? MUTED : access.canSave ? GREEN : MUTED }}
-                  >
-                    <span className="material-symbols-outlined text-base">
-                      {saved[i] ? 'check' : access.canSave ? 'bookmark_add' : 'lock'}
-                    </span>
-                    {saved[i] ? 'Saved' : 'Save as Report'}
-                  </button>
+                {limitHit ? (
+                  <div className="w-full max-w-2xl">{blockedCard}</div>
+                ) : (
+                  <>
+                    <div className="w-full max-w-2xl">
+                      {composer(true)}
+                      {remainingLine}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2.5 justify-center max-w-2xl">
+                      {SUGGESTIONS.map(s => (
+                        <button
+                          key={s}
+                          onClick={() => send(s)}
+                          disabled={loading}
+                          className="text-base font-semibold rounded-full px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50"
+                          style={{ backgroundColor: CHIP_BG, color: INK }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
-            ))}
-          </div>
 
-          {limitHit ? (
-            <div className="py-2">{blockedCard}</div>
+              <p className="text-xs text-center mt-4" style={{ color: MUTED }}>{DISCLAIMER}</p>
+            </main>
           ) : (
-            <>
-              {composer(false)}
-              {remainingLine}
-            </>
+            /* ── Active chat state ── */
+            <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pb-4 min-h-0">
+              <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-6 py-4 min-h-0">
+                {messages.map((m, i) => (
+                  <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+                    {m.role === 'assistant' && (
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: GREEN }}>
+                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>travel_explore</span>
+                        </span>
+                        <span className="text-sm font-bold" style={{ color: INK }}>LotScout Search</span>
+                      </div>
+                    )}
+
+                    <div
+                      className={`rounded-2xl px-4 py-3 text-lg leading-relaxed ${
+                        m.role === 'user' ? 'max-w-[75%] rounded-br-md whitespace-pre-wrap' : 'max-w-[85%] rounded-bl-md border border-black/5 shadow-sm'
+                      }`}
+                      style={m.role === 'user' ? { backgroundColor: CHIP_BG, color: INK } : { backgroundColor: '#ffffff', color: INK }}
+                    >
+                      {m.content
+                        ? (m.role === 'assistant' ? <Markdown text={m.content} /> : m.content)
+                        : (streaming && i === messages.length - 1 ? (
+                          <span className="inline-flex gap-1 py-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="w-2.5 h-2.5 rounded-full bg-black/25 animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </span>
+                        ) : '')}
+                    </div>
+
+                    {/* Save as Report */}
+                    {m.role === 'assistant' && m.content && !streaming && access && (
+                      <button
+                        onClick={() => handleSaveClick(m.content, i)}
+                        disabled={!!saved[i]}
+                        title={access.canSave ? 'Save this as a report' : 'Saving reports is a Search Pro feature'}
+                        className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
+                        style={{ color: saved[i] ? MUTED : access.canSave ? GREEN : MUTED }}
+                      >
+                        <span className="material-symbols-outlined text-base">
+                          {saved[i] ? 'check' : access.canSave ? 'bookmark_add' : 'lock'}
+                        </span>
+                        {saved[i] ? 'Saved' : 'Save as Report'}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {limitHit ? (
+                <div className="py-2">{blockedCard}</div>
+              ) : (
+                <>
+                  {composer(false)}
+                  {remainingLine}
+                </>
+              )}
+              <p className="text-xs text-center mt-3" style={{ color: MUTED }}>{DISCLAIMER}</p>
+            </main>
           )}
-          <p className="text-xs text-center mt-3" style={{ color: MUTED }}>{DISCLAIMER}</p>
-        </main>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
