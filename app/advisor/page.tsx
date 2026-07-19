@@ -33,6 +33,9 @@ const SUGGESTIONS = [
 ];
 
 const DISCLAIMER = 'Educational information only, not financial, legal, or investment advice.';
+const GUEST_LIMIT = 3;
+const GUEST_COUNT_KEY = 'ls_guest_count';
+const SESSION_KEY = 'ls_advisor_session';
 
 // Stitch palette
 const INK = '#0D1F16';
@@ -123,19 +126,45 @@ export default function AdvisorPage() {
   const [limitHit, setLimitHit] = useState<null | 'guest' | 'free'>(null);
   const [saved, setSaved] = useState<Record<number, boolean>>({});
   const [upgrading, setUpgrading] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [mobileSidebar, setMobileSidebar] = useState(false);
+  const [guestCount, setGuestCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    // Restore the in-progress session (keeps the chat, incl. for guests, across navigation).
+    let restored = false;
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (Array.isArray(s?.messages) && s.messages.length) {
+          setMessages(s.messages);
+          if (s.currentId) setCurrentId(s.currentId);
+          restored = true;
+        }
+      }
+    } catch {}
+
+    // Client-side guest counter (reliable enforcement of the 3-question limit).
+    let gc = 0;
+    try { gc = parseInt(localStorage.getItem(GUEST_COUNT_KEY) || '0', 10) || 0; } catch {}
+    setGuestCount(gc);
+
     fetch('/api/advisor')
       .then(r => (r.ok ? r.json() : null))
       .then(j => {
         if (!j) return;
         if (j.access) {
           setAccess(j.access);
-          if (!j.access.unlimited && j.access.remaining !== null && j.access.remaining <= 0) {
-            setLimitHit(j.access.status === 'guest' ? 'guest' : 'free');
+          if (j.access.status === 'guest') {
+            if (gc >= GUEST_LIMIT || (j.access.remaining !== null && j.access.remaining <= 0)) setLimitHit('guest');
+          } else {
+            // Logged-in: clear any stale guest counter, honor the daily free limit.
+            try { localStorage.removeItem(GUEST_COUNT_KEY); } catch {}
+            setGuestCount(0);
+            if (!j.access.unlimited && j.access.remaining !== null && j.access.remaining <= 0) setLimitHit('free');
           }
         }
         const convs: Conversation[] = Array.isArray(j.conversations)
@@ -149,12 +178,21 @@ export default function AdvisorPage() {
         if (convs.length) {
           convs.sort((a, b) => b.updatedAt - a.updatedAt);
           setConversations(convs);
-          setCurrentId(convs[0].id);
-          setMessages(convs[0].messages);
+          if (!restored) {
+            setCurrentId(convs[0].id);
+            setMessages(convs[0].messages);
+          }
         }
       })
       .catch(() => {});
   }, []);
+
+  // Persist the current session so navigating away and back keeps the chat.
+  useEffect(() => {
+    try {
+      if (messages.length) sessionStorage.setItem(SESSION_KEY, JSON.stringify({ currentId, messages }));
+    } catch {}
+  }, [messages, currentId]);
 
   // Auto-scroll to the latest message.
   useEffect(() => {
@@ -169,8 +207,24 @@ export default function AdvisorPage() {
   const send = useCallback(async (text: string) => {
     const q = text.trim();
     if (!q || loading || limitHit) return;
+
+    // Enforce the guest limit client-side before sending a 4th question.
+    const isGuest = access?.status === 'guest';
+    if (isGuest && guestCount >= GUEST_LIMIT) {
+      setLimitHit('guest');
+      return;
+    }
+
     setInput('');
     setSaved({});
+
+    // Count this guest question up front so the limit triggers reliably.
+    if (isGuest) {
+      const next = guestCount + 1;
+      setGuestCount(next);
+      try { localStorage.setItem(GUEST_COUNT_KEY, String(next)); } catch {}
+      if (next >= GUEST_LIMIT) setLimitHit('guest');
+    }
 
     const prior = messages;
     const withUser: Msg[] = [...prior, { role: 'user', content: q }];
@@ -236,13 +290,14 @@ export default function AdvisorPage() {
       setLoading(false);
       inputRef.current?.focus();
     }
-  }, [messages, loading, limitHit, access, currentId, upsertConversation]);
+  }, [messages, loading, limitHit, access, currentId, upsertConversation, guestCount]);
 
   function newChat() {
     setCurrentId(newId());
     setMessages([]);
     setSaved({});
     setMobileSidebar(false);
+    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
     inputRef.current?.focus();
   }
 
@@ -253,7 +308,12 @@ export default function AdvisorPage() {
     setMobileSidebar(false);
   }
 
-  async function upgrade() {
+  // Open the in-page upgrade modal (keeps the chat; no navigation away).
+  function upgrade() {
+    setShowUpgradeModal(true);
+  }
+
+  async function startCheckout() {
     if (upgrading) return;
     setUpgrading(true);
     try {
@@ -319,8 +379,8 @@ export default function AdvisorPage() {
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
           <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to Search Pro for unlimited questions and saved reports.</p>
-          <button onClick={upgrade} disabled={upgrading} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: GREEN }}>
-            {upgrading ? 'Starting checkout…' : 'Upgrade to Search Pro, $20/mo'}
+          <button onClick={upgrade} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
+            Upgrade to Search Pro, $20/mo
           </button>
         </>
       )}
@@ -538,6 +598,37 @@ export default function AdvisorPage() {
           )}
         </div>
       </div>
+
+      {/* In-page upgrade modal — keeps the chat, no navigation away (browser back stays on /advisor). */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowUpgradeModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-7 text-center">
+            <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-white" style={{ backgroundColor: GREEN }}>
+              <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
+            </div>
+            <h2 className="text-xl font-bold mb-1" style={{ color: INK }}>Upgrade to Search Pro</h2>
+            <p className="text-base mb-5" style={{ color: MUTED }}>
+              Unlimited questions, saved market reports, and priority research for $20 per month.
+            </p>
+            <button
+              onClick={startCheckout}
+              disabled={upgrading}
+              className="w-full text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 disabled:opacity-60"
+              style={{ backgroundColor: GREEN }}
+            >
+              {upgrading ? 'Starting checkout…' : 'Continue to checkout'}
+            </button>
+            <button
+              onClick={() => setShowUpgradeModal(false)}
+              className="w-full mt-2 px-6 py-2.5 rounded-xl font-semibold text-base hover:bg-black/5 transition-colors"
+              style={{ color: MUTED }}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
