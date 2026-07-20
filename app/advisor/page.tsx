@@ -350,6 +350,32 @@ export default function AdvisorPage() {
     alert('Saving reports requires a LotScout plan. Sign up free, then upgrade to any plan to save market reports.');
   }
 
+  async function downloadPdf(r: { title: string; content: string }) {
+    try {
+      const res = await fetch('/api/advisor/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: r.title, content: r.content }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        alert(j?.error || 'Could not generate PDF.');
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `LotScout-Report-${(r.title || 'report').replace(/[^a-z0-9]+/gi, '-').slice(0, 50) || 'report'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Could not generate PDF.');
+    }
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -638,13 +664,23 @@ export default function AdvisorPage() {
                 <p className="text-sm text-center py-8" style={{ color: MUTED }}>
                   {access?.canSave
                     ? 'No saved reports yet. Use Save as Report under any answer to save it here.'
-                    : 'Saving reports is a Scout Pro feature.'}
+                    : 'Saving reports requires a LotScout plan.'}
                 </p>
               ) : (
                 savedReports.map((r, i) => (
                   <div key={i} className="border border-black/10 rounded-xl p-3">
                     <p className="text-sm font-semibold truncate mb-1" style={{ color: INK }}>{r.title}</p>
                     <div className="text-sm max-h-24 overflow-hidden" style={{ color: MUTED }}>{r.content}</div>
+                    {access?.canSave && (
+                      <button
+                        onClick={() => downloadPdf(r)}
+                        className="mt-2 flex items-center gap-1 text-sm font-semibold hover:underline"
+                        style={{ color: GREEN }}
+                      >
+                        <span className="material-symbols-outlined text-base">download</span>
+                        Download PDF
+                      </button>
+                    )}
                   </div>
                 ))
               )}
