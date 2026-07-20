@@ -31,10 +31,10 @@ const FEATURES = [
 function Check() {
   return (
     <span
-      className="material-symbols-outlined text-base"
-      style={{ fontVariationSettings: "'FILL' 1", color: '#1D9E75' }}
+      className="inline-flex items-center justify-center rounded-full shrink-0"
+      style={{ backgroundColor: '#1D9E75', width: '18px', height: '18px' }}
     >
-      check_circle
+      <span className="material-symbols-outlined text-white" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>check</span>
     </span>
   );
 }
@@ -60,12 +60,18 @@ function TierFeatures({ tier, dark = false }: { tier: 'standard' | 'priority' | 
             key={f.name}
             className={`flex items-center gap-2 text-lg ${dark ? 'text-emerald-50' : 'text-on-surface'} ${included ? '' : 'opacity-40'}`}
           >
-            <span
-              className={`material-symbols-outlined text-base shrink-0 ${included ? '' : (dark ? 'text-emerald-200' : 'text-secondary')}`}
-              style={included ? { fontVariationSettings: "'FILL' 1", color: '#1D9E75' } : { fontVariationSettings: "'FILL' 1" }}
-            >
-              {included ? 'check_circle' : 'remove'}
-            </span>
+            {included ? (
+              <span className="inline-flex items-center justify-center rounded-full shrink-0" style={{ backgroundColor: '#1D9E75', width: '18px', height: '18px' }}>
+                <span className="material-symbols-outlined text-white" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>check</span>
+              </span>
+            ) : (
+              <span
+                className={`material-symbols-outlined text-base shrink-0 ${dark ? 'text-emerald-200' : 'text-secondary'}`}
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                remove
+              </span>
+            )}
             {f.name}
           </li>
         );
@@ -134,7 +140,7 @@ export default function PricingPage() {
                 Annual
               </button>
             </div>
-            <span className="text-emerald-700 text-xs font-bold text-center">Get two months free when switching to annual</span>
+            <span className="text-emerald-700 text-xs font-bold text-center">Get 3 months free (25% off) with annual billing</span>
           </div>
 
           {/* STANDARD */}
@@ -220,7 +226,7 @@ export default function PricingPage() {
                   Annual
                 </button>
               </div>
-              <span className="text-green-700 text-xs font-bold pl-1">Get 2 months free with annual billing</span>
+              <span className="text-green-700 text-xs font-bold pl-1">Get 3 months free (25% off) with annual billing</span>
             </div>
 
             {/* Standard */}

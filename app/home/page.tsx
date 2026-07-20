@@ -35,12 +35,13 @@ function PlanFeatures({ tier }: { tier: 'standard' | 'priority' | 'enterprise' }
             key={f.name}
             className={`flex items-start gap-2 text-lg ${included ? 'text-on-surface' : 'text-secondary opacity-40'}`}
           >
-            <span
-              className={`material-symbols-outlined text-base flex-none mt-1 ${included ? '' : 'text-secondary'}`}
-              style={included ? { color: '#1D9E75' } : undefined}
-            >
-              {included ? 'check' : 'remove'}
-            </span>
+            {included ? (
+              <span className="inline-flex items-center justify-center rounded-full flex-none mt-1" style={{ backgroundColor: '#1D9E75', width: '18px', height: '18px' }}>
+                <span className="material-symbols-outlined text-white" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>check</span>
+              </span>
+            ) : (
+              <span className="material-symbols-outlined text-base flex-none mt-1 text-secondary">remove</span>
+            )}
             {f.name}
           </li>
         );
