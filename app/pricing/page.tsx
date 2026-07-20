@@ -31,8 +31,8 @@ const FEATURES = [
 function Check() {
   return (
     <span
-      className="material-symbols-outlined text-base text-primary"
-      style={{ fontVariationSettings: "'FILL' 1" }}
+      className="material-symbols-outlined text-base"
+      style={{ fontVariationSettings: "'FILL' 1", color: '#1D9E75' }}
     >
       check_circle
     </span>
@@ -61,8 +61,8 @@ function TierFeatures({ tier, dark = false }: { tier: 'standard' | 'priority' | 
             className={`flex items-center gap-2 text-lg ${dark ? 'text-emerald-50' : 'text-on-surface'} ${included ? '' : 'opacity-40'}`}
           >
             <span
-              className={`material-symbols-outlined text-base shrink-0 ${included ? (dark ? 'text-emerald-300' : 'text-emerald-600') : (dark ? 'text-emerald-200' : 'text-secondary')}`}
-              style={{ fontVariationSettings: "'FILL' 1" }}
+              className={`material-symbols-outlined text-base shrink-0 ${included ? '' : (dark ? 'text-emerald-200' : 'text-secondary')}`}
+              style={included ? { fontVariationSettings: "'FILL' 1", color: '#1D9E75' } : { fontVariationSettings: "'FILL' 1" }}
             >
               {included ? 'check_circle' : 'remove'}
             </span>

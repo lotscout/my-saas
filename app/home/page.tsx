@@ -35,7 +35,10 @@ function PlanFeatures({ tier }: { tier: 'standard' | 'priority' | 'enterprise' }
             key={f.name}
             className={`flex items-start gap-2 text-lg ${included ? 'text-on-surface' : 'text-secondary opacity-40'}`}
           >
-            <span className={`material-symbols-outlined text-base flex-none mt-1 ${included ? 'text-primary' : 'text-secondary'}`}>
+            <span
+              className={`material-symbols-outlined text-base flex-none mt-1 ${included ? '' : 'text-secondary'}`}
+              style={included ? { color: '#1D9E75' } : undefined}
+            >
               {included ? 'check' : 'remove'}
             </span>
             {f.name}
