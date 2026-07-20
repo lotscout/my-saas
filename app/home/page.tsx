@@ -554,7 +554,7 @@ export default function HomePage() {
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$329</span>
+                <span className="text-4xl font-extrabold text-primary">$197</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <ul className="space-y-3 mb-8 flex-grow">
@@ -578,7 +578,7 @@ export default function HomePage() {
             <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$799</span>
+                <span className="text-4xl font-extrabold text-primary">$529</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <ul className="space-y-3 mb-8 flex-grow">

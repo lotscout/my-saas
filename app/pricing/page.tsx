@@ -37,19 +37,14 @@ function Dash() {
   return <span className="text-outline-variant text-base">—</span>;
 }
 
-const ANNUAL_PRICES  = { standard: 97,  priority: 329, exclusive: 579 };
-const MONTHLY_PRICES = { standard: 113, priority: 384, exclusive: 675 };
+const MONTHLY_PRICES   = { standard: 97,  priority: 197,  exclusive: 529  };
+const ANNUAL_EFFECTIVE = { standard: 73,  priority: 148,  exclusive: 397  };
+const ANNUAL_TOTALS    = { standard: 873, priority: 1773, exclusive: 4761 };
 
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(true);
+  const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const { tier: userTier } = useUserTier();
-
-  const prices = isAnnual ? ANNUAL_PRICES : MONTHLY_PRICES;
-
-  function billingSubtext() {
-    return isAnnual ? 'Billed annually' : 'Billed monthly · no commitment';
-  }
 
   function getPriceKey(tier: string) {
     return `${tier}${isAnnual ? 'Annual' : 'Monthly'}`;
@@ -115,7 +110,7 @@ export default function PricingPage() {
                     Annual
                   </button>
                 </div>
-                <span className="text-emerald-700 text-xs font-bold pl-1">Get 2 months free</span>
+                <span className="text-emerald-700 text-xs font-bold pl-1">Get 3 months free with annual billing</span>
               </div>
             </div>
 
@@ -127,11 +122,27 @@ export default function PricingPage() {
                   <span className="text-secondary text-xs font-semibold">Current Plan</span>
                 )}
               </div>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-extrabold text-primary font-headline">${prices.standard}</span>
-                <span className="text-secondary font-medium text-sm">/mo</span>
-              </div>
-              <p className="text-xs text-secondary/70 mb-2">{billingSubtext()}</p>
+              {isAnnual ? (
+                <>
+                  <div className="flex items-baseline gap-1">
+                    <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.standard}/mo</del>
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-0.5">
+                    <span className="text-3xl font-extrabold text-primary font-headline">${ANNUAL_EFFECTIVE.standard}</span>
+                    <span className="text-secondary font-medium text-sm">/mo</span>
+                  </div>
+                  <p className="text-xs text-emerald-700 font-semibold mb-1">Save 25% · 3 months free</p>
+                  <p className="text-xs text-secondary/70 mb-2">Billed ${ANNUAL_TOTALS.standard}/yr</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-3xl font-extrabold text-primary font-headline">${MONTHLY_PRICES.standard}</span>
+                    <span className="text-secondary font-medium text-sm">/mo</span>
+                  </div>
+                  <p className="text-xs text-secondary/70 mb-2">Billed monthly · no commitment</p>
+                </>
+              )}
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading || userTier === 'standard'}
@@ -160,11 +171,27 @@ export default function PricingPage() {
               <div className="mb-1 text-center">
                 <span className="text-secondary font-bold text-sm tracking-widest uppercase">Priority</span>
               </div>
-              <div className="flex items-baseline gap-1 mb-1 justify-center">
-                <span className="text-3xl font-extrabold text-primary font-headline">${prices.priority}</span>
-                <span className="text-secondary font-medium text-sm">/mo</span>
-              </div>
-              <p className="text-xs text-secondary/70 mb-2 text-center">{billingSubtext()}</p>
+              {isAnnual ? (
+                <>
+                  <div className="flex items-baseline gap-1 justify-center">
+                    <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.priority}/mo</del>
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-0.5 justify-center">
+                    <span className="text-3xl font-extrabold text-primary font-headline">${ANNUAL_EFFECTIVE.priority}</span>
+                    <span className="text-secondary font-medium text-sm">/mo</span>
+                  </div>
+                  <p className="text-xs text-emerald-700 font-semibold mb-1 text-center">Save 25% · 3 months free</p>
+                  <p className="text-xs text-secondary/70 mb-2 text-center">Billed ${ANNUAL_TOTALS.priority}/yr</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-baseline gap-1 mb-1 justify-center">
+                    <span className="text-3xl font-extrabold text-primary font-headline">${MONTHLY_PRICES.priority}</span>
+                    <span className="text-secondary font-medium text-sm">/mo</span>
+                  </div>
+                  <p className="text-xs text-secondary/70 mb-2 text-center">Billed monthly · no commitment</p>
+                </>
+              )}
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
@@ -186,11 +213,27 @@ export default function PricingPage() {
                   <span className="text-secondary text-xs font-semibold">Current Plan</span>
                 )}
               </div>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
-                <span className="text-secondary font-medium text-sm">/mo</span>
-              </div>
-              <p className="text-xs text-secondary/70 mb-2">{billingSubtext()}</p>
+              {isAnnual ? (
+                <>
+                  <div className="flex items-baseline gap-1">
+                    <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.exclusive}/mo</del>
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-0.5">
+                    <span className="text-3xl font-extrabold text-primary font-headline">${ANNUAL_EFFECTIVE.exclusive}</span>
+                    <span className="text-secondary font-medium text-sm">/mo</span>
+                  </div>
+                  <p className="text-xs text-emerald-700 font-semibold mb-1">Save 25% · 3 months free</p>
+                  <p className="text-xs text-secondary/70 mb-2">Billed ${ANNUAL_TOTALS.exclusive}/yr</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-3xl font-extrabold text-primary font-headline">${MONTHLY_PRICES.exclusive}</span>
+                    <span className="text-secondary font-medium text-sm">/mo</span>
+                  </div>
+                  <p className="text-xs text-secondary/70 mb-2">Billed monthly · no commitment</p>
+                </>
+              )}
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading || userTier === 'exclusive'}
