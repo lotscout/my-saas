@@ -127,6 +127,8 @@ export default function AdvisorPage() {
   const [saved, setSaved] = useState<Record<number, boolean>>({});
   const [upgrading, setUpgrading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
+  const [savedReports, setSavedReports] = useState<{ title: string; content: string }[]>([]);
   const [mobileSidebar, setMobileSidebar] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -349,8 +351,11 @@ export default function AdvisorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'save', content }),
       });
-      if (res.ok) setSaved(s => ({ ...s, [idx]: true }));
-      else {
+      if (res.ok) {
+        setSaved(s => ({ ...s, [idx]: true }));
+        const title = (content.trim().split('\n')[0] || 'Saved report').slice(0, 60);
+        setSavedReports(prev => [{ title, content }, ...prev]);
+      } else {
         const j = await res.json().catch(() => ({}));
         alert(j?.error || 'Could not save.');
       }
@@ -440,19 +445,39 @@ export default function AdvisorPage() {
 
   const sidebarInner = (
     <div className="flex flex-col h-full">
-      <div className="p-3">
+      {/* LotScout branding */}
+      <div className="flex items-center gap-2 px-4 pt-4 pb-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="LotScout" className="h-7 w-7 object-contain" />
+        <span className="font-['Manrope'] font-extrabold text-lg" style={{ color: INK }}>LotScout</span>
+      </div>
+
+      {/* Top rows — clean text items */}
+      <div className="px-2">
         <button
           onClick={newChat}
-          className="w-full flex items-center justify-center gap-2 bg-green-700 text-white rounded-xl font-bold py-2.5 text-sm hover:bg-green-800 transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left transition-colors hover:bg-black/5"
+          style={{ color: INK }}
         >
-          <span className="material-symbols-outlined text-lg">add</span>
-          New Chat
+          <span className="material-symbols-outlined text-lg" style={{ color: MUTED }}>add</span>
+          New
+        </button>
+        <button
+          onClick={() => { setShowSaved(true); setMobileSidebar(false); }}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left transition-colors hover:bg-black/5"
+          style={{ color: INK }}
+        >
+          <span className="material-symbols-outlined text-lg" style={{ color: MUTED }}>bookmark</span>
+          Saved
         </button>
       </div>
-      <div className="flex-grow overflow-y-auto px-2 pb-3">
+
+      {/* Recents */}
+      <div className="flex-grow overflow-y-auto px-2 pb-3 mt-3">
+        <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>Recents</p>
         {conversations.length === 0 ? (
-          <p className="text-xs text-center px-2 py-4" style={{ color: MUTED }}>
-            {access?.status === 'guest' ? 'Sign in to save your chat history.' : 'No saved chats yet.'}
+          <p className="px-3 py-2 text-xs" style={{ color: MUTED }}>
+            {access?.status === 'guest' ? 'Sign in to save your chat history.' : 'No recent chats yet.'}
           </p>
         ) : (
           <>
@@ -461,10 +486,11 @@ export default function AdvisorPage() {
                 key={c.id}
                 onClick={() => loadConversation(c)}
                 title={c.title}
-                className={`w-full text-left truncate rounded-lg px-3 py-2 text-sm mb-0.5 transition-colors ${c.id === currentId ? 'font-semibold' : 'hover:bg-black/5'}`}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-colors ${c.id === currentId ? '' : 'hover:bg-black/5'}`}
                 style={{ color: INK, backgroundColor: c.id === currentId ? CHIP_BG : undefined }}
               >
-                {c.title || 'New chat'}
+                <span className="material-symbols-outlined text-base shrink-0" style={{ color: MUTED }}>chat_bubble</span>
+                <span className="truncate">{c.title || 'New chat'}</span>
               </button>
             ))}
             {access?.status === 'guest' && (
@@ -641,6 +667,37 @@ export default function AdvisorPage() {
             >
               Maybe later
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Saved reports (saved this session) */}
+      {showSaved && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowSaved(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
+              <h2 className="text-lg font-bold" style={{ color: INK }}>Saved reports</h2>
+              <button onClick={() => setShowSaved(false)} className="p-1 rounded hover:bg-black/5" aria-label="Close">
+                <span className="material-symbols-outlined" style={{ color: MUTED }}>close</span>
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4 space-y-3">
+              {savedReports.length === 0 ? (
+                <p className="text-sm text-center py-8" style={{ color: MUTED }}>
+                  {access?.canSave
+                    ? 'No saved reports yet. Use Save as Report under any answer to save it here.'
+                    : 'Saving reports is a Scout Pro feature.'}
+                </p>
+              ) : (
+                savedReports.map((r, i) => (
+                  <div key={i} className="border border-black/10 rounded-xl p-3">
+                    <p className="text-sm font-semibold truncate mb-1" style={{ color: INK }}>{r.title}</p>
+                    <div className="text-sm max-h-24 overflow-hidden" style={{ color: MUTED }}>{r.content}</div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}
