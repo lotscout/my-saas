@@ -512,9 +512,13 @@ export default function AdvisorPage() {
             /* ── Centered empty state ── */
             <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pb-6 min-h-0">
               <div className="flex-grow flex flex-col items-center justify-center gap-6">
-                <div className="text-center">
-                  <h1 className="font-['Manrope'] font-bold tracking-tight" style={{ color: INK, fontSize: '40px', lineHeight: 1.1 }}>Scout</h1>
-                  <p className="mt-2 text-lg" style={{ color: MUTED }}>Hi, I&apos;m Scout. Ask me anything about real estate markets, buying, selling, investing, and more.</p>
+                <div className="flex flex-col items-center text-center">
+                  <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/logo.png" alt="LotScout" className="h-11 w-11 object-contain" />
+                    <h1 className="font-['Manrope'] font-extrabold tracking-tight" style={{ color: INK, fontSize: '46px', lineHeight: 1.1 }}>Scout</h1>
+                  </div>
+                  <p className="mt-3 text-lg" style={{ color: MUTED }}>Hi, I&apos;m Scout. Ask me anything about real estate markets, buying, selling, investing, and more.</p>
                 </div>
 
                 {limitHit ? (
