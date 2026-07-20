@@ -362,7 +362,7 @@ export default function AdvisorPage() {
   function handleSaveClick(content: string, idx: number) {
     if (access?.canSave) { saveReport(content, idx); return; }
     if (access?.status === 'free') { upgrade(); return; }
-    alert('Saving reports is a Search Pro feature. Sign up free, then upgrade to Search Pro to save market reports.');
+    alert('Saving reports is a Scout Pro feature. Sign up free, then upgrade to Scout Pro to save market reports.');
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -389,9 +389,9 @@ export default function AdvisorPage() {
       ) : (
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to Search Pro for unlimited questions and saved reports.</p>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to Scout Pro for unlimited questions and saved reports.</p>
           <button onClick={upgrade} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
-            Upgrade to Search Pro, $20/mo
+            Upgrade to Scout Pro, $20/mo
           </button>
         </>
       )}
@@ -414,7 +414,7 @@ export default function AdvisorPage() {
         placeholder={limitHit ? 'Limit reached' : 'Ask anything about real estate...'}
         className="flex-grow resize-none bg-transparent px-2 py-2 text-lg leading-relaxed placeholder:text-[#717973] focus:outline-none disabled:cursor-not-allowed max-h-40"
         style={{ color: INK }}
-        aria-label="Search"
+        aria-label="Scout"
       />
       <button
         type="submit"
@@ -513,7 +513,7 @@ export default function AdvisorPage() {
             <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pb-6 min-h-0">
               <div className="flex-grow flex flex-col items-center justify-center gap-6">
                 <div className="text-center">
-                  <h1 className="font-['Manrope'] font-bold tracking-tight" style={{ color: INK, fontSize: '40px', lineHeight: 1.1 }}>Search</h1>
+                  <h1 className="font-['Manrope'] font-bold tracking-tight" style={{ color: INK, fontSize: '40px', lineHeight: 1.1 }}>Scout</h1>
                   <p className="mt-2 text-lg" style={{ color: MUTED }}>Ask about real estate markets, buying, selling, investing, building, and more.</p>
                 </div>
 
@@ -556,7 +556,7 @@ export default function AdvisorPage() {
                         <span className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: GREEN }}>
                           <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>travel_explore</span>
                         </span>
-                        <span className="text-sm font-bold" style={{ color: INK }}>LotScout Search</span>
+                        <span className="text-sm font-bold" style={{ color: INK }}>Scout</span>
                       </div>
                     )}
 
@@ -582,7 +582,7 @@ export default function AdvisorPage() {
                       <button
                         onClick={() => handleSaveClick(m.content, i)}
                         disabled={!!saved[i]}
-                        title={access.canSave ? 'Save this as a report' : 'Saving reports is a Search Pro feature'}
+                        title={access.canSave ? 'Save this as a report' : 'Saving reports is a Scout Pro feature'}
                         className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
                         style={{ color: saved[i] ? MUTED : access.canSave ? GREEN : MUTED }}
                       >
@@ -618,7 +618,7 @@ export default function AdvisorPage() {
             <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-white" style={{ backgroundColor: GREEN }}>
               <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
             </div>
-            <h2 className="text-xl font-bold mb-1" style={{ color: INK }}>Upgrade to Search Pro</h2>
+            <h2 className="text-xl font-bold mb-1" style={{ color: INK }}>Upgrade to Scout Pro</h2>
             <p className="text-base mb-5" style={{ color: MUTED }}>
               Unlimited questions, saved market reports, and priority research for $20 per month.
             </p>

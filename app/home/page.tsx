@@ -561,7 +561,7 @@ export default function HomePage() {
             <a href="mailto:support@lotscout.com" className="font-semibold text-emerald-600 hover:underline">support@lotscout.com</a>
           </p>
 
-          {/* Search Pro Add-On */}
+          {/* Scout Pro Add-On */}
           <div className="mt-8 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white shadow-md overflow-hidden">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6">
               <div className="flex items-center gap-3 min-w-[160px]">
@@ -570,7 +570,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-0.5">Add-On</div>
-                  <div className="font-headline text-lg font-extrabold text-primary">Search Pro</div>
+                  <div className="font-headline text-lg font-extrabold text-primary">Scout Pro</div>
                 </div>
               </div>
               <div className="flex-grow">
@@ -578,9 +578,9 @@ export default function HomePage() {
                   <span className="text-2xl font-extrabold text-primary font-headline">$20</span>
                   <span className="text-secondary">/mo</span>
                 </div>
-                <p className="text-sm text-on-surface-variant mb-2">Unlimited AI Search questions and saved reports. Ask our land investment advisor anything, as much as you want.</p>
+                <p className="text-sm text-on-surface-variant mb-2">Unlimited Scout questions and saved reports. Ask Scout anything, as much as you want.</p>
                 <div className="flex flex-wrap gap-x-5 gap-y-1">
-                  {['Unlimited Search questions', 'Save reports and conversations', 'Full access to the AI Land Advisor'].map((f) => (
+                  {['Unlimited Scout questions', 'Save reports and conversations', 'Full access to Scout'].map((f) => (
                     <span key={f} className="flex items-center gap-1.5 text-xs text-on-surface-variant">
                       <span className="material-symbols-outlined text-emerald-600 text-base">check</span> {f}
                     </span>
@@ -589,7 +589,7 @@ export default function HomePage() {
                 <p className="mt-2 text-xs text-emerald-700 font-semibold">✦ Included free with any LotScout paid plan (Standard, Priority, or Exclusive).</p>
               </div>
               <div className="flex-none">
-                <Link href="/pricing" className="inline-block py-3 px-6 font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all whitespace-nowrap">Get Search Pro</Link>
+                <Link href="/pricing" className="inline-block py-3 px-6 font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all whitespace-nowrap">Get Scout Pro</Link>
               </div>
             </div>
           </div>

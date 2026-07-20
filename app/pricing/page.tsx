@@ -339,7 +339,7 @@ export default function PricingPage() {
           </a>
         </div>
 
-        {/* ── Search Pro Add-On ── */}
+        {/* ── Scout Pro Add-On ── */}
         <div className="mt-8 rounded-2xl overflow-hidden shadow-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6">
             {/* Left: icon + name */}
@@ -349,7 +349,7 @@ export default function PricingPage() {
               </div>
               <div>
                 <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-0.5">Add-On</div>
-                <div className="font-headline text-lg font-extrabold text-primary">Search Pro</div>
+                <div className="font-headline text-lg font-extrabold text-primary">Scout Pro</div>
               </div>
             </div>
 
@@ -360,13 +360,13 @@ export default function PricingPage() {
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
               <p className="text-sm text-secondary mb-2">
-                Unlimited AI Search questions and saved reports. Ask our land investment advisor anything, as much as you want.
+                Unlimited Scout questions and saved reports. Ask Scout anything, as much as you want.
               </p>
               <div className="flex flex-wrap gap-x-5 gap-y-1">
                 {[
-                  'Unlimited Search questions',
+                  'Unlimited Scout questions',
                   'Save reports and conversations',
-                  'Full access to the AI Land Advisor',
+                  'Full access to Scout',
                 ].map((f) => (
                   <span key={f} className="flex items-center gap-1.5 text-xs text-secondary">
                     <span className="material-symbols-outlined text-emerald-600 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
@@ -386,7 +386,7 @@ export default function PricingPage() {
                 disabled={!!loading}
                 className="py-2.5 px-6 font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-60 whitespace-nowrap"
               >
-                {loading === 'searchProMonthly' ? 'Loading…' : 'Get Search Pro'}
+                {loading === 'searchProMonthly' ? 'Loading…' : 'Get Scout Pro'}
               </button>
             </div>
           </div>
