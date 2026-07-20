@@ -10,6 +10,7 @@ const GRID_CLS = 'grid grid-cols-[1.5fr_1fr_1fr_1fr]';
 
 // Full feature list — every tier shows all rows; unavailable rows render dimmed.
 const FEATURES = [
+  { name: 'Unlimited Scout AI Search',                       standard: true,  priority: true,  exclusive: true  },
   { name: 'Land Marketplace Access',                         standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  exclusive: true  },
   { name: 'Custom Company Profile',                          standard: true,  priority: true,  exclusive: true  },
@@ -25,9 +26,6 @@ const FEATURES = [
   { name: 'Early Access to New Buyers Before Anyone Else',   standard: false, priority: false, exclusive: true  },
   { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, exclusive: true  },
   { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, exclusive: true  },
-  { name: 'Priority Deal Matching with Top-Tier Buyers',     standard: false, priority: false, exclusive: true  },
-  { name: 'Quarterly Market Intelligence Reports',           standard: false, priority: false, exclusive: true  },
-  { name: "Direct Line to LotScout's Land Experts",          standard: false, priority: false, exclusive: true  },
 ];
 
 function Check() {
@@ -339,58 +337,6 @@ export default function PricingPage() {
           </a>
         </div>
 
-        {/* ── Scout Pro Add-On ── */}
-        <div className="mt-8 rounded-2xl overflow-hidden shadow-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6">
-            {/* Left: icon + name */}
-            <div className="flex items-center gap-3 min-w-[160px]">
-              <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center flex-none">
-                <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>search</span>
-              </div>
-              <div>
-                <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-0.5">Add-On</div>
-                <div className="font-headline text-lg font-extrabold text-primary">Scout Pro</div>
-              </div>
-            </div>
-
-            {/* Middle: price + description + features */}
-            <div className="flex-grow">
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-2xl font-extrabold text-primary font-headline">$20</span>
-                <span className="text-secondary font-medium text-sm">/mo</span>
-              </div>
-              <p className="text-sm text-secondary mb-2">
-                Unlimited Scout questions and saved reports. Ask Scout anything, as much as you want.
-              </p>
-              <div className="flex flex-wrap gap-x-5 gap-y-1">
-                {[
-                  'Unlimited Scout questions',
-                  'Save reports and conversations',
-                  'Full access to Scout',
-                ].map((f) => (
-                  <span key={f} className="flex items-center gap-1.5 text-xs text-secondary">
-                    <span className="material-symbols-outlined text-emerald-600 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    {f}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-2 text-xs text-emerald-700 font-semibold">
-                ✦ Included free with any LotScout paid plan (Standard, Priority, or Exclusive).
-              </p>
-            </div>
-
-            {/* Right: CTA */}
-            <div className="flex-none">
-              <button
-                onClick={() => handleCheckout('searchProMonthly')}
-                disabled={!!loading}
-                className="py-2.5 px-6 font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-60 whitespace-nowrap"
-              >
-                {loading === 'searchProMonthly' ? 'Loading…' : 'Get Scout Pro'}
-              </button>
-            </div>
-          </div>
-        </div>
       </main>
 
       {/* Footer */}

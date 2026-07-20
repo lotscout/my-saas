@@ -125,8 +125,6 @@ export default function AdvisorPage() {
   const [access, setAccess] = useState<Access | null>(null);
   const [limitHit, setLimitHit] = useState<null | 'guest' | 'free'>(null);
   const [saved, setSaved] = useState<Record<number, boolean>>({});
-  const [upgrading, setUpgrading] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
   const [savedReports, setSavedReports] = useState<{ title: string; content: string }[]>([]);
   const [mobileSidebar, setMobileSidebar] = useState(false);
@@ -321,27 +319,9 @@ export default function AdvisorPage() {
     setMobileSidebar(false);
   }
 
-  // Open the in-page upgrade modal (keeps the chat; no navigation away).
+  // Scout is included in every LotScout plan now — upgrading means viewing the plans.
   function upgrade() {
-    setShowUpgradeModal(true);
-  }
-
-  async function startCheckout() {
-    if (upgrading) return;
-    setUpgrading(true);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceKey: 'searchProMonthly' }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else { alert(data.error || 'Could not start checkout.'); setUpgrading(false); }
-    } catch {
-      alert('Could not start checkout.');
-      setUpgrading(false);
-    }
+    window.location.href = '/pricing';
   }
 
   async function saveReport(content: string, idx: number) {
@@ -367,7 +347,7 @@ export default function AdvisorPage() {
   function handleSaveClick(content: string, idx: number) {
     if (access?.canSave) { saveReport(content, idx); return; }
     if (access?.status === 'free') { upgrade(); return; }
-    alert('Saving reports is a Scout Pro feature. Sign up free, then upgrade to Scout Pro to save market reports.');
+    alert('Saving reports requires a LotScout plan. Sign up free, then upgrade to any plan to save market reports.');
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -394,10 +374,10 @@ export default function AdvisorPage() {
       ) : (
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to Scout Pro for unlimited questions and saved reports.</p>
-          <button onClick={upgrade} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
-            Upgrade to Scout Pro, $20/mo
-          </button>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to any LotScout plan for unlimited Scout and saved reports.</p>
+          <a href="/pricing" className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
+            View plans
+          </a>
         </>
       )}
     </div>
@@ -612,7 +592,7 @@ export default function AdvisorPage() {
                       <button
                         onClick={() => handleSaveClick(m.content, i)}
                         disabled={!!saved[i]}
-                        title={access.canSave ? 'Save this as a report' : 'Saving reports is a Scout Pro feature'}
+                        title={access.canSave ? 'Save this as a report' : 'Saving reports requires a LotScout plan'}
                         className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
                         style={{ color: saved[i] ? MUTED : access.canSave ? GREEN : MUTED }}
                       >
@@ -640,36 +620,7 @@ export default function AdvisorPage() {
         </div>
       </div>
 
-      {/* In-page upgrade modal — keeps the chat, no navigation away (browser back stays on /advisor). */}
-      {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowUpgradeModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-7 text-center">
-            <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-white" style={{ backgroundColor: GREEN }}>
-              <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
-            </div>
-            <h2 className="text-xl font-bold mb-1" style={{ color: INK }}>Upgrade to Scout Pro</h2>
-            <p className="text-base mb-5" style={{ color: MUTED }}>
-              Unlimited questions, saved market reports, and priority research for $20 per month.
-            </p>
-            <button
-              onClick={startCheckout}
-              disabled={upgrading}
-              className="w-full text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 disabled:opacity-60"
-              style={{ backgroundColor: GREEN }}
-            >
-              {upgrading ? 'Starting checkout…' : 'Continue to checkout'}
-            </button>
-            <button
-              onClick={() => setShowUpgradeModal(false)}
-              className="w-full mt-2 px-6 py-2.5 rounded-xl font-semibold text-base hover:bg-black/5 transition-colors"
-              style={{ color: MUTED }}
-            >
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Scout is included in every LotScout plan; upgrade links to /pricing. */}
 
       {/* Saved reports (saved this session) */}
       {showSaved && (

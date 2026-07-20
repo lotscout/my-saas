@@ -300,7 +300,7 @@ export async function POST(request: NextRequest) {
   if (body?.action === 'save') {
     if (!user) return Response.json({ error: 'Sign in required' }, { status: 401 });
     const access = await getUserAccess(user.id);
-    if (!access.canSave) return Response.json({ error: 'Upgrade to Scout Pro to save reports.' }, { status: 403 });
+    if (!access.canSave) return Response.json({ error: 'Upgrade to any LotScout plan to save reports.' }, { status: 403 });
     const content = String(body.content ?? '').trim().slice(0, 20000);
     if (!content) return Response.json({ error: 'Nothing to save' }, { status: 400 });
     try {
@@ -339,7 +339,7 @@ export async function POST(request: NextRequest) {
       const used = await getFreeUsedToday(user.id);
       if (used >= FREE_DAILY_LIMIT) {
         return Response.json(
-          { error: "You have reached today's free limit. Upgrade to Scout Pro for unlimited questions and saved reports.", reason: 'free_limit' },
+          { error: "You have reached today's free limit. Upgrade to any LotScout plan for unlimited Scout and saved reports.", reason: 'free_limit' },
           { status: 429 }
         );
       }
