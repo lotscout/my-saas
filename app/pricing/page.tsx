@@ -22,8 +22,8 @@ const FEATURES = [
   { name: 'Financing Partners Access',                       standard: false, priority: true,  exclusive: true  },
   { name: '24/7 Support',                                    standard: false, priority: true,  exclusive: true  },
   { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, exclusive: true  },
-  { name: 'Early Access to New Listings Before Anyone Else', standard: false, priority: false, exclusive: true  },
-  { name: 'Early Access to New Buyers Before Anyone Else',   standard: false, priority: false, exclusive: true  },
+  { name: 'Early Access to New Listings',                    standard: false, priority: false, exclusive: true  },
+  { name: 'Early Access to New Buyers',                      standard: false, priority: false, exclusive: true  },
   { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, exclusive: true  },
   { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, exclusive: true  },
 ];
