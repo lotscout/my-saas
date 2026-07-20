@@ -29,15 +29,15 @@ const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; enterp
 
 function PlanFeatures({ tier }: { tier: 'standard' | 'priority' | 'enterprise' }) {
   return (
-    <ul className="space-y-3 mb-8 flex-grow">
+    <ul className="space-y-2 mb-8 flex-grow">
       {ALL_FEATURES.map((f) => {
         const included = f[tier];
         return (
           <li
             key={f.name}
-            className={`flex items-start gap-3 text-sm ${included ? 'text-on-surface' : 'text-secondary opacity-40'}`}
+            className={`flex items-start gap-2 text-lg ${included ? 'text-on-surface' : 'text-secondary opacity-40'}`}
           >
-            <span className={`material-symbols-outlined text-lg flex-none mt-0.5 ${included ? 'text-primary' : 'text-secondary'}`}>
+            <span className={`material-symbols-outlined text-base flex-none mt-1 ${included ? 'text-primary' : 'text-secondary'}`}>
               {included ? 'check' : 'remove'}
             </span>
             {f.name}

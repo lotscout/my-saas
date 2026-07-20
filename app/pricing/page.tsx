@@ -33,7 +33,7 @@ const FEATURES = [
 function Check() {
   return (
     <span
-      className="material-symbols-outlined text-primary"
+      className="material-symbols-outlined text-base text-primary"
       style={{ fontVariationSettings: "'FILL' 1" }}
     >
       check_circle
@@ -54,16 +54,16 @@ const MONTHLY_PRICES = { standard: 113, priority: 232, exclusive: 617 };
 // in the tier are dimmed (opacity-40) with a dash instead of a green check.
 function TierFeatures({ tier, dark = false }: { tier: 'standard' | 'priority' | 'exclusive'; dark?: boolean }) {
   return (
-    <ul className="mt-5 space-y-3">
+    <ul className="mt-5 space-y-2">
       {FEATURES.map((f) => {
         const included = f[tier] === true;
         return (
           <li
             key={f.name}
-            className={`flex items-center gap-3 text-sm ${dark ? 'text-emerald-50' : 'text-on-surface'} ${included ? '' : 'opacity-40'}`}
+            className={`flex items-center gap-2 text-lg ${dark ? 'text-emerald-50' : 'text-on-surface'} ${included ? '' : 'opacity-40'}`}
           >
             <span
-              className={`material-symbols-outlined text-xl ${included ? (dark ? 'text-emerald-300' : 'text-emerald-600') : (dark ? 'text-emerald-200' : 'text-secondary')}`}
+              className={`material-symbols-outlined text-base shrink-0 ${included ? (dark ? 'text-emerald-300' : 'text-emerald-600') : (dark ? 'text-emerald-200' : 'text-secondary')}`}
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               {included ? 'check_circle' : 'remove'}
@@ -307,16 +307,16 @@ export default function PricingPage() {
                 key={fi}
                 className={`${GRID_CLS} border-t border-outline-variant/5 hover:bg-surface-container-lowest transition-colors`}
               >
-                <div className="py-3 pl-8 pr-4 text-sm font-medium text-on-surface flex items-center">
+                <div className="py-2 pl-8 pr-4 text-lg font-medium text-on-surface flex items-center">
                   {feature.name}
                 </div>
-                <div className="py-3 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
                   {cell(feature.standard)}
                 </div>
-                <div className="py-3 px-4 flex justify-center items-center border-l border-outline-variant/10 bg-primary-container/5">
+                <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10 bg-primary-container/5">
                   {cell(feature.priority)}
                 </div>
-                <div className="py-3 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
                   {cell(feature.exclusive)}
                 </div>
               </div>
