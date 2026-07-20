@@ -244,7 +244,18 @@ export default function AdvisorPage() {
         setLimitHit(j?.reason === 'guest_limit' ? 'guest' : 'free');
         return;
       }
-      if (!res.ok || !res.body) throw new Error('request failed');
+      if (!res.ok) {
+        // Surface the server-provided error type for debugging (e.g. config, api_500).
+        let detail = '';
+        try { const j = await res.json(); if (j?.type) detail = ` (${j.type})`; } catch {}
+        setMessages(m => {
+          const copy = [...m];
+          copy[copy.length - 1] = { role: 'assistant', content: `Sorry, something went wrong${detail}. Please try again.` };
+          return copy;
+        });
+        return;
+      }
+      if (!res.body) throw new Error('no response body');
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();

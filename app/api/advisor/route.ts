@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+// Web search + analysis + streaming can exceed 60s; 300s is the Vercel Pro ceiling.
+export const maxDuration = 300;
 
 const GUEST_LIMIT = 3;          // total questions for logged-out guests
 const FREE_DAILY_LIMIT = 5;     // questions per calendar day for free accounts
@@ -19,6 +20,34 @@ const PRIVACY_NOTE =
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+// Robustly pull the final answer text out of a message: join all text blocks rather
+// than assuming content[0] (web search adds server_tool_use / tool_result blocks).
+function extractText(msg: any): string {
+  try {
+    const blocks = Array.isArray(msg?.content) ? msg.content : [];
+    return blocks
+      .filter((b: any) => b?.type === 'text' && typeof b.text === 'string')
+      .map((b: any) => b.text)
+      .join('');
+  } catch {
+    return '';
+  }
+}
+
+// Classify an error into a non-sensitive category for logs and debugging output.
+function classifyError(err: unknown): string {
+  const anyErr = err as any;
+  const status = anyErr?.status ?? anyErr?.statusCode;
+  const msg = String(anyErr?.message ?? anyErr ?? '').toLowerCase();
+  if (status === 401 || /api key|unauthor|authentication/.test(msg)) return 'auth';
+  if (status === 429 || /rate limit|overloaded/.test(msg)) return 'rate_limit';
+  if (/timeout|timed out|etimedout|aborted|aborterror/.test(msg)) return 'timeout';
+  if (/tool|web_search|web search/.test(msg)) return 'tool';
+  if (status === 404 || /model|not found/.test(msg)) return 'model';
+  if (typeof status === 'number') return `api_${status}`;
+  return 'unknown';
 }
 
 interface Access {
@@ -330,23 +359,42 @@ export async function POST(request: NextRequest) {
     remainingAfter = Math.max(0, GUEST_LIMIT - next);
   }
 
-  const context = await buildLotScoutContext(user?.id ?? null);
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error('[advisor] Missing ANTHROPIC_API_KEY env var');
+    return Response.json({ error: 'Search is not configured on the server.', type: 'config' }, { status: 500 });
+  }
+
+  // Context is best-effort — a Supabase hiccup must not crash the whole answer.
+  let context = 'No LotScout market data is currently available.';
+  try {
+    context = await buildLotScoutContext(user?.id ?? null);
+  } catch (err) {
+    console.error('[advisor] context build error (non-fatal):', err);
+  }
   const system = `${SYSTEM_PROMPT}\n\n${PRIVACY_NOTE}\n\n<lotscout_market_data>\n${context}\n</lotscout_market_data>`;
 
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   // Persist the user's message for conversation history (logged-in only).
   if (user) {
     await insertMessage(user.id, 'user', lastUser, conversationId);
   }
 
+  // web_search server tool (Sonnet 5 supports the _20260209 variant). Passed via `as any`
+  // to stay resilient to SDK tool-type version differences.
   const tools = [{ type: 'web_search_20260209', name: 'web_search', max_uses: 6 }] as any;
 
   const readable = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();
       let fullText = '';
-      try {
+      let lastErr: unknown = null;
+      const stripDashes = (s: string) => s.replace(/\s*[—–―]\s*/g, ', ');
+
+      // One full completion, looping over server-tool pauses. Streams text as it
+      // arrives; if no deltas were emitted, extracts text blocks from the final
+      // message (robust to text / tool_use / tool_result content blocks).
+      const attempt = async (useTools: boolean) => {
         let convo: any[] = history.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content }));
         for (let i = 0; i < 5; i++) {
           const stream = await client.messages.stream({
@@ -354,14 +402,13 @@ export async function POST(request: NextRequest) {
             max_tokens: 2048,
             thinking: { type: 'disabled' },
             system,
-            tools,
+            ...(useTools ? { tools } : {}),
             messages: convo,
           } as any);
 
           for await (const ev of stream) {
             if (ev.type === 'content_block_delta' && ev.delta.type === 'text_delta') {
-              // Safety net: strip em/en dashes (and horizontal bar) so none reach the user.
-              const clean = ev.delta.text.replace(/\s*[—–―]\s*/g, ', ');
+              const clean = stripDashes(ev.delta.text);
               fullText += clean;
               controller.enqueue(enc.encode(clean));
             }
@@ -372,13 +419,35 @@ export async function POST(request: NextRequest) {
             convo = [...convo, { role: 'assistant', content: final.content }];
             continue;
           }
+          if (!fullText.trim()) {
+            const txt = extractText(final);
+            if (txt) { const clean = stripDashes(txt); fullText += clean; controller.enqueue(enc.encode(clean)); }
+          }
           break;
         }
+      };
+
+      try {
+        await attempt(true);
       } catch (err) {
-        console.error('[advisor] generation error:', err);
+        lastErr = err;
+        console.error('[advisor] generation error (with web_search):', err instanceof Error ? (err.stack ?? err.message) : err);
+        // Graceful fallback: if web search / tool use failed before producing any
+        // answer, retry once WITHOUT tools so the model still answers from knowledge.
         if (!fullText.trim()) {
-          controller.enqueue(enc.encode('Sorry, I ran into a problem answering that. Please try again in a moment.'));
+          try {
+            await attempt(false);
+            lastErr = null;
+          } catch (err2) {
+            lastErr = err2;
+            console.error('[advisor] generation error (no-tools fallback):', err2 instanceof Error ? (err2.stack ?? err2.message) : err2);
+          }
         }
+      }
+
+      if (!fullText.trim()) {
+        const type = classifyError(lastErr);
+        controller.enqueue(enc.encode(`Sorry, I could not complete that request right now (${type}). Please try again in a moment.`));
       }
 
       if (user && fullText.trim()) {
