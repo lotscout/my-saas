@@ -43,10 +43,10 @@ function Dash() {
   return <span className="text-outline-variant text-base">—</span>;
 }
 
-// Monthly = round(annual x 7/6) to preserve the existing "2 months free" annual
-// discount. Standard is unchanged; priority/enterprise repriced to $199/$529 annual.
-const ANNUAL_PRICES  = { standard: 97,  priority: 199, exclusive: 529 };
-const MONTHLY_PRICES = { standard: 113, priority: 232, exclusive: 617 };
+// Correct monthly prices. Annual = 9 months paid (3 months free = 25% off).
+const MONTHLY_PRICES   = { standard: 97,  priority: 197,  exclusive: 529  };
+const ANNUAL_EFFECTIVE = { standard: 73,  priority: 148,  exclusive: 397  }; // effective $/mo
+const ANNUAL_TOTALS    = { standard: 873, priority: 1773, exclusive: 4761 }; // billed /yr
 
 // Full feature list rendered in every mobile pricing card. Features not included
 // in the tier are dimmed (opacity-40) with a dash instead of a green check.
@@ -85,10 +85,12 @@ export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const { tier: userTier } = useUserTier();
 
-  const prices = isAnnual ? ANNUAL_PRICES : MONTHLY_PRICES;
+  const prices = isAnnual ? ANNUAL_EFFECTIVE : MONTHLY_PRICES;
 
-  function billingSubtext() {
-    return isAnnual ? 'Billed annually' : 'Billed monthly · no commitment';
+  function billingSubtext(tier: keyof typeof ANNUAL_TOTALS) {
+    return isAnnual
+      ? `Billed $${ANNUAL_TOTALS[tier]}/yr`
+      : 'Billed monthly · no commitment';
   }
 
   function getPriceKey(tier: string) {
@@ -146,11 +148,13 @@ export default function PricingPage() {
           {/* STANDARD */}
           <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
             <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Standard</p>
-            <div className="flex items-baseline gap-1 mb-1">
+            {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.standard}/mo</del>}
+            <div className="flex items-baseline gap-1 mb-0.5">
               <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
               <span className="text-secondary font-medium text-sm">/mo</span>
             </div>
-            <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
+            {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+            <p className="text-xs text-secondary/70 mb-4">{billingSubtext('standard')}</p>
             <button
               onClick={() => handleCheckout(getPriceKey('standard'))}
               disabled={!!loading || userTier === 'standard'}
@@ -165,11 +169,13 @@ export default function PricingPage() {
           <div className="rounded-3xl p-6 shadow-lg relative text-white" style={{ backgroundColor: '#1b4332' }}>
             <span className="absolute top-5 right-5 bg-emerald-400 text-emerald-950 text-[10px] font-black px-3 py-1 rounded-full tracking-wide uppercase">Most Popular</span>
             <p className="text-emerald-200 font-bold text-sm tracking-widest uppercase mb-2">Priority</p>
-            <div className="flex items-baseline gap-1 mb-1">
+            {isAnnual && <del className="text-emerald-200/40 text-sm font-medium">${MONTHLY_PRICES.priority}/mo</del>}
+            <div className="flex items-baseline gap-1 mb-0.5">
               <span className="text-4xl font-extrabold text-white font-headline">${prices.priority}</span>
               <span className="text-emerald-200 font-medium text-sm">/mo</span>
             </div>
-            <p className="text-xs text-emerald-200/70 mb-4">{billingSubtext()}</p>
+            {isAnnual && <p className="text-xs text-emerald-300 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+            <p className="text-xs text-emerald-200/70 mb-4">{billingSubtext('priority')}</p>
             <button
               onClick={() => handleCheckout(getPriceKey('priority'))}
               disabled={!!loading || userTier === 'priority'}
@@ -183,11 +189,13 @@ export default function PricingPage() {
           {/* EXCLUSIVE */}
           <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
             <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Enterprise</p>
-            <div className="flex items-baseline gap-1 mb-1">
+            {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.exclusive}/mo</del>}
+            <div className="flex items-baseline gap-1 mb-0.5">
               <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
               <span className="text-secondary font-medium text-sm">/mo</span>
             </div>
-            <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
+            {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+            <p className="text-xs text-secondary/70 mb-4">{billingSubtext('exclusive')}</p>
             <button
               onClick={() => handleCheckout(getPriceKey('exclusive'))}
               disabled={!!loading || userTier === 'exclusive'}
@@ -232,11 +240,13 @@ export default function PricingPage() {
             {/* Standard */}
             <div className="p-5 flex flex-col border-l border-outline-variant/10">
               <span className="text-secondary font-bold text-xs tracking-widest uppercase mb-2">Standard</span>
+              {isAnnual && <del className="text-secondary/40 text-sm font-medium mt-1">${MONTHLY_PRICES.standard}/mo</del>}
               <div className="flex items-baseline gap-1 mb-0.5">
                 <span className="text-3xl font-extrabold text-primary font-headline">${prices.standard}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
+              {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('standard')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading || userTier === 'standard'}
@@ -260,11 +270,13 @@ export default function PricingPage() {
                   <span className="bg-green-700 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full tracking-wide uppercase">Most Popular</span>
                 )}
               </div>
+              {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.priority}/mo</del>}
               <div className="flex items-baseline gap-1 mb-0.5">
                 <span className="text-3xl font-extrabold text-primary font-headline">${prices.priority}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
+              {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('priority')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
@@ -281,11 +293,13 @@ export default function PricingPage() {
             {/* Exclusive */}
             <div className="p-5 flex flex-col border-l border-outline-variant/10">
               <span className="text-secondary font-bold text-xs tracking-widest uppercase mb-2">Enterprise</span>
+              {isAnnual && <del className="text-secondary/40 text-sm font-medium mt-1">${MONTHLY_PRICES.exclusive}/mo</del>}
               <div className="flex items-baseline gap-1 mb-0.5">
                 <span className="text-3xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
                 <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              <p className="text-xs text-secondary/70 mb-4">{billingSubtext()}</p>
+              {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('exclusive')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading || userTier === 'exclusive'}
