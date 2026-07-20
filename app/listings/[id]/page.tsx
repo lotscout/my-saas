@@ -7,6 +7,7 @@ import { useUserTier } from '@/hooks/useUserTier';
 import { createClient } from '@/lib/supabase/client';
 import Header from '@/components/Header';
 import SendMessageModal from '@/components/SendMessageModal';
+import { getSellerName, isBadName } from '@/lib/getSellerName';
 import COUNTY_CENTROIDS from '@/lib/county-centroids.json';
 
 const IMAGE_REQUEST_BODY =
@@ -269,11 +270,13 @@ export default function ListingDetailPage() {
     );
   }
 
-  const sellerName = listing.owner_name || listing.digital_signature || 'Private Seller';
+  const sellerName = getSellerName(listing);
 
   const sellerInitials = (() => {
-    const name = listing.owner_name || listing.digital_signature || '';
-    return name.slice(0, 2).toUpperCase() || 'PS';
+    const parts = sellerName.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'S';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   })();
 
   const pricePerAcre =
@@ -670,7 +673,7 @@ export default function ListingDetailPage() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-on-surface text-sm truncate">{sellerName}</div>
-                  {listing.owner_name && (
+                  {listing.owner_name && !isBadName(listing.owner_name) && (
                     <Link href={`/sellers/${encodeURIComponent(listing.owner_name)}`} className="text-xs text-primary hover:underline">
                       View seller profile →
                     </Link>

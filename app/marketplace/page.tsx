@@ -15,6 +15,7 @@ import { createClient } from '@/lib/supabase/client';
 import BoostModal from '@/components/BoostModal';
 import SendMessageModal from '@/components/SendMessageModal';
 import { getBuyerName } from '@/lib/getBuyerName';
+import { getSellerName, isBadName } from '@/lib/getSellerName';
 
 const STATE_NAMES: Record<string, string> = {
   'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
@@ -150,12 +151,7 @@ const _LISTINGS_LEGACY = [
   },
 ];
 
-// Show a stored seller name as first name + last initial (e.g. "Marcus Thompson" -> "Marcus T.").
-function formatSellerLabel(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length <= 1) return name.trim();
-  return `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`;
-}
+// Seller display names are resolved via getSellerName (single source of truth).
 
 function SellerContact({ name, listingId }: { name: string | null; listingId: string }) {
   return (
@@ -1269,9 +1265,8 @@ export default function MarketplacePage() {
                     listing.county ? `${listing.county} County` : null,
                     listing.state,
                   ].filter(Boolean).join(', ');
-                  const sellerRaw = listing.owner_name || listing.digital_signature;
-                  const sellerLabel = sellerRaw ? formatSellerLabel(sellerRaw) : null;
-                  const sellerHref = listing.owner_name ? `/sellers/${encodeURIComponent(listing.owner_name)}` : null;
+                  const sellerLabel = getSellerName(listing);
+                  const sellerHref = listing.owner_name && !isBadName(listing.owner_name) ? `/sellers/${encodeURIComponent(listing.owner_name)}` : null;
                   const isHighlighted = hoveredListingId === listing.id;
                   return (
                     <Link

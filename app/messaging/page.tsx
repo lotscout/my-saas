@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
 import { createClient } from '@/lib/supabase/client';
+import { isBadName } from '@/lib/getSellerName';
 
 interface Participant {
   id: string;
@@ -48,10 +49,11 @@ interface Message {
 
 function participantName(p: Participant | null): string {
   if (!p) return 'User';
-  if (p.company_name) return p.company_name;
+  // Filter uploader / seed / test values so the wrong-name problem cannot recur.
+  if (p.company_name && !isBadName(p.company_name)) return p.company_name;
   const name = [p.first_name, p.last_name].filter(Boolean).join(' ');
-  if (name) return name;
-  if (p.email) return p.email;
+  if (name && !isBadName(name)) return name;
+  if (p.email && !isBadName(p.email)) return p.email;
   return 'User';
 }
 

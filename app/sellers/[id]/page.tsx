@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { createServiceClient } from '@/lib/supabase/service';
+import { getSellerName } from '@/lib/getSellerName';
 
 interface Listing {
   id: string;
@@ -27,13 +28,7 @@ function formatSize(acres: number | null, sqft: number | null): string {
   return 'Size not listed';
 }
 
-// The real seller is stored per-listing in owner_name; the uploader account only
-// manages the listing and is never shown. Display first name + last initial.
-function formatSellerName(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length <= 1) return name.trim();
-  return `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`;
-}
+// Seller display name is resolved via getSellerName (single source of truth).
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -61,8 +56,8 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  const displayName = formatSellerName(sellerName);
-  const initials = getInitials(sellerName);
+  const displayName = getSellerName({ owner_name: sellerName });
+  const initials = getInitials(displayName);
   const firstName = displayName.split(' ')[0];
   // Messaging is routed to the account that manages the listing; it is not displayed.
   const contactUserId = listings[0].user_id;
