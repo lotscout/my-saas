@@ -514,7 +514,7 @@ export default function AdvisorPage() {
               <div className="flex-grow flex flex-col items-center justify-center gap-6">
                 <div className="text-center">
                   <h1 className="font-['Manrope'] font-bold tracking-tight" style={{ color: INK, fontSize: '40px', lineHeight: 1.1 }}>Scout</h1>
-                  <p className="mt-2 text-lg" style={{ color: MUTED }}>Ask about real estate markets, buying, selling, investing, building, and more.</p>
+                  <p className="mt-2 text-lg" style={{ color: MUTED }}>Hi, I&apos;m Scout. Ask me anything about real estate markets, buying, selling, investing, and more.</p>
                 </div>
 
                 {limitHit ? (
