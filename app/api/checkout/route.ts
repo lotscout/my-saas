@@ -17,6 +17,7 @@ const priceMap: Record<string, string | undefined> = {
   exclusiveMonthly: process.env.STRIPE_EXCLUSIVE_MONTHLY_PRICE_ID,
   exclusiveAnnual: process.env.STRIPE_EXCLUSIVE_ANNUAL_PRICE_ID,
   additionalReport: process.env.STRIPE_ADDITIONAL_REPORT_PRICE_ID,
+  searchProMonthly: process.env.STRIPE_SEARCH_PRO_MONTHLY_PRICE_ID,
 };
 
 const tierFromPriceKey: Record<string, string | undefined> = {
@@ -27,6 +28,7 @@ const tierFromPriceKey: Record<string, string | undefined> = {
   exclusiveMonthly: 'exclusive',
   exclusiveAnnual: 'exclusive',
   additionalReport: undefined,
+  searchProMonthly: 'search_pro',
 };
 
 export async function POST(request: NextRequest) {
@@ -43,8 +45,9 @@ export async function POST(request: NextRequest) {
     const priceId = priceMap[priceKey];
     const tier = tierFromPriceKey[priceKey];
     const isOneTime = priceKey === 'additionalReport';
+    const isSearchPro = priceKey === 'searchProMonthly';
 
-    if (!priceId || (!isOneTime && !tier)) {
+    if (!priceId || (!isOneTime && !isSearchPro && !tier)) {
       return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
     }
 
@@ -62,8 +65,8 @@ export async function POST(request: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: user.id,
       ...(existingCustomerId ? { customer: existingCustomerId } : {}),
-      ...(isOneTime ? {} : { metadata: { tier } }),
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/property-analysis`,
+      ...(isOneTime ? {} : { metadata: { tier: tier ?? '', ...(isSearchPro ? { type: 'search_pro' } : {}) } }),
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing?search_pro=success`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
     });
 

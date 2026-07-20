@@ -86,7 +86,7 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
 
       const makeGreenIcon = () => L.divIcon({
         className: '',
-        html: `<div style="background:#1a7a4a;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+        html: `<div style="background:#1D9E75;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
         iconSize: [12, 12],
         iconAnchor: [6, 6],
       });
@@ -164,7 +164,7 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
       } else {
         marker.setIcon(L.divIcon({
           className: '',
-          html: `<div style="background:#1a7a4a;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+          html: `<div style="background:#1D9E75;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
           iconSize: [12, 12],
           iconAnchor: [6, 6],
         }));
@@ -186,7 +186,7 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
       <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow text-xs font-semibold text-slate-600 flex items-center gap-3 z-[1000]">
         <span className="flex items-center gap-1.5">
-          <span style={{ width:10,height:10,borderRadius:'50%',background:'#1a7a4a',display:'inline-block',border:'2px solid white',boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
+          <span style={{ width:10,height:10,borderRadius:'50%',background:'#1D9E75',display:'inline-block',border:'2px solid white',boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
           Active
         </span>
         <span className="flex items-center gap-1.5">

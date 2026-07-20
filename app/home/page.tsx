@@ -4,6 +4,52 @@ import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import CreateListingGate from '@/components/CreateListingGate';
 
+// Full feature list shown in every pricing card. Features not included in a
+// tier are dimmed (opacity-40) with a dash instead of a green check.
+const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; enterprise: boolean }[] = [
+  { name: 'Unlimited Scout AI Search',                       standard: true,  priority: true,  enterprise: true  },
+  { name: 'Land Marketplace Access',                         standard: true,  priority: true,  enterprise: true  },
+  { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  enterprise: true  },
+  { name: 'Custom Company Profile',                          standard: true,  priority: true,  enterprise: true  },
+  { name: 'Buyer Directory Access',                          standard: true,  priority: true,  enterprise: true  },
+  { name: 'Property Analysis Reports',                       standard: true,  priority: true,  enterprise: true  },
+  { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  enterprise: true  },
+  { name: 'Unlimited Listings',                              standard: false, priority: true,  enterprise: true  },
+  { name: 'Promoted Lot Requests',                           standard: false, priority: true,  enterprise: true  },
+  { name: 'Financing Partners Access',                       standard: false, priority: true,  enterprise: true  },
+  { name: '24/7 Support',                                    standard: false, priority: true,  enterprise: true  },
+  { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, enterprise: true  },
+  { name: 'Early Access to New Listings',                    standard: false, priority: false, enterprise: true  },
+  { name: 'Early Access to New Buyers',                      standard: false, priority: false, enterprise: true  },
+  { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, enterprise: true  },
+  { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, enterprise: true  },
+];
+
+function PlanFeatures({ tier }: { tier: 'standard' | 'priority' | 'enterprise' }) {
+  return (
+    <ul className="space-y-2 mb-8 flex-grow">
+      {ALL_FEATURES.map((f) => {
+        const included = f[tier];
+        return (
+          <li
+            key={f.name}
+            className={`flex items-start gap-2 text-lg ${included ? 'text-on-surface' : 'text-secondary opacity-40'}`}
+          >
+            {included ? (
+              <span className="inline-flex items-center justify-center rounded-full flex-none mt-1" style={{ backgroundColor: '#1D9E75', width: '18px', height: '18px' }}>
+                <span className="material-symbols-outlined text-white" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>check</span>
+              </span>
+            ) : (
+              <span className="material-symbols-outlined text-base flex-none mt-1 text-secondary">remove</span>
+            )}
+            {f.name}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 
 const HERO_SELLERS = [
   { city: 'Austin, TX',         lat: 30.27,  lng: -97.74,   count: 24 },
@@ -207,7 +253,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-4 mb-10">
                 <Link href="/sign-up" className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
-                <CreateListingGate className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</CreateListingGate>
+                <Link href="/sign-up" className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
               </div>
             </div>
             {/* Right column: interactive map */}
@@ -423,52 +469,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 5: The Problem */}
-      <section className="py-16 bg-surface px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary mb-8 tracking-tight">Sound Familiar?</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Before LotScout */}
-            <div className="bg-error-container/20 rounded-2xl p-6 md:p-8">
-              <h3 className="font-headline text-2xl font-bold text-on-error-container mb-5">Before LotScout</h3>
-              <ul className="space-y-4">
-                {[
-                  "You've been waiting 6–12 months and still haven't found the right buyer or property",
-                  "You're paying out 5–10% in commissions on every deal and watching your profits shrink",
-                  "You're not confident in the land value or data — every analysis takes days and costs hundreds",
-                  "You're spending hours scrolling through MLS listings that have nothing to do with land",
-                  "You found the perfect lot but someone else already closed on it before you even knew it existed",
-                ].map((text) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-error text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>close</span>
-                    <span className="text-on-surface-variant font-medium text-base leading-snug">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {/* With LotScout */}
-            <div className="bg-primary-fixed/20 rounded-2xl p-6 md:p-8 border border-primary/5">
-              <h3 className="font-headline text-2xl font-bold text-primary mb-5">With LotScout</h3>
-              <ul className="space-y-4">
-                {[
-                  'Find a verified buyer or seller in under 30 days — 6x faster than the traditional market',
-                  'Save thousands on realtor commissions and closing costs — keep 100% of your proceeds',
-                  'Every listing includes an in-depth AI analysis so you never spend hours researching a property again',
-                  'Get instantly matched with hundreds of active buyers or sellers the moment you join',
-                  '24/7 support from real people who know land — always someone in your corner on every deal',
-                  'Higher profits, faster closes — the average LotScout deal closes 6x faster than the MLS',
-                ].map((text) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-primary text-xl flex-none mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    <span className="text-on-surface font-semibold text-base leading-snug">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* SECTION 6: Who It's For */}
       <section className="py-16 bg-surface-container-low px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
@@ -533,20 +533,7 @@ export default function HomePage() {
                 <span className="text-4xl font-extrabold text-primary">$97</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Land Marketplace Access',
-                  'Lot to Buyer Match AI',
-                  'Custom Company Profile',
-                  'Buyer Directory Access',
-                  'Property Analysis Reports (24hr delivery)',
-                  'Lot Analysis Reports (24hr delivery)',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
+              <PlanFeatures tier="standard" />
               <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
             {/* Priority */}
@@ -557,52 +544,25 @@ export default function HomePage() {
                 <span className="text-4xl font-extrabold text-primary">$197</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Everything in Standard',
-                  'Unlimited Listings',
-                  'Promoted Lot Requests',
-                  'Financing Partners Access',
-                  '24/7 Support',
-                  'Property Analysis Reports (24hr delivery)',
-                  'Lot Analysis Reports (24hr delivery)',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface font-semibold text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
+              <PlanFeatures tier="priority" />
               <Link href="/sign-up" className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all text-center block">Get Started</Link>
             </div>
             {/* Exclusive */}
             <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
+              <h3 className="font-headline text-xl font-bold text-primary mb-2">Enterprise</h3>
               <div className="flex items-baseline gap-1 mb-4">
                 <span className="text-4xl font-extrabold text-primary">$529</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {[
-                  'Everything in Priority',
-                  'Property Analysis Reports (15 min delivery)',
-                  'Lot Analysis Reports (15 min delivery)',
-                  'Dedicated Full-Time Account Manager',
-                  'Early Access to New Listings Before Anyone Else',
-                  'Early Access to New Buyers Before Anyone Else',
-                  'Hands-On Listing Support and Deal Guidance',
-                  'White-Glove Onboarding and Setup',
-                  'Priority Deal Matching with Top-Tier Buyers',
-                  'Quarterly Market Intelligence Reports',
-                  "Direct Line to LotScout's Land Experts",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-on-surface-variant text-sm">
-                    <span className="material-symbols-outlined text-primary text-lg flex-none mt-0.5">check</span> {f}
-                  </li>
-                ))}
-              </ul>
+              <PlanFeatures tier="enterprise" />
               <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
           </div>
+          <p className="mt-8 sm:mt-10 text-center text-secondary text-base sm:text-lg">
+            Enterprise: Looking for something else related to land development, market updates, or economic data? Contact us at{' '}
+            <a href="mailto:support@lotscout.com" className="font-semibold text-emerald-600 hover:underline">support@lotscout.com</a>
+          </p>
+
         </div>
       </section>
 

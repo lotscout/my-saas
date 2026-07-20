@@ -7,6 +7,7 @@ import { useUserTier } from '@/hooks/useUserTier';
 import { createClient } from '@/lib/supabase/client';
 import Header from '@/components/Header';
 import SendMessageModal from '@/components/SendMessageModal';
+import { getSellerName, isBadName } from '@/lib/getSellerName';
 import COUNTY_CENTROIDS from '@/lib/county-centroids.json';
 
 const IMAGE_REQUEST_BODY =
@@ -269,11 +270,13 @@ export default function ListingDetailPage() {
     );
   }
 
-  const sellerName = listing.owner_name || listing.digital_signature || 'Private Seller';
+  const sellerName = getSellerName(listing);
 
   const sellerInitials = (() => {
-    const name = listing.owner_name || listing.digital_signature || '';
-    return name.slice(0, 2).toUpperCase() || 'PS';
+    const parts = sellerName.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'S';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   })();
 
   const pricePerAcre =
@@ -522,7 +525,7 @@ export default function ListingDetailPage() {
             {/* Stats bar — Redfin-style horizontal chips */}
             <div className="flex flex-wrap border-y border-outline-variant/30 divide-x divide-outline-variant/30">
               {listing.asking_price != null && listing.asking_price > 0 && (
-                <div className="flex flex-col py-4 px-5 first:pl-0">
+                <div className="flex flex-col py-4 px-5 flex-1 items-center text-center">
                   <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
                     {fmtPrice(listing.asking_price)}
                   </span>
@@ -530,7 +533,7 @@ export default function ListingDetailPage() {
                 </div>
               )}
               {lotSizeDisplay && (
-                <div className="flex flex-col py-4 px-5">
+                <div className="flex flex-col py-4 px-5 flex-1 items-center text-center">
                   <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
                     {lotSizeDisplay}
                   </span>
@@ -538,23 +541,15 @@ export default function ListingDetailPage() {
                 </div>
               )}
               {listing.zoning && (
-                <div className="flex flex-col py-4 px-5">
+                <div className="flex flex-col py-4 px-5 flex-1 items-center text-center">
                   <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
                     {listing.zoning}
                   </span>
                   <span className="text-xs text-secondary font-medium mt-1.5">Zoning</span>
                 </div>
               )}
-              {listing.ownership_type && (
-                <div className="flex flex-col py-4 px-5">
-                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
-                    {listing.ownership_type}
-                  </span>
-                  <span className="text-xs text-secondary font-medium mt-1.5">Type</span>
-                </div>
-              )}
               {pricePerAcre !== null && (
-                <div className="flex flex-col py-4 px-5">
+                <div className="flex flex-col py-4 px-5 flex-1 items-center text-center">
                   <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
                     ~{fmtPrice(pricePerAcre)}
                   </span>
@@ -678,9 +673,11 @@ export default function ListingDetailPage() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-on-surface text-sm truncate">{sellerName}</div>
-                  <Link href={`/sellers/${listing.user_id}`} className="text-xs text-primary hover:underline">
-                    View profile →
-                  </Link>
+                  {listing.owner_name && !isBadName(listing.owner_name) && (
+                    <Link href={`/sellers/${encodeURIComponent(listing.owner_name)}`} className="text-xs text-primary hover:underline">
+                      View seller profile →
+                    </Link>
+                  )}
                 </div>
               </div>
 

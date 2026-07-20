@@ -3,9 +3,10 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import NotificationBell from '@/components/NotificationBell';
 
 const NAV_LINKS = [
-  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Scout', href: '/advisor' },
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Buyer Directory', href: '/buyer-directory' },
   { label: 'Deal Analysis', href: '/property-analysis' },
@@ -73,9 +74,7 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
+            <NotificationBell />
             <div className="relative" ref={dropdownRef}>
               <button
                 className="p-2 text-primary hover:bg-emerald-50 rounded-full transition-all"

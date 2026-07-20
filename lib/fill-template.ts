@@ -1,15 +1,16 @@
 import fs from 'fs';
 import path from 'path';
-import type { ReportData } from './report-schema';
+import type { TemplateData } from './report-schema';
 
-export function fillTemplate(templatePath: string, data: ReportData): string {
+// Fills {{UPPERCASE_KEY}} placeholders in the report template.
+export function fillTemplate(templatePath: string, data: TemplateData): string {
   let html = fs.readFileSync(templatePath, 'utf-8');
-  (Object.entries(data) as [string, string][]).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(data)) {
     html = html.replaceAll(`{{${key}}}`, value ?? '');
-  });
+  }
   return html;
 }
 
-export function getTemplatePath(page: 1 | 2 | 3 | 4 | 5): string {
-  return path.join(process.cwd(), 'lib', 'report-templates', `page${page}.html`);
+export function getReportTemplatePath(): string {
+  return path.join(process.cwd(), 'lib', 'report-templates', 'report.html');
 }

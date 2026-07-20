@@ -2,7 +2,20 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Build a stored seller name as first name + last initial (e.g. "Marcus T.").
+function formatOwnerName(first: string | null, last: string | null): string | null {
+  const f = (first ?? '').trim();
+  const l = (last ?? '').trim();
+  if (!f && !l) return null;
+  if (!l) return f;
+  return `${f} ${l[0].toUpperCase()}.`;
+}
+
 export async function GET(request: NextRequest) {
+  const auth = await createClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const { searchParams } = new URL(request.url);
   const sort = searchParams.get('sort') || 'newest';
   const search = (searchParams.get('search') || '').trim();
@@ -121,8 +134,20 @@ export async function POST(request: NextRequest) {
     const lotSizeAcres = lotSizeUnit === 'acres' && lotSizeValue ? Number(lotSizeValue) : null;
     const lotSizeSqft  = lotSizeUnit === 'sqft'  && lotSizeValue ? Number(lotSizeValue) : null;
 
+    const serviceClient = createServiceClient();
+
+    // Populate owner_name from the creating user's profile (first name + last initial)
+    // so app-created listings surface a real seller name and a seller profile.
+    const { data: creatorProfile } = await serviceClient
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('id', user.id)
+      .single();
+    const ownerName = formatOwnerName(creatorProfile?.first_name ?? null, creatorProfile?.last_name ?? null);
+
     const payload = {
       user_id:                 user.id,
+      owner_name:              ownerName,
       status:                  'pending_review',
       ownership_type:          ownershipType          ?? null,
       ownership_certified:     ownershipCertified     ?? false,
@@ -155,7 +180,6 @@ export async function POST(request: NextRequest) {
 
     console.log('[POST /api/listings] inserting for user', user.id);
 
-    const serviceClient = createServiceClient();
     const { data: listing, error: insertError } = await serviceClient
       .from('listings')
       .insert(payload)

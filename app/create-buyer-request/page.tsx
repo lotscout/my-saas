@@ -56,6 +56,14 @@ const URGENCY_OPTIONS = ['Flexible', 'Ready Now', 'Urgent']
 
 const CONTACT_METHODS = ['Email', 'Phone Call', 'Text Message', 'In-App Messaging']
 
+const LOT_SIZE_RANGES: { label: string; min: number; max: number | null }[] = [
+  { label: 'Under 1 acre', min: 0, max: 1 },
+  { label: '1 to 5 acres', min: 1, max: 5 },
+  { label: '5 to 20 acres', min: 5, max: 20 },
+  { label: '20 to 100 acres', min: 20, max: 100 },
+  { label: '100+ acres', min: 100, max: null },
+]
+
 export default function CreateBuyerRequestPage() {
   const router = useRouter()
 
@@ -64,6 +72,8 @@ export default function CreateBuyerRequestPage() {
     county: '',
     zip_code: '',
     city: '',
+    target_cities: '',
+    lot_size_range: '',
     location_notes: '',
     zoning: [] as string[],
     area_unit: 'acres',
@@ -215,6 +225,13 @@ export default function CreateBuyerRequestPage() {
           target_county: formData.county || null,
           target_city: formData.city || null,
           target_zip: formData.zip_code || null,
+          target_cities: formData.target_cities?.trim() || null,
+          ...(() => {
+            const r = LOT_SIZE_RANGES.find(x => x.label === formData.lot_size_range);
+            return r
+              ? { lot_size_min: r.min, lot_size_max: r.max, lot_size_label: r.label }
+              : { lot_size_min: null, lot_size_max: null, lot_size_label: null };
+          })(),
           target_regions: [formData.state, formData.county, formData.city].filter(Boolean),
           budget_min: formData.min_budget ? Number(String(formData.min_budget).replace(/,/g, '')) : null,
           budget_max: formData.max_budget ? Number(String(formData.max_budget).replace(/,/g, '')) : null,
@@ -361,6 +378,16 @@ export default function CreateBuyerRequestPage() {
                       />
                       {profanityErrors.location_notes && <p className="text-xs text-error mt-1">Please remove inappropriate language.</p>}
                     </div>
+                    <div className="space-y-1 mt-4">
+                      <label className="text-[10px] uppercase tracking-wider font-bold text-secondary">Target Cities <span className="font-normal normal-case">(optional, comma separated)</span></label>
+                      <input
+                        type="text"
+                        value={formData.target_cities}
+                        onChange={e => set('target_cities', e.target.value)}
+                        placeholder="e.g. Denver, Aurora, Lakewood"
+                        className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5 px-4"
+                      />
+                    </div>
                   </div>
 
                   {/* Zoning Preference */}
@@ -429,6 +456,17 @@ export default function CreateBuyerRequestPage() {
                           className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
                         />
                       </div>
+                    </div>
+                    <div className="space-y-2 mt-6">
+                      <label className="block text-sm font-semibold text-primary">Lot Size Range <span className="text-xs font-normal text-secondary">(optional preset)</span></label>
+                      <select
+                        value={formData.lot_size_range}
+                        onChange={e => set('lot_size_range', e.target.value)}
+                        className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      >
+                        <option value="">No preference</option>
+                        {LOT_SIZE_RANGES.map(r => <option key={r.label} value={r.label}>{r.label}</option>)}
+                      </select>
                     </div>
                   </div>
 

@@ -2,12 +2,36 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 
+interface RecentListing {
+  id: string;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  price: number | null;
+  status: string | null;
+  created_at: string;
+}
+
+interface RecentBuyerRequest {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  company_name: string | null;
+  state: string | null;
+  created_at: string;
+  status: string | null;
+}
+
 interface Stats {
   totalUsers: number;
   activeListings: number;
   pendingListings: number;
   pendingAnalysis: number;
   pendingBuyerRequests: number;
+  totalListings: number;
+  totalBuyerRequests: number;
+  recentListings: RecentListing[];
+  recentBuyerRequests: RecentBuyerRequest[];
 }
 
 interface Notification {
@@ -312,7 +336,7 @@ export default function AdminDashboardPage() {
       {/* Stats grid */}
       <section className="mb-10">
         <h2 className="text-xs font-bold text-on-surface/40 uppercase tracking-widest mb-4">Platform Overview</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           <StatCard
             label="Total Users"
             value={stats?.totalUsers ?? null}
@@ -320,10 +344,22 @@ export default function AdminDashboardPage() {
             color="bg-blue-600"
           />
           <StatCard
-            label="Active Listings"
-            value={stats?.activeListings ?? null}
+            label="Total Listings"
+            value={stats?.totalListings ?? null}
             icon="home_work"
             color="bg-emerald-600"
+          />
+          <StatCard
+            label="Total Buyer Requests"
+            value={stats?.totalBuyerRequests ?? null}
+            icon="person_search"
+            color="bg-orange-500"
+          />
+          <StatCard
+            label="Active Listings"
+            value={stats?.activeListings ?? null}
+            icon="check_circle"
+            color="bg-emerald-400"
           />
           <StatCard
             label="Pending Listings"
@@ -414,6 +450,119 @@ export default function AdminDashboardPage() {
             </div>
             <span className="material-symbols-outlined text-on-surface/30 group-hover:text-on-surface/60 transition-colors">chevron_right</span>
           </a>
+        </div>
+      </section>
+
+      {/* Recent Listings */}
+      <section className="mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs font-bold text-on-surface/40 uppercase tracking-widest">Recent Listings</h2>
+          <a href="/admin/listings" className="text-xs font-semibold text-primary hover:underline">View all →</a>
+        </div>
+        <div className="bg-white border border-outline-variant/10 rounded-2xl shadow-sm overflow-hidden">
+          {!stats ? (
+            <div className="p-6 space-y-3">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="animate-pulse flex gap-4">
+                  <div className="h-4 bg-surface-container rounded w-20" />
+                  <div className="h-4 bg-surface-container rounded flex-1" />
+                  <div className="h-4 bg-surface-container rounded w-28" />
+                  <div className="h-4 bg-surface-container rounded w-20" />
+                </div>
+              ))}
+            </div>
+          ) : (stats.recentListings?.length ?? 0) === 0 ? (
+            <div className="p-8 text-center text-on-surface/40 text-sm">No listings yet</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-outline-variant/10">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider whitespace-nowrap">Status</th>
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider">Address</th>
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider whitespace-nowrap">City, State</th>
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider whitespace-nowrap">Price</th>
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider whitespace-nowrap">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {stats.recentListings.map(l => (
+                    <tr key={l.id} className="hover:bg-surface-container-lowest transition-colors">
+                      <td className="px-6 py-3.5 whitespace-nowrap">
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                          l.status === 'active' ? 'bg-emerald-50 text-emerald-700' :
+                          l.status === 'pending_review' ? 'bg-amber-50 text-amber-700' :
+                          l.status === 'sold' ? 'bg-blue-50 text-blue-700' :
+                          'bg-surface-container text-on-surface/50'
+                        }`}>{l.status ?? '—'}</span>
+                      </td>
+                      <td className="px-6 py-3.5 text-on-surface font-medium max-w-[180px] truncate">{l.address ?? '—'}</td>
+                      <td className="px-6 py-3.5 text-on-surface/70 whitespace-nowrap">{[l.city, l.state].filter(Boolean).join(', ') || '—'}</td>
+                      <td className="px-6 py-3.5 text-on-surface/70 whitespace-nowrap">{l.price != null ? '$' + Number(l.price).toLocaleString() : '—'}</td>
+                      <td className="px-6 py-3.5 text-on-surface/50 whitespace-nowrap text-xs">{formatDateTime(l.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Recent Buyer Requests */}
+      <section className="mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs font-bold text-on-surface/40 uppercase tracking-widest">Recent Buyer Requests</h2>
+          <a href="/buyer-directory" className="text-xs font-semibold text-primary hover:underline">View all →</a>
+        </div>
+        <div className="bg-white border border-outline-variant/10 rounded-2xl shadow-sm overflow-hidden">
+          {!stats ? (
+            <div className="p-6 space-y-3">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="animate-pulse flex gap-4">
+                  <div className="h-4 bg-surface-container rounded w-20" />
+                  <div className="h-4 bg-surface-container rounded flex-1" />
+                  <div className="h-4 bg-surface-container rounded w-28" />
+                  <div className="h-4 bg-surface-container rounded w-20" />
+                </div>
+              ))}
+            </div>
+          ) : (stats.recentBuyerRequests?.length ?? 0) === 0 ? (
+            <div className="p-8 text-center text-on-surface/40 text-sm">No buyer requests yet</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-outline-variant/10">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider whitespace-nowrap">Status</th>
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider whitespace-nowrap">Buyer</th>
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider">Company</th>
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider whitespace-nowrap">State</th>
+                    <th className="text-left px-6 py-3 text-xs font-bold text-on-surface/40 uppercase tracking-wider whitespace-nowrap">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {stats.recentBuyerRequests.map(r => (
+                    <tr key={r.id} className="hover:bg-surface-container-lowest transition-colors">
+                      <td className="px-6 py-3.5 whitespace-nowrap">
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                          r.status === 'active' ? 'bg-emerald-50 text-emerald-700' :
+                          r.status === 'pending_review' ? 'bg-amber-50 text-amber-700' :
+                          'bg-surface-container text-on-surface/50'
+                        }`}>{r.status ?? '—'}</span>
+                      </td>
+                      <td className="px-6 py-3.5 text-on-surface font-medium whitespace-nowrap">
+                        {[r.first_name, r.last_name].filter(Boolean).join(' ') || '—'}
+                      </td>
+                      <td className="px-6 py-3.5 text-on-surface/70 max-w-[160px] truncate">{r.company_name ?? '—'}</td>
+                      <td className="px-6 py-3.5 text-on-surface/70 whitespace-nowrap">{r.state ?? '—'}</td>
+                      <td className="px-6 py-3.5 text-on-surface/50 whitespace-nowrap text-xs">{formatDateTime(r.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </section>
 

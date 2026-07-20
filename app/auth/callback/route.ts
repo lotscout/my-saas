@@ -61,11 +61,11 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const type = searchParams.get('type')
 
-  // Password reset links carry type=recovery — send to the reset form, not the dashboard.
-  // All other flows (email confirmation, OAuth) default to /dashboard or the next param.
+  // Password reset links carry type=recovery — send to the reset form, not the marketplace.
+  // All other flows (email confirmation, OAuth) default to /marketplace or the next param.
   const next = type === 'recovery'
     ? '/reset-password'
-    : (searchParams.get('next') ?? '/dashboard')
+    : (searchParams.get('next') ?? searchParams.get('redirect') ?? '/marketplace')
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? origin
 

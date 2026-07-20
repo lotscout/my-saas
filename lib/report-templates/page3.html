@@ -3,116 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #0D1F16; }
 .page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
-.header { background: #1B4332; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
-.header-brand { color: #fff; font-size: 18px; font-weight: 900; }
-.header-title { color: #6EE7B7; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
-.body { padding: 32px 40px; flex: 1; }
-.section-title { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1B4332; margin-bottom: 14px; }
-.divider { height: 1px; background: #E5E7EB; margin: 20px 0; }
-.rezoning-card { border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-.rezoning-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
-.rezoning-desc { font-size: 12px; color: #555; line-height: 1.55; margin-bottom: 8px; }
-.badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.05em; }
-.badge-approved { background: #D1FAE5; color: #065F46; }
-.badge-warning { background: #FEF3C7; color: #92400E; }
-.badge-status { background: #DBEAFE; color: #1E40AF; }
-.permits-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-.permit-box { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; text-align: center; }
-.permit-label { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-.permit-value { font-size: 20px; font-weight: 900; color: #1B4332; }
-.infra-card { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
-.infra-icon { width: 36px; height: 36px; background: #F0FDF4; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
-.infra-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
-.infra-detail { font-size: 12px; color: #555; line-height: 1.5; }
-.alert-box { background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 14px 16px; margin-top: 16px; }
-.alert-title { font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 3px; }
-.alert-date { font-size: 11px; font-weight: 700; color: #B45309; margin-bottom: 4px; }
-.alert-text { font-size: 12px; color: #78350F; line-height: 1.5; }
-.footer { background: #1B4332; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; position: static; }
-.footer-left { color: #6EE7B7; font-size: 10px; font-weight: 600; }
-.footer-right { color: #6EE7B7; font-size: 10px; font-weight: 600; }
+.header { background: #0D1F16; padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-name { color: #fff; font-size: 16px; font-weight: 900; }
+.header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
+.header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.header-county { color: rgba(255,255,255,0.5); font-size: 11px; }
+.body { padding: 22px 40px 14px; flex: 1; }
+.section-title-wrap { margin-bottom: 20px; }
+.section-title { font-size: 22px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #0D1F16; line-height: 1.15; }
+.section-accent { height: 3px; background: linear-gradient(90deg, #1D9E75 0%, rgba(29,158,117,0) 100%); margin-top: 8px; border-radius: 2px; }
+.divider { height: 1px; background: #E5E7EB; margin: 18px 0; }
+.rezoning-card { border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+.rezoning-title { font-size: 18px; font-weight: 700; color: #0D1F16; margin-bottom: 5px; }
+.rezoning-meta { display: flex; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+.rezoning-meta-item { font-size: 14px; color: #0D1F16; font-weight: 600; }
+.rezoning-meta-item strong { color: #6B7280; font-weight: 700; }
+.rezoning-desc { font-size: 15px; color: #000; line-height: 1.6; margin-bottom: 6px; }
+.badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; border: 1px solid; }
+.badge-approved { border-color: #0D1F16; color: #0D1F16; background: #fff; }
+.badge-warning { border-color: #0D1F16; color: #0D1F16; background: #fff; }
+.badge-status { border-color: #0D1F16; color: #0D1F16; background: #fff; }
+.permits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; }
+.permit-cell { padding: 12px 16px; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; }
+.permit-cell:nth-child(2n) { border-right: none; }
+.permit-cell:nth-last-child(-n+2) { border-bottom: none; }
+.permit-key { font-size: 11px; font-weight: 700; color: #374151; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.permit-val { font-size: 20px; font-weight: 800; color: #0D1F16; }
+.no-break { page-break-inside: avoid; break-inside: avoid; }
+@media print { .no-break { page-break-inside: avoid; break-inside: avoid; } }
+.footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { color: rgba(255,255,255,0.55); font-size: 13px; }
+.footer-center { color: #fff; font-size: 13px; font-weight: 700; }
+.footer-right { color: rgba(255,255,255,0.55); font-size: 13px; }
 </style>
 </head>
 <body>
 <div class="page">
   <div class="header">
-    <div class="header-brand">LotScout</div>
-    <div class="header-title">{{county_name}} &mdash; Zoning &amp; Development</div>
+    <div class="header-left">
+      <div class="logo-name">LotScout</div>
+      <div class="header-divider"></div>
+      <div class="header-section">Development Intelligence</div>
+    </div>
+    <div class="header-county">{{county_name}}</div>
   </div>
+
   <div class="body">
 
-    <div class="section-title">Recent Rezoning Activity</div>
+    <div class="section-title-wrap">
+      <div class="section-title">Rezonings Approved: Last 30 Days</div>
+      <div class="section-accent"></div>
+    </div>
 
-    <div class="rezoning-card">
+    <div class="rezoning-card no-break">
       <div class="rezoning-title">{{rezoning_1_title}}</div>
+      <div class="rezoning-meta">
+        <span class="rezoning-meta-item"><strong>Address:</strong> {{rezoning_1_address}}</span>
+        <span class="rezoning-meta-item"><strong>Acreage:</strong> {{rezoning_1_acreage}} ac</span>
+        <span class="rezoning-meta-item"><strong>From:</strong> {{rezoning_1_prev_zoning}}</span>
+        <span class="rezoning-meta-item"><strong>To:</strong> {{rezoning_1_new_zoning}}</span>
+        <span class="rezoning-meta-item"><strong>Body:</strong> {{rezoning_1_approving_body}}</span>
+        <span class="rezoning-meta-item"><strong>Date:</strong> {{rezoning_1_date_approved}}</span>
+      </div>
       <div class="rezoning-desc">{{rezoning_1_description}}</div>
       <span class="badge badge-approved">{{rezoning_1_note}}</span>
     </div>
 
-    <div class="rezoning-card">
+    <div class="rezoning-card no-break">
       <div class="rezoning-title">{{rezoning_2_title}}</div>
+      <div class="rezoning-meta">
+        <span class="rezoning-meta-item"><strong>Address:</strong> {{rezoning_2_address}}</span>
+        <span class="rezoning-meta-item"><strong>Acreage:</strong> {{rezoning_2_acreage}} ac</span>
+        <span class="rezoning-meta-item"><strong>From:</strong> {{rezoning_2_prev_zoning}}</span>
+        <span class="rezoning-meta-item"><strong>To:</strong> {{rezoning_2_new_zoning}}</span>
+        <span class="rezoning-meta-item"><strong>Body:</strong> {{rezoning_2_approving_body}}</span>
+        <span class="rezoning-meta-item"><strong>Date:</strong> {{rezoning_2_date_approved}}</span>
+      </div>
       <div class="rezoning-desc">{{rezoning_2_description}}</div>
       <span class="badge badge-warning">{{rezoning_2_note}}</span>
     </div>
 
-    <div class="rezoning-card">
+    <div class="rezoning-card no-break">
       <div class="rezoning-title">{{rezoning_3_title}}</div>
+      <div class="rezoning-meta">
+        <span class="rezoning-meta-item"><strong>Address:</strong> {{rezoning_3_address}}</span>
+        <span class="rezoning-meta-item"><strong>Acreage:</strong> {{rezoning_3_acreage}} ac</span>
+        <span class="rezoning-meta-item"><strong>From:</strong> {{rezoning_3_prev_zoning}}</span>
+        <span class="rezoning-meta-item"><strong>To:</strong> {{rezoning_3_new_zoning}}</span>
+        <span class="rezoning-meta-item"><strong>Body:</strong> {{rezoning_3_approving_body}}</span>
+        <span class="rezoning-meta-item"><strong>Date:</strong> {{rezoning_3_date_approved}}</span>
+      </div>
       <div class="rezoning-desc">{{rezoning_3_description}}</div>
       <span class="badge badge-status">{{rezoning_3_status}}</span>
     </div>
 
     <div class="divider"></div>
-    <div class="section-title">Building Permits Issued</div>
-    <div class="permits-grid">
-      <div class="permit-box">
-        <div class="permit-label">Residential</div>
-        <div class="permit-value">{{permits_residential}}</div>
-      </div>
-      <div class="permit-box">
-        <div class="permit-label">Aggregate Value</div>
-        <div class="permit-value" style="font-size:16px;">{{permits_aggregate_value}}</div>
-      </div>
-      <div class="permit-box">
-        <div class="permit-label">Commercial</div>
-        <div class="permit-value">{{permits_commercial}}</div>
-      </div>
-      <div class="permit-box">
-        <div class="permit-label">Avg Sq Ft</div>
-        <div class="permit-value" style="font-size:14px;">{{permits_avg_sqft}}</div>
-      </div>
+    <div class="section-title-wrap">
+      <div class="section-title">Building Permits Issued</div>
+      <div class="section-accent"></div>
     </div>
-
-    <div class="divider"></div>
-    <div class="section-title">Infrastructure Projects</div>
-
-    <div class="infra-card">
-      <div class="infra-icon">&#128739;</div>
-      <div>
-        <div class="infra-title">{{infra_1_title}}</div>
-        <div class="infra-detail">{{infra_1_detail}}</div>
-      </div>
-    </div>
-    <div class="infra-card" style="border-bottom: none;">
-      <div class="infra-icon">&#128674;</div>
-      <div>
-        <div class="infra-title">{{infra_2_title}}</div>
-        <div class="infra-detail">{{infra_2_detail}}</div>
-      </div>
-    </div>
-
-    <div class="alert-box">
-      <div class="alert-date">Upcoming: {{board_meeting_date}}</div>
-      <div class="alert-title">{{board_meeting_title}}</div>
-      <div class="alert-text">{{board_meeting_warning}}</div>
+    <div class="permits-grid no-break">
+      <div class="permit-cell"><div class="permit-key">Residential</div><div class="permit-val">{{permits_residential}}</div></div>
+      <div class="permit-cell"><div class="permit-key">Commercial</div><div class="permit-val">{{permits_commercial}}</div></div>
+      <div class="permit-cell"><div class="permit-key">Aggregate Value</div><div class="permit-val">{{permits_aggregate_value}}</div></div>
+      <div class="permit-cell"><div class="permit-key">Average Sq Ft</div><div class="permit-val">{{permits_avg_sqft}}</div></div>
     </div>
 
   </div>
+
   <div class="footer">
-    <div class="footer-left">LotScout &mdash; lotscout.com</div>
-    <div class="footer-right">{{report_month}} &nbsp;&middot;&nbsp; Page 3 of 5</div>
+    <div class="footer-left">The #1 Platform for Land Data and Off-Market Deals</div>
+    <div class="footer-center">lotscout.com</div>
+    <div class="footer-right">3 of 10</div>
   </div>
 </div>
 </body>

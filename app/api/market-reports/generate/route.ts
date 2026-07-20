@@ -2,12 +2,117 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { generateReportData } from '@/lib/report-generator';
-import { fillTemplate, getTemplatePath } from '@/lib/fill-template';
+import { fillTemplate, getReportTemplatePath } from '@/lib/fill-template';
 import { generatePDF } from '@/lib/generate-pdf';
 import { logEmail } from '@/lib/email-logger';
+import type { AIReportData, TemplateData } from '@/lib/report-schema';
 
 // Allow long-running PDF + AI generation
 export const maxDuration = 300;
+
+// ── URL builders ─────────────────────────────────────────────────────────────
+
+function slug(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+const STATE_ABBR: Record<string, string> = {
+  alabama: 'AL', alaska: 'AK', arizona: 'AZ', arkansas: 'AR', california: 'CA',
+  colorado: 'CO', connecticut: 'CT', delaware: 'DE', florida: 'FL', georgia: 'GA',
+  hawaii: 'HI', idaho: 'ID', illinois: 'IL', indiana: 'IN', iowa: 'IA', kansas: 'KS',
+  kentucky: 'KY', louisiana: 'LA', maine: 'ME', maryland: 'MD', massachusetts: 'MA',
+  michigan: 'MI', minnesota: 'MN', mississippi: 'MS', missouri: 'MO', montana: 'MT',
+  nebraska: 'NE', nevada: 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+  'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND',
+  ohio: 'OH', oklahoma: 'OK', oregon: 'OR', pennsylvania: 'PA', 'rhode island': 'RI',
+  'south carolina': 'SC', 'south dakota': 'SD', tennessee: 'TN', texas: 'TX', utah: 'UT',
+  vermont: 'VT', virginia: 'VA', washington: 'WA', 'west virginia': 'WV',
+  wisconsin: 'WI', wyoming: 'WY',
+};
+
+// ── Land-use acre computation ─────────────────────────────────────────────────
+
+function computeAcres(pctStr: string, sqmiStr: string): string {
+  const pct = parseFloat(pctStr) / 100;
+  const sqmi = parseFloat(sqmiStr.replace(/,/g, ''));
+  if (!isFinite(pct) || !isFinite(sqmi) || sqmi === 0) return '—';
+  return Math.round(pct * sqmi * 640).toLocaleString() + ' ac';
+}
+
+// ── HTML row builders ─────────────────────────────────────────────────────────
+
+function buildCompSalesRows(d: AIReportData): string {
+  const rows: string[] = [];
+  for (let i = 1; i <= 6; i++) {
+    const loc = d[`comp_${i}_location` as keyof AIReportData];
+    if (!loc) break;
+    rows.push(
+      `<tr class="hover:bg-[#f4faf7] transition-colors">` +
+      `<td class="px-6 py-4 cell text-on-surface">${loc}</td>` +
+      `<td class="px-6 py-4 cell text-on-surface">${d[`comp_${i}_acres` as keyof AIReportData]}</td>` +
+      `<td class="px-6 py-4 cell text-on-surface text-right font-semibold">${d[`comp_${i}_price` as keyof AIReportData]}</td>` +
+      `<td class="px-6 py-4 cell text-on-surface text-right">${d[`comp_${i}_price_per_acre` as keyof AIReportData]}</td>` +
+      `<td class="px-6 py-4 cell text-on-surface-variant">${d[`comp_${i}_date` as keyof AIReportData]}</td>` +
+      `</tr>`,
+    );
+  }
+  if (rows.length === 0) {
+    return `<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant" style="font-size:14.6px;">No verified sold land records found for this county in the last 90 days.</td></tr>`;
+  }
+  return rows.join('\n');
+}
+
+function buildActiveListingRows(d: AIReportData): string {
+  if (d.listing_no_data_note) {
+    return `<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant" style="font-size:14.6px;">${d.listing_no_data_note}</td></tr>`;
+  }
+  const rows: string[] = [];
+  for (let i = 1; i <= 6; i++) {
+    const loc = d[`listing_${i}_location` as keyof AIReportData];
+    if (!loc) break;
+    const status = d[`listing_${i}_status` as keyof AIReportData] ?? 'Active';
+    const statusColor = status.toLowerCase().includes('reduced') ? '#F59E0B' : '#10B981';
+    rows.push(
+      `<tr class="hover:bg-[#f4faf7] transition-colors">` +
+      `<td class="px-6 py-4 cell text-on-surface">${loc}</td>` +
+      `<td class="px-6 py-4 cell text-on-surface">${d[`listing_${i}_acres` as keyof AIReportData]}</td>` +
+      `<td class="px-6 py-4 cell text-on-surface text-right font-semibold">${d[`listing_${i}_price` as keyof AIReportData]}</td>` +
+      `<td class="px-6 py-4 cell text-on-surface text-right">${d[`listing_${i}_price_per_acre` as keyof AIReportData]}</td>` +
+      `<td class="px-6 py-4 cell"><span style="color:${statusColor};font-weight:600;">${status}</span></td>` +
+      `</tr>`,
+    );
+  }
+  if (rows.length === 0) {
+    return `<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant" style="font-size:14.6px;">No active land listings found for this county at this time.</td></tr>`;
+  }
+  return rows.join('\n');
+}
+
+function buildDataSourcesHtml(d: AIReportData): string {
+  const cards: string[] = [];
+  for (let i = 1; i <= 8; i++) {
+    const name = d[`source_${i}_name` as keyof AIReportData];
+    const url  = d[`source_${i}_url`  as keyof AIReportData];
+    const date = d[`source_${i}_date` as keyof AIReportData];
+    if (!name) continue;
+    cards.push(
+      `<div class="data-card p-5">` +
+      `<div class="flex items-start gap-3">` +
+      `<span class="material-symbols-outlined text-[#1D9E75] mt-0.5" style="font-size:20px;font-variation-settings:'FILL' 1;">language</span>` +
+      `<div style="min-width:0;">` +
+      `<p class="font-bold text-on-surface" style="font-size:14.6px;margin:0 0 2px;">${name}</p>` +
+      `<a href="${url}" class="text-[#1D9E75] break-all" style="font-size:12px;">${url}</a>` +
+      `<p class="text-on-surface-variant mt-1" style="font-size:12px;margin:4px 0 0;">Accessed ${date}</p>` +
+      `</div></div></div>`,
+    );
+  }
+  if (cards.length === 0) {
+    return `<p class="text-on-surface-variant" style="font-size:14.6px;">No sources recorded for this report.</p>`;
+  }
+  return cards.join('\n');
+}
+
+// ── Delivery email ────────────────────────────────────────────────────────────
 
 function buildDeliveryEmail(
   firstName: string,
@@ -62,16 +167,19 @@ function buildDeliveryEmail(
 </html>`;
 }
 
+// ── Route handler ─────────────────────────────────────────────────────────────
+
 export async function POST(request: NextRequest) {
   const body = await request.json() as {
     county?: string;
     state?: string;
     email?: string;
     first_name?: string;
+    last_name?: string;
     report_month?: string;
   };
 
-  const { county, state, email, first_name, report_month } = body;
+  const { county, state, email, first_name, last_name, report_month } = body;
 
   if (!county || !state || !email || !first_name || !report_month) {
     return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
@@ -85,25 +193,69 @@ export async function POST(request: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lotscout.com';
 
   try {
-    // Mark as generating
     await supabase
       .from('market_report_requests')
       .update({ status: 'generating' })
       .eq('email', email.toLowerCase().trim());
 
-    // Step 1: AI generates data
-    const reportData = await generateReportData(county, state, report_month);
+    // Step 1: AI research
+    const aiData = await generateReportData(county, state, report_month);
 
-    // Step 2: Fill templates
-    const filledPages = ([1, 2, 3, 4, 5] as const).map(n =>
-      fillTemplate(getTemplatePath(n), reportData),
-    );
+    // Step 2: Build template data
+    const countyBase = county.replace(/\s+county$/i, '').trim();
+    const stateAbbr  = STATE_ABBR[state.toLowerCase()] ?? state;
+    const recipientName = [first_name, last_name].filter(Boolean).join(' ').trim();
 
-    // Step 3: Render PDF
-    const pdfBuffer = await generatePDF(filledPages);
+    const pctStr = (s: string) => s?.includes('%') ? s : `${s}%`;
 
-    // Step 4: Upload to Supabase Storage
-    const fileName = `${county.replace(/\s+/g, '-')}-${state.replace(/\s+/g, '-')}-${report_month.replace(/\s+/g, '-')}.pdf`;
+    const templateData: TemplateData = {
+      COUNTY_NAME:    countyBase,
+      STATE:          state,
+      REPORT_DATE:    report_month,
+
+      MEDIAN_PRICE_ACRE: aiData.median_price_acre,
+      ACTIVE_LISTINGS:   aiData.active_listings,
+      AVG_DOM:           aiData.avg_dom,
+      YOY_CHANGE:        aiData.yoy_change,
+
+      COUNTY_OVERVIEW_PROSE: aiData.county_overview_prose,
+
+      COMP_SALES_ROWS:    buildCompSalesRows(aiData),
+      ACTIVE_LISTING_ROWS: buildActiveListingRows(aiData),
+
+      ZILLOW_URL:    `https://www.zillow.com/homes/for_sale/${slug(countyBase)}-county-${slug(state)}_rb/?homeType=lot%2Cland`,
+      REDFIN_URL:    `https://www.redfin.com/county/land-for-sale/${slug(state)}/${slug(countyBase)}-county`,
+      LANDWATCH_URL: `https://www.landwatch.com/${slug(state)}-land-for-sale/${slug(countyBase)}-county/`,
+
+      LAND_USE_RES_PCT: pctStr(aiData.land_use_res_pct),
+      LAND_USE_AG_PCT:  pctStr(aiData.land_use_ag_pct),
+      LAND_USE_COM_PCT: pctStr(aiData.land_use_com_pct),
+
+      LAND_USE_RES_AC: computeAcres(aiData.land_use_res_pct, aiData.land_area_sqmi),
+      LAND_USE_AG_AC:  computeAcres(aiData.land_use_ag_pct,  aiData.land_area_sqmi),
+      LAND_USE_COM_AC: computeAcres(aiData.land_use_com_pct, aiData.land_area_sqmi),
+
+      REZONING_PROSE: aiData.rezoning_prose,
+      PERMITS_PROSE:  aiData.permits_prose,
+      POLICY_PROSE:   aiData.policy_prose,
+      RISK_PROSE:     aiData.risk_prose,
+      INSIGHT_PROSE:  aiData.insight_prose,
+      WATCH_PROSE:    aiData.watch_prose,
+
+      DATA_SOURCES: buildDataSourcesHtml(aiData),
+
+      RECIPIENT_NAME: recipientName,
+      LOTSCOUT_URL:   `https://lotscout.com/marketplace?state=${stateAbbr}`,
+    };
+
+    // Step 3: Fill template
+    const filledHtml = fillTemplate(getReportTemplatePath(), templateData);
+
+    // Step 4: Render PDF
+    const pdfBuffer = await generatePDF(filledHtml);
+
+    // Step 5: Upload to Supabase Storage
+    const fileName = `${slug(countyBase)}-${slug(state)}-${report_month.replace(/\s+/g, '-')}.pdf`;
 
     const { error: uploadError } = await supabase.storage
       .from('market-reports')
@@ -122,24 +274,24 @@ export async function POST(request: NextRequest) {
 
     const reportUrl = urlData.publicUrl;
 
-    // Step 5: Update request row
+    // Step 6: Update request row
     await supabase
       .from('market_report_requests')
       .update({ status: 'delivered', report_url: reportUrl })
       .eq('email', email.toLowerCase().trim());
 
-    // Step 6: Send delivery email
+    // Step 7: Send delivery email
     const resend = new Resend(process.env.RESEND_API_KEY);
     try {
       await resend.emails.send({
-        from: 'reports@lotscout.com',
+        from: 'LotScout <hello@lotscout.com>',
         to: email.trim(),
         subject: `Your LotScout Market Report for ${county}, ${state} is here`,
         html: buildDeliveryEmail(first_name.trim(), county, state, reportUrl, siteUrl),
       });
       await logEmail({
         to_email:   email.trim(),
-        from_email: 'reports@lotscout.com',
+        from_email: 'hello@lotscout.com',
         subject:    `Your LotScout Market Report for ${county}, ${state} is here`,
         email_type: 'market_report_delivery',
       });

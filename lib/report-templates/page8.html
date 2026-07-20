@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #0D1F16; }
+.page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
+.header { background: #0D1F16; padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-name { color: #fff; font-size: 16px; font-weight: 900; }
+.header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
+.header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.header-county { color: rgba(255,255,255,0.5); font-size: 11px; }
+.body { padding: 28px 40px 20px; flex: 1; }
+.section-title-wrap { margin-bottom: 20px; }
+.section-title { font-size: 22px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #0D1F16; line-height: 1.15; }
+.section-accent { height: 3px; background: linear-gradient(90deg, #1D9E75 0%, rgba(29,158,117,0) 100%); margin-top: 8px; border-radius: 2px; }
+.divider { height: 1px; background: #E5E7EB; margin: 22px 0; }
+.method-note { font-size: 12px; color: #9CA3AF; line-height: 1.6; margin-bottom: 20px; font-style: italic; }
+.risk-row { display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid #F3F4F6; }
+.risk-row:last-child { border-bottom: none; }
+.risk-label { font-size: 15px; font-weight: 600; color: #0D1F16; min-width: 180px; flex-shrink: 0; }
+.risk-bar-bg { flex: 1; height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; }
+.risk-bar { height: 8px; border-radius: 4px; }
+.risk-display { font-size: 13px; font-weight: 700; color: #6B7280; min-width: 60px; text-align: right; flex-shrink: 0; }
+.watch-list { list-style: none; }
+.watch-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F3F4F6; font-size: 15px; color: #000; line-height: 1.6; }
+.watch-item:last-child { border-bottom: none; }
+.watch-bullet { width: 18px; height: 18px; background: #0D1F16; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.watch-bullet-inner { width: 6px; height: 6px; background: #fff; border-radius: 50%; }
+.no-break { page-break-inside: avoid; break-inside: avoid; }
+@media print { .no-break { page-break-inside: avoid; break-inside: avoid; } }
+.footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { color: rgba(255,255,255,0.55); font-size: 13px; }
+.footer-center { color: #fff; font-size: 13px; font-weight: 700; }
+.footer-right { color: rgba(255,255,255,0.55); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-name">LotScout</div>
+      <div class="header-divider"></div>
+      <div class="header-section">Risk Assessment</div>
+    </div>
+    <div class="header-county">{{county_name}}</div>
+  </div>
+
+  <div class="body">
+    <div class="section-title-wrap">
+      <div class="section-title">Risk Indicators</div>
+      <div class="section-accent"></div>
+    </div>
+    <div class="method-note">Scored based on publicly available data including permit volume, rezoning activity, employment trends, election schedules, and price momentum. Lower scores on Entitlement Risk, Price Volatility, and Election Risk are better. Higher scores on Demand Strength are better.</div>
+
+    <div class="risk-row no-break">
+      <div class="risk-label">{{risk_1_label}}</div>
+      <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_1_pct}}%;background-color:{{risk_1_color}};"></div></div>
+      <div class="risk-display">{{risk_1_display}}</div>
+    </div>
+    <div class="risk-row no-break">
+      <div class="risk-label">{{risk_2_label}}</div>
+      <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_2_pct}}%;background-color:{{risk_2_color}};"></div></div>
+      <div class="risk-display">{{risk_2_display}}</div>
+    </div>
+    <div class="risk-row no-break">
+      <div class="risk-label">{{risk_3_label}}</div>
+      <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_3_pct}}%;background-color:{{risk_3_color}};"></div></div>
+      <div class="risk-display">{{risk_3_display}}</div>
+    </div>
+    <div class="risk-row no-break">
+      <div class="risk-label">{{risk_4_label}}</div>
+      <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_4_pct}}%;background-color:{{risk_4_color}};"></div></div>
+      <div class="risk-display">{{risk_4_display}}</div>
+    </div>
+    <div class="risk-row no-break">
+      <div class="risk-label">{{risk_5_label}}</div>
+      <div class="risk-bar-bg"><div class="risk-bar" style="width:{{risk_5_pct}}%;background-color:{{risk_5_color}};"></div></div>
+      <div class="risk-display">{{risk_5_display}}</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title-wrap">
+      <div class="section-title">What to Watch For</div>
+      <div class="section-accent"></div>
+    </div>
+    <ul class="watch-list">
+      <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_1}}</span></li>
+      <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_2}}</span></li>
+      <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_3}}</span></li>
+      <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_4}}</span></li>
+      <li class="watch-item no-break"><div class="watch-bullet"><div class="watch-bullet-inner"></div></div><span>{{watch_5}}</span></li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">The #1 Platform for Land Data and Off-Market Deals</div>
+    <div class="footer-center">lotscout.com</div>
+    <div class="footer-right">8 of 10</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
@@ -33,18 +33,24 @@ export default function EditProfilePage() {
   const [state, setState] = useState('');
   const [county, setCounty] = useState('');
   const [tier, setTier] = useState('');
+  const [contactVisible, setContactVisible] = useState(false);
   const [toastOk, setToastOk] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function load() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/sign-in'); return; }
+      setUserId(user.id);
       setEmail(user.email ?? '');
       const meta = (user.user_metadata ?? {}) as Record<string, string>;
       const { data, error: profileError } = await supabase
         .from('profiles')
-        .select('first_name, last_name, phone, bio, company_name, subscription_tier, state, county')
+        .select('first_name, last_name, phone, bio, company_name, subscription_tier, state, county, avatar_url')
         .eq('id', user.id)
         .single();
       if (profileError) console.warn('[edit-profile] load error:', profileError.message);
@@ -56,6 +62,14 @@ export default function EditProfilePage() {
       setState(data?.state ?? '');
       setCounty(data?.county ?? '');
       setTier(data?.subscription_tier ?? '');
+      setAvatarUrl(data?.avatar_url ?? meta.avatar_url ?? null);
+      // Load contact visibility separately so a not-yet-migrated column can't break the main load.
+      const { data: visRow } = await supabase
+        .from('profiles')
+        .select('contact_visible')
+        .eq('id', user.id)
+        .single();
+      setContactVisible(visRow?.contact_visible === true);
       setLoading(false);
     }
     load();
@@ -67,7 +81,7 @@ export default function EditProfilePage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
-    const payload = {
+    const basePayload = {
       id: user.id,
       email: user.email,
       first_name: firstName.trim() || null,
@@ -79,12 +93,23 @@ export default function EditProfilePage() {
       county: county.trim() || null,
       updated_at: new Date().toISOString(),
     };
+    const payload = { ...basePayload, contact_visible: contactVisible };
 
-    const { data: result, error } = await supabase
+    let { error } = await supabase
       .from('profiles')
       .upsert(payload, { onConflict: 'id' })
       .select('id, first_name, last_name, email')
       .single();
+
+    // If the contact_visible column hasn't been migrated yet, save the rest so profile editing still works.
+    if (error && /contact_visible/i.test(error.message)) {
+      console.warn('[edit-profile] contact_visible column missing — saving without it. Run the migration to enable this preference.');
+      ({ error } = await supabase
+        .from('profiles')
+        .upsert(basePayload, { onConflict: 'id' })
+        .select('id, first_name, last_name, email')
+        .single());
+    }
 
     setSaving(false);
     if (error) {
@@ -94,6 +119,40 @@ export default function EditProfilePage() {
       setToastOk(true);
       setToast('Profile saved successfully!');
       setTimeout(() => { setToast(null); router.push('/profile'); }, 2000);
+    }
+  }
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setToastOk(false);
+      setToast('Image must be under 5MB.');
+      e.target.value = '';
+      return;
+    }
+    if (!userId) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/avatar', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error('Avatar upload error:', data.error);
+        throw new Error(data.error ?? 'Upload failed');
+      }
+      setAvatarUrl(data.url);
+      setToastOk(true);
+      setToast('Profile picture updated!');
+      setTimeout(() => setToast(null), 2000);
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+      setToastOk(false);
+      setToast(err instanceof Error && err.message ? err.message : 'Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
     }
   }
 
@@ -146,13 +205,42 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined text-primary-container">badge</span>
                   Profile Identity
                 </h3>
-                <div className="relative group w-40 h-40 mx-auto flex items-center justify-center bg-surface rounded-full border-4 border-surface shadow-md">
-                  <span className="material-symbols-outlined text-primary/30" style={{ fontSize: '80px' }}>account_circle</span>
-                  <button className="absolute bottom-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform">
+                <div className="relative group w-40 h-40 mx-auto flex items-center justify-center bg-surface rounded-full border-4 border-surface shadow-md overflow-hidden">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                  ) : (firstName || lastName) ? (
+                    <span className="text-primary/60 font-headline font-extrabold" style={{ fontSize: '52px' }}>
+                      {`${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || firstName.charAt(0).toUpperCase()}
+                    </span>
+                  ) : (
+                    <span className="material-symbols-outlined text-primary/30" style={{ fontSize: '80px' }}>account_circle</span>
+                  )}
+                  {uploading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                      <span className="material-symbols-outlined text-white animate-spin" style={{ fontSize: '36px' }}>progress_activity</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    aria-label="Upload profile picture"
+                    className="absolute bottom-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
                     <span className="material-symbols-outlined text-sm">photo_camera</span>
                   </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
                 </div>
-                <p className="text-xs text-center text-secondary leading-relaxed">JPG, GIF or PNG. Max size of 2MB.</p>
+                <p className="text-xs text-center text-secondary leading-relaxed">
+                  {uploading ? 'Uploading...' : 'JPG, GIF or PNG. Max size of 5MB.'}
+                </p>
               </div>
 
               <div className="lg:col-span-8 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6">
@@ -238,6 +326,20 @@ export default function EditProfilePage() {
                       onChange={e => setCounty(e.target.value)}
                     />
                   </div>
+                  <label className="flex items-start gap-3 pt-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
+                      checked={contactVisible}
+                      onChange={e => setContactVisible(e.target.checked)}
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold text-primary">Visible to other users</span>
+                      <span className="block text-[11px] text-secondary leading-relaxed">
+                        When on, your phone, email, website, and company are shown to other users on your profile and buyer requests. When off, your contact info stays private and others contact you through platform messaging.
+                      </span>
+                    </span>
+                  </label>
                 </div>
               </div>
 

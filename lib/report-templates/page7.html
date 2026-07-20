@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { width: 816px; min-height: 1056px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #0D1F16; }
+.page { width: 816px; min-height: 1056px; display: flex; flex-direction: column; }
+.header { background: #0D1F16; padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-name { color: #fff; font-size: 16px; font-weight: 900; }
+.header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
+.header-section { color: #6EE7B7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.header-county { color: rgba(255,255,255,0.5); font-size: 11px; }
+.body { padding: 28px 40px 20px; flex: 1; }
+.section-title-wrap { margin-bottom: 20px; }
+.section-title { font-size: 22px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #0D1F16; line-height: 1.15; }
+.section-accent { height: 3px; background: linear-gradient(90deg, #1D9E75 0%, rgba(29,158,117,0) 100%); margin-top: 8px; border-radius: 2px; }
+.divider { height: 1px; background: #E5E7EB; margin: 22px 0; }
+.policy-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 7px; padding: 12px 14px; margin-bottom: 10px; }
+.policy-date { font-size: 11px; font-weight: 700; color: #6B7280; margin-bottom: 3px; letter-spacing: 0.05em; text-transform: uppercase; }
+.policy-title { font-size: 18px; font-weight: 700; color: #0D1F16; margin-bottom: 5px; }
+.policy-desc { font-size: 15px; color: #000; line-height: 1.6; }
+.incentive-card { border: 1px solid #E5E7EB; border-radius: 7px; padding: 12px 14px; margin-bottom: 10px; }
+.incentive-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; gap: 8px; }
+.incentive-label { font-size: 15px; font-weight: 700; color: #0D1F16; }
+.incentive-value { font-size: 15px; font-weight: 800; color: #0D1F16; text-align: right; white-space: nowrap; }
+.incentive-meta { font-size: 11px; color: #9CA3AF; margin-bottom: 5px; }
+.incentive-meta strong { color: #6B7280; }
+.incentive-explanation { font-size: 15px; color: #000; line-height: 1.55; }
+.no-break { page-break-inside: avoid; break-inside: avoid; }
+@media print { .no-break { page-break-inside: avoid; break-inside: avoid; } }
+.footer { background: #0D1F16; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { color: rgba(255,255,255,0.55); font-size: 13px; }
+.footer-center { color: #fff; font-size: 13px; font-weight: 700; }
+.footer-right { color: rgba(255,255,255,0.55); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-name">LotScout</div>
+      <div class="header-divider"></div>
+      <div class="header-section">Policy &amp; Incentives</div>
+    </div>
+    <div class="header-county">{{county_name}}</div>
+  </div>
+
+  <div class="body">
+    <div class="section-title-wrap">
+      <div class="section-title">Elections &amp; Policy</div>
+      <div class="section-accent"></div>
+    </div>
+
+    <div class="policy-card no-break">
+      <div class="policy-date">{{policy_1_date_badge}}</div>
+      <div class="policy-title">{{policy_1_title}}</div>
+      <div class="policy-desc">{{policy_1_description}}</div>
+    </div>
+    <div class="policy-card no-break">
+      <div class="policy-date">{{policy_2_date_badge}}</div>
+      <div class="policy-title">{{policy_2_title}}</div>
+      <div class="policy-desc">{{policy_2_description}}</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title-wrap">
+      <div class="section-title">Local Incentives</div>
+      <div class="section-accent"></div>
+    </div>
+
+    <div class="incentive-card no-break">
+      <div class="incentive-header">
+        <div class="incentive-label">{{incentive_1_label}}</div>
+        <div class="incentive-value">{{incentive_1_value}}</div>
+      </div>
+      <div class="incentive-meta"><strong>Zone:</strong> {{incentive_1_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_1_expiry}}</div>
+      <div class="incentive-explanation">{{incentive_1_explanation}}</div>
+    </div>
+    <div class="incentive-card no-break">
+      <div class="incentive-header">
+        <div class="incentive-label">{{incentive_2_label}}</div>
+        <div class="incentive-value">{{incentive_2_value}}</div>
+      </div>
+      <div class="incentive-meta"><strong>Zone:</strong> {{incentive_2_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_2_expiry}}</div>
+      <div class="incentive-explanation">{{incentive_2_explanation}}</div>
+    </div>
+    <div class="incentive-card no-break">
+      <div class="incentive-header">
+        <div class="incentive-label">{{incentive_3_label}}</div>
+        <div class="incentive-value">{{incentive_3_value}}</div>
+      </div>
+      <div class="incentive-meta"><strong>Zone:</strong> {{incentive_3_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_3_expiry}}</div>
+      <div class="incentive-explanation">{{incentive_3_explanation}}</div>
+    </div>
+    <div class="incentive-card no-break">
+      <div class="incentive-header">
+        <div class="incentive-label">{{incentive_4_label}}</div>
+        <div class="incentive-value">{{incentive_4_value}}</div>
+      </div>
+      <div class="incentive-meta"><strong>Zone:</strong> {{incentive_4_zone}} &nbsp;&middot;&nbsp; <strong>Expires:</strong> {{incentive_4_expiry}}</div>
+      <div class="incentive-explanation">{{incentive_4_explanation}}</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">The #1 Platform for Land Data and Off-Market Deals</div>
+    <div class="footer-center">lotscout.com</div>
+    <div class="footer-right">7 of 10</div>
+  </div>
+</div>
+</body>
+</html>

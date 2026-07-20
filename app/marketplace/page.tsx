@@ -14,6 +14,8 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import BoostModal from '@/components/BoostModal';
 import SendMessageModal from '@/components/SendMessageModal';
+import { getBuyerName } from '@/lib/getBuyerName';
+import { getSellerName, isBadName } from '@/lib/getSellerName';
 
 const STATE_NAMES: Record<string, string> = {
   'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
@@ -56,6 +58,7 @@ interface Listing {
   contact_methods: string[];
   status: string;
   photos_urls: string[] | null;
+  owner_name: string | null;
   digital_signature: string | null;
   created_at: string;
   user_id?: string | null;
@@ -148,6 +151,8 @@ const _LISTINGS_LEGACY = [
   },
 ];
 
+// Seller display names are resolved via getSellerName (single source of truth).
+
 function SellerContact({ name, listingId }: { name: string | null; listingId: string }) {
   return (
     <div className="pt-3 mt-3 border-t border-surface-container">
@@ -186,13 +191,17 @@ interface BuyerRequest {
   budget_max: number | null;
   min_acreage: number | null;
   max_acreage: number | null;
+  target_cities: string | null;
+  lot_size_min: number | null;
+  lot_size_max: number | null;
+  lot_size_label: string | null;
   use_case: string;
   zoning_preference: string[];
   timeline: string;
   additional_notes: string | null;
   contact_preference: string[];
   created_at: string;
-  profiles: { first_name: string | null; last_name: string | null; avatar_url: string | null } | null;
+  profiles: { first_name: string | null; last_name: string | null; company_name: string | null; avatar_url: string | null } | null;
 }
 
 function fmtPerAcreMkt(budgetMax: number | null, minAcreage: number | null, budgetMin: number | null): string {
@@ -1256,6 +1265,8 @@ export default function MarketplacePage() {
                     listing.county ? `${listing.county} County` : null,
                     listing.state,
                   ].filter(Boolean).join(', ');
+                  const sellerLabel = getSellerName(listing);
+                  const sellerHref = listing.owner_name && !isBadName(listing.owner_name) ? `/sellers/${encodeURIComponent(listing.owner_name)}` : null;
                   const isHighlighted = hoveredListingId === listing.id;
                   return (
                     <Link
@@ -1310,6 +1321,22 @@ export default function MarketplacePage() {
                           <div className="mt-3">
                             <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
                           </div>
+                        )}
+                        {sellerLabel && (
+                          sellerHref ? (
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(sellerHref); }}
+                              className="mt-3 self-start flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                            >
+                              <span className="material-symbols-outlined text-sm">person</span>
+                              {sellerLabel}
+                            </button>
+                          ) : (
+                            <p className="mt-3 flex items-center gap-1 text-xs font-bold text-secondary">
+                              <span className="material-symbols-outlined text-sm">person</span>
+                              {sellerLabel}
+                            </p>
+                          )
                         )}
                         {profile?.id && listing.user_id === profile.id && (
                           <button
@@ -1455,27 +1482,36 @@ export default function MarketplacePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBuyerRequests.map(req => {
                   const stateAbbrev = req.target_state ? (STATE_NAMES[req.target_state.toLowerCase()] ?? null) : null;
-                  let location: string;
-                  if (req.target_city && req.target_state) location = `${req.target_city}, ${stateAbbrev ?? req.target_state}`;
-                  else if (req.target_county && req.target_state) location = `${req.target_county} County, ${stateAbbrev ?? req.target_state}`;
-                  else location = req.target_state || 'Location not specified';
+                  const location: string =
+                    (req.target_regions?.length ? req.target_regions.join(', ') : null) ||
+                    (req.target_city && req.target_state ? `${req.target_city}, ${stateAbbrev ?? req.target_state}` : null) ||
+                    (req.target_county && req.target_state ? `${req.target_county} County, ${stateAbbrev ?? req.target_state}` : null) ||
+                    req.target_state ||
+                    'Location not specified';
                   const perAcre = fmtPerAcreMkt(req.budget_max, req.min_acreage, req.budget_min);
                   const timeline = req.timeline ? fmtTimelineMkt(req.timeline) : null;
 
-                  const listedByMkt = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ');
+                  const listedByMkt = getBuyerName(req);
                   return (
                     <div
                       key={req.id}
                       className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden"
                     >
                       <div className="space-y-2">
-                        <div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p><p className={`text-base font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p></div>
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p>
+                          <p className={`text-base font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p>
+                          {(() => {
+                            const city = (req.target_cities ?? '').split(',')[0]?.trim() || req.target_city || null;
+                            return (city || req.lot_size_label) ? (
+                              <p className="text-xs text-secondary mt-0.5">{[city, req.lot_size_label].filter(Boolean).join(' · ')}</p>
+                            ) : null;
+                          })()}
+                        </div>
                         <div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Budget</p><p className="text-base font-bold text-on-surface">{perAcre}</p></div>
                         {timeline && (<div><p className="text-xs font-black uppercase tracking-widest text-secondary/70">Timeline</p><p className="text-base font-bold text-on-surface">{timeline}</p></div>)}
                       </div>
-                      {listedByMkt && (
-                        <p className="text-xs text-secondary italic mt-3">Listed by {listedByMkt}</p>
-                      )}
+                      <p className="text-xs text-secondary italic mt-3">Listed by {listedByMkt}</p>
                       <div className="flex gap-2 mt-3">
                         {canViewContact ? (
                           <Link

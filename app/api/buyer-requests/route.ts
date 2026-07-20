@@ -49,37 +49,55 @@ export async function POST(request: NextRequest) {
 
     const service = createServiceClient();
 
-    const { data: buyerRequest, error: insertError } = await service
+    const baseInsert = {
+      user_id: user.id,
+      status: 'active',
+      target_regions: body.target_regions ?? [],
+      target_state: body.target_state ?? null,
+      target_county: body.target_county ?? null,
+      target_city: body.target_city ?? null,
+      target_zip: body.target_zip ?? null,
+      budget_min: body.budget_min ? Number(body.budget_min) : null,
+      budget_max: body.budget_max ? Number(body.budget_max) : null,
+      price_per_acre: body.price_per_acre ? Number(body.price_per_acre) : null,
+      min_acreage: body.min_acreage ? Number(body.min_acreage) : null,
+      max_acreage: body.max_acreage ? Number(body.max_acreage) : null,
+      area_unit: body.area_unit ?? 'acres',
+      zoning_preference: body.zoning_preference ?? [],
+      road_access: body.road_access ?? [],
+      utilities: body.utilities ?? [],
+      financing: body.financing ?? [],
+      use_case: body.use_case ?? null,
+      use_case_description: body.use_case_description ?? null,
+      specific_requirements: body.specific_requirements ?? null,
+      timeline: body.timeline ?? null,
+      target_close_date: body.target_close_date ?? null,
+      working_with_agent: body.working_with_agent ?? false,
+      additional_notes: body.additional_notes ?? null,
+      contact_preference: body.contact_preference ?? [],
+    };
+    // New optional fields — kept separate so an un-migrated column can't block submissions.
+    const extraInsert = {
+      target_cities: body.target_cities ?? null,
+      lot_size_min: body.lot_size_min ?? null,
+      lot_size_max: body.lot_size_max ?? null,
+      lot_size_label: body.lot_size_label ?? null,
+    };
+
+    let { data: buyerRequest, error: insertError } = await service
       .from('buyer_requests')
-      .insert({
-        user_id: user.id,
-        status: 'active',
-        target_regions: body.target_regions ?? [],
-        target_state: body.target_state ?? null,
-        target_county: body.target_county ?? null,
-        target_city: body.target_city ?? null,
-        target_zip: body.target_zip ?? null,
-        budget_min: body.budget_min ? Number(body.budget_min) : null,
-        budget_max: body.budget_max ? Number(body.budget_max) : null,
-        price_per_acre: body.price_per_acre ? Number(body.price_per_acre) : null,
-        min_acreage: body.min_acreage ? Number(body.min_acreage) : null,
-        max_acreage: body.max_acreage ? Number(body.max_acreage) : null,
-        area_unit: body.area_unit ?? 'acres',
-        zoning_preference: body.zoning_preference ?? [],
-        road_access: body.road_access ?? [],
-        utilities: body.utilities ?? [],
-        financing: body.financing ?? [],
-        use_case: body.use_case ?? null,
-        use_case_description: body.use_case_description ?? null,
-        specific_requirements: body.specific_requirements ?? null,
-        timeline: body.timeline ?? null,
-        target_close_date: body.target_close_date ?? null,
-        working_with_agent: body.working_with_agent ?? false,
-        additional_notes: body.additional_notes ?? null,
-        contact_preference: body.contact_preference ?? [],
-      })
+      .insert({ ...baseInsert, ...extraInsert })
       .select()
       .single();
+
+    if (insertError && /target_cities|lot_size_(min|max|label)/i.test(insertError.message)) {
+      console.warn('[buyer-requests] lot-size/cities columns missing — saving without them. Run the migration to enable.');
+      ({ data: buyerRequest, error: insertError } = await service
+        .from('buyer_requests')
+        .insert(baseInsert)
+        .select()
+        .single());
+    }
 
     if (insertError || !buyerRequest) {
       console.error('[buyer-requests] Insert error:', insertError);

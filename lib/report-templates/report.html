@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LotScout Land Market Report — {{COUNTY_NAME}} County, {{STATE}}</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f4faf7",
+                    "surface": "#ffffff",
+                    "on-background": "#151c27",
+                    "background": "#ffffff",
+                    "on-surface": "#151c27",
+                    "outline": "#6d7a73",
+                    "on-surface-variant": "#3d4943",
+                    "secondary": "#59C4A0",
+                    "secondary-container": "#d6f5e9",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#0F6E56",
+                    "primary": "#1D9E75",
+                    "on-primary": "#ffffff",
+                    "outline-variant": "#bccac1"
+            },
+            "borderRadius": {"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
+            "spacing": {"margin-page":"40px","block-padding":"24px","container-max":"1280px","gutter":"24px","stack-sm":"8px","stack-lg":"32px","stack-md":"16px"},
+            "fontFamily": {"headline-md":["Manrope"],"body-md":["Manrope"],"display-lg":["Manrope"],"label-sm":["Manrope"],"body-lg":["Manrope"],"headline-lg":["Manrope"]},
+            "fontSize": {
+                    "headline-md": ["20px", {"lineHeight":"28px","fontWeight":"700"}],
+                    "body-md": ["14.6px", {"lineHeight":"22px","fontWeight":"400"}],
+                    "display-lg": ["36px", {"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],
+                    "label-sm": ["12px", {"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"600"}],
+                    "body-lg": ["16px", {"lineHeight":"24px","fontWeight":"500"}],
+                    "headline-lg": ["28px", {"lineHeight":"36px","fontWeight":"700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family:'Manrope',sans-serif; background-color:#ffffff; color:#151c27; -webkit-font-smoothing:antialiased; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        .data-card { background-color:#F9FAFB; border:1px solid #E5E7EB; border-radius:24px; }
+        .accent-border { border-left:4px solid #1D9E75; }
+        .paragraph-text { font-size:14.6px; line-height:1.6; color:#3d4943; }
+        .prose-small { font-size:14.6px; line-height:1.6; color:#3d4943; }
+        .text-source-note { font-size:14.6px; line-height:1.5; }
+        .cell { font-size:14.6px; line-height:22px; }
+
+        /* ── PAGE BREAK RULES ──
+           Each .report-section starts on a new printed page.
+           Content within a section flows naturally onto additional
+           pages if it is too long to fit on one. */
+        .report-section { page-break-before: always; break-before: page; }
+        .report-section:first-of-type { page-break-before: avoid; break-before: avoid; }
+        .report-page-inner { max-width:1000px; margin:0 auto; padding:48px 40px 96px; }
+        .report-footer {
+            position: fixed; bottom:0; left:0; width:100%;
+            padding:14px 40px; display:flex; justify-content:space-between;
+            align-items:center; border-top:1px solid #bccac1; background:#fff;
+        }
+        @media screen {
+            .report-section { min-height: 100vh; border-bottom: 1px dashed #e0e0e0; }
+        }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════
+     LOTSCOUT LAND MARKET REPORT — MASTER TEMPLATE
+
+     This is a FIXED template with DYNAMIC content. The structure,
+     section order, headers, colors, and page-break behavior never
+     change. Only the data inside each section changes per report.
+
+     MERGE FIELDS (replaced by the generator per report):
+       {{COUNTY_NAME}}      e.g. "Maricopa"
+       {{STATE}}            e.g. "Arizona"
+       {{REPORT_DATE}}      e.g. "May 2026"
+       {{MEDIAN_PRICE_ACRE}} {{ACTIVE_LISTINGS}} {{AVG_DOM}} {{YOY_CHANGE}}
+       {{COUNTY_OVERVIEW_PROSE}}
+       {{COMP_SALES_ROWS}}  {{ACTIVE_LISTING_ROWS}}
+       {{ZILLOW_URL}} {{REDFIN_URL}} {{LANDWATCH_URL}}
+       {{LAND_USE_*}}  {{REZONING_PROSE}} {{PERMITS_PROSE}} {{POLICY_PROSE}}
+       {{RISK_PROSE}} {{INSIGHT_PROSE}} {{WATCH_PROSE}}
+       {{DATA_SOURCES}}  (see honesty rule below)
+
+     ── DATA SOURCES HONESTY RULE (BAKED IN) ──
+     The Data Sources section MUST be generated dynamically from the
+     actual sources the generator pulled data from during THIS report's
+     creation. Each source the system successfully queries is recorded,
+     and ONLY recorded sources appear on the page. NEVER render a source
+     the generator did not actually use. Do not display the full static
+     list below as-is — it is a FORMAT EXAMPLE only. Replace it with the
+     real, recorded sources for each report.
+     ════════════════════════════════════════════════════════════════ -->
+
+
+<!-- ═══════════════ SECTION 1 — TITLE PAGE ═══════════════ -->
+<section class="report-section relative flex flex-col justify-center items-center text-center px-margin-page" style="min-height:100vh;">
+<div class="absolute inset-0 pointer-events-none opacity-[0.03]" style="background-image: radial-gradient(#1D9E75 1px, transparent 1px); background-size: 40px 40px;"></div>
+<div class="absolute top-margin-page w-full flex justify-center">
+<span class="text-headline-lg font-headline-lg text-[#1D9E75] tracking-tight">LotScout</span>
+</div>
+<div class="z-10 max-w-4xl flex flex-col items-center">
+<h1 class="text-display-lg font-display-lg text-on-background mb-4">Land Market Report</h1>
+<h2 class="text-headline-lg font-headline-lg text-on-surface-variant mb-stack-md uppercase tracking-widest">{{COUNTY_NAME}} County, {{STATE}}</h2>
+<div class="flex my-stack-lg"><div class="w-24 h-1.5 bg-[#1D9E75] rounded-full"></div></div>
+<p class="font-body-lg text-on-surface-variant text-body-md">{{REPORT_DATE}}</p>
+</div>
+<div class="mt-stack-lg text-center">
+<p class="text-body-lg font-bold text-on-surface mb-2">Prepared by LotScout</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">America's #1 platform for off-market land sellers and buyers.</p>
+</div>
+</section>
+
+
+<!-- ═══════════════ SECTION 2 — MARKET SNAPSHOT & COUNTY OVERVIEW ═══════════════ -->
+<section class="report-section">
+<div class="report-page-inner">
+<header class="mb-stack-lg">
+<h1 class="text-headline-lg font-headline-lg text-[#0F6E56]" style="font-size:34.6px;">Market Snapshot &amp; County Overview</h1>
+<div class="h-1 w-24 bg-[#1D9E75] rounded-full mt-2"></div>
+</header>
+<!-- Stat blocks -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack-lg">
+<div class="data-card p-block-padding flex flex-col justify-between">
+<div><span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Median Price/Acre</span>
+<h2 class="font-extrabold text-[#1D9E75] mt-2" style="font-size:34.6px;">{{MEDIAN_PRICE_ACRE}}</h2></div>
+</div>
+<div class="data-card p-block-padding flex flex-col justify-between">
+<div><span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Active Listings</span>
+<h2 class="font-extrabold text-on-surface mt-2" style="font-size:34.6px;">{{ACTIVE_LISTINGS}}</h2></div>
+</div>
+<div class="data-card p-block-padding flex flex-col justify-between">
+<div><span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Avg. Days on Market</span>
+<h2 class="font-extrabold text-on-surface mt-2" style="font-size:34.6px;">{{AVG_DOM}}</h2></div>
+</div>
+<div class="data-card p-block-padding flex flex-col justify-between">
+<div><span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">YoY Change</span>
+<h2 class="font-extrabold text-[#1D9E75] mt-2" style="font-size:34.6px;">{{YOY_CHANGE}}</h2></div>
+</div>
+</section>
+<!-- County overview prose -->
+<section class="flex flex-col items-center text-center">
+<h3 class="text-headline-md font-headline-md text-on-surface mb-stack-md" style="font-size:26.6px;">County Overview</h3>
+<div class="paragraph-text space-y-4 max-w-4xl">{{COUNTY_OVERVIEW_PROSE}}</div>
+</section>
+</div>
+</section>
+
+
+<!-- ═══════════════ SECTION 3 — COMPARABLE SALES & ACTIVE LISTINGS ═══════════════ -->
+<section class="report-section">
+<div class="report-page-inner">
+<header class="mb-stack-lg">
+<h1 class="text-headline-lg font-headline-lg text-[#0F6E56]" style="font-size:34.6px;">Comparable Sales &amp; Active Listings</h1>
+<div class="h-1 w-24 bg-[#1D9E75] rounded-full mt-2"></div>
+</header>
+<!-- Comparable sales -->
+<section class="mb-stack-lg">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-stack-md" style="font-size:24px;">Comparable Sales</h2>
+<div class="data-card overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#f4faf7] border-b border-outline-variant"><tr>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider">Location</th>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider">Acreage</th>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider text-right">Sale Price</th>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider text-right">Price/Acre</th>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider">Date Sold</th>
+</tr></thead>
+<tbody class="divide-y divide-gray-100 bg-white">
+<!-- {{COMP_SALES_ROWS}} — generator loops rows here -->
+{{COMP_SALES_ROWS}}
+</tbody>
+</table>
+</div>
+<p class="text-on-surface-variant mt-3" style="font-size:12px;">Source: Zillow, Redfin, and LandWatch public sale records (last 180 days).</p>
+</section>
+<!-- Active listings -->
+<section class="mb-stack-lg">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-stack-md" style="font-size:24px;">Active Listings</h2>
+<div class="data-card overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#f4faf7] border-b border-outline-variant"><tr>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider">Location</th>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider">Acreage</th>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider text-right">Asking Price</th>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider text-right">Price/Acre</th>
+<th class="px-6 py-4 text-label-sm font-bold text-[#0F6E56] uppercase tracking-wider">Status</th>
+</tr></thead>
+<tbody class="divide-y divide-gray-100 bg-white">
+<!-- {{ACTIVE_LISTING_ROWS}} — generator loops rows here -->
+{{ACTIVE_LISTING_ROWS}}
+</tbody>
+</table>
+</div>
+<div class="mt-stack-md flex flex-wrap gap-4">
+<a href="{{ZILLOW_URL}}" class="inline-flex items-center gap-2 text-[#1D9E75] font-bold" style="font-size:14.6px;"><span class="material-symbols-outlined text-[18px]">open_in_new</span>View active listings on Zillow</a>
+<a href="{{LANDWATCH_URL}}" class="inline-flex items-center gap-2 text-[#1D9E75] font-bold" style="font-size:14.6px;"><span class="material-symbols-outlined text-[18px]">open_in_new</span>View on LandWatch</a>
+<a href="{{REDFIN_URL}}" class="inline-flex items-center gap-2 text-[#1D9E75] font-bold" style="font-size:14.6px;"><span class="material-symbols-outlined text-[18px]">open_in_new</span>View on Redfin</a>
+</div>
+</section>
+<!-- Land use breakdown -->
+<section class="mb-stack-lg">
+<div class="mb-6">
+<h2 class="text-headline-md font-headline-md text-on-surface" style="font-size:24px;">Land Use Breakdown</h2>
+<p class="text-on-surface-variant mt-1" style="font-size:14.6px;">Zoning distribution within the {{COUNTY_NAME}} County market radius.</p>
+</div>
+<div class="data-card p-stack-md">
+<div class="relative h-12 w-full flex rounded-full overflow-hidden">
+<div class="h-full bg-[#1D9E75] flex items-center justify-center text-white font-bold text-label-sm" style="width:{{LAND_USE_RES_PCT}};">{{LAND_USE_RES_PCT}}</div>
+<div class="h-full bg-[#59C4A0] flex items-center justify-center text-white font-bold text-label-sm" style="width:{{LAND_USE_AG_PCT}};">{{LAND_USE_AG_PCT}}</div>
+<div class="h-full bg-[#d6f5e9] flex items-center justify-center text-[#0F6E56] font-bold text-label-sm" style="width:{{LAND_USE_COM_PCT}};">{{LAND_USE_COM_PCT}}</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 pt-6 border-t border-outline-variant">
+<div class="flex flex-col"><span class="text-headline-md font-extrabold text-[#1D9E75]">{{LAND_USE_RES_AC}}</span><span class="text-label-sm text-outline uppercase font-bold">Residential Stock</span></div>
+<div class="flex flex-col"><span class="text-headline-md font-extrabold text-[#59C4A0]">{{LAND_USE_AG_AC}}</span><span class="text-label-sm text-outline uppercase font-bold">Agricultural Reserve</span></div>
+<div class="flex flex-col"><span class="text-headline-md font-extrabold text-[#0F6E56]">{{LAND_USE_COM_AC}}</span><span class="text-label-sm text-outline uppercase font-bold">Commercial Corridor</span></div>
+</div>
+</div>
+</section>
+</div>
+</section>
+
+
+<!-- ═══════════════ SECTION 4 — DEVELOPMENT INTELLIGENCE ═══════════════ -->
+<section class="report-section">
+<div class="report-page-inner">
+<header class="mb-12">
+<h1 class="text-headline-lg font-headline-lg text-[#0F6E56]" style="font-size:34.6px;">Development Intelligence</h1>
+<div class="h-1 w-24 bg-[#1D9E75] rounded-full mt-2"></div>
+</header>
+<div class="space-y-12">
+<section>
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-[#1D9E75]" style='font-variation-settings:"FILL" 1;'>layers</span>
+<h2 class="text-headline-md font-headline-md text-on-surface" style="font-size:22px;">Rezoning Updates</h2>
+</div>
+<div class="paragraph-text">{{REZONING_PROSE}}</div>
+</section>
+<div class="border-t border-outline-variant opacity-50"></div>
+<section>
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-[#1D9E75]" style='font-variation-settings:"FILL" 1;'>architecture</span>
+<h2 class="text-headline-md font-headline-md text-on-surface" style="font-size:22px;">Building Permits Granted</h2>
+</div>
+<div class="paragraph-text">{{PERMITS_PROSE}}</div>
+</section>
+<div class="border-t border-outline-variant opacity-50"></div>
+<section>
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-[#1D9E75]" style='font-variation-settings:"FILL" 1;'>policy</span>
+<h2 class="text-headline-md font-headline-md text-on-surface" style="font-size:22px;">Elections / Policy / Zoning Changes</h2>
+</div>
+<div class="paragraph-text">{{POLICY_PROSE}}</div>
+</section>
+</div>
+</div>
+</section>
+
+
+<!-- ═══════════════ SECTION 5 — LOTSCOUT RECOMMENDATION ═══════════════ -->
+<section class="report-section">
+<div class="report-page-inner">
+<header class="mb-stack-lg">
+<h1 class="font-headline-lg text-[#0F6E56]" style="font-size:34.6px;">LotScout Recommendation</h1>
+<div class="h-1 w-24 bg-[#1D9E75] rounded-full mt-2"></div>
+<p class="text-on-surface-variant mt-3 max-w-2xl" style="font-size:14.6px; line-height:1.6;">Strategic assessment based on 24-month market velocity and the regulatory outlook for {{COUNTY_NAME}} County.</p>
+</header>
+<div class="space-y-gutter">
+<section class="data-card p-block-padding accent-border">
+<div class="flex items-center gap-3 mb-3"><span class="material-symbols-outlined text-[#1D9E75]" style="font-size:24px;">warning_amber</span><h2 class="font-headline-md text-on-surface" style="font-size:22px;">Risk</h2></div>
+<div class="prose-small">{{RISK_PROSE}}</div>
+</section>
+<section class="data-card p-block-padding accent-border">
+<div class="flex items-center gap-3 mb-3"><span class="material-symbols-outlined text-[#1D9E75]" style="font-size:24px;">lightbulb</span><h2 class="font-headline-md text-on-surface" style="font-size:22px;">Insight</h2></div>
+<div class="prose-small">{{INSIGHT_PROSE}}</div>
+</section>
+<section class="data-card p-block-padding accent-border">
+<div class="flex items-center gap-3 mb-3"><span class="material-symbols-outlined text-[#1D9E75]" style="font-size:24px;">visibility</span><h2 class="font-headline-md text-on-surface" style="font-size:22px;">What to Watch For</h2></div>
+<div class="prose-small">{{WATCH_PROSE}}</div>
+</section>
+</div>
+</div>
+</section>
+
+
+<!-- ═══════════════ SECTION 6 — DATA SOURCES ═══════════════
+     HONESTY RULE: render ONLY the sources actually used to build THIS
+     report. The grid below is a FORMAT EXAMPLE. The generator must
+     replace {{DATA_SOURCES}} with the recorded sources for this report. -->
+<section class="report-section">
+<div class="report-page-inner">
+<header class="mb-stack-lg">
+<h1 class="text-headline-lg font-headline-lg text-[#0F6E56]" style="font-size:34.6px;">Data Sources</h1>
+<div class="h-1 w-24 bg-[#1D9E75] rounded-full mt-2"></div>
+</header>
+<div class="border-l-4 border-[#1D9E75] pl-4 py-2 mb-8">
+<p class="text-source-note text-on-surface-variant">This report synthesizes data from the providers listed below, specific to {{COUNTY_NAME}} County, {{STATE}}. Only sources actually used in this report appear here.</p>
+</div>
+<!-- {{DATA_SOURCES}} — generator outputs recorded source cards in this grid.
+     Format example for a single source card: -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+{{DATA_SOURCES}}
+</div>
+<div class="mt-8 p-6 border border-outline-variant rounded-xl">
+<p class="text-source-note text-on-surface-variant italic">Data sources are verified at the time of report generation. Update frequency varies by provider, ranging from real-time feeds to annual reviews.</p>
+</div>
+</div>
+</section>
+
+
+<!-- ═══════════════ SECTION 7 — SOURCES & DISCLAIMER ═══════════════ -->
+<section class="report-section">
+<div class="report-page-inner">
+<header class="mb-stack-lg">
+<h1 class="text-headline-lg font-headline-lg text-[#0F6E56]" style="font-size:34.6px;">Disclaimer</h1>
+<div class="h-1 w-24 bg-[#1D9E75] rounded-full mt-2"></div>
+</header>
+<div class="paragraph-text space-y-5 max-w-4xl" style="line-height:1.8;">
+<p>This LotScout Land Market Report is provided for informational and analytical purposes only. The data contained herein is synthesized from public records and commercial data providers, including county parcel and assessor data, secondary market listing and transaction histories, geospatial mapping, demographic data, and zoning and permitting records. While LotScout applies data validation protocols to support accuracy, real estate market conditions are subject to rapid change. LotScout does not guarantee the absolute accuracy, completeness, or timeliness of the information presented, and this report does not constitute financial, legal, or investment advice.</p>
+<p>Users are encouraged to perform independent due diligence before committing to any land acquisition or development project. LotScout and its affiliates shall not be held liable for any financial losses, missed opportunities, or disputes arising from the use of or reliance upon the metrics, projections, or property-specific insights provided in this document. By accessing this report, the recipient acknowledges that market performance is inherently uncertain and that historical transaction records are not a definitive indicator of future appreciation or development feasibility.</p>
+<p>This report is prepared for the sole and personal use of the named recipient. It may not be copied, reproduced, redistributed, resold, republished, or shared with any third party, in whole or in part, in any form, without the prior written consent of LotScout. All content, data compilations, and analysis contained herein are the property of LotScout and are protected accordingly. Unauthorized distribution or commercial use is strictly prohibited.</p>
+</div>
+</div>
+</section>
+
+
+<!-- ═══════════════ SECTION 8 — ABOUT LOTSCOUT ═══════════════ -->
+<section class="report-section">
+<div class="report-page-inner">
+<header class="mb-stack-lg">
+<h1 class="text-headline-lg font-headline-lg text-[#0F6E56]" style="font-size:34.6px;">About LotScout</h1>
+<div class="h-1 w-24 bg-[#1D9E75] rounded-full mt-2"></div>
+</header>
+<!-- Intro statement -->
+<p class="paragraph-text max-w-4xl mb-8" style="line-height:1.8;">LotScout is America's platform for off-market land. We connect verified land sellers directly with builders, developers, and investors, no agents and no commissions in between. We don't sell leads. We create relationships that turn into real transactions.</p>
+<!-- Feature grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+<div class="flex items-start gap-4 p-5 bg-[#f4faf7] rounded-xl border border-outline-variant/40">
+<span class="material-symbols-outlined text-[#1D9E75]">verified_user</span>
+<div>
+<h3 class="font-bold text-on-surface" style="font-size:16px;">Verified Users Only</h3>
+<p class="text-on-surface-variant" style="font-size:14.6px; line-height:1.5;">Every buyer and seller on the platform is verified, so you deal with real people and real parcels.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-5 bg-[#f4faf7] rounded-xl border border-outline-variant/40">
+<span class="material-symbols-outlined text-[#1D9E75]">handshake</span>
+<div>
+<h3 class="font-bold text-on-surface" style="font-size:16px;">Relationships, Not Leads</h3>
+<p class="text-on-surface-variant" style="font-size:14.6px; line-height:1.5;">We never sell your information. We connect off-market buyers and sellers directly to each other.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-5 bg-[#f4faf7] rounded-xl border border-outline-variant/40">
+<span class="material-symbols-outlined text-[#1D9E75]">insights</span>
+<div>
+<h3 class="font-bold text-on-surface" style="font-size:16px;">Free Market Updates</h3>
+<p class="text-on-surface-variant" style="font-size:14.6px; line-height:1.5;">Get free land market updates for unlimited counties, delivered straight to your inbox.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-5 bg-[#f4faf7] rounded-xl border border-outline-variant/40">
+<span class="material-symbols-outlined text-[#1D9E75]">account_balance</span>
+<div>
+<h3 class="font-bold text-on-surface" style="font-size:16px;">Financing Partners</h3>
+<p class="text-on-surface-variant" style="font-size:14.6px; line-height:1.5;">Access vetted financing partners to fund land acquisitions and development projects.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-5 bg-[#f4faf7] rounded-xl border border-outline-variant/40">
+<span class="material-symbols-outlined text-[#1D9E75]">description</span>
+<div>
+<h3 class="font-bold text-on-surface" style="font-size:16px;">Property Analysis &amp; Development Tools</h3>
+<p class="text-on-surface-variant" style="font-size:14.6px; line-height:1.5;">Run property analysis reports and use land development tools built for serious buyers.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-5 bg-[#f4faf7] rounded-xl border border-outline-variant/40">
+<span class="material-symbols-outlined text-[#1D9E75]">store</span>
+<div>
+<h3 class="font-bold text-on-surface" style="font-size:16px;">900+ Listings Nationwide</h3>
+<p class="text-on-surface-variant" style="font-size:14.6px; line-height:1.5;">Browse a full marketplace of over 900 land listings across all 50 states.</p>
+</div>
+</div>
+</div>
+<!-- CTA -->
+<div class="data-card p-block-padding accent-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h3 class="font-headline-md text-on-surface" style="font-size:20px;">Buying or selling land in {{COUNTY_NAME}} County?</h3>
+<p class="text-on-surface-variant mt-1" style="font-size:14.6px;">Browse off-market listings and connect directly on LotScout.</p>
+</div>
+<a href="{{LOTSCOUT_URL}}" class="inline-flex items-center justify-center gap-2 bg-[#1D9E75] text-white font-bold px-6 py-3 rounded-lg whitespace-nowrap" style="font-size:15px;">
+Visit LotScout
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+
+
+<!-- ═══════════════ SHARED FOOTER (repeats on every printed page) ═══════════════ -->
+<footer class="report-footer">
+<div class="text-label-sm font-bold text-[#1D9E75]" style="font-size:12px;">LotScout</div>
+<div class="text-on-surface-variant text-label-sm font-label-sm" style="font-size:11px;">Prepared exclusively for {{RECIPIENT_NAME}} · Not for redistribution</div>
+<div class="text-on-surface-variant text-label-sm font-label-sm" style="font-size:12px;">{{COUNTY_NAME}} County, {{STATE}}</div>
+</footer>
+
+</body>
+</html>

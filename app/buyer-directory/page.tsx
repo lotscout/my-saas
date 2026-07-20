@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import { useUserTier } from '@/hooks/useUserTier';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
+import { getBuyerName } from '@/lib/getBuyerName';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,10 +24,16 @@ interface BuyerRequest {
   budget_max: number | null;
   min_acreage: number | null;
   max_acreage: number | null;
+  target_cities: string | null;
+  lot_size_min: number | null;
+  lot_size_max: number | null;
+  lot_size_label: string | null;
   use_case: string | null;
   zoning_preference: string[] | null;
   timeline: string | null;
   additional_notes: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
   display_name: string | null;
   display_company: string | null;
   contact_phone: string | null;
@@ -98,19 +105,15 @@ function fmtTimeline(t: string): string {
   return t;
 }
 
-function getBuyerName(req: BuyerRequest) {
-  if (req.display_name) return req.display_name;
-  const p = req.profiles;
-  return [p?.first_name, p?.last_name].filter(Boolean).join(' ') || req.display_company || 'Anonymous Buyer';
+
+// First city from the comma-separated target_cities list (falls back to target_city).
+function primaryCity(req: { target_cities?: string | null; target_city?: string | null }): string | null {
+  const first = (req.target_cities ?? '').split(',')[0]?.trim();
+  return first || req.target_city || null;
 }
 
-function getInitials(req: BuyerRequest) {
-  if (req.display_company) return req.display_company.substring(0, 2).toUpperCase();
-  const p = req.profiles;
-  return ([p?.first_name?.[0], p?.last_name?.[0]].filter(Boolean).join('').toUpperCase()) || 'AB';
-}
-
-function fmtLocation(city: string | null, county: string | null, state: string | null): string {
+function fmtLocation(city: string | null, county: string | null, state: string | null, regions?: string[] | null): string {
+  if (regions?.length) return regions.join(', ');
   const abbrev = state ? (STATE_ABBREV[state.toLowerCase()] ?? null) : null;
   if (city && state) return `${city}, ${abbrev ?? state}`;
   if (county && state) return `${county} County, ${abbrev ?? state}`;
@@ -141,145 +144,80 @@ function applyAcreageFilter(req: BuyerRequest, f: string): boolean {
   return true;
 }
 
-// ─── Shared BuyerRow ─────────────────────────────────────────────────────────
+// ─── DirectoryCard — contact info only (Buyer Directory) ──────────────────────
 
-interface BuyerRowProps {
-  req: BuyerRequest;
-  canViewContact: boolean;
-  showTimeline?: boolean;
-  minimal?: boolean;
-}
-
-function BuyerRow({ req, canViewContact, showTimeline = true, minimal = false }: BuyerRowProps) {
+function DirectoryCard({ req }: { req: BuyerRequest }) {
+  const router = useRouter();
   const name = getBuyerName(req);
-  const initials = getInitials(req);
-  const company = req.display_company || req.profiles?.company_name || null;
-  const blur = !canViewContact;
-
-  if (minimal) {
-    return (
-      <Link
-        href={`/buyer-requests/${req.id}`}
-        className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 px-4 py-3 flex items-center hover:shadow-md hover:border-primary/20 transition-all"
-      >
-        <div className="min-w-0">
-          <p className={`font-bold text-primary text-sm truncate ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
-          {company && (
-            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{company}</p>
-          )}
-        </div>
-      </Link>
-    );
-  }
+  const website = req.contact_website;
+  const phone = req.contact_phone;
+  const email = req.contact_email;
+  const reachable = !!(phone || email);
 
   return (
-    <Link
-      href={`/buyer-requests/${req.id}`}
-      className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-md hover:border-primary/20 transition-all"
+    <div
+      onClick={() => router.push(`/buyer-requests/${req.id}`)}
+      className="relative bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-3 flex flex-col gap-1.5 cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden min-h-[116px]"
     >
-      {/* Avatar + identity */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 ${blur ? 'blur-sm' : ''}`}>
-          {req.profiles?.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={req.profiles.avatar_url} alt="Buyer" className="w-full h-full object-cover rounded-full" />
-          ) : (
-            <span className="text-primary font-bold text-sm">{initials}</span>
+      <p className="font-bold text-primary text-sm leading-tight line-clamp-2">{name}</p>
+      {website && (
+        <a
+          href={`https://${website.replace(/^https?:\/\//, '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="flex items-center gap-1 text-xs text-primary/80 hover:text-primary font-medium truncate"
+        >
+          <span className="material-symbols-outlined text-sm">language</span>
+          <span className="truncate">{website.replace(/^https?:\/\//, '')}</span>
+        </a>
+      )}
+      {reachable ? (
+        <div className="mt-auto space-y-0.5">
+          {phone && (
+            <p className="flex items-center gap-1 text-[11px] text-secondary truncate">
+              <span className="material-symbols-outlined text-sm">call</span>{phone}
+            </p>
+          )}
+          {email && (
+            <p className="flex items-center gap-1 text-[11px] text-secondary truncate">
+              <span className="material-symbols-outlined text-sm">mail</span>{email}
+            </p>
           )}
         </div>
-        <div className="min-w-0">
-          <p className={`font-bold text-primary text-sm truncate ${blur ? 'blur-sm select-none' : ''}`}>{name}</p>
-          {company && (
-            <p className={`text-xs text-secondary truncate ${blur ? 'blur-sm select-none' : ''}`}>{company}</p>
-          )}
-          {req.contact_website && (
-            <a href={`https://${req.contact_website}`} target="_blank" rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              className="text-xs text-primary/70 hover:text-primary font-medium transition-colors">
-              {req.contact_website}
-            </a>
-          )}
-        </div>
-      </div>
-
-      {/* Meta chips */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs shrink-0">
-        <span className="flex items-center gap-1 text-secondary">
-          <span className="material-symbols-outlined text-sm">location_on</span>
-          {fmtLocation(req.target_city, req.target_county, req.target_state)}
-        </span>
-        <span className="font-semibold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</span>
-        {req.use_case && (
-          <span className="bg-primary/8 text-primary px-2 py-0.5 rounded-full font-bold capitalize">{req.use_case.split(' — ')[0]}</span>
-        )}
-        {showTimeline && req.timeline && (
-          <span className="text-secondary hidden md:inline">{fmtTimeline(req.timeline)}</span>
-        )}
-      </div>
-    </Link>
+      ) : (
+        <p className="mt-auto text-[11px] text-secondary/70 italic">Contact via platform</p>
+      )}
+    </div>
   );
 }
 
-// ─── BuyerRequestCard (for Requests tab) ──────────────────────────────────────
+// ─── RequestCard — active-search criteria (Buyer Requests) ────────────────────
 
-interface BuyerCardProps {
-  req: BuyerRequest;
-  canViewContact: boolean;
-  onUpgradeClick?: () => void;
-}
-
-function BuyerRequestCard({ req, canViewContact, onUpgradeClick }: BuyerCardProps) {
-  const location = fmtLocation(req.target_city, req.target_county, req.target_state);
-  const perAcre = fmtPerAcre(req.budget_max, req.min_acreage, req.budget_min);
+function RequestCard({ req }: { req: BuyerRequest }) {
+  const router = useRouter();
+  const name = getBuyerName(req);
+  const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
-  const listedBy = [req.profiles?.first_name, req.profiles?.last_name].filter(Boolean).join(' ');
+  const useCase = req.use_case ? req.use_case.split(' — ')[0].trim() : null;
 
   return (
-    <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-4 flex flex-col hover:shadow-lg hover:border-primary/25 transition-all overflow-hidden">
-      <div className="space-y-2">
-        <div>
-          <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Location</p>
-          <p className={`text-base font-bold ${location === 'Location not specified' ? 'text-secondary/50 italic' : 'text-on-surface'}`}>{location}</p>
-        </div>
-        <div>
-          <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Budget</p>
-          <p className="text-base font-bold text-on-surface">{perAcre}</p>
-        </div>
-        {timeline && (
-          <div>
-            <p className="text-xs font-black uppercase tracking-widest text-secondary/70">Timeline</p>
-            <p className="text-base font-bold text-on-surface">{timeline}</p>
-          </div>
-        )}
+    <div
+      onClick={() => router.push(`/buyer-requests/${req.id}`)}
+      className="relative bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-3 flex flex-col gap-1 cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden min-h-[116px]"
+    >
+      <p className="font-bold text-primary text-sm leading-tight line-clamp-2">{name}</p>
+      <div className="flex items-center gap-0.5 text-xs text-secondary">
+        <span className="material-symbols-outlined text-sm">location_on</span>
+        <span className="truncate">{location}</span>
       </div>
-
-      {listedBy && (
-        <p className="text-xs text-secondary italic mt-3">Listed by {listedBy}</p>
+      {(primaryCity(req) || req.lot_size_label) && (
+        <p className="text-[11px] text-secondary truncate">
+          {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
+        </p>
       )}
-
-      <div className="flex gap-2 mt-3">
-        {canViewContact ? (
-          <Link
-            href={`/buyer-requests/${req.id}`}
-            className="w-1/2 bg-green-700 text-white text-sm font-semibold rounded-xl py-2 text-center hover:bg-green-800 transition-colors"
-          >
-            Contact Buyer
-          </Link>
-        ) : (
-          <button
-            onClick={onUpgradeClick}
-            className="w-1/2 bg-green-700 text-white text-sm font-semibold rounded-xl py-2 hover:bg-green-800 transition-colors"
-          >
-            Contact Buyer
-          </button>
-        )}
-        <Link
-          href={`/buyer-requests/${req.id}`}
-          className="w-1/2 border border-green-700 text-green-700 text-sm font-semibold rounded-xl py-2 text-center hover:bg-green-50 transition-colors"
-        >
-          See More
-        </Link>
-      </div>
+      {useCase && <p className="text-[11px] text-secondary truncate capitalize">{useCase}</p>}
+      {timeline && <p className="text-[11px] text-secondary mt-auto">{timeline}</p>}
     </div>
   );
 }
@@ -312,10 +250,6 @@ function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitl
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function BuyerDirectoryPage() {
-  const { isAdmin, isAtLeast, loading: permLoading } = useUserTier();
-
-  const canViewContact = !permLoading && (isAtLeast('standard') || !!isAdmin);
-
   // ── Navigation state ──
   const [tab, setTab] = useState<MainTab>('directory');
   const [view, setView] = useState<DirectoryView>('grid');
@@ -374,7 +308,7 @@ export default function BuyerDirectoryPage() {
     if (!state) return;
     setStateLoading(true);
     setStateSearched(state);
-    fetch(`/api/buyer-directory?status=active&state=${encodeURIComponent(state)}&limit=50`)
+    fetch(`/api/buyer-directory?status=active&state=${encodeURIComponent(state)}&limit=10`)
       .then(r => r.json())
       .then(({ requests }) => { setStateBuyers((requests ?? []) as BuyerRequest[]); setStateLoading(false); })
       .catch(() => setStateLoading(false));
@@ -679,9 +613,9 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try adjusting your search or filters</p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {filteredNational.map(req => (
-                        <BuyerRow key={req.id} req={req} canViewContact={canViewContact} minimal />
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
+                      {filteredNational.map((req) => (
+                        <DirectoryCard key={req.id} req={req} />
                       ))}
                     </div>
                   )}
@@ -755,14 +689,9 @@ export default function BuyerDirectoryPage() {
                             <p className="text-sm mt-1">Try a different state or clear your filters</p>
                           </div>
                         ) : (
-                          <div className="space-y-2">
-                            {filteredState.map((req, i) => (
-                              <div key={req.id} className="flex items-center gap-3">
-                                <span className="text-xs font-bold text-secondary/50 w-6 text-right shrink-0">{i + 1}</span>
-                                <div className="flex-1">
-                                  <BuyerRow req={req} canViewContact={canViewContact} showTimeline />
-                                </div>
-                              </div>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
+                            {filteredState.map((req) => (
+                              <DirectoryCard key={req.id} req={req} />
                             ))}
                           </div>
                         )}
@@ -872,9 +801,9 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try clearing your filters or check back soon</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                       {filteredActiveBR.map(req => (
-                        <BuyerRequestCard key={req.id} req={req} canViewContact={canViewContact} onUpgradeClick={() => setShowUpgradeModal(true)} />
+                        <RequestCard key={req.id} req={req} />
                       ))}
                     </div>
                   )}
@@ -975,14 +904,9 @@ export default function BuyerDirectoryPage() {
                   <p className="text-sm">Try adjusting your search or clearing filters</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                   {filteredBR.map(req => (
-                    <BuyerRequestCard
-                      key={req.id}
-                      req={req}
-                      canViewContact={canViewContact}
-                      onUpgradeClick={() => setShowUpgradeModal(true)}
-                    />
+                    <RequestCard key={req.id} req={req} />
                   ))}
                 </div>
               )}

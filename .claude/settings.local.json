@@ -41,7 +41,31 @@
       "Bash(Get-ChildItem -Recurse -Path app, components -Include \"*.tsx\", \"*.ts\")",
       "Bash(Measure-Object)",
       "Bash(Select-Object -ExpandProperty Count)",
-      "Bash(grep -E '\\\\.\\(tsx|ts\\)$')"
+      "Bash(grep -E '\\\\.\\(tsx|ts\\)$')",
+      "Skill(supabase:supabase)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\bobby\\\\my-saas\" -Recurse -Filter \"middleware.ts\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\bobby\\\\my-saas\\\\lib\\\\county-centroids.json' -TotalCount 20\")",
+      "Bash(npx next *)",
+      "Bash(supabase db *)",
+      "Bash(Select-String \"buyer-directory\")",
+      "PowerShell(Get-Process *)",
+      "PowerShell(cd C:\\\\Users\\\\bobby\\\\my-saas; Start-Process powershell -ArgumentList \"-NoExit -Command `\"npm run dev`\"\" -WindowStyle Normal)",
+      "Bash(git show *)",
+      "Read(//tmp/**)",
+      "Bash(python3 -c \"import sys,json; p=json.load\\(sys.stdin\\); deps={**p.get\\('dependencies',{}\\), **p.get\\('devDependencies',{}\\)}; print\\('\\\\n'.join\\(f'{k}: {v}' for k,v in deps.items\\(\\) if any\\(x in k for x in ['recharts','chart','d3']\\)\\)\\)\")",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\bobby\\\\my-saas\" -Recurse -Directory -Filter \"migrations\")",
+      "Bash(python3 -c ' *)",
+      "Bash(supabase projects *)",
+      "Bash(grep -v \"//\\\\|import\\\\|interface\\\\|type\\\\|profile\\\\b\")",
+      "Bash(grep -E \"\\\\.\\(tsx?|test|spec|md\\)$\")",
+      "Bash(powershell *)",
+      "mcp__plugin_supabase_supabase__restore_project",
+      "mcp__plugin_supabase_supabase__get_project",
+      "PowerShell(npm run *)",
+      "Skill(claude-api)",
+      "Bash(xargs -I{} echo \"unique commit tips: {}\")"
     ]
   }
 }

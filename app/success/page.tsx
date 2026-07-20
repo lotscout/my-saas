@@ -15,10 +15,10 @@ export default function SuccessPage() {
             Your subscription is active. Welcome to LotScout — let&apos;s get to work.
           </p>
           <Link
-            href="/dashboard"
+            href="/marketplace"
             className="inline-block px-10 py-4 bg-emerald-600 text-white font-bold text-lg rounded-xl hover:bg-emerald-700 transition-colors shadow-lg"
           >
-            Go to Dashboard
+            Go to Marketplace
           </Link>
         </div>
       </main>

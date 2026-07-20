@@ -165,7 +165,7 @@ export default function CreateListingPage() {
 
       sessionStorage.setItem('listing_submitted', '1')
       setToast('Listing submitted! Redirecting…')
-      setTimeout(() => router.push('/dashboard'), 1500)
+      setTimeout(() => router.push('/marketplace'), 1500)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {

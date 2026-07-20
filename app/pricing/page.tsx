@@ -4,31 +4,37 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
 
-const GRID = { display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr' } as const;
+// Shared responsive grid: feature-label column + 3 tier columns.
+// fr units always fit the container width, so the table never overflows horizontally.
+const GRID_CLS = 'grid grid-cols-[1.5fr_1fr_1fr_1fr]';
 
+// Full feature list — every tier shows all rows; unavailable rows render dimmed.
 const FEATURES = [
-  { name: 'Land Marketplace Access',     standard: true,          priority: true,          exclusive: true          },
-  { name: 'Buyer Directory Access',      standard: true,          priority: true,          exclusive: true          },
-  { name: 'Custom Company Profile',      standard: true,          priority: true,          exclusive: true          },
-  { name: 'Lot Analysis Reports',        standard: true,          priority: true,          exclusive: true          },
-  { name: 'Property Analysis Reports',   standard: '5/month',     priority: '15/month',    exclusive: 'Unlimited'   },
-  { name: 'Additional Analysis Reports', standard: '$4.99 each',  priority: '$4.99 each',  exclusive: false         },
-  { name: 'Lot to Buyer Match AI',       standard: true,          priority: true,          exclusive: true          },
-  { name: 'Report Delivery',             standard: '24 hours',    priority: '24 hours',    exclusive: '15 min'      },
-  { name: 'Unlimited Listings',          standard: false,         priority: true,          exclusive: true          },
-  { name: 'Promoted Lot Requests',       standard: false,         priority: true,          exclusive: true          },
-  { name: 'Financing Partners Access',   standard: false,         priority: true,          exclusive: true          },
-  { name: '24/7 Support',               standard: false,         priority: true,          exclusive: true          },
-  { name: 'Hands-On Listing Support',   standard: false,         priority: false,         exclusive: true          },
+  { name: 'Unlimited Scout AI Search',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'Land Marketplace Access',                         standard: true,  priority: true,  exclusive: true  },
+  { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  exclusive: true  },
+  { name: 'Custom Company Profile',                          standard: true,  priority: true,  exclusive: true  },
+  { name: 'Buyer Directory Access',                          standard: true,  priority: true,  exclusive: true  },
+  { name: 'Property Analysis Reports',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  exclusive: true  },
+  { name: 'Unlimited Listings',                              standard: false, priority: true,  exclusive: true  },
+  { name: 'Promoted Lot Requests',                           standard: false, priority: true,  exclusive: true  },
+  { name: 'Financing Partners Access',                       standard: false, priority: true,  exclusive: true  },
+  { name: '24/7 Support',                                    standard: false, priority: true,  exclusive: true  },
+  { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, exclusive: true  },
+  { name: 'Early Access to New Listings',                    standard: false, priority: false, exclusive: true  },
+  { name: 'Early Access to New Buyers',                      standard: false, priority: false, exclusive: true  },
+  { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, exclusive: true  },
+  { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, exclusive: true  },
 ];
 
 function Check() {
   return (
     <span
-      className="material-symbols-outlined text-primary"
-      style={{ fontVariationSettings: "'FILL' 1" }}
+      className="inline-flex items-center justify-center rounded-full shrink-0"
+      style={{ backgroundColor: '#1D9E75', width: '18px', height: '18px' }}
     >
-      check_circle
+      <span className="material-symbols-outlined text-white" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>check</span>
     </span>
   );
 }
@@ -37,14 +43,55 @@ function Dash() {
   return <span className="text-outline-variant text-base">—</span>;
 }
 
+// Correct monthly prices. Annual = 9 months paid (3 months free = 25% off).
 const MONTHLY_PRICES   = { standard: 97,  priority: 197,  exclusive: 529  };
-const ANNUAL_EFFECTIVE = { standard: 73,  priority: 148,  exclusive: 397  };
-const ANNUAL_TOTALS    = { standard: 873, priority: 1773, exclusive: 4761 };
+const ANNUAL_EFFECTIVE = { standard: 73,  priority: 148,  exclusive: 397  }; // effective $/mo
+const ANNUAL_TOTALS    = { standard: 873, priority: 1773, exclusive: 4761 }; // billed /yr
+
+// Full feature list rendered in every mobile pricing card. Features not included
+// in the tier are dimmed (opacity-40) with a dash instead of a green check.
+function TierFeatures({ tier, dark = false }: { tier: 'standard' | 'priority' | 'exclusive'; dark?: boolean }) {
+  return (
+    <ul className="mt-5 space-y-2">
+      {FEATURES.map((f) => {
+        const included = f[tier] === true;
+        return (
+          <li
+            key={f.name}
+            className={`flex items-center gap-2 text-lg ${dark ? 'text-emerald-50' : 'text-on-surface'} ${included ? '' : 'opacity-40'}`}
+          >
+            {included ? (
+              <span className="inline-flex items-center justify-center rounded-full shrink-0" style={{ backgroundColor: '#1D9E75', width: '18px', height: '18px' }}>
+                <span className="material-symbols-outlined text-white" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>check</span>
+              </span>
+            ) : (
+              <span
+                className={`material-symbols-outlined text-base shrink-0 ${dark ? 'text-emerald-200' : 'text-secondary'}`}
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                remove
+              </span>
+            )}
+            {f.name}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const { tier: userTier } = useUserTier();
+
+  const prices = isAnnual ? ANNUAL_EFFECTIVE : MONTHLY_PRICES;
+
+  function billingSubtext(tier: keyof typeof ANNUAL_TOTALS) {
+    return isAnnual
+      ? `Billed $${ANNUAL_TOTALS[tier]}/yr`
+      : 'Billed monthly · no commitment';
+  }
 
   function getPriceKey(tier: string) {
     return `${tier}${isAnnual ? 'Annual' : 'Monthly'}`;
@@ -72,133 +119,171 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="bg-background text-on-surface antialiased min-h-screen flex flex-col">
+    <div className="bg-background text-on-surface antialiased min-h-screen flex flex-col overflow-x-hidden">
       <Header />
 
-      <main className="flex-grow pt-20 pb-4 px-4 sm:px-6 max-w-7xl mx-auto w-full">
-        {/* Page heading */}
-        <header className="mb-4">
-          <h1 className="font-headline text-3xl font-extrabold text-primary tracking-tighter leading-tight">
-            <span className="text-emerald-600">Pricing</span>
-          </h1>
-        </header>
+      <main className="flex-grow pt-20 pb-4 px-4 sm:px-6 max-w-6xl mx-auto w-full">
 
-        <div className="overflow-x-auto rounded-2xl">
-        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl shadow-primary/5 min-w-[560px]">
+        {/* ── Mobile stacked tier cards ── */}
+        <div className="md:hidden space-y-5">
+          {/* Billing toggle (shares isAnnual with the desktop table) */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full">
+              <button
+                onClick={() => setIsAnnual(false)}
+                className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${!isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary'}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setIsAnnual(true)}
+                className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary'}`}
+              >
+                Annual
+              </button>
+            </div>
+            <span className="text-emerald-700 text-xs font-bold text-center">Get 3 months free (25% off) with annual billing</span>
+          </div>
 
-          {/* ── Column headers ── */}
-          <div style={GRID} className="border-b border-outline-variant/10">
+          {/* STANDARD */}
+          <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
+            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Standard</p>
+            {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.standard}/mo</del>}
+            <div className="flex items-baseline gap-1 mb-0.5">
+              <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
+              <span className="text-secondary font-medium text-sm">/mo</span>
+            </div>
+            {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+            <p className="text-xs text-secondary/70 mb-4">{billingSubtext('standard')}</p>
+            <button
+              onClick={() => handleCheckout(getPriceKey('standard'))}
+              disabled={!!loading || userTier === 'standard'}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
+            >
+              {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
+            </button>
+            <TierFeatures tier="standard" />
+          </div>
+
+          {/* PRIORITY — Most Popular */}
+          <div className="rounded-3xl p-6 shadow-lg relative text-white" style={{ backgroundColor: '#1b4332' }}>
+            <span className="absolute top-5 right-5 bg-emerald-400 text-emerald-950 text-[10px] font-black px-3 py-1 rounded-full tracking-wide uppercase">Most Popular</span>
+            <p className="text-emerald-200 font-bold text-sm tracking-widest uppercase mb-2">Priority</p>
+            {isAnnual && <del className="text-emerald-200/40 text-sm font-medium">${MONTHLY_PRICES.priority}/mo</del>}
+            <div className="flex items-baseline gap-1 mb-0.5">
+              <span className="text-4xl font-extrabold text-white font-headline">${prices.priority}</span>
+              <span className="text-emerald-200 font-medium text-sm">/mo</span>
+            </div>
+            {isAnnual && <p className="text-xs text-emerald-300 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+            <p className="text-xs text-emerald-200/70 mb-4">{billingSubtext('priority')}</p>
+            <button
+              onClick={() => handleCheckout(getPriceKey('priority'))}
+              disabled={!!loading || userTier === 'priority'}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-emerald-900 text-emerald-200 cursor-default' : 'bg-emerald-300 text-emerald-950 hover:bg-emerald-200'}`}
+            >
+              {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
+            </button>
+            <TierFeatures tier="priority" dark />
+          </div>
+
+          {/* EXCLUSIVE */}
+          <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
+            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Enterprise</p>
+            {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.exclusive}/mo</del>}
+            <div className="flex items-baseline gap-1 mb-0.5">
+              <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
+              <span className="text-secondary font-medium text-sm">/mo</span>
+            </div>
+            {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+            <p className="text-xs text-secondary/70 mb-4">{billingSubtext('exclusive')}</p>
+            <button
+              onClick={() => handleCheckout(getPriceKey('exclusive'))}
+              disabled={!!loading || userTier === 'exclusive'}
+              className={`w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'hover:opacity-90'}`}
+              style={userTier === 'exclusive' ? undefined : { backgroundColor: '#1b4332' }}
+            >
+              {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
+            </button>
+            <TierFeatures tier="exclusive" />
+          </div>
+        </div>
+
+        {/* ── Desktop comparison table ── */}
+        <div className="hidden md:block bg-white rounded-2xl border border-outline-variant/15 overflow-hidden shadow-sm">
+
+          {/* ── Header row ── */}
+          <div className={`${GRID_CLS} border-b border-outline-variant/10`}>
 
             {/* Top-left: billing toggle */}
-            <div className="p-4 flex flex-col justify-center gap-2">
-              <div className="flex flex-col gap-1 self-start">
-                <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full self-start">
-                  <button
-                    onClick={() => setIsAnnual(false)}
-                    className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                      !isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
-                    }`}
-                  >
-                    Monthly
-                  </button>
-                  <button
-                    onClick={() => setIsAnnual(true)}
-                    className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                      isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
-                    }`}
-                  >
-                    Annual
-                  </button>
-                </div>
-                <span className="text-emerald-700 text-xs font-bold pl-1">Get 3 months free with annual billing</span>
+            <div className="p-5 flex flex-col justify-center gap-2">
+              <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full self-start">
+                <button
+                  onClick={() => setIsAnnual(false)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                    !isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setIsAnnual(true)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                    isAnnual ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-secondary hover:text-primary'
+                  }`}
+                >
+                  Annual
+                </button>
               </div>
+              <span className="text-green-700 text-xs font-bold pl-1">Get 3 months free (25% off) with annual billing</span>
             </div>
 
             {/* Standard */}
-            <div className="p-4 flex flex-col border-l border-outline-variant/10">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-secondary font-bold text-sm tracking-widest uppercase">Standard</span>
-                {userTier === 'standard' && (
-                  <span className="text-secondary text-xs font-semibold">Current Plan</span>
-                )}
+            <div className="p-5 flex flex-col border-l border-outline-variant/10">
+              <span className="text-secondary font-bold text-xs tracking-widest uppercase mb-2">Standard</span>
+              {isAnnual && <del className="text-secondary/40 text-sm font-medium mt-1">${MONTHLY_PRICES.standard}/mo</del>}
+              <div className="flex items-baseline gap-1 mb-0.5">
+                <span className="text-3xl font-extrabold text-primary font-headline">${prices.standard}</span>
+                <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              {isAnnual ? (
-                <>
-                  <div className="flex items-baseline gap-1">
-                    <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.standard}/mo</del>
-                  </div>
-                  <div className="flex items-baseline gap-1 mb-0.5">
-                    <span className="text-3xl font-extrabold text-primary font-headline">${ANNUAL_EFFECTIVE.standard}</span>
-                    <span className="text-secondary font-medium text-sm">/mo</span>
-                  </div>
-                  <p className="text-xs text-emerald-700 font-semibold mb-1">Save 25% · 3 months free</p>
-                  <p className="text-xs text-secondary/70 mb-2">Billed ${ANNUAL_TOTALS.standard}/yr</p>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-3xl font-extrabold text-primary font-headline">${MONTHLY_PRICES.standard}</span>
-                    <span className="text-secondary font-medium text-sm">/mo</span>
-                  </div>
-                  <p className="text-xs text-secondary/70 mb-2">Billed monthly · no commitment</p>
-                </>
-              )}
+              {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('standard')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading || userTier === 'standard'}
-                className={`mt-auto w-full py-2 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'standard'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    : 'border-2 border-primary text-primary hover:bg-primary/5'
                 }`}
               >
                 {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
               </button>
             </div>
 
-            {/* Priority */}
-            <div className="p-4 flex flex-col border-l border-outline-variant/10">
-              {/* Badge row — in normal flow, right-aligned, above tier name */}
-              <div className="flex justify-end mb-1">
+            {/* Priority — highlighted */}
+            <div className="p-5 flex flex-col border-l border-outline-variant/10 bg-primary-container/5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-primary font-bold text-xs tracking-widest uppercase">Priority</span>
                 {userTier === 'priority' ? (
                   <span className="text-secondary text-xs font-semibold">Current Plan</span>
                 ) : (
-                  <span className="inline-block rotate-6 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full tracking-wide shadow-sm">
-                    Most Popular
-                  </span>
+                  <span className="bg-green-700 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full tracking-wide uppercase">Most Popular</span>
                 )}
               </div>
-              <div className="mb-1 text-center">
-                <span className="text-secondary font-bold text-sm tracking-widest uppercase">Priority</span>
+              {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.priority}/mo</del>}
+              <div className="flex items-baseline gap-1 mb-0.5">
+                <span className="text-3xl font-extrabold text-primary font-headline">${prices.priority}</span>
+                <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              {isAnnual ? (
-                <>
-                  <div className="flex items-baseline gap-1 justify-center">
-                    <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.priority}/mo</del>
-                  </div>
-                  <div className="flex items-baseline gap-1 mb-0.5 justify-center">
-                    <span className="text-3xl font-extrabold text-primary font-headline">${ANNUAL_EFFECTIVE.priority}</span>
-                    <span className="text-secondary font-medium text-sm">/mo</span>
-                  </div>
-                  <p className="text-xs text-emerald-700 font-semibold mb-1 text-center">Save 25% · 3 months free</p>
-                  <p className="text-xs text-secondary/70 mb-2 text-center">Billed ${ANNUAL_TOTALS.priority}/yr</p>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-baseline gap-1 mb-1 justify-center">
-                    <span className="text-3xl font-extrabold text-primary font-headline">${MONTHLY_PRICES.priority}</span>
-                    <span className="text-secondary font-medium text-sm">/mo</span>
-                  </div>
-                  <p className="text-xs text-secondary/70 mb-2 text-center">Billed monthly · no commitment</p>
-                </>
-              )}
+              {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('priority')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
-                className={`mt-auto w-full py-2 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'priority'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    : 'bg-green-700 text-white hover:bg-green-800'
                 }`}
               >
                 {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
@@ -206,41 +291,22 @@ export default function PricingPage() {
             </div>
 
             {/* Exclusive */}
-            <div className="p-4 flex flex-col border-l border-outline-variant/10">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-secondary font-bold text-sm tracking-widest uppercase">Exclusive</span>
-                {userTier === 'exclusive' && (
-                  <span className="text-secondary text-xs font-semibold">Current Plan</span>
-                )}
+            <div className="p-5 flex flex-col border-l border-outline-variant/10">
+              <span className="text-secondary font-bold text-xs tracking-widest uppercase mb-2">Enterprise</span>
+              {isAnnual && <del className="text-secondary/40 text-sm font-medium mt-1">${MONTHLY_PRICES.exclusive}/mo</del>}
+              <div className="flex items-baseline gap-1 mb-0.5">
+                <span className="text-3xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
+                <span className="text-secondary font-medium text-sm">/mo</span>
               </div>
-              {isAnnual ? (
-                <>
-                  <div className="flex items-baseline gap-1">
-                    <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.exclusive}/mo</del>
-                  </div>
-                  <div className="flex items-baseline gap-1 mb-0.5">
-                    <span className="text-3xl font-extrabold text-primary font-headline">${ANNUAL_EFFECTIVE.exclusive}</span>
-                    <span className="text-secondary font-medium text-sm">/mo</span>
-                  </div>
-                  <p className="text-xs text-emerald-700 font-semibold mb-1">Save 25% · 3 months free</p>
-                  <p className="text-xs text-secondary/70 mb-2">Billed ${ANNUAL_TOTALS.exclusive}/yr</p>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-3xl font-extrabold text-primary font-headline">${MONTHLY_PRICES.exclusive}</span>
-                    <span className="text-secondary font-medium text-sm">/mo</span>
-                  </div>
-                  <p className="text-xs text-secondary/70 mb-2">Billed monthly · no commitment</p>
-                </>
-              )}
+              {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+              <p className="text-xs text-secondary/70 mb-4">{billingSubtext('exclusive')}</p>
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading || userTier === 'exclusive'}
-                className={`mt-auto w-full py-2 px-4 font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'exclusive'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    : 'border-2 border-primary text-primary hover:bg-primary/5'
                 }`}
               >
                 {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
@@ -252,24 +318,23 @@ export default function PricingPage() {
           {FEATURES.map((feature, fi) => {
             const cell = (val: boolean | string) =>
               typeof val === 'string'
-                ? <span className="text-xs font-bold text-primary">{val}</span>
+                ? <span className="text-sm font-bold text-primary">{val}</span>
                 : val ? <Check /> : <Dash />;
             return (
               <div
                 key={fi}
-                style={GRID}
-                className={fi > 0 ? 'border-t border-outline-variant/5' : 'border-t border-outline-variant/10'}
+                className={`${GRID_CLS} border-t border-outline-variant/5 hover:bg-surface-container-lowest transition-colors`}
               >
-                <div className="py-0.5 pl-8 pr-4 text-sm text-secondary flex items-center">
+                <div className="py-2 pl-8 pr-4 text-lg font-medium text-on-surface flex items-center">
                   {feature.name}
                 </div>
-                <div className="py-0.5 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
                   {cell(feature.standard)}
                 </div>
-                <div className="py-0.5 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10 bg-primary-container/5">
                   {cell(feature.priority)}
                 </div>
-                <div className="py-0.5 px-4 flex justify-center items-center border-l border-outline-variant/10">
+                <div className="py-2 px-4 flex justify-center items-center border-l border-outline-variant/10">
                   {cell(feature.exclusive)}
                 </div>
               </div>
@@ -277,7 +342,21 @@ export default function PricingPage() {
           })}
 
         </div>
+
+        {/* Enterprise / custom solution */}
+        <div className="mt-8 bg-surface-container-low rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div>
+            <h3 className="font-headline text-lg font-bold text-primary mb-1">Need a custom solution?</h3>
+            <p className="text-secondary text-sm">Large brokerage or enterprise team? Let&apos;s build a plan that fits your volume.</p>
+          </div>
+          <a
+            href="mailto:support@lotscout.com"
+            className="shrink-0 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all active:scale-95"
+          >
+            Contact Sales
+          </a>
         </div>
+
       </main>
 
       {/* Footer */}
