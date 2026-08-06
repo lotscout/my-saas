@@ -292,7 +292,7 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 3: Marketplace Preview */}
-      <section className="py-16 bg-surface px-4 sm:px-8">
+      <section id="marketplace" className="py-16 bg-surface px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-4">A Glimpse of What&apos;s Inside</h2>
           <p className="text-secondary text-base sm:text-xl mb-8 sm:mb-12">All properties on LotScout are off-market listings you won&apos;t find on Zillow or Realtor.com.</p>
@@ -386,7 +386,7 @@ export default function HomePage() {
                   <span>Agricultural / Conservation</span>
                 </div>
               </div>
-              <button className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">View Profile</button>
+              <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
             </div>
 
             {/* Buyer Card 2 */}
@@ -415,7 +415,7 @@ export default function HomePage() {
                   <span>Light Industrial / Residential</span>
                 </div>
               </div>
-              <button className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">View Profile</button>
+              <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
             </div>
 
             {/* Buyer Card 3 */}
@@ -444,7 +444,7 @@ export default function HomePage() {
                   <span>Timberland / Recreational</span>
                 </div>
               </div>
-              <button className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">View Profile</button>
+              <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
             </div>
 
             {/* Card 4 - locked */}
@@ -470,7 +470,7 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 6: Who It's For */}
-      <section className="py-16 bg-surface-container-low px-4 sm:px-8">
+      <section id="platform" className="py-16 bg-surface-container-low px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-3">Built for Both Sides of the Deal</h2>
@@ -522,7 +522,7 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 7: Pricing */}
-      <section className="py-16 bg-surface px-4 sm:px-8">
+      <section id="pricing" className="py-16 bg-surface px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary mb-8 sm:mb-10 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
