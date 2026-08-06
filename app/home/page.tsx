@@ -245,15 +245,15 @@ export default function HomePage() {
           <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center">
             {/* Left column: hero text */}
             <div>
-              <h1 className="font-headline text-3xl sm:text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
+              <h1 className="font-headline text-2xl sm:text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
                 America&apos;s #1 Platform for Off-Market Land Deals.
               </h1>
               <p className="font-body text-lg text-on-primary-container leading-relaxed mb-8 max-w-2xl">
                 LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.
               </p>
-              <div className="flex flex-wrap gap-4 mb-10">
-                <Link href="/sign-up" className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
-                <Link href="/sign-up" className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
+              <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                <Link href="/sign-up" className="w-full sm:w-auto text-center bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
+                <Link href="/sign-up" className="w-full sm:w-auto text-center border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
               </div>
             </div>
             {/* Right column: interactive map */}
@@ -276,7 +276,7 @@ export default function HomePage() {
 
       {/* SECTION 2: Social Proof Stats */}
       <section className="py-16 bg-primary text-white px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {[
             { stat: '92%',     label: 'Fast Closing Rate' },
             { stat: '$4.32M',  label: 'Commission Saved' },
@@ -537,7 +537,7 @@ export default function HomePage() {
               <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
             {/* Priority */}
-            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative">
+            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative mt-6 md:mt-0">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
               <div className="flex items-baseline gap-1 mb-4">
@@ -574,12 +574,12 @@ export default function HomePage() {
           <p className="text-on-primary-container text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
             LotScout connects serious buyers and sellers of off-market land directly. No realtors. No commission. No waiting on the MLS. Just the right match at the right time.
           </p>
-          <Link href="/sign-up" className="inline-block bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors active:scale-95">Get Started Free</Link>
+          <Link href="/sign-up" className="block sm:inline-block w-full sm:w-auto bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors active:scale-95 text-center">Get Started Free</Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-emerald-950 w-full py-12 px-8">
+      <footer className="bg-emerald-950 w-full py-12 px-4 sm:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto gap-8 font-body text-sm tracking-normal">
           <div className="text-xl font-bold text-emerald-50">LotScout</div>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
