@@ -27,7 +27,17 @@ export default function SignInPage() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
-      setError('Invalid email or password');
+      const authError = signInError as { status?: number; code?: string; message?: string };
+      const isInvalidCredentials =
+        authError.status === 400 ||
+        authError.code === 'invalid_credentials' ||
+        authError.message?.toLowerCase().includes('invalid login credentials');
+
+      setError(
+        isInvalidCredentials
+          ? 'Invalid email or password.'
+          : 'Login service is temporarily unavailable. Please try again in a few minutes.'
+      );
       setLoading(false);
       return;
     }
