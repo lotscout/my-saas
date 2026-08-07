@@ -121,8 +121,33 @@ function fmtLocation(city: string | null, county: string | null, state: string |
   return state || 'Location not specified';
 }
 
-function shortUseCase(req: BuyerRequest): string | null {
-  return req.use_case ? req.use_case.split(' — ')[0].trim() : null;
+function fmtZoning(zoning: string[] | null): string {
+  if (!zoning?.length) return 'Any zoning';
+  return zoning.slice(0, 2).join(', ');
+}
+
+function fmtLotSize(req: BuyerRequest): string {
+  if (req.lot_size_label) return req.lot_size_label;
+  const min = req.min_acreage ?? req.lot_size_min;
+  const max = req.max_acreage ?? req.lot_size_max;
+  const f = (n: number) => `${Number.isInteger(n) ? n : Number(n.toFixed(1))} acres`;
+  if (min && max) return `${f(min)} – ${f(max)}`;
+  if (min) return `${f(min)}+`;
+  if (max) return `Up to ${f(max)}`;
+  return 'Flexible';
+}
+
+function DetailGrid({ items }: { items: { label: string; value: string; primary?: boolean }[] }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 border-y border-outline-variant/15 py-5">
+      {items.map(item => (
+        <div key={item.label} className="min-w-0">
+          <p className={`font-headline font-extrabold text-primary leading-tight ${item.primary ? 'text-2xl' : 'text-xl'}`}>{item.label}</p>
+          <p className="text-base font-semibold text-secondary mt-1 truncate">{item.value}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function applyBudgetFilter(req: BuyerRequest, f: string): boolean {
@@ -159,8 +184,7 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
   const email = req.contact_email;
   const reachable = !!(phone || email);
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
-  const budget = fmtBudget(req.budget_min, req.budget_max);
-  const useCase = shortUseCase(req);
+  const timeline = req.timeline ? fmtTimeline(req.timeline) : 'Flexible';
 
   return (
     <div
@@ -174,24 +198,13 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
         )}
       </div>
 
-      <div className="space-y-4 divide-y divide-outline-variant/15">
-        <div className="pb-4">
-          <p className="font-headline text-2xl font-extrabold text-primary leading-tight">Budget</p>
-          <p className="text-lg font-semibold text-secondary mt-1">{budget}</p>
-        </div>
-        <div className="pt-4 space-y-4">
-          <div>
-            <p className="font-headline text-xl font-extrabold text-primary leading-tight">Location</p>
-            <p className="text-base font-semibold text-secondary mt-1 truncate">{location}</p>
-          </div>
-          {useCase && (
-            <div>
-              <p className="font-headline text-xl font-extrabold text-primary leading-tight">Use Case</p>
-              <p className="text-base font-semibold text-secondary mt-1 capitalize">{useCase}</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <DetailGrid items={[
+        { label: 'Budget', value: fmtBudget(req.budget_min, req.budget_max), primary: true },
+        { label: 'Timeline', value: timeline },
+        { label: 'Zoning', value: fmtZoning(req.zoning_preference) },
+        { label: 'Location', value: location },
+        { label: 'Lot Size', value: fmtLotSize(req) },
+      ]} />
 
       {website && (
         <a
@@ -234,8 +247,7 @@ function RequestCard({ req }: { req: BuyerRequest }) {
   const router = useRouter();
   const name = getBuyerName(req);
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
-  const timeline = req.timeline ? fmtTimeline(req.timeline) : null;
-  const useCase = req.use_case ? req.use_case.split(' — ')[0].trim() : null;
+  const timeline = req.timeline ? fmtTimeline(req.timeline) : 'Flexible';
 
   return (
     <div
@@ -245,36 +257,13 @@ function RequestCard({ req }: { req: BuyerRequest }) {
       <div className="min-w-0 border-b border-outline-variant/15 pb-4">
         <p className="font-headline font-extrabold text-primary text-3xl leading-tight line-clamp-2">{name}</p>
       </div>
-      <div>
-        <p className="font-headline text-2xl font-extrabold text-primary leading-tight">Budget</p>
-        <p className="text-lg font-semibold text-secondary mt-1">{fmtBudget(req.budget_min, req.budget_max)}</p>
-      </div>
-      <div>
-        <p className="font-headline text-xl font-extrabold text-primary leading-tight">Location</p>
-        <p className="text-base font-semibold text-secondary mt-1 truncate">{location}</p>
-      </div>
-      {(primaryCity(req) || req.lot_size_label) && (
-        <div>
-          <p className="font-headline text-xl font-extrabold text-primary leading-tight">Property Type</p>
-          <p className="text-base font-semibold text-secondary mt-1 truncate">
-            {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
-          </p>
-        </div>
-      )}
-      <div className="space-y-4 text-base font-semibold text-secondary mt-auto">
-        {useCase && (
-          <div>
-            <p className="font-headline text-xl font-extrabold text-primary leading-tight">Use Case</p>
-            <p className="text-base font-semibold text-secondary mt-1 capitalize">{useCase}</p>
-          </div>
-        )}
-        {timeline && (
-          <div>
-            <p className="font-headline text-xl font-extrabold text-primary leading-tight">Timeline</p>
-            <p className="text-base font-semibold text-secondary mt-1">{timeline}</p>
-          </div>
-        )}
-      </div>
+      <DetailGrid items={[
+        { label: 'Budget', value: fmtBudget(req.budget_min, req.budget_max), primary: true },
+        { label: 'Timeline', value: timeline },
+        { label: 'Zoning', value: fmtZoning(req.zoning_preference) },
+        { label: 'Location', value: location },
+        { label: 'Lot Size', value: fmtLotSize(req) },
+      ]} />
       <div className="flex items-center justify-end text-sm pt-1 border-t border-outline-variant/15">
         <span className="material-symbols-outlined text-2xl text-[#059669] group-hover:translate-x-1 transition-transform">arrow_forward</span>
       </div>
