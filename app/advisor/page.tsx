@@ -29,7 +29,6 @@ const SUGGESTIONS = [
   'How do I evaluate an investment property?',
   'What should builders know about the current market?',
   'Where are the best markets to invest in 2026?',
-  'How do I price my property to sell?',
 ];
 
 const DISCLAIMER = 'Educational information only, not financial, legal, or investment advice.';
@@ -548,8 +547,7 @@ export default function AdvisorPage() {
                           key={s}
                           onClick={() => send(s)}
                           disabled={loading}
-                          className="text-base font-semibold rounded-full px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50"
-                          style={{ backgroundColor: CHIP_BG, color: INK }}
+                          className="text-base font-normal rounded-full px-4 py-2 border border-black/25 bg-white text-black transition-colors hover:bg-surface-container-low disabled:opacity-50"
                         >
                           {s}
                         </button>
