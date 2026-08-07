@@ -325,6 +325,57 @@ function DirectoryHomeCard({ icon, title, description, action, accent = 'primary
   );
 }
 
+function LoadingCardGrid({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="bg-white rounded-2xl border border-outline-variant/15 p-6 animate-pulse min-h-[230px] shadow-sm">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-surface-container-high" />
+            <div className="space-y-3 flex-1 pt-1">
+              <div className="h-4 bg-surface-container-high rounded-full w-36" />
+              <div className="h-3 bg-surface-container-high rounded-full w-24" />
+            </div>
+          </div>
+          <div className="rounded-xl bg-surface-container-low p-4 mb-5 space-y-3">
+            <div className="h-3 bg-surface-container-high rounded-full w-20" />
+            <div className="h-4 bg-surface-container-high rounded-full w-32" />
+          </div>
+          <div className="flex gap-2 mb-6">
+            <div className="h-8 bg-surface-container-high rounded-full w-28" />
+            <div className="h-8 bg-surface-container-high rounded-full w-20" />
+          </div>
+          <div className="h-px bg-surface-container-high mb-4" />
+          <div className="h-3 bg-surface-container-high rounded-full w-32" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({ icon, title, subtitle, actionLabel, onAction }: {
+  icon: string;
+  title: string;
+  subtitle: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="bg-white rounded-[1.75rem] border border-outline-variant/15 shadow-sm text-center py-16 px-6 text-secondary">
+      <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mb-5">
+        <span className="material-symbols-outlined text-4xl text-primary/45">{icon}</span>
+      </div>
+      <p className="font-headline text-2xl font-extrabold text-primary mb-2">{title}</p>
+      <p className="text-base max-w-md mx-auto leading-relaxed">{subtitle}</p>
+      {actionLabel && onAction && (
+        <button onClick={onAction} className="mt-6 inline-flex items-center justify-center rounded-xl bg-primary text-white px-5 py-3 text-sm font-extrabold hover:bg-primary/90 transition-colors">
+          {actionLabel}
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── Sub-view back header ─────────────────────────────────────────────────────
 
 function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitle: string; count?: number; onBack: () => void }) {
@@ -694,17 +745,15 @@ export default function BuyerDirectoryPage() {
 
 
                   {nationalLoading ? (
-                    <div className="space-y-3">
-                      {[1,2,3,4,5].map(i => (
-                        <div key={i} className="bg-surface-container-low rounded-xl h-16 animate-pulse" />
-                      ))}
-                    </div>
+                    <LoadingCardGrid />
                   ) : filteredNational.length === 0 ? (
-                    <div className="text-center py-16 text-secondary">
-                      <span className="material-symbols-outlined text-5xl mb-3 block text-primary/20">search_off</span>
-                      <p className="font-semibold">No buyers found</p>
-                      <p className="text-sm mt-1">Try adjusting your search or filters</p>
-                    </div>
+                    <EmptyState
+                      icon="search_off"
+                      title="No buyers found"
+                      subtitle="Try adjusting your search or clearing the filters to broaden the buyer pool."
+                      actionLabel="Clear filters"
+                      onAction={() => { setGlobalSearch(''); setNationalUseCase(''); setNationalRoadAccess(''); }}
+                    />
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
                       {filteredNational.map((req) => (
@@ -747,7 +796,9 @@ export default function BuyerDirectoryPage() {
                     </div>
                   </div>
 
-                  {stateSearched && !stateLoading && (() => {
+                  {stateLoading ? (
+                    <LoadingCardGrid count={3} />
+                  ) : stateSearched && (() => {
                     const filteredState = stateRoadAccess
                       ? stateBuyers.filter(r => {
                           const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
@@ -776,11 +827,13 @@ export default function BuyerDirectoryPage() {
                           )}
                         </div>
                         {filteredState.length === 0 ? (
-                          <div className="text-center py-16 text-secondary">
-                            <span className="material-symbols-outlined text-5xl mb-3 block text-primary/20">location_off</span>
-                            <p className="font-semibold">{stateBuyers.length === 0 ? `No buyers found in ${stateSearched}` : 'No buyers match these filters'}</p>
-                            <p className="text-sm mt-1">Try a different state or clear your filters</p>
-                          </div>
+                          <EmptyState
+                            icon="location_off"
+                            title={stateBuyers.length === 0 ? `No buyers found in ${stateSearched}` : 'No buyers match these filters'}
+                            subtitle="Try a different state or clear the road access filter to widen the results."
+                            actionLabel={stateRoadAccess ? 'Clear filter' : undefined}
+                            onAction={stateRoadAccess ? () => setStateRoadAccess('') : undefined}
+                          />
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
                             {filteredState.map((req) => (
@@ -875,24 +928,15 @@ export default function BuyerDirectoryPage() {
                   </div>
 
                   {activeLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {[1,2,3].map(i => (
-                        <div key={i} className="bg-surface-container-low rounded-2xl p-5 animate-pulse space-y-4">
-                          <div className="h-4 bg-surface-container-high rounded w-32" />
-                          <div className="h-3 bg-surface-container-high rounded w-24" />
-                          <div className="mt-4 space-y-2">
-                            <div className="h-2 bg-surface-container-high rounded w-full" />
-                            <div className="h-2 bg-surface-container-high rounded w-3/4" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <LoadingCardGrid />
                   ) : filteredActiveBR.length === 0 ? (
-                    <div className="text-center py-16 text-secondary">
-                      <span className="material-symbols-outlined text-5xl mb-3 block text-primary/20">hourglass_empty</span>
-                      <p className="font-semibold">No active buyers match your filters</p>
-                      <p className="text-sm mt-1">Try clearing your filters or check back soon</p>
-                    </div>
+                    <EmptyState
+                      icon="hourglass_empty"
+                      title="No active buyers match your filters"
+                      subtitle="Clear your filters or check back soon for buyers with fresh purchase intent."
+                      actionLabel="Clear filters"
+                      onAction={() => { setActiveBrState(''); setActiveBrBudget(''); setActiveBrAcreage(''); setActiveBrZoning(''); setActiveBrRoadAccess(''); setActiveBrSearch(''); }}
+                    />
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                       {filteredActiveBR.map(req => (
@@ -969,33 +1013,21 @@ export default function BuyerDirectoryPage() {
               </div>
 
               {brLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1,2,3].map(i => (
-                    <div key={i} className="bg-surface-container-low rounded-2xl p-6 animate-pulse space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-surface-container-high" />
-                        <div className="space-y-2 flex-1">
-                          <div className="h-3 bg-surface-container-high rounded w-24" />
-                          <div className="h-2 bg-surface-container-high rounded w-16" />
-                        </div>
-                      </div>
-                      <div className="h-2 bg-surface-container-high rounded w-full" />
-                      <div className="h-2 bg-surface-container-high rounded w-3/4" />
-                    </div>
-                  ))}
-                </div>
+                <LoadingCardGrid />
               ) : buyerRequests.length === 0 ? (
-                <div className="text-center py-24 text-secondary">
-                  <span className="material-symbols-outlined text-6xl mb-4 block text-primary/20">person_search</span>
-                  <p className="font-headline text-2xl font-bold text-primary mb-2">No buyer requests yet</p>
-                  <p className="text-sm">Be the first to post your buying criteria and connect with sellers</p>
-                </div>
+                <EmptyState
+                  icon="person_search"
+                  title="No buyer requests yet"
+                  subtitle="Be the first to post buying criteria and connect with motivated sellers."
+                />
               ) : filteredBR.length === 0 ? (
-                <div className="text-center py-16 text-secondary">
-                  <span className="material-symbols-outlined text-5xl mb-4 block text-primary/20">filter_list_off</span>
-                  <p className="font-headline text-xl font-bold text-primary mb-2">No results match your filters</p>
-                  <p className="text-sm">Try adjusting your search or clearing filters</p>
-                </div>
+                <EmptyState
+                  icon="filter_list_off"
+                  title="No results match your filters"
+                  subtitle="Try clearing filters or broadening your search to see more active buyer requests."
+                  actionLabel="Clear filters"
+                  onAction={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBrSearch(''); setGlobalSearch(''); }}
+                />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredBR.map(req => (
