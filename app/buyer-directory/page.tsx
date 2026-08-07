@@ -618,20 +618,7 @@ export default function BuyerDirectoryPage() {
                 Find verified land buyers, understand what they want, and move faster when a property matches their criteria.
               </p>
             </div>
-            <div className="relative grid grid-cols-2 gap-3 min-w-full sm:min-w-[360px] lg:self-end">
-              <div className="rounded-2xl bg-primary text-white p-5 shadow-lg shadow-primary/10">
-                <p className="text-3xl font-headline font-extrabold leading-none">3</p>
-                <p className="text-xs font-bold uppercase tracking-wider text-white/75 mt-2">Buyer views</p>
-              </div>
-              <div className="rounded-2xl bg-white border border-outline-variant/15 p-5 shadow-sm">
-                <p className="text-3xl font-headline font-extrabold text-primary leading-none">30d</p>
-                <p className="text-xs font-bold uppercase tracking-wider text-secondary mt-2">Active intent</p>
-              </div>
-              <div className="col-span-2 rounded-2xl bg-emerald-50 border border-emerald-100 p-5">
-                <p className="text-sm font-extrabold text-emerald-800">Premium seller workflow</p>
-                <p className="text-sm text-emerald-700/80 mt-1">Search, filter, review, then open the full buyer profile.</p>
-              </div>
-            </div>
+
           </section>
 
           {/* Search + tabs */}
