@@ -10,7 +10,7 @@ import { getBuyerName } from '@/lib/getBuyerName';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type MainTab = 'directory' | 'requests';
-type DirectoryView = 'grid' | 'national' | 'by-state' | 'active';
+type DirectoryView = 'national' | 'by-state' | 'active';
 
 interface BuyerRequest {
   id: string;
@@ -357,17 +357,19 @@ function EmptyState({ icon, title, subtitle, actionLabel, onAction }: {
 
 // ─── Sub-view back header ─────────────────────────────────────────────────────
 
-function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitle: string; count?: number; onBack: () => void }) {
+function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitle: string; count?: number; onBack?: () => void }) {
   return (
     <div className="bg-white rounded-[1.75rem] border border-outline-variant/15 shadow-sm p-6 sm:p-7 flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-7">
       <div>
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-secondary hover:text-primary text-sm font-bold mb-4 transition-colors"
-        >
-          <span className="material-symbols-outlined text-base">arrow_back</span>
-          Back to Directory
-        </button>
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-secondary hover:text-primary text-sm font-bold mb-4 transition-colors"
+          >
+            <span className="material-symbols-outlined text-base">arrow_back</span>
+            Back to Directory
+          </button>
+        )}
         <h2 className="font-headline text-3xl sm:text-4xl font-extrabold text-primary tracking-tight">{title}</h2>
         <p className="text-secondary text-base mt-2 max-w-2xl leading-relaxed">{subtitle}</p>
       </div>
@@ -385,7 +387,7 @@ function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitl
 export default function BuyerDirectoryPage() {
   // ── Navigation state ──
   const [tab, setTab] = useState<MainTab>('directory');
-  const [view, setView] = useState<DirectoryView>('grid');
+  const [view] = useState<DirectoryView>('active');
 
   // ── Global search ──
   const [globalSearch, setGlobalSearch] = useState('');
@@ -522,22 +524,8 @@ export default function BuyerDirectoryPage() {
 
   // ── Helpers ──
 
-  function openView(v: DirectoryView) {
-    setGlobalSearch('');
-    setView(v);
-  }
-
-  function backToGrid() {
-    setView('grid');
-    setGlobalSearch('');
-  }
-
   const searchPlaceholder = tab === 'requests'
     ? 'Search by state, county, or zip code...'
-    : view === 'grid'
-    ? 'Search buyers by name, company, state, or use case...'
-    : view === 'national'
-    ? 'Search buyers by name, company, state, or use case...'
     : view === 'active'
     ? 'Filter active buyers by name, company, or state...'
     : 'Search buyers by name, company, state, or use case...';
@@ -545,6 +533,7 @@ export default function BuyerDirectoryPage() {
   const handleSearchChange = (val: string) => {
     setGlobalSearch(val);
     if (tab === 'requests') setBrSearch(val);
+    else setActiveBrSearch(val);
   };
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -606,12 +595,12 @@ export default function BuyerDirectoryPage() {
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
               <input
                 type="text"
-                value={globalSearch}
+                value={tab === 'requests' ? brSearch : activeBrSearch}
                 onChange={e => handleSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
                 className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-2xl pl-12 pr-10 py-4 text-base font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
               />
-              {globalSearch && (
+              {(tab === 'requests' ? brSearch : activeBrSearch) && (
                 <button
                   onClick={() => handleSearchChange('')}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface"
@@ -625,176 +614,6 @@ export default function BuyerDirectoryPage() {
           {/* ── DIRECTORY TAB ── */}
           {tab === 'directory' && (
             <>
-              {/* Grid view — 3 category cards */}
-              {view === 'grid' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
-                  <DirectoryHomeCard
-                    icon="language"
-                    title="Top National Buyers"
-                    description="Browse high-volume land buyers actively purchasing across multiple US markets."
-                    action="Browse buyers"
-                    onClick={() => openView('national')}
-                  />
-                  <DirectoryHomeCard
-                    icon="map"
-                    title="Top Buyers by State"
-                    description="Pick a state and surface the most relevant buyers ranked by budget and activity."
-                    action="Select a state"
-                    onClick={() => openView('by-state')}
-                  />
-                  <DirectoryHomeCard
-                    icon="bolt"
-                    title="Active Buyers"
-                    description="Focus on buyers with near-term purchase intent and a timeline under 30 days."
-                    action="View active buyers"
-                    accent="emerald"
-                    onClick={() => openView('active')}
-                  />
-                </div>
-              )}
-
-              {/* National buyers view */}
-              {view === 'national' && (
-                <div>
-                  <ViewHeader
-                    title="Top National Buyers"
-                    subtitle="Highest-volume land buyers ranked by budget, actively purchasing across the US"
-                    count={filteredNational.length}
-                    onBack={backToGrid}
-                  />
-
-                  {/* Filters row */}
-                  <div className={FILTER_BAR_CLS}>
-                    <select value={nationalUseCase} onChange={e => setNationalUseCase(e.target.value)} className={SELECT_CLS}>
-                      <option value="">All Use Cases</option>
-                      <option value="row crop">Row Crop</option>
-                      <option value="livestock">Livestock/Ranching</option>
-                      <option value="recreational">Recreational</option>
-                      <option value="residential development">Residential Development</option>
-                      <option value="commercial development">Commercial Development</option>
-                      <option value="conservation">Conservation</option>
-                      <option value="investment">Investment</option>
-                    </select>
-                    <select value={nationalRoadAccess} onChange={e => setNationalRoadAccess(e.target.value)} className={SELECT_CLS}>
-                      <option value="">Road Access</option>
-                      <option value="Paved Road">Paved Road</option>
-                      <option value="Gravel Road">Gravel Road</option>
-                      <option value="Dirt Road">Dirt Road</option>
-                      <option value="Private Road">Private Road</option>
-                      <option value="Easement">Easement</option>
-                      <option value="No Road Access">No Road Access</option>
-                    </select>
-                    {(nationalUseCase || nationalRoadAccess) && (
-                      <button onClick={() => { setNationalUseCase(''); setNationalRoadAccess(''); }} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">close</span> Clear
-                      </button>
-                    )}
-                  </div>
-
-
-                  {nationalLoading ? (
-                    <LoadingCardGrid />
-                  ) : filteredNational.length === 0 ? (
-                    <EmptyState
-                      icon="search_off"
-                      title="No buyers found"
-                      subtitle="Try adjusting your search or clearing the filters to broaden the buyer pool."
-                      actionLabel="Clear filters"
-                      onAction={() => { setGlobalSearch(''); setNationalUseCase(''); setNationalRoadAccess(''); }}
-                    />
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
-                      {filteredNational.map((req) => (
-                        <DirectoryCard key={req.id} req={req} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* By-state view */}
-              {view === 'by-state' && (
-                <div>
-                  <ViewHeader
-                    title="Top Buyers by State"
-                    subtitle="Find the most active buyers in any state, ranked by budget"
-                    count={stateSearched ? stateBuyers.length : undefined}
-                    onBack={backToGrid}
-                  />
-
-                  {/* State selector */}
-                  <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/15 p-6 mb-6">
-                    <p className="text-sm font-semibold text-on-surface mb-3">Select a state to see top buyers</p>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <select
-                        value={selectedState}
-                        onChange={e => setSelectedState(e.target.value)}
-                        className="flex-1 bg-white border border-outline-variant/25 rounded-xl px-4 py-3 text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all shadow-sm"
-                      >
-                        <option value="">— Choose a state —</option>
-                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      <button
-                        onClick={() => loadStateBuyers(selectedState)}
-                        disabled={!selectedState || stateLoading}
-                        className="bg-primary text-white px-6 py-3 rounded-xl font-extrabold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                      >
-                        {stateLoading ? 'Searching…' : 'Show Top Buyers'}
-                      </button>
-                    </div>
-                  </div>
-
-                  {stateLoading ? (
-                    <LoadingCardGrid count={3} />
-                  ) : stateSearched && (() => {
-                    const filteredState = stateRoadAccess
-                      ? stateBuyers.filter(r => {
-                          const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
-                          return roads.some(rd => rd.toLowerCase().includes(stateRoadAccess.toLowerCase()));
-                        })
-                      : stateBuyers;
-                    return (
-                      <>
-                        <div className={FILTER_BAR_CLS}>
-                          <p className="text-sm text-secondary">
-                            Showing top {filteredState.length} buyer{filteredState.length !== 1 ? 's' : ''} in <strong className="text-on-surface">{stateSearched}</strong>
-                          </p>
-                          <select value={stateRoadAccess} onChange={e => setStateRoadAccess(e.target.value)} className={SELECT_CLS}>
-                            <option value="">Road Access</option>
-                            <option value="Paved Road">Paved Road</option>
-                            <option value="Gravel Road">Gravel Road</option>
-                            <option value="Dirt Road">Dirt Road</option>
-                            <option value="Private Road">Private Road</option>
-                            <option value="Easement">Easement</option>
-                            <option value="No Road Access">No Road Access</option>
-                          </select>
-                          {stateRoadAccess && (
-                            <button onClick={() => setStateRoadAccess('')} className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
-                              <span className="material-symbols-outlined text-sm">close</span> Clear
-                            </button>
-                          )}
-                        </div>
-                        {filteredState.length === 0 ? (
-                          <EmptyState
-                            icon="location_off"
-                            title={stateBuyers.length === 0 ? `No buyers found in ${stateSearched}` : 'No buyers match these filters'}
-                            subtitle="Try a different state or clear the road access filter to widen the results."
-                            actionLabel={stateRoadAccess ? 'Clear filter' : undefined}
-                            onAction={stateRoadAccess ? () => setStateRoadAccess('') : undefined}
-                          />
-                        ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
-                            {filteredState.map((req) => (
-                              <DirectoryCard key={req.id} req={req} />
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-                </div>
-              )}
-
               {/* Active buyers view */}
               {view === 'active' && (
                 <div>
@@ -802,25 +621,7 @@ export default function BuyerDirectoryPage() {
                     title="Active Buyers"
                     subtitle="Buyers actively seeking land with a purchase timeline under 30 days"
                     count={filteredActiveBR.length}
-                    onBack={backToGrid}
                   />
-
-                  {/* Search bar */}
-                  <div className="relative mb-5">
-                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
-                    <input
-                      type="text"
-                      value={activeBrSearch}
-                      onChange={e => setActiveBrSearch(e.target.value)}
-                      placeholder="Search by state, county, or zip code..."
-                      className="w-full bg-white border border-outline-variant/25 rounded-2xl pl-12 pr-10 py-4 text-base font-medium text-on-surface placeholder:text-secondary shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                    />
-                    {activeBrSearch && (
-                      <button onClick={() => setActiveBrSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
-                        <span className="material-symbols-outlined text-lg">close</span>
-                      </button>
-                    )}
-                  </div>
 
                   {/* Filters */}
                   <div className={FILTER_BAR_CLS}>
