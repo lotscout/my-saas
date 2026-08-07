@@ -221,9 +221,8 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
       ) : (
         <p className="mt-auto text-sm font-semibold text-secondary/80 border-t border-outline-variant/15 pt-4">Contact via platform</p>
       )}
-      <div className="flex items-center justify-between text-primary font-extrabold text-sm pt-1">
-        <span>View Buyer Profile</span>
-        <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      <div className="flex items-center justify-end text-sm pt-1">
+        <span className="material-symbols-outlined text-2xl text-[#059669] group-hover:translate-x-1 transition-transform">arrow_forward</span>
       </div>
     </div>
   );
@@ -276,9 +275,8 @@ function RequestCard({ req }: { req: BuyerRequest }) {
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between text-primary font-extrabold text-sm pt-1 border-t border-outline-variant/15">
-        <span>View Request</span>
-        <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      <div className="flex items-center justify-end text-sm pt-1 border-t border-outline-variant/15">
+        <span className="material-symbols-outlined text-2xl text-[#059669] group-hover:translate-x-1 transition-transform">arrow_forward</span>
       </div>
     </div>
   );
