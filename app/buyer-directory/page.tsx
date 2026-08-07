@@ -174,17 +174,22 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
         )}
       </div>
 
-      <div className="space-y-3">
-        <div>
-          <p className="text-xs font-extrabold uppercase tracking-wider text-secondary mb-1">Target Budget</p>
-          <p className="text-2xl font-extrabold text-on-surface">{budget}</p>
+      <div className="space-y-4 divide-y divide-outline-variant/15">
+        <div className="pb-4">
+          <p className="font-headline text-2xl font-extrabold text-primary leading-tight">Budget</p>
+          <p className="text-lg font-semibold text-secondary mt-1">{budget}</p>
         </div>
-        <div className="space-y-2 text-base font-semibold text-secondary">
-          <p className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-lg text-primary">location_on</span>
-            <span className="truncate">{location}</span>
-          </p>
-          {useCase && <p className="capitalize">{useCase}</p>}
+        <div className="pt-4 space-y-4">
+          <div>
+            <p className="font-headline text-xl font-extrabold text-primary leading-tight">Location</p>
+            <p className="text-base font-semibold text-secondary mt-1 truncate">{location}</p>
+          </div>
+          {useCase && (
+            <div>
+              <p className="font-headline text-xl font-extrabold text-primary leading-tight">Use Case</p>
+              <p className="text-base font-semibold text-secondary mt-1 capitalize">{useCase}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -238,25 +243,38 @@ function RequestCard({ req }: { req: BuyerRequest }) {
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
       className="group relative bg-white rounded-2xl border border-outline-variant/20 p-7 flex flex-col gap-5 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[230px]"
     >
-      <div className="min-w-0">
+      <div className="min-w-0 border-b border-outline-variant/15 pb-4">
         <p className="font-headline font-extrabold text-primary text-3xl leading-tight line-clamp-2">{name}</p>
-        <div className="flex items-center gap-2 text-base font-semibold text-secondary mt-2">
-          <span className="material-symbols-outlined text-lg text-primary">location_on</span>
-          <span className="truncate">{location}</span>
-        </div>
       </div>
       <div>
-        <p className="text-xs font-extrabold uppercase tracking-wider text-secondary mb-1">Budget</p>
-        <p className="text-2xl font-extrabold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</p>
+        <p className="font-headline text-2xl font-extrabold text-primary leading-tight">Budget</p>
+        <p className="text-lg font-semibold text-secondary mt-1">{fmtBudget(req.budget_min, req.budget_max)}</p>
+      </div>
+      <div>
+        <p className="font-headline text-xl font-extrabold text-primary leading-tight">Location</p>
+        <p className="text-base font-semibold text-secondary mt-1 truncate">{location}</p>
       </div>
       {(primaryCity(req) || req.lot_size_label) && (
-        <p className="text-base font-semibold text-secondary truncate">
-          {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
-        </p>
+        <div>
+          <p className="font-headline text-xl font-extrabold text-primary leading-tight">Property Type</p>
+          <p className="text-base font-semibold text-secondary mt-1 truncate">
+            {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
+          </p>
+        </div>
       )}
-      <div className="space-y-1 text-base font-semibold text-secondary mt-auto">
-        {useCase && <p className="capitalize">{useCase}</p>}
-        {timeline && <p>{timeline}</p>}
+      <div className="space-y-4 text-base font-semibold text-secondary mt-auto">
+        {useCase && (
+          <div>
+            <p className="font-headline text-xl font-extrabold text-primary leading-tight">Use Case</p>
+            <p className="text-base font-semibold text-secondary mt-1 capitalize">{useCase}</p>
+          </div>
+        )}
+        {timeline && (
+          <div>
+            <p className="font-headline text-xl font-extrabold text-primary leading-tight">Timeline</p>
+            <p className="text-base font-semibold text-secondary mt-1">{timeline}</p>
+          </div>
+        )}
       </div>
       <div className="flex items-center justify-between text-primary font-extrabold text-sm pt-1 border-t border-outline-variant/15">
         <span>View Request</span>
