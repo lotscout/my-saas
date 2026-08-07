@@ -133,19 +133,12 @@ export default function AdvisorPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    // Restore the in-progress session (keeps the chat, incl. for guests, across navigation).
-    let restored = false;
-    try {
-      const raw = sessionStorage.getItem(SESSION_KEY);
-      if (raw) {
-        const s = JSON.parse(raw);
-        if (Array.isArray(s?.messages) && s.messages.length) {
-          setMessages(s.messages);
-          if (s.currentId) setCurrentId(s.currentId);
-          restored = true;
-        }
-      }
-    } catch {}
+    // Always start Scout on a fresh chat when the page opens.
+    // Saved conversations remain available in Recents, but are never auto-loaded.
+    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+    setCurrentId(newId());
+    setMessages([]);
+    setSaved({});
 
     // Client-side guest counter (reliable enforcement of the 3-question limit).
     let gc = 0;
@@ -178,21 +171,10 @@ export default function AdvisorPage() {
         if (convs.length) {
           convs.sort((a, b) => b.updatedAt - a.updatedAt);
           setConversations(convs);
-          if (!restored) {
-            setCurrentId(convs[0].id);
-            setMessages(convs[0].messages);
-          }
         }
       })
       .catch(() => {});
   }, []);
-
-  // Persist the current session so navigating away and back keeps the chat.
-  useEffect(() => {
-    try {
-      if (messages.length) sessionStorage.setItem(SESSION_KEY, JSON.stringify({ currentId, messages }));
-    } catch {}
-  }, [messages, currentId]);
 
   // Auto-scroll to the latest message.
   useEffect(() => {
@@ -550,7 +532,7 @@ export default function AdvisorPage() {
                     <img src="/logo.png" alt="LotScout" className="h-11 w-11 object-contain" />
                     <h1 className="font-['Manrope'] font-extrabold tracking-tight" style={{ color: INK, fontSize: '46px', lineHeight: 1.1 }}>Scout</h1>
                   </div>
-                  <p className="mt-3 text-lg" style={{ color: MUTED }}>Hi, I&apos;m Scout. Ask me anything about real estate markets, buying, selling, investing, and more.</p>
+                  <p className="mt-3 text-lg" style={{ color: MUTED }}>What are we scouting today?</p>
                 </div>
 
                 {limitHit ? (
