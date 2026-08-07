@@ -87,7 +87,7 @@ export default function DealAnalysisPage() {
           <h1 className="font-headline text-4xl font-extrabold text-primary tracking-tight mb-1">Deal Analysis</h1>
           <p className="text-secondary mt-2 text-sm max-w-xl">
             Submit a property for a full deal analysis. Our team will review the
-            parcel data, zoning, comps, and financing potential — then deliver a
+            parcel data, zoning, comps, and financing potential, then deliver a
             detailed report straight to your inbox.
           </p>
         </header>
@@ -213,7 +213,7 @@ export default function DealAnalysisPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={4}
-                  placeholder="Any context that would help our team — intended use, financing questions, concerns, etc."
+                  placeholder="Any context that would help our team: intended use, financing questions, concerns, etc."
                   className={`${inputClass} resize-none`}
                 />
               </div>

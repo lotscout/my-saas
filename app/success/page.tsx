@@ -12,7 +12,7 @@ export default function SuccessPage() {
           </div>
           <h1 className="text-5xl font-extrabold text-primary mb-6 font-headline">Thank you for subscribing!</h1>
           <p className="text-secondary text-xl opacity-80 mb-10">
-            Your subscription is active. Welcome to LotScout — let&apos;s get to work.
+            Your subscription is active. Welcome to LotScout. Let&apos;s get to work.
           </p>
           <Link
             href="/marketplace"

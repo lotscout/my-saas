@@ -28,6 +28,14 @@ function isPublic(pathname: string) {
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
 
+  // API routes return JSON and enforce their own auth — never redirect them.
+  // Keep them out of proxy auth work so public endpoints stay fast.
+  if (path.startsWith('/api')) return NextResponse.next({ request })
+
+  // Public pages are always allowed. Do not call Supabase here; marketing/auth
+  // pages must not depend on an auth roundtrip just to render.
+  if (isPublic(path)) return NextResponse.next({ request })
+
   // The user dashboard was removed — send any hit to the marketplace.
   if (path === '/dashboard' || path.startsWith('/dashboard/')) {
     const url = request.nextUrl.clone()
@@ -60,14 +68,7 @@ export async function proxy(request: NextRequest) {
   )
 
   // getUser() validates the JWT server-side — never trust only the cookie value.
-  // Always called so the session cookie is refreshed, even on public routes.
   const { data: { user } } = await supabase.auth.getUser()
-
-  // API routes return JSON and enforce their own auth — never redirect them.
-  if (path.startsWith('/api')) return supabaseResponse
-
-  // Public pages are always allowed.
-  if (isPublic(path)) return supabaseResponse
 
   // Internal page with no session → send to sign-in, remembering where they wanted to go.
   if (!user) {

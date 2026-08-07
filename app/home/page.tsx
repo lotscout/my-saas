@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import Link from 'next/link';
-import CreateListingGate from '@/components/CreateListingGate';
+import { useEffect, useRef, type AnchorHTMLAttributes } from 'react';
+
+function Link({ href, children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) {
+  return <a href={href} {...props}>{children}</a>;
+}
 
 // Full feature list shown in every pricing card. Features not included in a
 // tier are dimmed (opacity-40) with a dash instead of a green check.
@@ -222,11 +224,13 @@ export default function HomePage() {
     <div className="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-primary">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-surface-container-high">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
-          <Link href="/home" className="font-headline text-xl font-extrabold text-primary tracking-tight">LotScout</Link>
+          <Link href="/home" className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/lotscout-logo.png" alt="LotScout" className="w-11 h-11 object-contain" />
+            <span className="font-headline text-[1.625rem] font-extrabold text-primary tracking-tight">LotScout</span>
+          </Link>
           <div className="hidden md:flex items-center gap-8">
-            <Link href="/home#platform" className="text-sm font-semibold text-secondary hover:text-primary transition-colors">Platform</Link>
-            <Link href="/home#marketplace" className="text-sm font-semibold text-secondary hover:text-primary transition-colors">Marketplace</Link>
-            <Link href="/home#pricing" className="text-sm font-semibold text-secondary hover:text-primary transition-colors">Pricing</Link>
+
           </div>
           <div className="flex items-center gap-3">
             <Link href="/sign-in" className="px-4 py-2 rounded-lg border border-primary/30 text-primary text-sm font-bold hover:bg-primary/5 transition-colors">Sign In</Link>
@@ -264,27 +268,18 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Off-market callout banner */}
-      <div className="bg-emerald-900 py-4 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
-          <span className="material-symbols-outlined text-emerald-300 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>lock_open</span>
-          <p className="text-white font-semibold text-base">
-            All listings on LotScout are off-market. Sell without a realtor and keep 100% of your proceeds.
-          </p>
-        </div>
-      </div>
+
 
       {/* SECTION 2: Social Proof Stats */}
       <section className="py-16 bg-primary text-white px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
           {[
-            { stat: '92%',     label: 'Fast Closing Rate' },
-            { stat: '$4.32M',  label: 'Commission Saved' },
-            { stat: '72M+',    label: 'Land Transactions' },
-            { stat: '2,400+',  label: 'Active Listings' },
+            { stat: '$4.51M', label: 'Commission Saved' },
+            { stat: '$77M+',  label: 'Land Transactions' },
+            { stat: '905+',   label: 'Active Listings' },
           ].map(({ stat, label }) => (
-            <div key={label} className="text-center p-6 bg-white/5 rounded-2xl">
-              <div className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-1 text-primary-fixed">{stat}</div>
+            <div key={label} className="text-center p-8 bg-white/5 rounded-2xl">
+              <div className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-2 text-primary-fixed">{stat}</div>
               <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
             </div>
           ))}
@@ -292,63 +287,51 @@ export default function HomePage() {
       </section>
 
       {/* SECTION 3: Marketplace Preview */}
-      <section id="marketplace" className="py-16 bg-surface px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section id="marketplace" className="py-16 bg-surface">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-4">A Glimpse of What&apos;s Inside</h2>
-          <p className="text-secondary text-base sm:text-xl mb-8 sm:mb-12">All properties on LotScout are off-market listings you won&apos;t find on Zillow or Realtor.com.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Card 1 */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="w-full h-48 object-cover" alt="aerial landscape of a vast green rolling hill pasture during sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZulao6-fdPwv2dF4rCmpLxldDqaxwyGM1jAI60S0PXAiHvKusydmS7WFNrGZnWz3agwBLEApnoku9sp4EhNNceAoxGd5ZAXvNqqIxw-XJ0nhfC3zdwh_V9x6pN9qZWr0BfWBjulUvndtIDYgvMZa37uL5q7oOrlugcGuGU5t2sqHuoYcX-JGE7QGNvU1zStdrQrsrxV8hg5RdvZbdYEDWLxsiJu8QEujvbw5qsxRUfLnHmarvBynQs-vYnKjlgYG4a8Kb38v0LWdV" />
-              <div className="p-6">
-                <div className="text-primary font-bold text-xl mb-1">$450,000</div>
-                <div className="text-secondary font-medium mb-4">65 Acres · Gallatin, MT</div>
-                <div className="flex gap-2">
-                  <span className="bg-secondary-container text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded uppercase">Residential</span>
-                  <span className="bg-secondary-container text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded uppercase">Riverfront</span>
+          <p className="text-secondary text-base sm:text-xl mb-8 sm:mb-10">All properties on LotScout are off-market listings you won&apos;t find on Zillow or Realtor.com.</p>
+        </div>
+
+        {/* Auto-scrolling carousel */}
+        <div className="overflow-hidden">
+          <div
+            className="flex gap-5 w-max"
+            style={{ animation: 'marquee 40s linear infinite' }}
+            onMouseEnter={e => (e.currentTarget.style.animationPlayState = 'paused')}
+            onMouseLeave={e => (e.currentTarget.style.animationPlayState = 'running')}
+          >
+            {[
+              { price: '$50,000',    meta: '5.48 Acres · Wheelersburg, OH', tags: ['Residential', 'Wooded'],      img: '/listing-wheelersburg-oh.jpg' },
+              { price: '$725,000',   meta: '120 Acres · Boerne, TX',        tags: ['Ranch', 'Fenced'],            img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBY8GRIcD8bfludLFbbSK2-UO4kPxRWkltV05YcwfOfumwBuFit8qogzpUo5R7jRl3nmg2D5nktA3OIz3-o0AD1PgdOydScI-4fGpEyeyJ8LYrP6vidGCO93e4R6bVb7kradtCFRd6aNDuWKsDYyBUafliElyzavFiss21NsffAFE3tqx0X2aCa0odAjaGbQmYyLaJoTDI0gkNAyHs-hXwnliG7GDBEVW1lLcX-A1eyBkIXamMLLI2KKL4PQIsp_-ovx_kWI1K7N--F' },
+              { price: '$29,000',    meta: '3 Acres · Clyde, TX',             tags: ['Ranch', 'Agricultural'],     img: '/listing-clyde-tx.jpg' },
+              { price: '$300,000',   meta: '0.69 Acres · Bend, OR',          tags: ['Riverfront', 'Wooded'],      img: '/listing-bend-or.jpg' },
+              { price: '$2,800,000', meta: '540 Acres · Steamboat, CO',     tags: ['Agricultural', 'Water Rights'], img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuASYXdtkI0pKaN4KHtgDbkNT4ZERJxlztUPHz5d65poQKRw0NjABePxTimTG-cz6LtOqkMXF-zzzwIaFrDkQEjT3wpbPzQAqNdK5QDMK4hIsz_ZWIscZ2C7HZTU7c1-2DhI6xurbxtghY2ob8gvCuxAhZZZ2lemxdpTf1InVz8Rz76JP84Ayuq3weQvP6_7e0sJ9nDVSvGnoVQ3PAqqL2s7GgUfZB-FvUUUdqnKBEgBI0WRlQrkzy6L_Q7MnR6kre3Ba0NqtSvnD08l' },
+              { price: '$450,000',   meta: '65 Acres · Gallatin, MT',       tags: ['Residential', 'Riverfront'], img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZulao6-fdPwv2dF4rCmpLxldDqaxwyGM1jAI60S0PXAiHvKusydmS7WFNrGZnWz3agwBLEApnoku9sp4EhNNceAoxGd5ZAXvNqqIxw-XJ0nhfC3zdwh_V9x6pN9qZWr0BfWBjulUvndtIDYgvMZa37uL5q7oOrlugcGuGU5t2sqHuoYcX-JGE7QGNvU1zStdrQrsrxV8hg5RdvZbdYEDWLxsiJu8QEujvbw5qsxRUfLnHmarvBynQs-vYnKjlgYG4a8Kb38v0LWdV' },
+            // Duplicate for seamless loop
+              { price: '$50,000',    meta: '5.48 Acres · Wheelersburg, OH', tags: ['Residential', 'Wooded'],      img: '/listing-wheelersburg-oh.jpg' },
+              { price: '$725,000',   meta: '120 Acres · Boerne, TX',        tags: ['Ranch', 'Fenced'],            img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBY8GRIcD8bfludLFbbSK2-UO4kPxRWkltV05YcwfOfumwBuFit8qogzpUo5R7jRl3nmg2D5nktA3OIz3-o0AD1PgdOydScI-4fGpEyeyJ8LYrP6vidGCO93e4R6bVb7kradtCFRd6aNDuWKsDYyBUafliElyzavFiss21NsffAFE3tqx0X2aCa0odAjaGbQmYyLaJoTDI0gkNAyHs-hXwnliG7GDBEVW1lLcX-A1eyBkIXamMLLI2KKL4PQIsp_-ovx_kWI1K7N--F' },
+              { price: '$29,000',    meta: '3 Acres · Clyde, TX',             tags: ['Ranch', 'Agricultural'],     img: '/listing-clyde-tx.jpg' },
+              { price: '$300,000',   meta: '0.69 Acres · Bend, OR',          tags: ['Riverfront', 'Wooded'],      img: '/listing-bend-or.jpg' },
+              { price: '$2,800,000', meta: '540 Acres · Steamboat, CO',     tags: ['Agricultural', 'Water Rights'], img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuASYXdtkI0pKaN4KHtgDbkNT4ZERJxlztUPHz5d65poQKRw0NjABePxTimTG-cz6LtOqkMXF-zzzwIaFrDkQEjT3wpbPzQAqNdK5QDMK4hIsz_ZWIscZ2C7HZTU7c1-2DhI6xurbxtghY2ob8gvCuxAhZZZ2lemxdpTf1InVz8Rz76JP84Ayuq3weQvP6_7e0sJ9nDVSvGnoVQ3PAqqL2s7GgUfZB-FvUUUdqnKBEgBI0WRlQrkzy6L_Q7MnR6kre3Ba0NqtSvnD08l' },
+              { price: '$450,000',   meta: '65 Acres · Gallatin, MT',       tags: ['Residential', 'Riverfront'], img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZulao6-fdPwv2dF4rCmpLxldDqaxwyGM1jAI60S0PXAiHvKusydmS7WFNrGZnWz3agwBLEApnoku9sp4EhNNceAoxGd5ZAXvNqqIxw-XJ0nhfC3zdwh_V9x6pN9qZWr0BfWBjulUvndtIDYgvMZa37uL5q7oOrlugcGuGU5t2sqHuoYcX-JGE7QGNvU1zStdrQrsrxV8hg5RdvZbdYEDWLxsiJu8QEujvbw5qsxRUfLnHmarvBynQs-vYnKjlgYG4a8Kb38v0LWdV' },
+            ].map((listing, i) => (
+              <div key={i} className="w-72 flex-none bg-white rounded-xl overflow-hidden shadow-sm border border-surface-container-high">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="w-full h-48 object-cover" alt={listing.meta} src={listing.img} />
+                <div className="p-5">
+                  <div className="text-primary font-bold text-lg mb-1">{listing.price}</div>
+                  <div className="text-secondary font-medium text-sm mb-0.5">{listing.meta.split(' · ')[0]}</div>
+                  <div className="text-secondary/70 text-xs">{listing.meta.split(' · ')[1] ?? ''}</div>
                 </div>
               </div>
-            </div>
-            {/* Card 2 */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="w-full h-48 object-cover" alt="dramatic mountain peaks with pine forest in foreground under a clear blue alpine sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzc__lHoSAdcSO8AzlHGngmhLFyyJKdxCymOUePJ02ntLt232Z_VO7rydLpCKr3Ezbptxnz_wcY32esEgXuSDNnaiSAX3VdMQD4sWtRChsyBqACGwQ1LGvOerOjXc1NmpIpODR8q8Y-gZ-MvvQTk8J6iv3Jao-5TCJcKCA_Um0U2P2p3a-cQnxGZSqnLj3iKD779Sa4Zo4BagWKtSNbNoiEaB8DlChHVCmUFeYuYH9m6d9RgcqCTaCv1vqLNh59sO0yOfhmKsw8abG" />
-              <div className="p-6">
-                <div className="text-primary font-bold text-xl mb-1">$1,200,000</div>
-                <div className="text-secondary font-medium mb-4">210 Acres · Bend, OR</div>
-                <div className="flex gap-2">
-                  <span className="bg-secondary-container text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded uppercase">Timber</span>
-                  <span className="bg-secondary-container text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded uppercase">Off-Grid</span>
-                </div>
-              </div>
-            </div>
-            {/* Card 3 */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="w-full h-48 object-cover" alt="wide open flat ranch land with golden grass and scattered oak trees" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY8GRIcD8bfludLFbbSK2-UO4kPxRWkltV05YcwfOfumwBuFit8qogzpUo5R7jRl3nmg2D5nktA3OIz3-o0AD1PgdOydScI-4fGpEyeyJ8LYrP6vidGCO93e4R6bVb7kradtCFRd6aNDuWKsDYyBUafliElyzavFiss21NsffAFE3tqx0X2aCa0odAjaGbQmYyLaJoTDI0gkNAyHs-hXwnliG7GDBEVW1lLcX-A1eyBkIXamMLLI2KKL4PQIsp_-ovx_kWI1K7N--F" />
-              <div className="p-6">
-                <div className="text-primary font-bold text-xl mb-1">$725,000</div>
-                <div className="text-secondary font-medium mb-4">120 Acres · Boerne, TX</div>
-                <div className="flex gap-2">
-                  <span className="bg-secondary-container text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded uppercase">Ranch</span>
-                  <span className="bg-secondary-container text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded uppercase">Fenced</span>
-                </div>
-              </div>
-            </div>
-            {/* Card 4 - locked */}
-            <div className="relative bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high group">
-              <div
-                className="blur-md grayscale opacity-50 h-full w-full absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuASYXdtkI0pKaN4KHtgDbkNT4ZERJxlztUPHz5d65poQKRw0NjABePxTimTG-cz6LtOqkMXF-zzzwIaFrDkQEjT3wpbPzQAqNdK5QDMK4hIsz_ZWIscZ2C7HZTU7c1-2DhI6xurbxtghY2ob8gvCuxAhZZZ2lemxdpTf1InVz8Rz76JP84Ayuq3weQvP6_7e0sJ9nDVSvGnoVQ3PAqqL2s7GgUfZB-FvUUUdqnKBEgBI0WRlQrkzy6L_Q7MnR6kre3Ba0NqtSvnD08l')" }}
-              />
-              <div className="relative z-10 p-6 flex flex-col items-center justify-center h-full text-center bg-white/20 backdrop-blur-[2px]">
-                <span className="material-symbols-outlined text-primary text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                <p className="font-headline font-bold text-primary mb-6">Sign up to unlock 2,400+ off-market listings</p>
-                <Link href="/sign-up" className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</Link>
-              </div>
-            </div>
+            ))}
           </div>
+        </div>
+
+        {/* CTA */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8 flex justify-center">
+          <Link href="/sign-up" className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</Link>
         </div>
       </section>
 
@@ -357,92 +340,56 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
           <p className="text-secondary text-base sm:text-lg mb-8 sm:mb-10 max-w-2xl">
-            Sellers — these buyers are actively searching for land like yours right now.
+            Sellers. These buyers are actively searching for land like yours right now.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Buyer Card 1 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-none">
-                  <span className="material-symbols-outlined text-primary text-2xl">corporate_fare</span>
-                </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col items-center text-center">
+              <div className="flex justify-center mb-3">
                 <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
                   <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
                 </span>
               </div>
               <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">Vanguard Land Trust</h3>
               <p className="text-secondary text-sm font-medium mb-4">Denver, CO</p>
-              <div className="space-y-2 text-sm flex-grow">
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
-                  <span>50 to 500 acres</span>
-                </div>
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">payments</span>
-                  <span>$500k to $2M budget</span>
-                </div>
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">nature</span>
-                  <span>Agricultural / Conservation</span>
-                </div>
+              <div className="space-y-1.5 text-sm flex-grow w-full">
+                <p className="text-on-surface-variant">50 to 500 acres</p>
+                <p className="text-on-surface-variant">$500k to $2M budget</p>
+                <p className="text-on-surface-variant">Agricultural</p>
               </div>
               <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
             </div>
 
             {/* Buyer Card 2 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-none">
-                  <span className="material-symbols-outlined text-primary text-2xl">construction</span>
-                </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col items-center text-center">
+              <div className="flex justify-center mb-3">
                 <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
                   <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
                 </span>
               </div>
               <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">BuildWorks Inc.</h3>
               <p className="text-secondary text-sm font-medium mb-4">Austin, TX</p>
-              <div className="space-y-2 text-sm flex-grow">
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
-                  <span>5 to 20 acres</span>
-                </div>
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">payments</span>
-                  <span>$200k to $800k budget</span>
-                </div>
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">home_work</span>
-                  <span>Light Industrial / Residential</span>
-                </div>
+              <div className="space-y-1.5 text-sm flex-grow w-full">
+                <p className="text-on-surface-variant">5 to 20 acres</p>
+                <p className="text-on-surface-variant">$200k to $800k budget</p>
+                <p className="text-on-surface-variant">Residential</p>
               </div>
               <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
             </div>
 
             {/* Buyer Card 3 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-none">
-                  <span className="material-symbols-outlined text-primary text-2xl">forest</span>
-                </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col items-center text-center">
+              <div className="flex justify-center mb-3">
                 <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
                   <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
                 </span>
               </div>
               <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">Meridian Land Holdings</h3>
               <p className="text-secondary text-sm font-medium mb-4">Seattle, WA</p>
-              <div className="space-y-2 text-sm flex-grow">
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">crop_square</span>
-                  <span>100 to 1,000 acres</span>
-                </div>
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">payments</span>
-                  <span>$1M to $5M budget</span>
-                </div>
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-base text-primary/50">park</span>
-                  <span>Timberland / Recreational</span>
-                </div>
+              <div className="space-y-1.5 text-sm flex-grow w-full">
+                <p className="text-on-surface-variant">100 to 1,000 acres</p>
+                <p className="text-on-surface-variant">$1M to $5M budget</p>
+                <p className="text-on-surface-variant">Commercial</p>
               </div>
               <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
             </div>
@@ -469,54 +416,93 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 6: Who It's For */}
-      <section id="platform" className="py-16 bg-surface-container-low px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-3">Built for Both Sides of the Deal</h2>
-            <p className="text-secondary text-base sm:text-lg max-w-2xl">Whether you are liquidating an asset or expanding your portfolio, we provide the infrastructure to move faster.</p>
+      {/* SECTION: LotScout Search */}
+      <section className="py-20 bg-primary px-4 sm:px-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-widest mb-6">
+            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+            AI-Powered
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 overflow-hidden rounded-3xl">
-            {/* Seller */}
-            <div className="bg-primary p-8 md:p-10 flex flex-col justify-between">
-              <div>
-                <h3 className="font-headline text-2xl font-bold text-white mb-4">I&apos;m a Seller</h3>
-                <p className="text-on-primary-container text-lg mb-6">Reach a curated network of institutional and private buyers ready to deploy capital immediately.</p>
-                <ul className="space-y-3 mb-8">
-                  {[
-                    'Priority listing exposure',
-                    'Direct-to-buyer messaging',
-                    'Automated land valuation',
-                    'Identity verification for buyers',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-white/90 font-medium">
-                      <span className="material-symbols-outlined text-primary-fixed-dim">check</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <CreateListingGate className="w-full bg-primary-fixed text-primary py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors text-center block">List My Property</CreateListingGate>
+          <h2 className="font-headline text-3xl sm:text-5xl font-bold text-white mb-4">LotScout Search</h2>
+          <p className="text-on-primary-container text-lg mb-10">An AI powered land development search tool</p>
+          <Link href="/sign-up" className="flex items-center gap-3 bg-white rounded-2xl px-6 py-4 shadow-2xl hover:shadow-none transition-shadow cursor-pointer w-full">
+            <span className="material-symbols-outlined text-primary text-2xl">search</span>
+            <span className="text-secondary text-base flex-grow text-left">Search land by location, acreage, zoning, price...</span>
+            <span className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-xl whitespace-nowrap">Search</span>
+          </Link>
+          <div className="flex flex-wrap justify-center gap-2 mt-6">
+            {[
+              'Ag-zoned land near Denver',
+              '50+ acres under $500k in Colorado',
+              'Off-market ranches in Texas',
+              'Parcels near path of growth',
+            ].map((q) => (
+              <Link key={q} href="/sign-up" className="text-white/70 hover:text-white text-xs border border-white/20 hover:border-white/50 px-3 py-1.5 rounded-full transition-colors">
+                {q}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION: Market Updates */}
+      <section className="py-16 bg-surface-container-low px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-end justify-between mb-8 sm:mb-10 flex-wrap gap-4">
+            <div>
+              <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-2">Market Updates</h2>
+              <p className="text-secondary text-base sm:text-lg max-w-2xl">Land market intelligence: permit trends, price shifts, and deal activity across key markets.</p>
             </div>
-            {/* Buyer */}
-            <div className="bg-white p-8 md:p-10 flex flex-col justify-between">
-              <div>
-                <h3 className="font-headline text-2xl font-bold text-primary mb-4">I&apos;m a Buyer</h3>
-                <p className="text-secondary text-lg mb-6">Gain access to off-market inventory and deep-data insights before the general public sees the listing.</p>
-                <ul className="space-y-3 mb-8">
-                  {[
-                    'Off-market land opportunities',
-                    'AI topographic assessments',
-                    'Custom search alert criteria',
-                    'Direct-to-seller negotiations',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-on-surface-variant font-medium">
-                      <span className="material-symbols-outlined text-primary">check</span> {item}
-                    </li>
-                  ))}
-                </ul>
+            <Link href="/sign-up" className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
+              View all updates <span className="material-symbols-outlined text-base">arrow_forward</span>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                tag: 'Colorado',
+                tagColor: 'bg-emerald-100 text-emerald-700',
+                title: 'Denver Fringe Markets Heating Up',
+                body: 'Permit activity along the E-470 corridor surged 34% QoQ. Ag-zoned parcels within 15 miles of DIA are moving faster than any time in the past 3 years.',
+                date: 'Aug 2026',
+                icon: 'trending_up',
+              },
+              {
+                tag: 'Texas',
+                tagColor: 'bg-amber-100 text-amber-700',
+                title: 'West Texas Ranch Land Seeing Renewed Interest',
+                body: 'Low supply and increased buyer demand from out-of-state investors is pushing $/acre up in the Abilene–Clyde corridor. Off-market deals closing 18% above asking.',
+                date: 'Aug 2026',
+                icon: 'landscape',
+              },
+              {
+                tag: 'National',
+                tagColor: 'bg-blue-100 text-blue-700',
+                title: 'Off-Market Land Deals Outpace MLS Volume',
+                body: 'For the third consecutive quarter, off-market land transactions outpaced MLS-listed deals by 2.1x in rural and semi-rural markets under 500 acres.',
+                date: 'Jul 2026',
+                icon: 'bar_chart',
+              },
+            ].map((item) => (
+              <div key={item.title} className="bg-white rounded-2xl p-6 border border-surface-container-high shadow-sm flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${item.tagColor}`}>{item.tag}</span>
+                  <div className="w-9 h-9 bg-primary/5 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary text-lg">{item.icon}</span>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-headline font-bold text-primary text-base mb-2">{item.title}</h3>
+                  <p className="text-secondary text-sm leading-relaxed">{item.body}</p>
+                </div>
+                <div className="mt-auto flex items-center justify-between pt-2 border-t border-surface-container-high">
+                  <span className="text-xs text-secondary/60 font-medium">{item.date}</span>
+                  <Link href="/sign-up" className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5">
+                    Read more <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </Link>
+                </div>
               </div>
-              <Link href="/sign-up" className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition-colors text-center block">Find Land Now</Link>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -549,7 +535,7 @@ export default function HomePage() {
             </div>
             {/* Exclusive */}
             <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
-              <h3 className="font-headline text-xl font-bold text-primary mb-2">Enterprise</h3>
+              <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
               <div className="flex items-baseline gap-1 mb-4">
                 <span className="text-4xl font-extrabold text-primary">$529</span>
                 <span className="text-secondary">/mo</span>
@@ -570,7 +556,7 @@ export default function HomePage() {
       <section className="py-16 bg-primary px-4 sm:px-8 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="font-headline text-2xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Your Next Land Partnership Starts Here</h2>
+          <h2 className="font-headline text-2xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Your Next Land Deal Starts Here</h2>
           <p className="text-on-primary-container text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
             LotScout connects serious buyers and sellers of off-market land directly. No realtors. No commission. No waiting on the MLS. Just the right match at the right time.
           </p>

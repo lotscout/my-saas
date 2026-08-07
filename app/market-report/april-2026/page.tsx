@@ -54,12 +54,12 @@ const INSIGHTS = [
   {
     icon: 'account_balance',
     title: 'Multi-Use Properties Command Premium',
-    body: 'Properties supporting agricultural, recreational, and residential uses simultaneously are the strongest performers. Buyers increasingly value optionality — land that generates income today while preserving future development potential. Parcels with favorable zoning and subdivision potential receiving stronger offers.',
+    body: 'Properties supporting agricultural, recreational, and residential uses simultaneously are the strongest performers. Buyers increasingly value optionality: land that generates income today while preserving future development potential. Parcels with favorable zoning and subdivision potential receiving stronger offers.',
   },
   {
     icon: 'trending_flat',
     title: 'Tariff Impact and Agricultural Stabilization',
-    body: 'Corn and soybean prices stabilized following ad-hoc government payments offsetting tariff impact. Congress strengthened crop insurance programs. Benchmark farm values at $8,299/acre — down modestly from peak but stable outlook through mid-2026. Cattle operators managing volatility but supply-demand fundamentals remain supportive.',
+    body: 'Corn and soybean prices stabilized following ad-hoc government payments offsetting tariff impact. Congress strengthened crop insurance programs. Benchmark farm values at $8,299/acre, down modestly from peak but stable outlook through mid-2026. Cattle operators managing volatility but supply-demand fundamentals remain supportive.',
   },
 ];
 
@@ -85,7 +85,7 @@ export default function AprilMarketReport() {
         <section className="mb-14">
           <h2 className="font-headline text-2xl font-extrabold text-primary mb-2">National Overview</h2>
           <p className="text-secondary text-sm mb-8 max-w-2xl">
-            U.S. land markets entered 2026 with cautious optimism — values stabilizing after the post-pandemic peak, while quality parcels continue to command premium prices across all regions.
+            U.S. land markets entered 2026 with cautious optimism, values stabilizing after the post-pandemic peak, while quality parcels continue to command premium prices across all regions.
           </p>
 
           {/* Stat callout cards */}
@@ -106,7 +106,7 @@ export default function AprilMarketReport() {
             <div>
               <p className="font-semibold text-on-surface text-sm mb-1">Market Sentiment: Cautious Optimism</p>
               <p className="text-secondary text-sm leading-relaxed">
-                The national average price range across all land types sits at <strong className="text-on-surface">$12,000–$15,000/acre</strong>, with a 5-year compound annual growth rate of <strong className="text-on-surface">5.8%</strong>. Values are stabilizing after the 2021–2023 peak, but demand for quality parcels remains firm — especially in high-growth states and recreational markets.
+                The national average price range across all land types sits at <strong className="text-on-surface">$12,000–$15,000/acre</strong>, with a 5-year compound annual growth rate of <strong className="text-on-surface">5.8%</strong>. Values are stabilizing after the 2021–2023 peak, but demand for quality parcels remains firm, especially in high-growth states and recreational markets.
               </p>
             </div>
           </div>

@@ -60,13 +60,19 @@ export async function POST(request: NextRequest) {
       .single();
     const existingCustomerId = existingSub?.stripe_customer_id ?? undefined;
 
+    const successPath = isSearchPro
+      ? '/pricing?search_pro=success'
+      : isOneTime
+        ? '/property-analysis?report=success'
+        : '/success';
+
     const session = await stripe.checkout.sessions.create({
       mode: isOneTime ? 'payment' : 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: user.id,
       ...(existingCustomerId ? { customer: existingCustomerId } : {}),
       ...(isOneTime ? {} : { metadata: { tier: tier ?? '', ...(isSearchPro ? { type: 'search_pro' } : {}) } }),
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing?search_pro=success`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}${successPath}`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
     });
 
