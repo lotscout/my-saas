@@ -15,7 +15,6 @@ import { createClient } from '@/lib/supabase/client';
 import BoostModal from '@/components/BoostModal';
 import SendMessageModal from '@/components/SendMessageModal';
 import { getBuyerName } from '@/lib/getBuyerName';
-import { getSellerName, isBadName } from '@/lib/getSellerName';
 
 const STATE_NAMES: Record<string, string> = {
   'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
@@ -1265,8 +1264,6 @@ export default function MarketplacePage() {
                     listing.county ? `${listing.county} County` : null,
                     listing.state,
                   ].filter(Boolean).join(', ');
-                  const sellerLabel = getSellerName(listing);
-                  const sellerHref = listing.owner_name && !isBadName(listing.owner_name) ? `/sellers/${encodeURIComponent(listing.owner_name)}` : null;
                   const isHighlighted = hoveredListingId === listing.id;
                   return (
                     <Link
@@ -1321,22 +1318,6 @@ export default function MarketplacePage() {
                           <div className="mt-3">
                             <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
                           </div>
-                        )}
-                        {sellerLabel && (
-                          sellerHref ? (
-                            <button
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(sellerHref); }}
-                              className="mt-3 self-start flex items-center gap-1 text-xs font-bold text-primary hover:underline"
-                            >
-                              <span className="material-symbols-outlined text-sm">person</span>
-                              {sellerLabel}
-                            </button>
-                          ) : (
-                            <p className="mt-3 flex items-center gap-1 text-xs font-bold text-secondary">
-                              <span className="material-symbols-outlined text-sm">person</span>
-                              {sellerLabel}
-                            </p>
-                          )
                         )}
                         {profile?.id && listing.user_id === profile.id && (
                           <button
