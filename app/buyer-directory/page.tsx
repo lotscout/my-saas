@@ -600,43 +600,25 @@ export default function BuyerDirectoryPage() {
 
           </section>
 
-          {/* Search + tabs */}
+          {/* Search */}
           <div className="bg-white/90 backdrop-blur rounded-[1.75rem] border border-outline-variant/15 shadow-sm p-3 sm:p-4 mb-9">
-            <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-              <div className="relative flex-1">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
-                <input
-                  type="text"
-                  value={tab === 'requests' ? brSearch : globalSearch}
-                  onChange={e => handleSearchChange(e.target.value)}
-                  placeholder={searchPlaceholder}
-                  className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-2xl pl-12 pr-10 py-4 text-base font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                />
-                {(tab === 'requests' ? brSearch : globalSearch) && (
-                  <button
-                    onClick={() => handleSearchChange('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface"
-                  >
-                    <span className="material-symbols-outlined text-lg">close</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1 bg-surface-container-low rounded-2xl p-1 shrink-0">
-                {(['directory', 'requests'] as MainTab[]).map(t => (
-                  <button
-                    key={t}
-                    onClick={() => { setTab(t); setView('grid'); setGlobalSearch(''); setBrSearch(''); }}
-                    className={`px-5 py-3 rounded-xl text-sm font-extrabold transition-all ${
-                      tab === t
-                        ? 'bg-white text-primary shadow-sm'
-                        : 'text-secondary hover:text-on-surface'
-                    }`}
-                  >
-                    {t === 'directory' ? 'Buyer Directory' : 'Buyer Requests'}
-                  </button>
-                ))}
-              </div>
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
+              <input
+                type="text"
+                value={globalSearch}
+                onChange={e => handleSearchChange(e.target.value)}
+                placeholder={searchPlaceholder}
+                className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-2xl pl-12 pr-10 py-4 text-base font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+              />
+              {globalSearch && (
+                <button
+                  onClick={() => handleSearchChange('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              )}
             </div>
           </div>
 
