@@ -432,36 +432,29 @@ export default function AdvisorPage() {
 
   const sidebarInner = (
     <div className="flex flex-col h-full">
-      {/* LotScout branding */}
-      <div className="flex items-center gap-2 px-4 pt-4 pb-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="LotScout" className="h-7 w-7 object-contain" />
-        <span className="font-['Manrope'] font-extrabold text-lg" style={{ color: INK }}>LotScout</span>
-      </div>
-
       {/* Top rows — clean text items */}
-      <div className="px-2">
+      <div className="px-2 pt-4">
         <button
           onClick={newChat}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left transition-colors hover:bg-black/5"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-lg text-left transition-colors hover:bg-black/5"
           style={{ color: INK }}
         >
-          <span className="material-symbols-outlined text-lg" style={{ color: MUTED }}>add</span>
+          <span className="material-symbols-outlined text-2xl" style={{ color: MUTED }}>add</span>
           New
         </button>
         <button
           onClick={() => { setShowSaved(true); setMobileSidebar(false); }}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left transition-colors hover:bg-black/5"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-lg text-left transition-colors hover:bg-black/5"
           style={{ color: INK }}
         >
-          <span className="material-symbols-outlined text-lg" style={{ color: MUTED }}>bookmark</span>
+          <span className="material-symbols-outlined text-2xl" style={{ color: MUTED }}>bookmark</span>
           Saved
         </button>
       </div>
 
       {/* Recents */}
       <div className="flex-grow overflow-y-auto px-2 pb-3 mt-3">
-        <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>Recents</p>
+        <p className="px-3 pb-1 text-sm font-semibold uppercase tracking-wider" style={{ color: MUTED }}>Recents</p>
         {conversations.length === 0 ? (
           <p className="px-3 py-2 text-xs" style={{ color: MUTED }}>
             {access?.status === 'guest' ? 'Sign in to save your chat history.' : 'No recent chats yet.'}
@@ -473,15 +466,15 @@ export default function AdvisorPage() {
                 key={c.id}
                 onClick={() => loadConversation(c)}
                 title={c.title}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-colors ${c.id === currentId ? '' : 'hover:bg-black/5'}`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-lg text-left transition-colors ${c.id === currentId ? '' : 'hover:bg-black/5'}`}
                 style={{ color: INK, backgroundColor: c.id === currentId ? CHIP_BG : undefined }}
               >
-                <span className="material-symbols-outlined text-base shrink-0" style={{ color: MUTED }}>chat_bubble</span>
+                <span className="material-symbols-outlined text-xl shrink-0" style={{ color: MUTED }}>chat_bubble</span>
                 <span className="truncate">{c.title || 'New chat'}</span>
               </button>
             ))}
             {access?.status === 'guest' && (
-              <p className="text-[11px] px-3 pt-3" style={{ color: MUTED }}>Sign in to keep your history across visits.</p>
+              <p className="text-sm px-3 pt-3" style={{ color: MUTED }}>Sign in to keep your history across visits.</p>
             )}
           </>
         )}
