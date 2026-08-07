@@ -527,11 +527,9 @@ export default function AdvisorPage() {
             <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pb-6 min-h-0">
               <div className="flex-grow flex flex-col items-center justify-center gap-6">
                 <div className="flex flex-col items-center text-center">
-                  <div className="flex items-center gap-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/logo.png" alt="LotScout" className="h-11 w-11 object-contain" />
-                    <h1 className="font-['Manrope'] font-extrabold tracking-tight" style={{ color: INK, fontSize: '46px', lineHeight: 1.1 }}>Scout</h1>
-                  </div>
+                  <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+                    Scout
+                  </h1>
                   <p className="mt-3 text-lg" style={{ color: MUTED }}>What are we scouting today?</p>
                 </div>
 
