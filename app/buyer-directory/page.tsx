@@ -121,13 +121,6 @@ function fmtLocation(city: string | null, county: string | null, state: string |
   return state || 'Location not specified';
 }
 
-function buyerInitials(req: BuyerRequest): string {
-  const name = getBuyerName(req).trim();
-  const parts = name.split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-  return (parts[0]?.slice(0, 2) || 'LS').toUpperCase();
-}
-
 function shortUseCase(req: BuyerRequest): string | null {
   return req.use_case ? req.use_case.split(' — ')[0].trim() : null;
 }
@@ -172,40 +165,26 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-5 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[250px]"
+      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-7 flex flex-col gap-5 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[250px]"
     >
-      <div className="flex items-start gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center font-headline font-extrabold text-lg shrink-0 shadow-sm">
-          {buyerInitials(req)}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-emerald-700">
-              Verified Buyer
-            </span>
-          </div>
-          <p className="font-headline font-extrabold text-primary text-xl leading-tight line-clamp-2">{name}</p>
-          {req.display_company && (
-            <p className="text-sm font-semibold text-secondary truncate mt-1">{req.display_company}</p>
-          )}
-        </div>
+      <div className="min-w-0">
+        <p className="font-headline font-extrabold text-primary text-3xl leading-tight line-clamp-2">{name}</p>
+        {req.display_company && (
+          <p className="text-lg font-semibold text-secondary truncate mt-2">{req.display_company}</p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
-        <div className="rounded-xl bg-surface-container-low px-4 py-3">
-          <p className="text-[11px] font-extrabold uppercase tracking-wider text-secondary mb-1">Target Budget</p>
-          <p className="text-base font-extrabold text-on-surface">{budget}</p>
+      <div className="space-y-3">
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-wider text-secondary mb-1">Target Budget</p>
+          <p className="text-2xl font-extrabold text-on-surface">{budget}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/5 px-3 py-1.5 text-sm font-bold text-primary">
-            <span className="material-symbols-outlined text-base">location_on</span>
-            {location}
-          </span>
-          {useCase && (
-            <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700 capitalize">
-              {useCase}
-            </span>
-          )}
+        <div className="space-y-2 text-base font-semibold text-secondary">
+          <p className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-lg text-primary">location_on</span>
+            <span className="truncate">{location}</span>
+          </p>
+          {useCase && <p className="capitalize">{useCase}</p>}
         </div>
       </div>
 
@@ -257,32 +236,27 @@ function RequestCard({ req }: { req: BuyerRequest }) {
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[230px]"
+      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-7 flex flex-col gap-5 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[230px]"
     >
-      <div className="flex items-start gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center font-headline font-extrabold text-lg shrink-0 shadow-sm">
-          {buyerInitials(req)}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-headline font-extrabold text-primary text-xl leading-tight line-clamp-2">{name}</p>
-          <div className="flex items-center gap-1.5 text-sm font-semibold text-secondary mt-1">
-            <span className="material-symbols-outlined text-base">location_on</span>
-            <span className="truncate">{location}</span>
-          </div>
+      <div className="min-w-0">
+        <p className="font-headline font-extrabold text-primary text-3xl leading-tight line-clamp-2">{name}</p>
+        <div className="flex items-center gap-2 text-base font-semibold text-secondary mt-2">
+          <span className="material-symbols-outlined text-lg text-primary">location_on</span>
+          <span className="truncate">{location}</span>
         </div>
       </div>
-      <div className="rounded-xl bg-surface-container-low px-4 py-3">
-        <p className="text-[11px] font-extrabold uppercase tracking-wider text-secondary mb-1">Budget</p>
-        <p className="text-base font-extrabold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</p>
+      <div>
+        <p className="text-xs font-extrabold uppercase tracking-wider text-secondary mb-1">Budget</p>
+        <p className="text-2xl font-extrabold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</p>
       </div>
       {(primaryCity(req) || req.lot_size_label) && (
-        <p className="text-sm font-semibold text-secondary truncate">
+        <p className="text-base font-semibold text-secondary truncate">
           {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
         </p>
       )}
-      <div className="flex flex-wrap gap-2 mt-auto">
-        {useCase && <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700 capitalize">{useCase}</span>}
-        {timeline && <span className="rounded-full bg-primary/5 px-3 py-1.5 text-sm font-bold text-primary">{timeline}</span>}
+      <div className="space-y-1 text-base font-semibold text-secondary mt-auto">
+        {useCase && <p className="capitalize">{useCase}</p>}
+        {timeline && <p>{timeline}</p>}
       </div>
       <div className="flex items-center justify-between text-primary font-extrabold text-sm pt-1 border-t border-outline-variant/15">
         <span>View Request</span>
@@ -310,14 +284,14 @@ function DirectoryHomeCard({ icon, title, description, action, accent = 'primary
     >
       <div className={`absolute inset-x-0 top-0 h-1 ${emerald ? 'bg-emerald-500' : 'bg-primary'}`} />
       <div className="flex items-start justify-between gap-5 mb-8">
-        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${emerald ? 'bg-emerald-50 group-hover:bg-emerald-100' : 'bg-primary/8 group-hover:bg-primary/12'}`}>
+        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border transition-colors ${emerald ? 'bg-white border-emerald-200' : 'bg-primary/8 border-transparent group-hover:bg-primary/12'}`}>
           <span className={`material-symbols-outlined text-4xl ${emerald ? 'text-emerald-700' : 'text-primary'}`}>{icon}</span>
         </div>
         <span className="material-symbols-outlined text-primary/30 group-hover:text-primary group-hover:translate-x-1 transition-all">arrow_forward</span>
       </div>
       <h3 className="font-headline text-2xl font-extrabold text-primary mb-3 tracking-tight">{title}</h3>
       <p className="text-secondary text-base leading-relaxed mb-8 min-h-[78px]">{description}</p>
-      <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold ${emerald ? 'bg-emerald-50 text-emerald-700' : 'bg-primary/5 text-primary'}`}>
+      <div className={`inline-flex items-center gap-2 text-sm font-extrabold ${emerald ? 'text-emerald-700' : 'text-primary'}`}>
         {emerald && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />}
         {action}
       </div>
