@@ -527,7 +527,7 @@ export default function AdvisorPage() {
             <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pb-6 min-h-0">
               <div className="flex-grow flex flex-col items-center justify-center gap-6">
                 <div className="flex flex-col items-center text-center">
-                  <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+                  <h1 className="font-headline text-5xl sm:text-6xl md:text-7xl font-extrabold text-primary tracking-tighter leading-tight">
                     Scout
                   </h1>
                   <p className="mt-3 text-lg" style={{ color: MUTED }}>What are we scouting today?</p>
@@ -568,10 +568,7 @@ export default function AdvisorPage() {
                 {messages.map((m, i) => (
                   <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
                     {m.role === 'assistant' && (
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: GREEN }}>
-                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>travel_explore</span>
-                        </span>
+                      <div className="mb-1.5">
                         <span className="text-sm font-bold" style={{ color: INK }}>Scout</span>
                       </div>
                     )}
