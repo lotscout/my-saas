@@ -62,7 +62,7 @@ const US_STATES = [
   'Virginia','Washington','West Virginia','Wisconsin','Wyoming',
 ];
 
-const SELECT_CLS = 'bg-surface-container-low px-3 py-2 rounded-lg border border-transparent hover:border-primary/20 text-sm font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all';
+const SELECT_CLS = 'bg-white px-4 py-3 rounded-xl border border-outline-variant/25 hover:border-primary/30 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all shadow-sm';
 
 const STATE_ABBREV: Record<string, string> = {
   'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
@@ -120,6 +120,17 @@ function fmtLocation(city: string | null, county: string | null, state: string |
   return state || 'Location not specified';
 }
 
+function buyerInitials(req: BuyerRequest): string {
+  const name = getBuyerName(req).trim();
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return (parts[0]?.slice(0, 2) || 'LS').toUpperCase();
+}
+
+function shortUseCase(req: BuyerRequest): string | null {
+  return req.use_case ? req.use_case.split(' — ')[0].trim() : null;
+}
+
 function applyBudgetFilter(req: BuyerRequest, f: string): boolean {
   const max = req.budget_max ?? 0;
   const min = req.budget_min ?? 0;
@@ -153,41 +164,82 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
   const phone = req.contact_phone;
   const email = req.contact_email;
   const reachable = !!(phone || email);
+  const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
+  const budget = fmtBudget(req.budget_min, req.budget_max);
+  const useCase = shortUseCase(req);
 
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="relative bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-3 flex flex-col gap-1.5 cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden min-h-[116px]"
+      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-5 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[250px]"
     >
-      <p className="font-bold text-primary text-sm leading-tight line-clamp-2">{name}</p>
+      <div className="flex items-start gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center font-headline font-extrabold text-lg shrink-0 shadow-sm">
+          {buyerInitials(req)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-emerald-700">
+              Verified Buyer
+            </span>
+          </div>
+          <p className="font-headline font-extrabold text-primary text-xl leading-tight line-clamp-2">{name}</p>
+          {req.display_company && (
+            <p className="text-sm font-semibold text-secondary truncate mt-1">{req.display_company}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3">
+        <div className="rounded-xl bg-surface-container-low px-4 py-3">
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-secondary mb-1">Target Budget</p>
+          <p className="text-base font-extrabold text-on-surface">{budget}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/5 px-3 py-1.5 text-sm font-bold text-primary">
+            <span className="material-symbols-outlined text-base">location_on</span>
+            {location}
+          </span>
+          {useCase && (
+            <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700 capitalize">
+              {useCase}
+            </span>
+          )}
+        </div>
+      </div>
+
       {website && (
         <a
           href={`https://${website.replace(/^https?:\/\//, '')}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={e => e.stopPropagation()}
-          className="flex items-center gap-1 text-xs text-primary/80 hover:text-primary font-medium truncate"
+          className="flex items-center gap-2 text-sm text-primary/80 hover:text-primary font-bold truncate"
         >
-          <span className="material-symbols-outlined text-sm">language</span>
+          <span className="material-symbols-outlined text-base">language</span>
           <span className="truncate">{website.replace(/^https?:\/\//, '')}</span>
         </a>
       )}
       {reachable ? (
-        <div className="mt-auto space-y-0.5">
+        <div className="mt-auto space-y-1.5 border-t border-outline-variant/15 pt-4">
           {phone && (
-            <p className="flex items-center gap-1 text-[11px] text-secondary truncate">
-              <span className="material-symbols-outlined text-sm">call</span>{phone}
+            <p className="flex items-center gap-2 text-sm font-semibold text-secondary truncate">
+              <span className="material-symbols-outlined text-base">call</span>{phone}
             </p>
           )}
           {email && (
-            <p className="flex items-center gap-1 text-[11px] text-secondary truncate">
-              <span className="material-symbols-outlined text-sm">mail</span>{email}
+            <p className="flex items-center gap-2 text-sm font-semibold text-secondary truncate">
+              <span className="material-symbols-outlined text-base">mail</span>{email}
             </p>
           )}
         </div>
       ) : (
-        <p className="mt-auto text-[11px] text-secondary/70 italic">Contact via platform</p>
+        <p className="mt-auto text-sm font-semibold text-secondary/80 border-t border-outline-variant/15 pt-4">Contact via platform</p>
       )}
+      <div className="flex items-center justify-between text-primary font-extrabold text-sm pt-1">
+        <span>View Buyer Profile</span>
+        <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      </div>
     </div>
   );
 }
@@ -204,20 +256,37 @@ function RequestCard({ req }: { req: BuyerRequest }) {
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="relative bg-surface-container-lowest rounded-xl border-2 border-green-700 md:border-gray-200 md:hover:border-green-700 p-3 flex flex-col gap-1 cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden min-h-[116px]"
+      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[230px]"
     >
-      <p className="font-bold text-primary text-sm leading-tight line-clamp-2">{name}</p>
-      <div className="flex items-center gap-0.5 text-xs text-secondary">
-        <span className="material-symbols-outlined text-sm">location_on</span>
-        <span className="truncate">{location}</span>
+      <div className="flex items-start gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center font-headline font-extrabold text-lg shrink-0 shadow-sm">
+          {buyerInitials(req)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-headline font-extrabold text-primary text-xl leading-tight line-clamp-2">{name}</p>
+          <div className="flex items-center gap-1.5 text-sm font-semibold text-secondary mt-1">
+            <span className="material-symbols-outlined text-base">location_on</span>
+            <span className="truncate">{location}</span>
+          </div>
+        </div>
+      </div>
+      <div className="rounded-xl bg-surface-container-low px-4 py-3">
+        <p className="text-[11px] font-extrabold uppercase tracking-wider text-secondary mb-1">Budget</p>
+        <p className="text-base font-extrabold text-on-surface">{fmtBudget(req.budget_min, req.budget_max)}</p>
       </div>
       {(primaryCity(req) || req.lot_size_label) && (
-        <p className="text-[11px] text-secondary truncate">
+        <p className="text-sm font-semibold text-secondary truncate">
           {[primaryCity(req), req.lot_size_label].filter(Boolean).join(' · ')}
         </p>
       )}
-      {useCase && <p className="text-[11px] text-secondary truncate capitalize">{useCase}</p>}
-      {timeline && <p className="text-[11px] text-secondary mt-auto">{timeline}</p>}
+      <div className="flex flex-wrap gap-2 mt-auto">
+        {useCase && <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700 capitalize">{useCase}</span>}
+        {timeline && <span className="rounded-full bg-primary/5 px-3 py-1.5 text-sm font-bold text-primary">{timeline}</span>}
+      </div>
+      <div className="flex items-center justify-between text-primary font-extrabold text-sm pt-1 border-t border-outline-variant/15">
+        <span>View Request</span>
+        <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      </div>
     </div>
   );
 }
@@ -469,7 +538,7 @@ export default function BuyerDirectoryPage() {
               value={tab === 'requests' ? brSearch : globalSearch}
               onChange={e => handleSearchChange(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full bg-white border border-outline-variant/25 rounded-2xl pl-11 pr-10 py-3.5 text-sm text-on-surface placeholder:text-secondary shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+              className="w-full bg-white border border-outline-variant/25 rounded-2xl pl-12 pr-10 py-4 text-base font-medium text-on-surface placeholder:text-secondary shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
             />
             {(tab === 'requests' ? brSearch : globalSearch) && (
               <button
@@ -503,7 +572,7 @@ export default function BuyerDirectoryPage() {
             <>
               {/* Grid view — 3 category cards */}
               {view === 'grid' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
                   {/* Card 1: Top National Buyers */}
                   <button
                     onClick={() => openView('national')}
@@ -613,7 +682,7 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try adjusting your search or filters</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
                       {filteredNational.map((req) => (
                         <DirectoryCard key={req.id} req={req} />
                       ))}
@@ -689,7 +758,7 @@ export default function BuyerDirectoryPage() {
                             <p className="text-sm mt-1">Try a different state or clear your filters</p>
                           </div>
                         ) : (
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
+                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
                             {filteredState.map((req) => (
                               <DirectoryCard key={req.id} req={req} />
                             ))}
@@ -801,7 +870,7 @@ export default function BuyerDirectoryPage() {
                       <p className="text-sm mt-1">Try clearing your filters or check back soon</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                       {filteredActiveBR.map(req => (
                         <RequestCard key={req.id} req={req} />
                       ))}
@@ -904,7 +973,7 @@ export default function BuyerDirectoryPage() {
                   <p className="text-sm">Try adjusting your search or clearing filters</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredBR.map(req => (
                     <RequestCard key={req.id} req={req} />
                   ))}
