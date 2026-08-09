@@ -248,14 +248,14 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
           <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center">
             {/* Left column: hero text */}
-            <div>
+            <div className="text-center md:text-left">
               <h1 className="font-headline text-2xl sm:text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
                 America&apos;s #1 Platform for Off-Market Land Deals.
               </h1>
-              <p className="font-body text-lg text-on-primary-container leading-relaxed mb-8 max-w-2xl">
+              <p className="font-body text-lg text-on-primary-container leading-relaxed mb-8 max-w-2xl mx-auto md:mx-0">
                 LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 mb-10">
+              <div className="flex flex-col sm:flex-row gap-4 mb-10 justify-center md:justify-start">
                 <Link href="/sign-up" className="w-full sm:w-auto text-center bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
                 <Link href="/sign-up" className="w-full sm:w-auto text-center border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
               </div>
@@ -271,16 +271,16 @@ export default function HomePage() {
 
 
       {/* SECTION 2: Social Proof Stats */}
-      <section className="py-16 bg-primary text-white px-4 sm:px-8">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
+      <section className="py-8 sm:py-16 bg-primary text-white px-4 sm:px-8">
+        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 sm:gap-8">
           {[
             { stat: '$4.51M', label: 'Commission Saved' },
             { stat: '$77M+',  label: 'Land Transactions' },
             { stat: '905+',   label: 'Active Listings' },
           ].map(({ stat, label }) => (
-            <div key={label} className="text-center p-8 bg-white/5 rounded-2xl">
-              <div className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-2 text-primary-fixed">{stat}</div>
-              <div className="text-on-primary-container font-medium uppercase tracking-widest text-xs">{label}</div>
+            <div key={label} className="text-center px-2 py-3 sm:p-8 bg-white/5 rounded-xl sm:rounded-2xl">
+              <div className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-1 sm:mb-2 text-primary-fixed leading-none">{stat}</div>
+              <div className="text-on-primary-container font-medium uppercase tracking-wide sm:tracking-widest text-[9px] sm:text-xs leading-tight">{label}</div>
             </div>
           ))}
         </div>
@@ -337,82 +337,56 @@ export default function HomePage() {
 
       {/* SECTION 4: New Buyers Added Daily */}
       <section className="py-16 bg-surface-container-low px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto mb-8 sm:mb-10">
           <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
-          <p className="text-secondary text-base sm:text-lg mb-8 sm:mb-10 max-w-2xl">
+          <p className="text-secondary text-base sm:text-lg max-w-2xl">
             Sellers. These buyers are actively searching for land like yours right now.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Buyer Card 1 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col items-center text-center">
-              <div className="flex justify-center mb-3">
-                <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
-                </span>
-              </div>
-              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">Vanguard Land Trust</h3>
-              <p className="text-secondary text-sm font-medium mb-4">Denver, CO</p>
-              <div className="space-y-1.5 text-sm flex-grow w-full">
-                <p className="text-on-surface-variant">50 to 500 acres</p>
-                <p className="text-on-surface-variant">$500k to $2M budget</p>
-                <p className="text-on-surface-variant">Agricultural</p>
-              </div>
-              <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
-            </div>
+        </div>
 
-            {/* Buyer Card 2 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col items-center text-center">
-              <div className="flex justify-center mb-3">
-                <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
-                </span>
-              </div>
-              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">BuildWorks Inc.</h3>
-              <p className="text-secondary text-sm font-medium mb-4">Austin, TX</p>
-              <div className="space-y-1.5 text-sm flex-grow w-full">
-                <p className="text-on-surface-variant">5 to 20 acres</p>
-                <p className="text-on-surface-variant">$200k to $800k budget</p>
-                <p className="text-on-surface-variant">Residential</p>
-              </div>
-              <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
-            </div>
-
-            {/* Buyer Card 3 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-container-high flex flex-col items-center text-center">
-              <div className="flex justify-center mb-3">
-                <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
-                </span>
-              </div>
-              <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">Meridian Land Holdings</h3>
-              <p className="text-secondary text-sm font-medium mb-4">Seattle, WA</p>
-              <div className="space-y-1.5 text-sm flex-grow w-full">
-                <p className="text-on-surface-variant">100 to 1,000 acres</p>
-                <p className="text-on-surface-variant">$1M to $5M budget</p>
-                <p className="text-on-surface-variant">Commercial</p>
-              </div>
-              <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
-            </div>
-
-            {/* Card 4 - locked */}
-            <div className="relative bg-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full border border-surface-container-high">
-              <div className="blur-sm opacity-40 absolute inset-0 p-6 space-y-4 pointer-events-none">
-                <div className="w-12 h-12 bg-primary/10 rounded-full"></div>
-                <div className="h-4 bg-surface-container-high rounded w-3/4"></div>
-                <div className="h-3 bg-surface-container-high rounded w-1/2"></div>
-                <div className="space-y-2 pt-2">
-                  <div className="h-3 bg-surface-container-high rounded w-full"></div>
-                  <div className="h-3 bg-surface-container-high rounded w-5/6"></div>
-                  <div className="h-3 bg-surface-container-high rounded w-4/5"></div>
+        <div className="overflow-hidden">
+          <div
+            className="flex gap-5 w-max"
+            style={{ animation: 'marquee 40s linear infinite' }}
+            onMouseEnter={e => (e.currentTarget.style.animationPlayState = 'paused')}
+            onMouseLeave={e => (e.currentTarget.style.animationPlayState = 'running')}
+          >
+            {[
+              { name: 'Vanguard Land Trust', location: 'Denver, CO', acres: '50 to 500 acres', budget: '$500k to $2M budget', use: 'Agricultural' },
+              { name: 'BuildWorks Inc.', location: 'Austin, TX', acres: '5 to 20 acres', budget: '$200k to $800k budget', use: 'Residential' },
+              { name: 'Meridian Land Holdings', location: 'Seattle, WA', acres: '100 to 1,000 acres', budget: '$1M to $5M budget', use: 'Commercial' },
+              { name: 'Summit Acre Partners', location: 'Boise, ID', acres: '20 to 80 acres', budget: '$350k to $1.5M budget', use: 'Residential' },
+              { name: 'Ironwood Development', location: 'Phoenix, AZ', acres: '10 to 60 acres', budget: '$750k to $3M budget', use: 'Mixed Use' },
+              { name: 'Prairie Capital Group', location: 'Tulsa, OK', acres: '40 to 300 acres', budget: '$400k to $2.5M budget', use: 'Ranch' },
+              // Duplicate for seamless loop
+              { name: 'Vanguard Land Trust', location: 'Denver, CO', acres: '50 to 500 acres', budget: '$500k to $2M budget', use: 'Agricultural' },
+              { name: 'BuildWorks Inc.', location: 'Austin, TX', acres: '5 to 20 acres', budget: '$200k to $800k budget', use: 'Residential' },
+              { name: 'Meridian Land Holdings', location: 'Seattle, WA', acres: '100 to 1,000 acres', budget: '$1M to $5M budget', use: 'Commercial' },
+              { name: 'Summit Acre Partners', location: 'Boise, ID', acres: '20 to 80 acres', budget: '$350k to $1.5M budget', use: 'Residential' },
+              { name: 'Ironwood Development', location: 'Phoenix, AZ', acres: '10 to 60 acres', budget: '$750k to $3M budget', use: 'Mixed Use' },
+              { name: 'Prairie Capital Group', location: 'Tulsa, OK', acres: '40 to 300 acres', budget: '$400k to $2.5M budget', use: 'Ranch' },
+            ].map((buyer, i) => (
+              <div key={i} className="w-72 flex-none bg-white rounded-xl p-5 shadow-sm border border-surface-container-high min-h-[280px] flex flex-col items-center text-center">
+                <div className="flex justify-center mb-3">
+                  <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
+                  </span>
                 </div>
+                <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">{buyer.name}</h3>
+                <p className="text-secondary text-sm font-medium mb-4">{buyer.location}</p>
+                <div className="space-y-1.5 text-sm flex-grow w-full">
+                  <p className="text-on-surface-variant">{buyer.acres}</p>
+                  <p className="text-on-surface-variant">{buyer.budget}</p>
+                  <p className="text-on-surface-variant">{buyer.use}</p>
+                </div>
+                <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
               </div>
-              <div className="relative z-10 p-6 flex flex-col items-center justify-center h-full text-center min-h-[280px]">
-                <span className="material-symbols-outlined text-primary text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                <p className="font-headline font-bold text-primary mb-6 leading-snug">Sign up to see all active buyers</p>
-                <Link href="/sign-up" className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</Link>
-              </div>
-            </div>
+            ))}
           </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8 flex justify-center">
+          <Link href="/sign-up" className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">See All Active Buyers</Link>
         </div>
       </section>
 
