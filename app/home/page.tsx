@@ -111,10 +111,19 @@ function HeroMap() {
   useEffect(() => {
     const loadScript = (src: string): Promise<void> =>
       new Promise((resolve, reject) => {
-        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+        const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
+        if (existing) {
+          if (existing.dataset.loaded === 'true') { resolve(); return; }
+          existing.addEventListener('load', () => resolve(), { once: true });
+          existing.addEventListener('error', reject, { once: true });
+          return;
+        }
         const s = document.createElement('script');
         s.src = src;
-        s.onload = () => resolve();
+        s.onload = () => {
+          s.dataset.loaded = 'true';
+          resolve();
+        };
         s.onerror = reject;
         document.head.appendChild(s);
       });
@@ -136,7 +145,10 @@ function HeroMap() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const topojson = (window as any).topojson;
 
-      const w = containerRef.current.clientWidth;
+      await new Promise(requestAnimationFrame);
+      if (cancelled || !containerRef.current) return;
+
+      const w = containerRef.current.clientWidth || 360;
       const h = Math.round(w * 0.64);
 
       const svg = d3.select(svgRef.current).attr('width', w).attr('height', h);
