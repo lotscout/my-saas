@@ -29,13 +29,13 @@ const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; enterp
 
 function PlanFeatures({ tier }: { tier: 'standard' | 'priority' | 'enterprise' }) {
   return (
-    <ul className="space-y-2 mb-8 flex-grow">
+    <ul className="space-y-1.5 sm:space-y-2 mb-6 sm:mb-8 flex-grow">
       {ALL_FEATURES.map((f) => {
         const included = f[tier];
         return (
           <li
             key={f.name}
-            className={`flex items-start gap-2 text-lg ${included ? 'text-on-surface' : 'text-secondary opacity-40'}`}
+            className={`flex items-start gap-2 text-sm sm:text-lg ${included ? 'text-on-surface' : 'text-secondary opacity-40'}`}
           >
             {included ? (
               <span className="inline-flex items-center justify-center rounded-full flex-none mt-1" style={{ backgroundColor: '#1D9E75', width: '18px', height: '18px' }}>
@@ -232,9 +232,9 @@ export default function HomePage() {
           <div className="hidden md:flex items-center gap-8">
 
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/sign-in" className="px-4 py-2 rounded-lg border border-primary/30 text-primary text-sm font-bold hover:bg-primary/5 transition-colors">Sign In</Link>
-            <Link href="/sign-up" className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">Sign Up</Link>
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <Link href="/sign-in" className="px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border border-primary/30 text-primary text-xs sm:text-sm font-bold hover:bg-primary/5 transition-colors whitespace-nowrap">Sign In</Link>
+            <Link href="/sign-up" className="px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-primary text-white text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors whitespace-nowrap">Sign Up</Link>
           </div>
         </div>
       </nav>
@@ -252,9 +252,13 @@ export default function HomePage() {
               <h1 className="font-headline text-2xl sm:text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.05] mb-6">
                 America&apos;s #1 Platform for Off-Market Land Deals.
               </h1>
-              <p className="font-body text-lg text-on-primary-container leading-relaxed mb-8 max-w-2xl mx-auto md:mx-0">
-                LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.
+              <p className="font-body text-base sm:text-lg text-on-primary-container leading-relaxed mb-6 md:mb-8 max-w-2xl mx-auto md:mx-0">
+                <span className="md:hidden">Buy, sell, and discover off-market land deals across the U.S.</span>
+                <span className="hidden md:inline">LotScout connects serious land buyers and sellers directly, without the MLS or commissions. Join today and save thousands on your next land deal.</span>
               </p>
+              <div className="md:hidden mb-8 max-w-sm mx-auto">
+                <HeroMap />
+              </div>
               <div className="flex flex-col sm:flex-row gap-4 mb-10 justify-center md:justify-start">
                 <Link href="/sign-up" className="w-full sm:w-auto text-center bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
                 <Link href="/sign-up" className="w-full sm:w-auto text-center border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
@@ -289,7 +293,7 @@ export default function HomePage() {
       {/* SECTION 3: Marketplace Preview */}
       <section id="marketplace" className="py-16 bg-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-4">A Glimpse of What&apos;s Inside</h2>
+          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-4">Vacant Land for Sale — No Leads, Just Deals</h2>
           <p className="text-secondary text-base sm:text-xl mb-8 sm:mb-10">All properties on LotScout are off-market listings you won&apos;t find on Zillow or Realtor.com.</p>
         </div>
 
@@ -335,13 +339,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 4: New Buyers Added Daily */}
+      {/* SECTION 4: Be Seen by Active Buyers */}
       <section className="py-16 bg-surface-container-low px-4 sm:px-8">
         <div className="max-w-7xl mx-auto mb-8 sm:mb-10">
-          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-3">New Buyers Added Daily</h2>
-          <p className="text-secondary text-base sm:text-lg max-w-2xl">
-            Sellers. These buyers are actively searching for land like yours right now.
-          </p>
+          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight">Be Seen by Active Buyers</h2>
         </div>
 
         <div className="overflow-hidden">
@@ -352,64 +353,66 @@ export default function HomePage() {
             onMouseLeave={e => (e.currentTarget.style.animationPlayState = 'running')}
           >
             {[
-              { name: 'Vanguard Land Trust', location: 'Denver, CO', acres: '50 to 500 acres', budget: '$500k to $2M budget', use: 'Agricultural' },
-              { name: 'BuildWorks Inc.', location: 'Austin, TX', acres: '5 to 20 acres', budget: '$200k to $800k budget', use: 'Residential' },
-              { name: 'Meridian Land Holdings', location: 'Seattle, WA', acres: '100 to 1,000 acres', budget: '$1M to $5M budget', use: 'Commercial' },
-              { name: 'Summit Acre Partners', location: 'Boise, ID', acres: '20 to 80 acres', budget: '$350k to $1.5M budget', use: 'Residential' },
-              { name: 'Ironwood Development', location: 'Phoenix, AZ', acres: '10 to 60 acres', budget: '$750k to $3M budget', use: 'Mixed Use' },
-              { name: 'Prairie Capital Group', location: 'Tulsa, OK', acres: '40 to 300 acres', budget: '$400k to $2.5M budget', use: 'Ranch' },
+              { name: 'Vanguard Land Trust', location: 'Denver, CO', budget: '$500k to $2M', zoning: 'Agricultural' },
+              { name: 'BuildWorks Inc.', location: 'Austin, TX', budget: '$200k to $800k', zoning: 'Residential' },
+              { name: 'Meridian Land Holdings', location: 'Seattle, WA', budget: '$1M to $5M', zoning: 'Commercial' },
+              { name: 'Summit Acre Partners', location: 'Boise, ID', budget: '$350k to $1.5M', zoning: 'Residential' },
+              { name: 'Ironwood Development', location: 'Phoenix, AZ', budget: '$750k to $3M', zoning: 'Industrial' },
+              { name: 'Prairie Capital Group', location: 'Tulsa, OK', budget: '$400k to $2.5M', zoning: 'Agricultural' },
+              { name: 'Harbor Ridge Builders', location: 'Charlotte, NC', budget: '$600k to $3M', zoning: 'Residential' },
+              { name: 'Keystone Industrial Sites', location: 'Columbus, OH', budget: '$1.2M to $6M', zoning: 'Industrial' },
               // Duplicate for seamless loop
-              { name: 'Vanguard Land Trust', location: 'Denver, CO', acres: '50 to 500 acres', budget: '$500k to $2M budget', use: 'Agricultural' },
-              { name: 'BuildWorks Inc.', location: 'Austin, TX', acres: '5 to 20 acres', budget: '$200k to $800k budget', use: 'Residential' },
-              { name: 'Meridian Land Holdings', location: 'Seattle, WA', acres: '100 to 1,000 acres', budget: '$1M to $5M budget', use: 'Commercial' },
-              { name: 'Summit Acre Partners', location: 'Boise, ID', acres: '20 to 80 acres', budget: '$350k to $1.5M budget', use: 'Residential' },
-              { name: 'Ironwood Development', location: 'Phoenix, AZ', acres: '10 to 60 acres', budget: '$750k to $3M budget', use: 'Mixed Use' },
-              { name: 'Prairie Capital Group', location: 'Tulsa, OK', acres: '40 to 300 acres', budget: '$400k to $2.5M budget', use: 'Ranch' },
+              { name: 'Vanguard Land Trust', location: 'Denver, CO', budget: '$500k to $2M', zoning: 'Agricultural' },
+              { name: 'BuildWorks Inc.', location: 'Austin, TX', budget: '$200k to $800k', zoning: 'Residential' },
+              { name: 'Meridian Land Holdings', location: 'Seattle, WA', budget: '$1M to $5M', zoning: 'Commercial' },
+              { name: 'Summit Acre Partners', location: 'Boise, ID', budget: '$350k to $1.5M', zoning: 'Residential' },
+              { name: 'Ironwood Development', location: 'Phoenix, AZ', budget: '$750k to $3M', zoning: 'Industrial' },
+              { name: 'Prairie Capital Group', location: 'Tulsa, OK', budget: '$400k to $2.5M', zoning: 'Agricultural' },
+              { name: 'Harbor Ridge Builders', location: 'Charlotte, NC', budget: '$600k to $3M', zoning: 'Residential' },
+              { name: 'Keystone Industrial Sites', location: 'Columbus, OH', budget: '$1.2M to $6M', zoning: 'Industrial' },
             ].map((buyer, i) => (
-              <div key={i} className="w-72 flex-none bg-white rounded-xl p-5 shadow-sm border border-surface-container-high min-h-[280px] flex flex-col items-center text-center">
-                <div className="flex justify-center mb-3">
-                  <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
-                  </span>
+              <div key={i} className="w-72 flex-none bg-white rounded-xl p-5 shadow-sm border border-surface-container-high min-h-[280px] flex flex-col text-left">
+                <div className="flex items-center justify-end mb-5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary bg-primary/5 px-2 py-0.5 rounded-full">Active</span>
                 </div>
-                <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-0.5">{buyer.name}</h3>
-                <p className="text-secondary text-sm font-medium mb-4">{buyer.location}</p>
-                <div className="space-y-1.5 text-sm flex-grow w-full">
-                  <p className="text-on-surface-variant">{buyer.acres}</p>
-                  <p className="text-on-surface-variant">{buyer.budget}</p>
-                  <p className="text-on-surface-variant">{buyer.use}</p>
+                <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-4">{buyer.name}</h3>
+                <div className="space-y-3 text-sm flex-grow w-full">
+                  <p className="text-on-surface-variant leading-relaxed">
+                    <span className="block text-[10px] font-extrabold uppercase tracking-widest text-secondary/60 mb-0.5">Actively buying in</span>
+                    <span className="font-bold text-on-surface">{buyer.location}</span>
+                  </p>
+                  <p className="text-on-surface-variant leading-relaxed">
+                    <span className="block text-[10px] font-extrabold uppercase tracking-widest text-secondary/60 mb-0.5">Budget</span>
+                    <span className="font-bold text-on-surface">{buyer.budget}</span>
+                  </p>
+                  <p className="text-on-surface-variant leading-relaxed">
+                    <span className="block text-[10px] font-extrabold uppercase tracking-widest text-secondary/60 mb-0.5">Zoning</span>
+                    <span className="font-bold text-on-surface">{buyer.zoning}</span>
+                  </p>
                 </div>
-                <Link href="/sign-up" className="mt-5 w-full py-2.5 rounded-xl border border-primary/20 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all text-center block">View Profile</Link>
               </div>
             ))}
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8 flex justify-center">
-          <Link href="/sign-up" className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">See All Active Buyers</Link>
+          <Link href="/sign-up" className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">See More Buyers</Link>
         </div>
       </section>
 
-      {/* SECTION: LotScout Search */}
+      {/* SECTION: Scout Search */}
       <section className="py-20 bg-primary px-4 sm:px-8">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-widest mb-6">
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-            AI-Powered
-          </div>
-          <h2 className="font-headline text-3xl sm:text-5xl font-bold text-white mb-4">LotScout Search</h2>
-          <p className="text-on-primary-container text-lg mb-10">An AI powered land development search tool</p>
-          <Link href="/sign-up" className="flex items-center gap-3 bg-white rounded-2xl px-6 py-4 shadow-2xl hover:shadow-none transition-shadow cursor-pointer w-full">
+          <h2 className="font-headline text-3xl sm:text-5xl font-bold text-white mb-4">Scout Search</h2>
+          <p className="text-on-primary-container text-lg mb-10">Analyze your deals, learn your market, price your property, all with Scout.</p>
+          <Link href="/sign-up" className="flex items-center gap-3 bg-white rounded-2xl px-6 py-4 min-h-[64px] shadow-2xl hover:shadow-none transition-shadow cursor-pointer w-full">
             <span className="material-symbols-outlined text-primary text-2xl">search</span>
-            <span className="text-secondary text-base flex-grow text-left">Search land by location, acreage, zoning, price...</span>
-            <span className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-xl whitespace-nowrap">Search</span>
           </Link>
           <div className="flex flex-wrap justify-center gap-2 mt-6">
             {[
-              'Ag-zoned land near Denver',
-              '50+ acres under $500k in Colorado',
-              'Off-market ranches in Texas',
-              'Parcels near path of growth',
+              'How do I add value to my property?',
+              'Buyers in my area',
+              'Where should I invest in land?',
             ].map((q) => (
               <Link key={q} href="/sign-up" className="text-white/70 hover:text-white text-xs border border-white/20 hover:border-white/50 px-3 py-1.5 rounded-full transition-colors">
                 {q}
@@ -422,12 +425,10 @@ export default function HomePage() {
       {/* SECTION: Market Updates */}
       <section className="py-16 bg-surface-container-low px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-end justify-between mb-8 sm:mb-10 flex-wrap gap-4">
-            <div>
-              <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-2">Market Updates</h2>
-              <p className="text-secondary text-base sm:text-lg max-w-2xl">Land market intelligence: permit trends, price shifts, and deal activity across key markets.</p>
-            </div>
-            <Link href="/sign-up" className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
+          <div className="mb-8 sm:mb-10 text-center">
+            <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-2">Market Updates</h2>
+            <p className="text-secondary text-base sm:text-lg max-w-2xl mx-auto">Get ahead of the competition by knowing your market.</p>
+            <Link href="/sign-up" className="mt-4 inline-flex text-sm font-bold text-primary hover:underline items-center gap-1">
               View all updates <span className="material-symbols-outlined text-base">arrow_forward</span>
             </Link>
           </div>
@@ -484,10 +485,10 @@ export default function HomePage() {
       {/* SECTION 7: Pricing */}
       <section id="pricing" className="py-16 bg-surface px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary mb-8 sm:mb-10 text-center tracking-tight">Simple, Transparent Pricing. No Hidden Fees.</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary mb-8 sm:mb-10 text-center tracking-tight">Simple, Transparent Pricing.</h2>
+          <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:snap-none md:pb-0">
             {/* Standard */}
-            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
+            <div className="w-[86vw] max-w-sm flex-none snap-center bg-white p-5 sm:p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high md:w-auto md:max-w-none md:flex-auto">
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Standard</h3>
               <div className="flex items-baseline gap-1 mb-4">
                 <span className="text-4xl font-extrabold text-primary">$97</span>
@@ -497,7 +498,7 @@ export default function HomePage() {
               <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
             </div>
             {/* Priority */}
-            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative mt-6 md:mt-0">
+            <div className="w-[86vw] max-w-sm flex-none snap-center bg-white p-5 sm:p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative mt-4 md:mt-0 md:w-auto md:max-w-none md:flex-auto">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
               <div className="flex items-baseline gap-1 mb-4">
@@ -508,7 +509,7 @@ export default function HomePage() {
               <Link href="/sign-up" className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all text-center block">Get Started</Link>
             </div>
             {/* Exclusive */}
-            <div className="bg-white p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high">
+            <div className="w-[86vw] max-w-sm flex-none snap-center bg-white p-5 sm:p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high md:w-auto md:max-w-none md:flex-auto">
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
               <div className="flex items-baseline gap-1 mb-4">
                 <span className="text-4xl font-extrabold text-primary">$529</span>
