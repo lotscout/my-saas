@@ -221,6 +221,21 @@ export default function MarketplacePage() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mine = params.get('mine') === 'true';
+    const search = params.get('search');
+    const minAcres = params.get('minAcres');
+    const maxAcres = params.get('maxAcres');
+    const zoning = params.get('zoning');
+
+    if (mine) setShowMyListings(true);
+    if (search) setSearchQuery(search);
+    if (minAcres) setFilterLotSizeMin(minAcres);
+    if (maxAcres) setFilterLotSizeMax(maxAcres);
+    if (zoning) setFilterZoning([zoning]);
+  }, []);
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {

@@ -586,6 +586,13 @@ export default function BuyerDirectoryPage() {
               <h1 className="font-headline text-3xl sm:text-5xl font-extrabold text-primary tracking-tight leading-tight">Buyer Directory</h1>
               <p className="text-secondary text-base mt-2 max-w-2xl">Search active land buyers and review their acquisition criteria.</p>
             </div>
+            <Link
+              href="/create-buyer-request"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-primary/90 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:shrink-0"
+            >
+              <span className="material-symbols-outlined text-lg">add_circle</span>
+              Create Request
+            </Link>
           </section>
 
           {/* Search / sort / filter */}
