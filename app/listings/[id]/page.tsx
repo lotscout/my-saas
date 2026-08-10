@@ -13,6 +13,33 @@ import COUNTY_CENTROIDS from '@/lib/county-centroids.json';
 const IMAGE_REQUEST_BODY =
   "Hi, I'm interested in this property and would like to request additional images. Thank you!";
 
+const STATE_NAMES_TO_ABBREV: Record<string, string> = {
+  alabama: 'AL', alaska: 'AK', arizona: 'AZ', arkansas: 'AR', california: 'CA',
+  colorado: 'CO', connecticut: 'CT', delaware: 'DE', florida: 'FL', georgia: 'GA',
+  hawaii: 'HI', idaho: 'ID', illinois: 'IL', indiana: 'IN', iowa: 'IA', kansas: 'KS',
+  kentucky: 'KY', louisiana: 'LA', maine: 'ME', maryland: 'MD', massachusetts: 'MA',
+  michigan: 'MI', minnesota: 'MN', mississippi: 'MS', missouri: 'MO', montana: 'MT',
+  nebraska: 'NE', nevada: 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+  'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND',
+  ohio: 'OH', oklahoma: 'OK', oregon: 'OR', pennsylvania: 'PA', 'rhode island': 'RI',
+  'south carolina': 'SC', 'south dakota': 'SD', tennessee: 'TN', texas: 'TX',
+  utah: 'UT', vermont: 'VT', virginia: 'VA', washington: 'WA', 'west virginia': 'WV',
+  wisconsin: 'WI', wyoming: 'WY', 'district of columbia': 'DC',
+};
+
+function normalizeStateForMap(state: string | null): string | null {
+  const value = state?.trim();
+  if (!value) return null;
+  if (/^[A-Za-z]{2}$/.test(value)) return value.toUpperCase();
+  return STATE_NAMES_TO_ABBREV[value.toLowerCase()] ?? null;
+}
+
+function normalizeCountyForMap(county: string | null): string | null {
+  const value = county?.trim();
+  if (!value) return null;
+  return value.replace(/\s+County$/i, '').trim();
+}
+
 const STATE_CENTROIDS: Record<string, [number, number]> = {
   AL: [32.7990, -86.8073], AK: [64.2008, -153.4937], AZ: [34.2744, -111.6602],
   AR: [34.8938, -92.4426], CA: [37.1841, -119.4696], CO: [38.9972, -105.5478],
@@ -90,10 +117,12 @@ function SingleListingMap({ county, state }: { county: string | null; state: str
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
     const centroids = COUNTY_CENTROIDS as unknown as Record<string, [number, number]>;
-    const key = county && state ? `${county}|${state}` : null;
+    const stateCode = normalizeStateForMap(state);
+    const countyName = normalizeCountyForMap(county);
+    const key = countyName && stateCode ? `${countyName}|${stateCode}` : null;
     let coords: [number, number] | null = null;
     if (key) coords = centroids[key] ?? null;
-    if (!coords && state) coords = STATE_CENTROIDS[state] ?? null;
+    if (!coords && stateCode) coords = STATE_CENTROIDS[stateCode] ?? null;
     if (!coords) return;
     const c = coords;
 
