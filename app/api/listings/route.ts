@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from('listings')
     .select(
-      'id,title,property_description,state,county,zip_code,street_address,apn,' +
+      'id,title,property_description,city,state,county,zip_code,street_address,apn,' +
       'lot_size_acres,lot_size_sqft,zoning,road_access,utilities,asking_price,' +
       'price_negotiable,ownership_type,contact_methods,status,photos_urls,' +
       'owner_name,digital_signature,created_at,user_id,promoted,boost_expires_at,lat,lng'
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
   if (search) {
     query = query.or(
-      `title.ilike.%${search}%,state.ilike.%${search}%,county.ilike.%${search}%,zip_code.ilike.%${search}%`
+      `title.ilike.%${search}%,city.ilike.%${search}%,state.ilike.%${search}%,county.ilike.%${search}%,zip_code.ilike.%${search}%`
     );
   }
 
@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
       ownershipCertified,
       title,
       propertyDescription,
+      city,
       state,
       county,
       zipCode,
@@ -137,6 +138,19 @@ export async function POST(request: NextRequest) {
       signatureDate,
     } = body;
 
+    const streetAddressClean = typeof streetAddress === 'string' ? streetAddress.trim() : '';
+    const apnClean = typeof apn === 'string' ? apn.trim() : '';
+    const cityClean = typeof city === 'string' ? city.trim() : '';
+    const stateClean = typeof state === 'string' ? state.trim() : '';
+    const zipCodeClean = typeof zipCode === 'string' ? zipCode.trim() : '';
+
+    if (!streetAddressClean && !apnClean) {
+      return NextResponse.json({ error: 'Enter a street address or APN — at least one is required' }, { status: 400 });
+    }
+    if (!cityClean) return NextResponse.json({ error: 'City is required' }, { status: 400 });
+    if (!stateClean) return NextResponse.json({ error: 'State is required' }, { status: 400 });
+    if (!zipCodeClean) return NextResponse.json({ error: 'Zip code is required' }, { status: 400 });
+
     const lotSizeAcres = lotSizeUnit === 'acres' && lotSizeValue ? Number(lotSizeValue) : null;
     const lotSizeSqft  = lotSizeUnit === 'sqft'  && lotSizeValue ? Number(lotSizeValue) : null;
 
@@ -159,11 +173,12 @@ export async function POST(request: NextRequest) {
       ownership_certified:     ownershipCertified     ?? false,
       title:                   title                  ?? null,
       property_description:    propertyDescription    ?? null,
-      state:                   state                  ?? null,
+      city:                    cityClean,
+      state:                   stateClean,
       county:                  county                 ?? null,
-      zip_code:                zipCode                ?? null,
-      street_address:          streetAddress          ?? null,
-      apn:                     apn                    ?? null,
+      zip_code:                zipCodeClean,
+      street_address:          streetAddressClean || null,
+      apn:                     apnClean || null,
       lot_size_acres:          lotSizeAcres,
       lot_size_sqft:           lotSizeSqft,
       zoning:                  zoning                 ?? null,

@@ -41,6 +41,7 @@ interface Listing {
   id: string;
   title: string | null;
   property_description: string | null;
+  city: string | null;
   state: string | null;
   county: string | null;
   zip_code: string | null;
@@ -465,6 +466,7 @@ export default function MarketplacePage() {
           ? (l.state ?? '').toUpperCase() === stateAbbrev
           : (l.state ?? '').toLowerCase().includes(qLow)
         ) ||
+        (l.city ?? '').toLowerCase().includes(qLow) ||
         (l.county ?? '').toLowerCase().includes(qLow) ||
         (l.zip_code ?? '').includes(qLow)
       );

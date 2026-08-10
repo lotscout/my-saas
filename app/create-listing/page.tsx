@@ -135,6 +135,7 @@ export default function CreateListingPage() {
           ownershipCertified: formData.ownership_certified,
           title: formData.title,
           propertyDescription: formData.property_description,
+          city: formData.city,
           state: formData.state,
           county: formData.county,
           zipCode: formData.zip_code,
@@ -211,6 +212,9 @@ export default function CreateListingPage() {
     const errors: Record<string, string> = {}
     if (!formData.street_address?.trim() && !formData.apn?.trim())
       errors.address = 'Enter a street address or APN — at least one is required'
+    if (!formData.city?.trim()) errors.city = 'City is required'
+    if (!formData.state) errors.state = 'State is required'
+    if (!formData.zip_code?.trim()) errors.zip_code = 'Zip code is required'
     const lotVal = lotSizeUnit === 'acres' ? formData.lot_size_acres : formData.lot_size_sqft
     if (!lotVal || Number(lotVal) <= 0) errors.lot_size = 'Lot size is required'
     if (!formData.zoning) errors.zoning = 'Select a zoning type'
@@ -477,7 +481,7 @@ export default function CreateListingPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="md:col-span-2 space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">Address *</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">Address <span className="font-medium text-secondary/70">(or APN required)</span></label>
                         <input
                           type="text"
                           value={formData.street_address ?? ''}
@@ -487,7 +491,7 @@ export default function CreateListingPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">APN (Parcel Number) *</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">APN (Parcel Number) <span className="font-medium text-secondary/70">(or address required)</span></label>
                         <input
                           type="text"
                           value={formData.apn ?? ''}
@@ -498,20 +502,32 @@ export default function CreateListingPage() {
                       </div>
                     </div>
                     {step2Errors.address && <p className="text-xs text-error font-medium -mt-4">{step2Errors.address}</p>}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div className="col-span-2 md:col-span-1 space-y-1">
+                        <label className="block text-sm font-bold text-secondary tracking-wide">City *</label>
+                        <input
+                          type="text"
+                          value={formData.city ?? ''}
+                          onChange={e => { set('city', e.target.value); setStep2Errors(prev => ({ ...prev, city: '' })) }}
+                          placeholder="City"
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.city ? 'ring-2 ring-error' : ''}`}
+                        />
+                        {step2Errors.city && <p className="text-xs text-error font-medium mt-1">{step2Errors.city}</p>}
+                      </div>
                       <div className="space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">State</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">State *</label>
                         <div className="relative">
                           <select
                             value={formData.state ?? ''}
-                            onChange={e => set('state', e.target.value)}
-                            className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+                            onChange={e => { set('state', e.target.value); setStep2Errors(prev => ({ ...prev, state: '' })) }}
+                            className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all appearance-none ${step2Errors.state ? 'ring-2 ring-error' : ''}`}
                           >
                             <option value="">Select State</option>
                             {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                           <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-secondary text-sm">expand_more</span>
                         </div>
+                        {step2Errors.state && <p className="text-xs text-error font-medium mt-1">{step2Errors.state}</p>}
                       </div>
                       <div className="space-y-1">
                         <label className="block text-sm font-bold text-secondary tracking-wide">County</label>
@@ -524,14 +540,15 @@ export default function CreateListingPage() {
                         />
                       </div>
                       <div className="col-span-2 md:col-span-1 space-y-1">
-                        <label className="block text-sm font-bold text-secondary tracking-wide">Zip Code</label>
+                        <label className="block text-sm font-bold text-secondary tracking-wide">Zip Code *</label>
                         <input
                           type="text"
                           value={formData.zip_code ?? ''}
-                          onChange={e => set('zip_code', e.target.value)}
+                          onChange={e => { set('zip_code', e.target.value); setStep2Errors(prev => ({ ...prev, zip_code: '' })) }}
                           placeholder="00000"
-                          className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all"
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.zip_code ? 'ring-2 ring-error' : ''}`}
                         />
+                        {step2Errors.zip_code && <p className="text-xs text-error font-medium mt-1">{step2Errors.zip_code}</p>}
                       </div>
                     </div>
                   </section>
