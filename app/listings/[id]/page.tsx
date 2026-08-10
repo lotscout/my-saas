@@ -654,10 +654,10 @@ export default function ListingDetailPage() {
                 <p className="text-secondary text-sm">~{fmtPrice(pricePerAcre)} / acre</p>
               )}
 
-              <div className="border-t border-outline-variant/15 my-5" />
+              <div className="border-t border-outline-variant/15 my-3" />
 
               {/* Seller */}
-              <div className="flex items-center gap-3 mb-5">
+              <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-green-700 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 uppercase tracking-wide">
                   {sellerInitials}
                 </div>
@@ -672,10 +672,10 @@ export default function ListingDetailPage() {
               </div>
 
               {/* Action buttons */}
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={handleMessage}
-                  className="w-full py-2 bg-green-700 text-white font-bold text-xs rounded-lg hover:bg-green-800 transition-colors active:scale-95"
+                  className="w-full py-1.5 bg-green-700 text-white font-bold text-[11px] rounded-md hover:bg-green-800 transition-colors active:scale-95"
                 >
                   Message Seller
                 </button>
@@ -684,15 +684,15 @@ export default function ListingDetailPage() {
                   <button
                     onClick={handleRequestImages}
                     disabled={imageRequestSent || imageRequestLoading}
-                    className="w-full py-2 border border-green-700 text-green-700 font-bold text-xs rounded-lg hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-full py-1.5 border border-green-700 text-green-700 font-bold text-[11px] rounded-md hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    {imageRequestSent ? 'Images Requested ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
+                    {imageRequestSent ? 'Requested ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
                   </button>
                 ) : !tierLoading ? (
                   <div className="relative group">
                     <button
                       disabled
-                      className="w-full py-2 border border-green-700/30 text-green-700/40 font-bold text-xs rounded-lg cursor-not-allowed"
+                      className="w-full py-1.5 border border-green-700/30 text-green-700/40 font-bold text-[11px] rounded-md cursor-not-allowed"
                     >
                       Request Images
                     </button>
@@ -703,7 +703,7 @@ export default function ListingDetailPage() {
                 ) : null}
               </div>
 
-              <div className="border-t border-outline-variant/15 mt-5 pt-4">
+              <div className="border-t border-outline-variant/15 mt-3 pt-3">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <span className="text-xs text-secondary">Listed {fmtListingDate(listing.created_at)}</span>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
