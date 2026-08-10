@@ -269,6 +269,7 @@ export default function MarketplacePage() {
   const [showBuyerFreeModal, setShowBuyerFreeModal] = useState(false);
   const [showContactUpgradeModal, setShowContactUpgradeModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'properties' | 'buyer-requests'>('properties');
+  const [showMyListings, setShowMyListings] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsSort, setListingsSort] = useState('recommended');
@@ -412,6 +413,7 @@ export default function MarketplacePage() {
   useEffect(() => {
     setListingsLoading(true);
     const params = new URLSearchParams({ sort: listingsSort, limit: '200' });
+    if (showMyListings && profile?.id) params.set('mine', 'true');
     fetch(`/api/listings?${params}`)
       .then(r => r.json())
       .then(data => {
@@ -432,7 +434,7 @@ export default function MarketplacePage() {
         setListingsLoading(false);
       })
       .catch(() => setListingsLoading(false));
-  }, [listingsSort]);
+  }, [listingsSort, showMyListings, profile?.id]);
 
   useEffect(() => {
     if (activeTab !== 'buyer-requests') return;
@@ -540,6 +542,15 @@ export default function MarketplacePage() {
 
     return result;
   }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeMin, filterLotSizeMax, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleMyListingsClick() {
+    if (!profile?.id) {
+      router.push('/login');
+      return;
+    }
+    setActiveTab('properties');
+    setShowMyListings(prev => !prev);
+  }
 
   const filteredBuyerRequests = useMemo(() => {
     const filtered = buyerRequests.filter(req => {
@@ -716,7 +727,7 @@ export default function MarketplacePage() {
 
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1400px] mx-auto">
         {/* Header */}
-        <section className="mb-8 flex flex-col md:flex-row justify-between items-end gap-6">
+        <section className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="max-w-2xl">
             <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
               Scout Your <span className="text-emerald-600">Next Deal</span>
@@ -724,6 +735,27 @@ export default function MarketplacePage() {
             <p className="text-slate-500 font-body text-lg leading-relaxed">
               Advanced land acquisition powered by cartographic precision. Browse 2,400+ off-market listings throughout the U.S
             </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 md:justify-end">
+            <button
+              type="button"
+              onClick={handleMyListingsClick}
+              className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition-all ${
+                showMyListings
+                  ? 'bg-primary text-white hover:bg-primary/90'
+                  : 'bg-white text-primary border border-outline-variant/25 hover:border-primary/30 hover:bg-surface-container-low'
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg">inventory_2</span>
+              My Listings
+            </button>
+            <Link
+              href="/create-listing"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">add_circle</span>
+              Create Listing
+            </Link>
           </div>
         </section>
 
@@ -1246,8 +1278,8 @@ export default function MarketplacePage() {
             ) : filteredListings.length === 0 ? (
               <div className="text-center py-20 text-secondary">
                 <span className="material-symbols-outlined text-5xl mb-4 block">search_off</span>
-                <p className="font-headline text-xl font-bold text-primary mb-2">No listings found</p>
-                <p className="text-sm">Try a different search term</p>
+                <p className="font-headline text-xl font-bold text-primary mb-2">{showMyListings ? 'No listings created yet' : 'No listings found'}</p>
+                <p className="text-sm">{showMyListings ? 'Create your first listing to see it here.' : 'Try a different search term'}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">

@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || 'newest';
   const search = (searchParams.get('search') || '').trim();
   const limit = Math.min(parseInt(searchParams.get('limit') || '200'), 500);
+  const mine = searchParams.get('mine') === 'true';
 
   const orderCol =
     sort === 'price_desc' || sort === 'price_asc' ? 'asking_price'
@@ -37,9 +38,14 @@ export async function GET(request: NextRequest) {
       'price_negotiable,ownership_type,contact_methods,status,photos_urls,' +
       'owner_name,digital_signature,created_at,user_id,promoted,boost_expires_at,lat,lng'
     )
-    .in('status', ['active', 'published'])
     .order(orderCol, { ascending })
     .limit(limit);
+
+  if (mine) {
+    query = query.eq('user_id', user.id);
+  } else {
+    query = query.in('status', ['active', 'published']);
+  }
 
   if (search) {
     query = query.or(
