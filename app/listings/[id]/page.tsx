@@ -354,7 +354,6 @@ export default function ListingDetailPage() {
     ...(listing.street_address ? [['Street Address', listing.street_address] as [string, string]] : []),
     ...(listing.preferred_close_date ? [['Preferred Close', fmtCloseDate(listing.preferred_close_date)] as [string, string]] : []),
     ...(listing.ownership_type ? [['Ownership', listing.ownership_type] as [string, string]] : []),
-    ...(listing.price_negotiable ? [['Price', 'Negotiable'] as [string, string]] : []),
     ...(listing.comparable_market_value ? [['Market Value', fmtPrice(listing.comparable_market_value)] as [string, string]] : []),
   ];
 
@@ -656,11 +655,7 @@ export default function ListingDetailPage() {
                 <span className="text-lg sm:text-2xl font-bold text-green-900">
                   {fmtPrice(listing.asking_price)}
                 </span>
-                {listing.price_negotiable && (
-                  <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-0.5 rounded-full">
-                    Negotiable
-                  </span>
-                )}
+
               </div>
               {pricePerAcre !== null && (
                 <p className="text-secondary text-sm">~{fmtPrice(pricePerAcre)} / acre</p>
@@ -684,10 +679,10 @@ export default function ListingDetailPage() {
               </div>
 
               {/* Action buttons */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <button
                   onClick={handleMessage}
-                  className="w-full py-3 bg-green-700 text-white font-bold text-sm rounded-lg hover:bg-green-800 transition-colors active:scale-95"
+                  className="w-full py-2 bg-green-700 text-white font-bold text-xs rounded-lg hover:bg-green-800 transition-colors active:scale-95"
                 >
                   Message Seller
                 </button>
@@ -696,7 +691,7 @@ export default function ListingDetailPage() {
                   <button
                     onClick={handleRequestImages}
                     disabled={imageRequestSent || imageRequestLoading}
-                    className="w-full py-3 border border-green-700 text-green-700 font-bold text-sm rounded-lg hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-full py-2 border border-green-700 text-green-700 font-bold text-xs rounded-lg hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {imageRequestSent ? 'Images Requested ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
                   </button>
@@ -704,7 +699,7 @@ export default function ListingDetailPage() {
                   <div className="relative group">
                     <button
                       disabled
-                      className="w-full py-3 border border-green-700/30 text-green-700/40 font-bold text-sm rounded-lg cursor-not-allowed"
+                      className="w-full py-2 border border-green-700/30 text-green-700/40 font-bold text-xs rounded-lg cursor-not-allowed"
                     >
                       Request Images
                     </button>
@@ -713,13 +708,6 @@ export default function ListingDetailPage() {
                     </div>
                   </div>
                 ) : null}
-
-                <Link
-                  href={`/property-analysis?listing=${listing.id}`}
-                  className="w-full py-3 border border-outline-variant/40 text-secondary font-bold text-sm rounded-lg hover:bg-surface-container-low transition-colors text-center block"
-                >
-                  Request Analysis
-                </Link>
               </div>
 
               <div className="border-t border-outline-variant/15 mt-5 pt-4">
