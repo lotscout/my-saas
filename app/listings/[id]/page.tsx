@@ -360,15 +360,9 @@ export default function ListingDetailPage() {
   const titleSubline = listing.zip_code ? `${titleSublineBase} ${listing.zip_code}` : titleSublineBase;
 
   const detailItems: [string, string][] = [
-    ...(lotSizeDisplay ? [['Lot Size', lotSizeDisplay] as [string, string]] : []),
-    ...(listing.zoning ? [['Zoning', listing.zoning] as [string, string]] : []),
     ...((listing.road_access?.length ?? 0) > 0 ? [['Road Access', listing.road_access!.join(', ')] as [string, string]] : []),
     ...((listing.utilities?.length ?? 0) > 0 ? [['Utilities', listing.utilities!.join(', ')] as [string, string]] : []),
     ...(listing.apn ? [['APN', listing.apn] as [string, string]] : []),
-    ...(listing.county ? [['County', listing.county] as [string, string]] : []),
-    ...(listing.state ? [['State', listing.state] as [string, string]] : []),
-    ...(listing.zip_code ? [['Zip Code', listing.zip_code] as [string, string]] : []),
-    ...(listing.street_address ? [['Street Address', listing.street_address] as [string, string]] : []),
     ...(listing.preferred_close_date ? [['Preferred Close', fmtCloseDate(listing.preferred_close_date)] as [string, string]] : []),
     ...(listing.ownership_type ? [['Ownership', listing.ownership_type] as [string, string]] : []),
     ...(listing.comparable_market_value ? [['Market Value', fmtPrice(listing.comparable_market_value)] as [string, string]] : []),
@@ -667,19 +661,6 @@ export default function ListingDetailPage() {
           {/* RIGHT COLUMN — sticky sidebar */}
           <div className="w-full lg:w-[360px] xl:w-[400px] flex-shrink-0 self-start">
             <div className="lg:sticky lg:top-24 border border-gray-200 rounded-lg shadow-sm p-4 bg-white">
-
-              {/* Price */}
-              <div className="flex items-baseline gap-3 flex-wrap mb-1">
-                <span className="text-lg sm:text-2xl font-bold text-green-900">
-                  {fmtPrice(listing.asking_price)}
-                </span>
-
-              </div>
-              {pricePerAcre !== null && (
-                <p className="text-secondary text-sm">~{fmtPrice(pricePerAcre)} / acre</p>
-              )}
-
-              <div className="border-t border-outline-variant/15 my-3" />
 
               {/* Seller */}
               <div className="flex items-center gap-3 mb-3">
