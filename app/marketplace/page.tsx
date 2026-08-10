@@ -83,6 +83,23 @@ function formatAcreage(acres: number | null, sqft: number | null): string {
 
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80';
 
+const LISTING_STATUS_META: Record<string, { label: string; className: string }> = {
+  active: { label: 'Published', className: 'bg-emerald-600 text-white' },
+  published: { label: 'Published', className: 'bg-emerald-600 text-white' },
+  pending_review: { label: 'Under Review', className: 'bg-amber-500 text-white' },
+  revision_needed: { label: 'Under Review', className: 'bg-amber-500 text-white' },
+  sold: { label: 'Sold', className: 'bg-blue-600 text-white' },
+  draft: { label: 'Draft', className: 'bg-slate-600 text-white' },
+  rejected: { label: 'Rejected', className: 'bg-red-600 text-white' },
+};
+
+function getListingStatusMeta(status: string) {
+  return LISTING_STATUS_META[status] ?? {
+    label: status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    className: 'bg-slate-600 text-white',
+  };
+}
+
 const _LISTINGS_LEGACY = [
   {
     id: 1,
@@ -1314,12 +1331,22 @@ export default function MarketplacePage() {
                     >
                       {/* Image */}
                       <div className="relative overflow-hidden bg-surface-container-low aspect-video">
-                        {listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() && (
-                          <div className="absolute top-3 left-3 z-10">
-                            <span className="bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-lg">
-                              <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                              Featured
-                            </span>
+                        {(showMyListings || (listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date())) && (
+                          <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-2">
+                            {showMyListings && (() => {
+                              const statusMeta = getListingStatusMeta(listing.status);
+                              return (
+                                <span className={`${statusMeta.className} text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest shadow-lg`}>
+                                  {statusMeta.label}
+                                </span>
+                              );
+                            })()}
+                            {listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() && (
+                              <span className="bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-lg">
+                                <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                Featured
+                              </span>
+                            )}
                           </div>
                         )}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
