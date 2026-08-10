@@ -63,6 +63,10 @@ export async function PATCH(
   const sellerName = profile?.full_name || profile?.first_name || 'there';
   const location = [listing.county, listing.state].filter(Boolean).join(', ');
 
+  if (!sellerEmail) {
+    return NextResponse.json({ error: 'Listing status updated, but seller email is missing so no notification could be sent.' }, { status: 502 });
+  }
+
   if (sellerEmail) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
@@ -163,8 +167,9 @@ export async function PATCH(
       }
     } catch (emailErr) {
       console.error('[listing/status] Email error:', emailErr);
+      return NextResponse.json({ error: 'Listing status updated, but email notification failed to send.' }, { status: 502 });
     }
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, emailSent: true });
 }

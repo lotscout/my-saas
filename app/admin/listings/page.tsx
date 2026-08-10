@@ -345,6 +345,15 @@ export default function AdminListingsPage() {
                   <tr key={l.id} className="hover:bg-surface-container-low/40 transition-colors">
                     <td className="px-5 py-4">
                       <span className="font-medium text-on-surface line-clamp-1 max-w-[200px] block">{l.title || '—'}</span>
+                      <a
+                        href={`/listings/${l.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-900 transition-colors"
+                      >
+                        Verify details
+                        <span className="material-symbols-outlined text-sm">open_in_new</span>
+                      </a>
                     </td>
                     <td className="px-4 py-4">
                       <div className="font-medium text-on-surface">{l.profiles?.full_name || '—'}</div>
