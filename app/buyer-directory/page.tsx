@@ -139,11 +139,11 @@ function fmtLotSize(req: BuyerRequest): string {
 
 function DetailGrid({ items }: { items: { label: string; value: string }[] }) {
   return (
-    <div className="grid grid-cols-2 gap-3 border-y border-outline-variant/15 py-4">
+    <div className="grid grid-cols-2 gap-1.5 border-y border-outline-variant/20 py-2">
       {items.map(item => (
-        <div key={item.label} className="min-w-0 rounded-xl bg-surface-container-lowest px-3 py-2.5 text-center">
-          <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest leading-tight">{item.label}</p>
-          <p className="text-sm font-bold text-primary mt-1 truncate leading-tight">{item.value}</p>
+        <div key={item.label} className="min-w-0 rounded-lg bg-emerald-50/60 border border-emerald-100 px-2 py-1.5 text-center">
+          <p className="text-[8px] font-black text-emerald-800/70 uppercase tracking-wider leading-none">{item.label}</p>
+          <p className="text-[11px] font-extrabold text-primary mt-1 truncate leading-tight">{item.value}</p>
         </div>
       ))}
     </div>
@@ -189,12 +189,12 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 cursor-pointer hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[250px]"
+      className="group relative bg-white rounded-xl border border-emerald-100 p-3 flex flex-col gap-2.5 cursor-pointer hover:border-emerald-500/60 hover:shadow-xl hover:shadow-emerald-900/10 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[135px] ring-1 ring-black/[0.02]"
     >
-      <div className="min-w-0 text-center">
-        <p className="font-headline font-extrabold text-primary text-2xl leading-tight line-clamp-2">{name}</p>
+      <div className="min-w-0 text-center pr-5">
+        <p className="font-headline font-extrabold text-primary text-lg leading-tight line-clamp-1">{name}</p>
         {req.display_company && (
-          <p className="text-base sm:text-lg font-semibold text-secondary truncate mt-1 mx-auto max-w-full">{req.display_company}</p>
+          <p className="text-xs font-bold text-secondary truncate mt-0.5 mx-auto max-w-full">{req.display_company}</p>
         )}
       </div>
 
@@ -212,30 +212,30 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
           target="_blank"
           rel="noopener noreferrer"
           onClick={e => e.stopPropagation()}
-          className="flex items-center gap-2 text-sm text-primary/80 hover:text-primary font-bold truncate"
+          className="flex items-center gap-1.5 text-[11px] text-primary/80 hover:text-primary font-bold truncate"
         >
-          <span className="material-symbols-outlined text-base">language</span>
+          <span className="material-symbols-outlined text-sm">language</span>
           <span className="truncate">{website.replace(/^https?:\/\//, '')}</span>
         </a>
       )}
       {reachable ? (
-        <div className="mt-auto space-y-1.5 border-t border-outline-variant/15 pt-4">
+        <div className="mt-auto space-y-0.5 border-t border-outline-variant/15 pt-2">
           {phone && (
-            <p className="flex items-center gap-2 text-sm font-semibold text-secondary truncate">
-              <span className="material-symbols-outlined text-base">call</span>{phone}
+            <p className="flex items-center gap-1.5 text-[11px] font-semibold text-secondary truncate">
+              <span className="material-symbols-outlined text-sm">call</span>{phone}
             </p>
           )}
           {email && (
-            <p className="flex items-center gap-2 text-sm font-semibold text-secondary truncate">
-              <span className="material-symbols-outlined text-base">mail</span>{email}
+            <p className="flex items-center gap-1.5 text-[11px] font-semibold text-secondary truncate">
+              <span className="material-symbols-outlined text-sm">mail</span>{email}
             </p>
           )}
         </div>
       ) : (
-        <p className="mt-auto text-sm font-semibold text-secondary/80 border-t border-outline-variant/15 pt-4">Contact via platform</p>
+        <p className="mt-auto text-[11px] font-semibold text-secondary/80 border-t border-outline-variant/15 pt-2">Contact via platform</p>
       )}
-      <div className="flex items-center justify-end text-sm pt-1">
-        <span className="material-symbols-outlined text-2xl text-[#059669] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      <div className="absolute top-3 right-3 flex items-center justify-end text-sm">
+        <span className="material-symbols-outlined text-lg text-emerald-600 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
       </div>
     </div>
   );
@@ -252,12 +252,12 @@ function RequestCard({ req }: { req: BuyerRequest }) {
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 cursor-pointer hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[230px]"
+      className="group relative bg-white rounded-xl border border-emerald-100 p-3 flex flex-col gap-2.5 cursor-pointer hover:border-emerald-500/60 hover:shadow-xl hover:shadow-emerald-900/10 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[125px] ring-1 ring-black/[0.02]"
     >
-      <div className="min-w-0 border-b border-outline-variant/15 pb-4 text-center">
-        <p className="font-headline font-extrabold text-primary text-2xl leading-tight line-clamp-2">{name}</p>
+      <div className="min-w-0 border-b border-outline-variant/15 pb-2 text-center pr-5">
+        <p className="font-headline font-extrabold text-primary text-lg leading-tight line-clamp-1">{name}</p>
         {req.display_company && (
-          <p className="text-base sm:text-lg font-semibold text-secondary truncate mt-1 mx-auto max-w-full">{req.display_company}</p>
+          <p className="text-xs font-bold text-secondary truncate mt-0.5 mx-auto max-w-full">{req.display_company}</p>
         )}
       </div>
       <DetailGrid items={[
@@ -267,8 +267,8 @@ function RequestCard({ req }: { req: BuyerRequest }) {
         { label: 'Location', value: location },
         { label: 'Lot Size', value: fmtLotSize(req) },
       ]} />
-      <div className="flex items-center justify-end text-sm pt-1 border-t border-outline-variant/15">
-        <span className="material-symbols-outlined text-2xl text-[#059669] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      <div className="absolute top-3 right-3 flex items-center justify-end text-sm">
+        <span className="material-symbols-outlined text-lg text-emerald-600 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
       </div>
     </div>
   );
@@ -309,7 +309,7 @@ function DirectoryHomeCard({ icon, title, description, action, accent = 'primary
 
 function LoadingCardGrid({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="bg-white rounded-2xl border border-outline-variant/15 p-6 animate-pulse min-h-[230px] shadow-sm">
           <div className="flex items-start gap-4 mb-6">
@@ -699,7 +699,7 @@ export default function BuyerDirectoryPage() {
                       onAction={() => { setActiveBrState(''); setActiveBrBudget(''); setActiveBrAcreage(''); setActiveBrZoning(''); setActiveBrRoadAccess(''); setActiveBrSearch(''); }}
                     />
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                       {filteredActiveBR.map(req => (
                         <RequestCard key={req.id} req={req} />
                       ))}
@@ -790,7 +790,7 @@ export default function BuyerDirectoryPage() {
                   onAction={() => { setFilterBudget(''); setFilterAcreage(''); setFilterZoning(''); setFilterTimeline(''); setFilterRoadAccessBR(''); setBrSearch(''); setGlobalSearch(''); }}
                 />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                   {filteredBR.map(req => (
                     <RequestCard key={req.id} req={req} />
                   ))}
