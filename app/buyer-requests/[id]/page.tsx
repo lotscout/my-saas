@@ -162,6 +162,21 @@ export default function BuyerRequestPage() {
   const rawCities = (request.target_cities ?? '').split(',').map(c => c.trim()).filter(Boolean);
   const cityTags = rawCities.length ? rawCities : (locationCity ? [locationCity] : []);
 
+  const companyName = request.display_company || profile?.company_name || null;
+  const reportRows = [
+    { label: 'Budget', value: budgetStr },
+    { label: 'Timeline', value: timelineLabel },
+    { label: 'Lot Size', value: request.lot_size_label ?? acreageStr },
+    { label: 'Primary Use', value: primaryUse },
+  ].filter((row): row is { label: string; value: string } => !!row.value);
+
+  const locationSummary = [
+    cityTags.length ? cityTags.join(', ') : null,
+    locationCounty ? `${locationCounty} County` : null,
+    fullStateName || locationState,
+    locationZip,
+  ].filter(Boolean).join(' · ');
+
   return (
     <div className="bg-surface text-on-surface min-h-screen">
       <Header />
@@ -209,116 +224,97 @@ export default function BuyerRequestPage() {
         </div>
       )}
 
-      <main className="pt-20 pb-12 max-w-5xl mx-auto px-4 sm:px-6">
+      <main className="pt-24 pb-16 max-w-6xl mx-auto px-4 sm:px-6">
 
-        {/* Back */}
-        <div className="mb-4">
+        <div className="mb-5">
           <Link href="/buyer-directory" className="inline-flex items-center gap-1 text-secondary hover:text-primary text-sm font-semibold transition-colors">
             <span className="material-symbols-outlined text-base">arrow_back</span>
             Back to Buyer Directory
           </Link>
         </div>
 
-        {/* Buyer header */}
-        <div className="mb-6">
-          <h1 className="font-headline text-3xl sm:text-4xl font-extrabold text-primary leading-tight">{buyerName}</h1>
-          <div className="flex flex-wrap items-center gap-3 mt-3">
-            <p className="text-secondary font-medium capitalize">{primaryUse ?? 'Land Acquisition'}</p>
-            {timelineLabel && (
-              <span className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/8 px-3 py-1.5 rounded-full">
-                <span className="material-symbols-outlined text-sm">schedule</span>
-                {timelineLabel}
-              </span>
-            )}
+        <article className="bg-white border border-outline-variant/20 rounded-2xl shadow-sm overflow-hidden">
+          <header className="border-b border-outline-variant/15 px-6 sm:px-10 py-8 sm:py-10">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+              <div className="min-w-0">
+                <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-secondary mb-3">Buyer Brief</p>
+                <h1 className="font-headline text-3xl sm:text-5xl font-extrabold text-primary leading-tight tracking-tight">{buyerName}</h1>
+                {companyName && <p className="mt-2 text-lg font-semibold text-secondary truncate max-w-2xl">{companyName}</p>}
+                {primaryUse && <p className="mt-4 text-base text-on-surface font-medium capitalize">{primaryUse}</p>}
+              </div>
+              <button
+                onClick={handleMessage}
+                className="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-sm lg:shrink-0"
+              >
+                <span className="material-symbols-outlined text-base">forum</span>
+                Message Buyer
+              </button>
+            </div>
+          </header>
+
+          {reportRows.length > 0 && (
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-b border-outline-variant/15 divide-y sm:divide-y-0 sm:divide-x divide-outline-variant/15">
+              {reportRows.map(row => (
+                <div key={row.label} className="px-6 py-5 text-center">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-secondary mb-2">{row.label}</p>
+                  <p className="text-lg font-extrabold text-primary leading-tight">{row.value}</p>
+                </div>
+              ))}
+            </section>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-0">
+            <div className="px-6 sm:px-10 py-8 sm:py-10 space-y-9">
+              {hasLocation && (
+                <section>
+                  <h2 className="font-headline text-xl font-extrabold text-primary mb-3">Target Location</h2>
+                  <p className="text-base text-on-surface leading-relaxed">{locationSummary || 'Location not specified'}</p>
+                </section>
+              )}
+
+              {hasIntendedUse && (
+                <section>
+                  <h2 className="font-headline text-xl font-extrabold text-primary mb-3">Acquisition Criteria</h2>
+                  <div className="space-y-3 text-base text-on-surface leading-relaxed">
+                    {useDescription && <p>{useDescription}</p>}
+                    {(request.zoning_preference?.length ?? 0) > 0 && (
+                      <div>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-secondary mb-2">Zoning Preference</p>
+                        <div className="flex flex-wrap gap-2">
+                          {request.zoning_preference!.map(z => (
+                            <span key={z} className="px-3 py-1.5 rounded-full border border-outline-variant/25 text-sm font-semibold text-on-surface bg-surface-container-lowest">{z}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+
+              {request.additional_notes && (
+                <section>
+                  <h2 className="font-headline text-xl font-extrabold text-primary mb-3">Additional Notes</h2>
+                  <p className="text-base text-on-surface-variant leading-relaxed whitespace-pre-line">{request.additional_notes}</p>
+                </section>
+              )}
+            </div>
+
+            <aside className="border-t lg:border-t-0 lg:border-l border-outline-variant/15 bg-surface-container-lowest px-6 py-8 sm:px-8 space-y-6">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-secondary mb-3">Summary</p>
+                <dl className="space-y-4">
+                  {budgetStr && <div><dt className="text-xs font-bold text-secondary uppercase tracking-wider">Budget</dt><dd className="text-sm font-bold text-primary mt-1">{budgetStr}</dd></div>}
+                  {timelineLabel && <div><dt className="text-xs font-bold text-secondary uppercase tracking-wider">Timeline</dt><dd className="text-sm font-bold text-primary mt-1">{timelineLabel}</dd></div>}
+                  {(request.lot_size_label || acreageStr) && <div><dt className="text-xs font-bold text-secondary uppercase tracking-wider">Lot Size</dt><dd className="text-sm font-bold text-primary mt-1">{request.lot_size_label ?? acreageStr}</dd></div>}
+                  {locationSummary && <div><dt className="text-xs font-bold text-secondary uppercase tracking-wider">Location</dt><dd className="text-sm font-bold text-primary mt-1">{locationSummary}</dd></div>}
+                </dl>
+              </div>
+              <div className="border-t border-outline-variant/15 pt-5">
+                <p className="text-xs text-secondary">Posted {new Date(request.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+              </div>
+            </aside>
           </div>
-          <button
-            onClick={handleMessage}
-            className="mt-5 inline-flex items-center gap-2 bg-green-700 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-green-800 transition-colors shadow-sm"
-          >
-            <span className="material-symbols-outlined text-base">forum</span>
-            Message Buyer
-          </button>
-        </div>
-
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          {/* Location */}
-          {hasLocation && (
-            <div className="md:col-span-2 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 hover:bg-surface-container transition-colors">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-primary">location_on</span>
-                <h2 className="font-headline text-lg font-bold text-primary">Location</h2>
-              </div>
-              {fullStateName && <p className="text-2xl font-extrabold text-on-surface mb-1">{fullStateName}</p>}
-              {(locationCounty || locationZip) && (
-                <p className="text-sm text-secondary mb-3">
-                  {[locationCounty ? `${locationCounty} County` : null, locationZip].filter(Boolean).join(' · ')}
-                </p>
-              )}
-              {cityTags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {cityTags.map(c => (
-                    <span key={c} className="px-3 py-1 bg-primary/8 text-primary text-xs font-bold rounded-full">{c}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Budget */}
-          {budgetStr && (
-            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 hover:bg-surface-container transition-colors">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-primary">payments</span>
-                <h2 className="font-headline text-lg font-bold text-primary">Budget</h2>
-              </div>
-              <p className="text-2xl font-extrabold text-on-surface">{budgetStr}</p>
-            </div>
-          )}
-
-          {/* Lot Size */}
-          {(request.lot_size_label || acreageStr) && (
-            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 hover:bg-surface-container transition-colors">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-primary">crop_square</span>
-                <h2 className="font-headline text-lg font-bold text-primary">Lot Size</h2>
-              </div>
-              <p className="text-2xl font-extrabold text-on-surface">{request.lot_size_label ?? acreageStr}</p>
-            </div>
-          )}
-
-          {/* Use Case */}
-          {hasIntendedUse && (
-            <div className="md:col-span-2 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 hover:bg-surface-container transition-colors">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-primary">category</span>
-                <h2 className="font-headline text-lg font-bold text-primary">Use Case</h2>
-              </div>
-              {primaryUse && <p className="text-lg font-bold text-on-surface mb-1 capitalize">{primaryUse}</p>}
-              {useDescription && <p className="text-sm text-on-surface-variant leading-relaxed">{useDescription}</p>}
-              {(request.zoning_preference?.length ?? 0) > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {request.zoning_preference!.map(z => (
-                    <span key={z} className="px-2.5 py-1 bg-surface-container text-secondary text-xs font-bold rounded-lg">{z}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Notes — only rendered when notes exist */}
-          {request.additional_notes && (
-            <div className="md:col-span-2 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 hover:bg-surface-container transition-colors">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-primary">notes</span>
-                <h2 className="font-headline text-lg font-bold text-primary">Additional Notes</h2>
-              </div>
-              <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">{request.additional_notes}</p>
-            </div>
-          )}
-
-        </div>
+        </article>
       </main>
     </div>
   );
