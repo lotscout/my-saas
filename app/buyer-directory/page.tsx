@@ -179,6 +179,8 @@ function applyAcreageFilter(req: BuyerRequest, f: string): boolean {
 function DirectoryCard({ req }: { req: BuyerRequest }) {
   const router = useRouter();
   const name = getBuyerName(req);
+  const company = req.display_company?.trim();
+  const showCompany = !!company && company.toLowerCase() !== name.trim().toLowerCase();
   const website = req.contact_website;
   const phone = req.contact_phone;
   const email = req.contact_email;
@@ -193,8 +195,8 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
     >
       <div className="min-w-0 text-center pr-5">
         <p className="font-headline font-extrabold text-primary text-lg leading-tight line-clamp-1">{name}</p>
-        {req.display_company && (
-          <p className="text-xs font-bold text-secondary truncate mt-0.5 mx-auto max-w-full">{req.display_company}</p>
+        {showCompany && (
+          <p className="text-xs font-bold text-secondary truncate mt-0.5 mx-auto max-w-full">{company}</p>
         )}
       </div>
 
@@ -246,6 +248,8 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
 function RequestCard({ req }: { req: BuyerRequest }) {
   const router = useRouter();
   const name = getBuyerName(req);
+  const company = req.display_company?.trim();
+  const showCompany = !!company && company.toLowerCase() !== name.trim().toLowerCase();
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
   const timeline = req.timeline ? fmtTimeline(req.timeline) : 'Flexible';
 
@@ -256,8 +260,8 @@ function RequestCard({ req }: { req: BuyerRequest }) {
     >
       <div className="min-w-0 border-b border-outline-variant/15 pb-2 text-center pr-5">
         <p className="font-headline font-extrabold text-primary text-lg leading-tight line-clamp-1">{name}</p>
-        {req.display_company && (
-          <p className="text-xs font-bold text-secondary truncate mt-0.5 mx-auto max-w-full">{req.display_company}</p>
+        {showCompany && (
+          <p className="text-xs font-bold text-secondary truncate mt-0.5 mx-auto max-w-full">{company}</p>
         )}
       </div>
       <DetailGrid items={[
