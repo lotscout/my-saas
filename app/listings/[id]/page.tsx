@@ -430,64 +430,37 @@ export default function ListingDetailPage() {
         </Link>
       </div>
 
-      {/* Full-width gallery */}
-      <div>
+      {/* Contained listing gallery */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {photos.length > 0 ? (
-          <div className="relative w-full bg-gray-900" style={{ height: 'clamp(300px, 50vh, 540px)' }}>
-            <div
-              className="h-full"
-              style={{
-                display: 'grid',
-                gap: '2px',
-                gridTemplateColumns: photos.length >= 2 ? '2fr 1fr' : '1fr',
-              }}
-            >
-              {/* Primary large image */}
-              <div className="relative overflow-hidden bg-gray-800">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photos[0]}
-                  alt="Primary property photo"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Right stacked pair */}
-              {photos.length >= 2 && (
+          <div className="relative overflow-hidden rounded-2xl border border-outline-variant/20 bg-gray-900 shadow-sm">
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth p-3 [scrollbar-width:thin] [scrollbar-color:#d1d5db_transparent]">
+              {photos.map((url, i) => (
                 <div
-                  style={{
-                    display: 'grid',
-                    gap: '2px',
-                    gridTemplateRows: photos.length >= 3 ? '1fr 1fr' : '1fr',
-                  }}
+                  key={`${url}-${i}`}
+                  className="relative min-w-full md:min-w-[78%] lg:min-w-[68%] snap-start overflow-hidden rounded-xl bg-gray-800"
+                  style={{ height: 'clamp(280px, 46vh, 520px)' }}
                 >
-                  <div className="relative overflow-hidden bg-gray-800">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photos[1]} alt="Property photo 2" className="absolute inset-0 w-full h-full object-cover" />
-                  </div>
-                  {photos.length >= 3 && (
-                    <div className="relative overflow-hidden bg-gray-800">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={photos[2]} alt="Property photo 3" className="absolute inset-0 w-full h-full object-cover" />
-                    </div>
-                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt={`Property photo ${i + 1}`}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
                 </div>
-              )}
+              ))}
             </div>
 
-            {/* See all photos button */}
-            <button
-              onClick={() => setShowAllPhotos(true)}
-              className="absolute bottom-4 right-4 bg-white text-gray-900 text-sm font-semibold px-4 py-2.5 rounded-lg shadow-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined text-base">photo_library</span>
-              See all {photos.length} photo{photos.length !== 1 ? 's' : ''}
-            </button>
+            {photos.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                Scroll sideways to view {photos.length} photos
+              </div>
+            )}
           </div>
         ) : (
           /* No photos placeholder */
           <div
-            className="w-full bg-gray-100 flex flex-col items-center justify-center gap-4"
+            className="rounded-2xl border border-outline-variant/20 bg-gray-100 flex flex-col items-center justify-center gap-4"
             style={{ height: 'clamp(240px, 40vh, 380px)' }}
           >
             <span className="material-symbols-outlined text-gray-300 text-7xl">photo_camera</span>
