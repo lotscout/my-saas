@@ -181,6 +181,7 @@ export default function ListingDetailPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [toastMsg, setToastMsg] = useState('');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -333,6 +334,20 @@ export default function ListingDetailPage() {
 
   const photos = listing.photos_urls ?? [];
 
+  useEffect(() => {
+    if (activePhotoIndex >= photos.length) setActivePhotoIndex(0);
+  }, [activePhotoIndex, photos.length]);
+
+  const showPrevPhoto = () => {
+    if (photos.length <= 1) return;
+    setActivePhotoIndex(prev => (prev === 0 ? photos.length - 1 : prev - 1));
+  };
+
+  const showNextPhoto = () => {
+    if (photos.length <= 1) return;
+    setActivePhotoIndex(prev => (prev + 1) % photos.length);
+  };
+
   const countyDisplay = listing.county ? `${listing.county} County` : null;
   const titleLocation = [countyDisplay, listing.state].filter(Boolean).join(', ') || 'Unknown Location';
   const acreageText = listing.lot_size_acres
@@ -464,28 +479,38 @@ export default function ListingDetailPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {photos.length > 0 ? (
           <div className="relative overflow-hidden rounded-2xl border border-outline-variant/20 bg-gray-900 shadow-sm">
-            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth p-3 [scrollbar-width:thin] [scrollbar-color:#d1d5db_transparent]">
-              {photos.map((url, i) => (
-                <div
-                  key={`${url}-${i}`}
-                  className="relative min-w-full md:min-w-[78%] lg:min-w-[68%] snap-start overflow-hidden rounded-xl bg-gray-800"
-                  style={{ height: 'clamp(280px, 46vh, 520px)' }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt={`Property photo ${i + 1}`}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+            <div className="relative overflow-hidden bg-gray-800" style={{ height: 'clamp(280px, 46vh, 520px)' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={photos[activePhotoIndex]}
+                alt={`Property photo ${activePhotoIndex + 1}`}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
 
-            {photos.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
-                Scroll sideways to view {photos.length} photos
-              </div>
-            )}
+              {photos.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={showPrevPhoto}
+                    aria-label="Previous photo"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/55 text-white flex items-center justify-center backdrop-blur-sm hover:bg-black/75 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-2xl">chevron_left</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={showNextPhoto}
+                    aria-label="Next photo"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/55 text-white flex items-center justify-center backdrop-blur-sm hover:bg-black/75 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-2xl">chevron_right</span>
+                  </button>
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                    {activePhotoIndex + 1} / {photos.length}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         ) : (
           /* No photos placeholder */
