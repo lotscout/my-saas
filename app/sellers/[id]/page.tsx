@@ -23,9 +23,9 @@ function formatPrice(price: number | null): string {
 }
 
 function formatSize(acres: number | null, sqft: number | null): string {
-  if (acres) return `${acres.toLocaleString()} acres`;
-  if (sqft) return `${sqft.toLocaleString()} sq ft`;
-  return 'Size not listed';
+  const acresText = acres ? `${acres.toLocaleString(undefined, { maximumFractionDigits: 2 })} acres` : '';
+  const sqftText = sqft ? `${sqft.toLocaleString()} sq ft` : '';
+  return [acresText, sqftText].filter(Boolean).join(' / ') || 'Size not listed';
 }
 
 // Seller display name is resolved via getSellerName (single source of truth).

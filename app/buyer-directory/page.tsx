@@ -63,7 +63,7 @@ const US_STATES = [
 ];
 
 const SELECT_CLS = 'bg-white px-4 py-3 rounded-xl border border-outline-variant/25 hover:border-primary/30 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all shadow-sm';
-const FILTER_BAR_CLS = 'bg-white/90 backdrop-blur rounded-2xl border border-outline-variant/15 shadow-sm p-4 flex flex-wrap items-center gap-3 mb-7';
+const FILTER_BAR_CLS = 'bg-white rounded-2xl border border-outline-variant/15 shadow-sm p-4 flex flex-wrap items-center gap-3 mb-7';
 
 const STATE_ABBREV: Record<string, string> = {
   'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
@@ -137,13 +137,13 @@ function fmtLotSize(req: BuyerRequest): string {
   return 'Flexible';
 }
 
-function DetailGrid({ items }: { items: { label: string; value: string; primary?: boolean }[] }) {
+function DetailGrid({ items }: { items: { label: string; value: string }[] }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 border-y border-outline-variant/15 py-5">
+    <div className="grid grid-cols-2 gap-3 border-y border-outline-variant/15 py-4">
       {items.map(item => (
-        <div key={item.label} className="min-w-0">
-          <p className={`font-headline font-extrabold text-primary leading-tight ${item.primary ? 'text-2xl' : 'text-xl'}`}>{item.label}</p>
-          <p className="text-base font-semibold text-secondary mt-1 truncate">{item.value}</p>
+        <div key={item.label} className="min-w-0 rounded-xl bg-surface-container-lowest px-3 py-2.5 text-center">
+          <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest leading-tight">{item.label}</p>
+          <p className="text-sm font-bold text-primary mt-1 truncate leading-tight">{item.value}</p>
         </div>
       ))}
     </div>
@@ -189,17 +189,17 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-7 flex flex-col gap-5 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[250px]"
+      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 cursor-pointer hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[250px]"
     >
-      <div className="min-w-0">
-        <p className="font-headline font-extrabold text-primary text-3xl leading-tight line-clamp-2">{name}</p>
+      <div className="min-w-0 text-center">
+        <p className="font-headline font-extrabold text-primary text-2xl leading-tight line-clamp-2">{name}</p>
         {req.display_company && (
-          <p className="text-lg font-semibold text-secondary truncate mt-2">{req.display_company}</p>
+          <p className="text-base sm:text-lg font-semibold text-secondary truncate mt-1 mx-auto max-w-full">{req.display_company}</p>
         )}
       </div>
 
       <DetailGrid items={[
-        { label: 'Budget', value: fmtBudget(req.budget_min, req.budget_max), primary: true },
+        { label: 'Budget', value: fmtBudget(req.budget_min, req.budget_max) },
         { label: 'Timeline', value: timeline },
         { label: 'Zoning', value: fmtZoning(req.zoning_preference) },
         { label: 'Location', value: location },
@@ -252,13 +252,16 @@ function RequestCard({ req }: { req: BuyerRequest }) {
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-7 flex flex-col gap-5 cursor-pointer hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[230px]"
+      className="group relative bg-white rounded-2xl border border-outline-variant/20 p-6 flex flex-col gap-4 cursor-pointer hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[230px]"
     >
-      <div className="min-w-0 border-b border-outline-variant/15 pb-4">
-        <p className="font-headline font-extrabold text-primary text-3xl leading-tight line-clamp-2">{name}</p>
+      <div className="min-w-0 border-b border-outline-variant/15 pb-4 text-center">
+        <p className="font-headline font-extrabold text-primary text-2xl leading-tight line-clamp-2">{name}</p>
+        {req.display_company && (
+          <p className="text-base sm:text-lg font-semibold text-secondary truncate mt-1 mx-auto max-w-full">{req.display_company}</p>
+        )}
       </div>
       <DetailGrid items={[
-        { label: 'Budget', value: fmtBudget(req.budget_min, req.budget_max), primary: true },
+        { label: 'Budget', value: fmtBudget(req.budget_min, req.budget_max) },
         { label: 'Timeline', value: timeline },
         { label: 'Zoning', value: fmtZoning(req.zoning_preference) },
         { label: 'Location', value: location },
@@ -417,6 +420,8 @@ export default function BuyerDirectoryPage() {
   const [activeBrAcreage, setActiveBrAcreage] = useState('');
   const [activeBrZoning, setActiveBrZoning] = useState('');
   const [activeBrRoadAccess, setActiveBrRoadAccess] = useState('');
+  const [activeSort, setActiveSort] = useState<'newest' | 'oldest'>('newest');
+  const [showActiveFilters, setShowActiveFilters] = useState(false);
 
   // ── Buyer requests tab ──
   const [buyerRequests, setBuyerRequests] = useState<BuyerRequest[]>([]);
@@ -488,7 +493,7 @@ export default function BuyerDirectoryPage() {
     const stateVals = activeBrState
       ? resolveStateQuery(activeBrState).map(v => v.toLowerCase())
       : null;
-    return activeBuyers.filter(r => {
+    const filtered = activeBuyers.filter(r => {
       const q = activeBrSearch.toLowerCase();
       const stored = (r.target_state ?? '').toLowerCase();
       const city = (r.target_city ?? '').toLowerCase();
@@ -503,7 +508,11 @@ export default function BuyerDirectoryPage() {
       const matchRoad = !activeBrRoadAccess || roads.some(rd => rd.toLowerCase().includes(activeBrRoadAccess.toLowerCase()));
       return matchSearch && matchState && matchBudget && matchAcreage && matchZoning && matchRoad;
     });
-  }, [activeBuyers, activeBrSearch, activeBrState, activeBrBudget, activeBrAcreage, activeBrZoning, activeBrRoadAccess]);
+    return [...filtered].sort((a, b) => {
+      const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return activeSort === 'oldest' ? diff : -diff;
+    });
+  }, [activeBuyers, activeBrSearch, activeBrState, activeBrBudget, activeBrAcreage, activeBrZoning, activeBrRoadAccess, activeSort]);
 
   const filteredBR = useMemo(() => {
     return buyerRequests.filter(r => {
@@ -539,7 +548,7 @@ export default function BuyerDirectoryPage() {
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-[radial-gradient(circle_at_top_left,rgba(29,158,117,0.12),transparent_34%),linear-gradient(180deg,#f8fbf8_0%,#f4f7f4_42%,#ffffff_100%)] text-on-surface min-h-screen">
+    <div className="bg-surface text-on-surface min-h-screen">
       <Header />
 
       {/* Upgrade Modal */}
@@ -572,41 +581,48 @@ export default function BuyerDirectoryPage() {
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
 
           {/* Page header */}
-          <section className="mb-7 bg-white/90 backdrop-blur rounded-[2rem] border border-outline-variant/15 shadow-sm p-6 sm:p-8 md:p-10 flex flex-col lg:flex-row justify-between gap-8 overflow-hidden relative">
-            <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-emerald-100/60 blur-3xl pointer-events-none" />
-            <div className="max-w-3xl relative">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.18em] text-primary mb-5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                Verified buyer network
-              </div>
-              <h1 className="font-headline text-4xl sm:text-5xl md:text-7xl font-extrabold text-primary tracking-tighter leading-[0.95] mb-5">
-                Buyer <span className="text-emerald-600">Directory</span>
-              </h1>
-              <p className="text-slate-600 font-body text-lg sm:text-xl leading-relaxed max-w-2xl">
-                Find verified land buyers, understand what they want, and move faster when a property matches their criteria.
-              </p>
+          <section className="mb-7 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h1 className="font-headline text-3xl sm:text-5xl font-extrabold text-primary tracking-tight leading-tight">Buyer Directory</h1>
+              <p className="text-secondary text-base mt-2 max-w-2xl">Search active land buyers and review their acquisition criteria.</p>
             </div>
-
           </section>
 
-          {/* Search */}
-          <div className="bg-white/90 backdrop-blur rounded-[1.75rem] border border-outline-variant/15 shadow-sm p-3 sm:p-4 mb-9">
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
-              <input
-                type="text"
-                value={tab === 'requests' ? brSearch : activeBrSearch}
-                onChange={e => handleSearchChange(e.target.value)}
-                placeholder={searchPlaceholder}
-                className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-2xl pl-12 pr-10 py-4 text-base font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-              />
-              {(tab === 'requests' ? brSearch : activeBrSearch) && (
-                <button
-                  onClick={() => handleSearchChange('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface"
-                >
-                  <span className="material-symbols-outlined text-lg">close</span>
-                </button>
+          {/* Search / sort / filter */}
+          <div className="bg-white rounded-2xl border border-outline-variant/15 shadow-sm p-3 sm:p-4 mb-7">
+            <div className="flex flex-col lg:flex-row gap-3">
+              <div className="relative flex-1">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
+                <input
+                  type="text"
+                  value={tab === 'requests' ? brSearch : activeBrSearch}
+                  onChange={e => handleSearchChange(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl pl-12 pr-10 py-3 text-sm font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                />
+                {(tab === 'requests' ? brSearch : activeBrSearch) && (
+                  <button
+                    onClick={() => handleSearchChange('')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface"
+                  >
+                    <span className="material-symbols-outlined text-lg">close</span>
+                  </button>
+                )}
+              </div>
+              {tab === 'directory' && (
+                <>
+                  <select value={activeSort} onChange={e => setActiveSort(e.target.value as 'newest' | 'oldest')} className="bg-white px-4 py-3 rounded-xl border border-outline-variant/25 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <option value="newest">Most Recent</option>
+                    <option value="oldest">Oldest</option>
+                  </select>
+                  <button
+                    onClick={() => setShowActiveFilters(prev => !prev)}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-outline-variant/25 text-sm font-bold text-primary hover:bg-surface-container-low transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-lg">tune</span>
+                    Filter
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -617,13 +633,8 @@ export default function BuyerDirectoryPage() {
               {/* Active buyers view */}
               {view === 'active' && (
                 <div>
-                  <ViewHeader
-                    title="Active Buyers"
-                    subtitle="Buyers actively seeking land with a purchase timeline under 30 days"
-                    count={filteredActiveBR.length}
-                  />
-
                   {/* Filters */}
+                  {showActiveFilters && (
                   <div className={FILTER_BAR_CLS}>
                     <select value={activeBrState} onChange={e => setActiveBrState(e.target.value)} className={SELECT_CLS}>
                       <option value="" disabled hidden>State</option>
@@ -675,6 +686,7 @@ export default function BuyerDirectoryPage() {
                       </button>
                     )}
                   </div>
+                  )}
 
                   {activeLoading ? (
                     <LoadingCardGrid />

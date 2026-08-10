@@ -151,8 +151,17 @@ export async function POST(request: NextRequest) {
     if (!stateClean) return NextResponse.json({ error: 'State is required' }, { status: 400 });
     if (!zipCodeClean) return NextResponse.json({ error: 'Zip code is required' }, { status: 400 });
 
-    const lotSizeAcres = lotSizeUnit === 'acres' && lotSizeValue ? Number(lotSizeValue) : null;
-    const lotSizeSqft  = lotSizeUnit === 'sqft'  && lotSizeValue ? Number(lotSizeValue) : null;
+    const rawLotSize = lotSizeValue ? Number(lotSizeValue) : null;
+    const lotSizeAcres = rawLotSize && rawLotSize > 0
+      ? lotSizeUnit === 'acres'
+        ? rawLotSize
+        : Number((rawLotSize / 43560).toFixed(6))
+      : null;
+    const lotSizeSqft = rawLotSize && rawLotSize > 0
+      ? lotSizeUnit === 'sqft'
+        ? Math.round(rawLotSize)
+        : Math.round(rawLotSize * 43560)
+      : null;
 
     const serviceClient = createServiceClient();
 

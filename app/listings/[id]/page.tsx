@@ -309,15 +309,17 @@ export default function ListingDetailPage() {
   })();
 
   const pricePerAcre =
-    listing.lot_size_unit === 'acres' && listing.lot_size_acres && listing.asking_price
+    listing.lot_size_acres && listing.asking_price
       ? Math.round(listing.asking_price / listing.lot_size_acres)
       : null;
 
-  const lotSizeDisplay = listing.lot_size_acres
-    ? `${listing.lot_size_acres.toLocaleString()} ac`
-    : listing.lot_size_sqft
+  const acresDisplay = listing.lot_size_acres
+    ? `${listing.lot_size_acres.toLocaleString(undefined, { maximumFractionDigits: 2 })} ac`
+    : null;
+  const sqftDisplay = listing.lot_size_sqft
     ? `${listing.lot_size_sqft.toLocaleString()} sq ft`
     : null;
+  const lotSizeDisplay = [acresDisplay, sqftDisplay].filter(Boolean).join(' / ') || null;
 
   const isMessagingOnly =
     listing.is_test_listing === true ||
@@ -343,7 +345,7 @@ export default function ListingDetailPage() {
   const titleSubline = listing.zip_code ? `${titleSublineBase} ${listing.zip_code}` : titleSublineBase;
 
   const detailItems: [string, string][] = [
-    ...(listing.lot_size_acres ? [['Lot Size', `${listing.lot_size_acres.toLocaleString()} Acres`] as [string, string]] : listing.lot_size_sqft ? [['Lot Size', `${listing.lot_size_sqft.toLocaleString()} sq ft`] as [string, string]] : []),
+    ...(lotSizeDisplay ? [['Lot Size', lotSizeDisplay] as [string, string]] : []),
     ...(listing.zoning ? [['Zoning', listing.zoning] as [string, string]] : []),
     ...((listing.road_access?.length ?? 0) > 0 ? [['Road Access', listing.road_access!.join(', ')] as [string, string]] : []),
     ...((listing.utilities?.length ?? 0) > 0 ? [['Utilities', listing.utilities!.join(', ')] as [string, string]] : []),

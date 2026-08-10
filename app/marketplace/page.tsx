@@ -76,9 +76,9 @@ function formatPrice(n: number | null): string {
 }
 
 function formatAcreage(acres: number | null, sqft: number | null): string {
-  if (acres) return `${acres.toLocaleString()} Acres`;
-  if (sqft) return `${sqft.toLocaleString()} Sq Ft`;
-  return '';
+  const acresText = acres ? `${acres.toLocaleString(undefined, { maximumFractionDigits: 2 })} Acres` : '';
+  const sqftText = sqft ? `${sqft.toLocaleString()} Sq Ft` : '';
+  return [acresText, sqftText].filter(Boolean).join(' / ');
 }
 
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80';
