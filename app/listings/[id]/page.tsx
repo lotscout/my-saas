@@ -597,16 +597,7 @@ export default function ListingDetailPage() {
             <section>
               <h2 className="text-base font-semibold text-on-surface mb-3">Location</h2>
               <SingleListingMap county={listing.county} state={listing.state} />
-              {locationItems.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 mt-5">
-                  {locationItems.map(([label, value]) => (
-                    <div key={label}>
-                      <div className="text-xs font-bold text-outline uppercase tracking-wider mb-1">{label}</div>
-                      <div className="text-on-surface font-medium text-sm">{value}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+
             </section>
 
             {/* Direct contact (non-messaging-only listings) */}
