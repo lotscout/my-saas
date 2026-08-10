@@ -836,7 +836,7 @@ export default function PropertyAnalysisPage() {
         <div className="max-w-screen-2xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col gap-2">
             <span className="text-lg font-bold text-white font-headline">LotScout</span>
-            <p className="font-['Inter'] text-xs tracking-wide uppercase text-white/60">© 2026 LotScout. All rights reserved.</p>
+            <p className="font-body text-xs tracking-wide uppercase text-white/60">© 2026 LotScout. All rights reserved.</p>
           </div>
           <div className="flex flex-wrap gap-x-8 gap-y-4 justify-start md:justify-end">
             <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="#">Terms of Service</a>

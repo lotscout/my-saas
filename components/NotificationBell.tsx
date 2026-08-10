@@ -107,7 +107,7 @@ export default function NotificationBell() {
       {open && (
         <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 bg-white border border-outline-variant/20 rounded-2xl shadow-xl overflow-hidden z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant/10">
-            <span className="text-sm font-black text-primary font-['Manrope']">Notifications</span>
+            <span className="text-sm font-black text-primary font-headline">Notifications</span>
             <span className="text-xs text-secondary">{items.length}</span>
           </div>
           <div className="max-h-[70vh] sm:max-h-96 overflow-y-auto">

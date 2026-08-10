@@ -286,7 +286,7 @@ export default function MessagingPage() {
         <div className="max-w-screen-2xl mx-auto px-2 sm:px-8 w-full flex h-full overflow-hidden">
 
           {/* Left nav sidebar — hidden on mobile */}
-          <aside className="hidden md:flex flex-none w-56 h-full flex-col border-r border-outline-variant/20 bg-white font-['Inter'] text-sm font-medium">
+          <aside className="hidden md:flex flex-none w-56 h-full flex-col border-r border-outline-variant/20 bg-white font-body text-sm font-medium">
             <div className="px-6 pt-6 pb-3">
               <p className="text-xs font-bold text-secondary uppercase tracking-widest">Inbox</p>
             </div>

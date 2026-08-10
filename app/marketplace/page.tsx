@@ -1195,12 +1195,12 @@ export default function MarketplacePage() {
             <img alt="LotScout Logo" className="h-10 w-10 object-contain invert brightness-0" src="/logo.png" />
             LotScout
           </div>
-          <p className="font-['Inter'] text-xs tracking-wide uppercase text-emerald-200/60 max-w-sm leading-relaxed">
+          <p className="font-body text-xs tracking-wide uppercase text-emerald-200/60 max-w-sm leading-relaxed">
             Advanced Geospatial Land Management Systems. Precision in every boundary. Engineered for the modern acquisition professional.
           </p>
-          <div className="text-emerald-200/40 font-['Inter'] text-[10px] uppercase tracking-widest">© 2024 LotScout. All rights reserved.</div>
+          <div className="text-emerald-200/40 font-body text-[10px] uppercase tracking-widest">© 2024 LotScout. All rights reserved.</div>
         </div>
-        <div className="flex flex-wrap md:justify-end gap-x-10 gap-y-4 font-['Inter'] text-xs tracking-widest uppercase font-bold">
+        <div className="flex flex-wrap md:justify-end gap-x-10 gap-y-4 font-body text-xs tracking-widest uppercase font-bold">
           <a className="text-emerald-200/60 hover:text-white transition-colors" href="#">Terms of Service</a>
           <a className="text-emerald-200/60 hover:text-white transition-colors" href="#">Privacy Policy</a>
           <a className="text-emerald-200/60 hover:text-white transition-colors" href="#">Data Sources</a>

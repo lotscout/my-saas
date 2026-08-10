@@ -46,14 +46,14 @@ export default function Header() {
         <div className="flex justify-between items-center px-4 sm:px-8 h-16 mx-auto">
 
           {/* Logo */}
-          <div className="text-xl font-black text-primary tracking-tighter flex items-center gap-3 font-['Manrope']">
+          <div className="text-xl font-black text-primary tracking-tighter flex items-center gap-3 font-headline">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img alt="LotScout Logo" className="h-8 w-8 object-contain" src="/logo.png" />
             LotScout
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8 font-['Manrope'] font-bold tracking-tight h-full">
+          <nav className="hidden md:flex items-center gap-8 font-headline font-bold tracking-tight h-full">
             {NAV_LINKS.map(({ label, href }) => {
               const isActive = href !== '#' && pathname === href;
               return (
@@ -86,14 +86,14 @@ export default function Header() {
                 <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden z-50">
                   <a
                     href="/profile"
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-primary font-headline font-semibold hover:bg-emerald-50 transition-colors"
                     onClick={() => setDropdownOpen(false)}
                   >
                     <span className="material-symbols-outlined text-base">person</span>
                     My Profile
                   </a>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-primary font-['Manrope'] font-semibold hover:bg-emerald-50 transition-colors border-t border-outline-variant/10"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-primary font-headline font-semibold hover:bg-emerald-50 transition-colors border-t border-outline-variant/10"
                     onClick={handleSignOut}
                   >
                     <span className="material-symbols-outlined text-base">logout</span>
@@ -120,7 +120,7 @@ export default function Header() {
       {/* Mobile nav drawer — same bg-white as header, no z-index bleed */}
       {mobileOpen && (
         <div className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-emerald-900/10 shadow-md md:hidden">
-          <nav className="flex flex-col font-['Manrope'] font-bold">
+          <nav className="flex flex-col font-headline font-bold">
             {NAV_LINKS.map(({ label, href }) => {
               const isActive = href !== '#' && pathname === href;
               return (
