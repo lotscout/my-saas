@@ -14,6 +14,7 @@ interface Participant {
   company_name: string | null;
   avatar_url: string | null;
   email?: string | null;
+  full_name?: string | null;
 }
 
 interface ListingContext {
@@ -53,6 +54,7 @@ function participantName(p: Participant | null): string {
   if (p.company_name && !isBadName(p.company_name)) return p.company_name;
   const name = [p.first_name, p.last_name].filter(Boolean).join(' ');
   if (name && !isBadName(name)) return name;
+  if (p.full_name && !isBadName(p.full_name)) return p.full_name;
   if (p.email && !isBadName(p.email)) return p.email;
   return 'User';
 }
@@ -63,6 +65,7 @@ function initials(p: Participant | null): string {
   const first = p.first_name?.[0] ?? '';
   const last = p.last_name?.[0] ?? '';
   if (first || last) return (first + last).toUpperCase();
+  if (p.full_name) return p.full_name.substring(0, 2).toUpperCase();
   if (p.email) return p.email[0].toUpperCase();
   return '?';
 }
