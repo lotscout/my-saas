@@ -196,7 +196,7 @@ export default function ListingDetailPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.replace(`/login?next=/listings/${id}`);
+        router.replace(`/sign-in?redirect=/listings/${id}`);
       } else {
         setCurrentUserId(user.id);
         setAuthed(true);
@@ -256,6 +256,12 @@ export default function ListingDetailPage() {
       if (anyMsg) setAlreadyMessaged(true);
     })();
   }, [listing, currentUserId]);
+
+  const photos = listing?.photos_urls ?? [];
+
+  useEffect(() => {
+    if (activePhotoIndex >= photos.length) setActivePhotoIndex(0);
+  }, [activePhotoIndex, photos.length]);
 
   function handleMessage() {
     if (tierLoading) return;
@@ -331,12 +337,6 @@ export default function ListingDetailPage() {
   const hasEmail = contactMethods.some(m => m.toLowerCase().includes('email'));
   const hasPhone = contactMethods.some(m => m.toLowerCase().includes('phone') && !m.toLowerCase().includes('text'));
   const hasText  = contactMethods.some(m => m.toLowerCase().includes('text') || m.toLowerCase().includes('sms'));
-
-  const photos = listing.photos_urls ?? [];
-
-  useEffect(() => {
-    if (activePhotoIndex >= photos.length) setActivePhotoIndex(0);
-  }, [activePhotoIndex, photos.length]);
 
   const showPrevPhoto = () => {
     if (photos.length <= 1) return;
