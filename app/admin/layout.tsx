@@ -13,6 +13,7 @@ import Header from '@/components/Header';
 
 const NAV = [
   { href: '/admin/dashboard',          label: 'Overview',          icon: 'dashboard'   },
+  { href: '/admin/dashboard/data-center', label: 'Data Center',    icon: 'database'    },
   { href: '/admin/listings',           label: 'Listings Queue',    icon: 'list_alt'    },
   { href: '/admin/users',              label: 'User Management',   icon: 'group'       },
   { href: '/admin/messages',           label: 'Messages',          icon: 'forum'       },
