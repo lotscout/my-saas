@@ -99,10 +99,11 @@ function fmtPerAcre(budgetMax: number | null, minAcreage: number | null, budgetM
 }
 
 function fmtTimeline(t: string): string {
-  if (/actively buying|0.30 days/i.test(t)) return 'Under 30 days';
-  if (/1.3 month/i.test(t)) return '1–3 months';
-  if (/3.6 month/i.test(t)) return '3–6 months';
-  if (/flexible|6\+/i.test(t)) return 'Flexible';
+  if (/60/i.test(t)) return '60 days';
+  if (/90/i.test(t)) return '90 days';
+  if (/n\/?a|not applicable|flexible/i.test(t)) return 'N/A';
+  if (/actively buying|0.30 days|1.3 month/i.test(t)) return '60 days';
+  if (/3.6 month|6\+ month/i.test(t)) return '90 days';
   return t;
 }
 
@@ -186,7 +187,7 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
   const email = req.contact_email;
   const reachable = !!(phone || email);
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
-  const timeline = req.timeline ? fmtTimeline(req.timeline) : 'Flexible';
+  const timeline = req.timeline ? fmtTimeline(req.timeline) : 'N/A';
 
   return (
     <div
@@ -251,7 +252,7 @@ function RequestCard({ req }: { req: BuyerRequest }) {
   const company = req.display_company?.trim();
   const showCompany = !!company && company.toLowerCase() !== name.trim().toLowerCase();
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
-  const timeline = req.timeline ? fmtTimeline(req.timeline) : 'Flexible';
+  const timeline = req.timeline ? fmtTimeline(req.timeline) : 'N/A';
 
   return (
     <div
@@ -461,7 +462,7 @@ export default function BuyerDirectoryPage() {
   useEffect(() => {
     if (view !== 'active') return;
     setActiveLoading(true);
-    fetch(`/api/buyer-directory?status=active&timeline=${encodeURIComponent('Actively Buying (0–30 days)')}`)
+    fetch('/api/buyer-directory?status=active&limit=200')
       .then(r => r.json())
       .then(({ requests }) => { setActiveBuyers((requests ?? []) as BuyerRequest[]); setActiveLoading(false); })
       .catch(() => setActiveLoading(false));
@@ -528,7 +529,7 @@ export default function BuyerDirectoryPage() {
       const matchBudget = applyBudgetFilter(r, filterBudget);
       const matchAcreage = applyAcreageFilter(r, filterAcreage);
       const matchZoning = !filterZoning || (r.zoning_preference ?? []).some(z => z.toLowerCase().includes(filterZoning));
-      const matchTimeline = !filterTimeline || (r.timeline ?? '').includes(filterTimeline);
+      const matchTimeline = !filterTimeline || fmtTimeline(r.timeline ?? 'N/A') === filterTimeline;
       const roads = ((r as unknown as Record<string, unknown>).road_access ?? []) as string[];
       const matchRoad = !filterRoadAccessBR || roads.some(rd => rd.toLowerCase().includes(filterRoadAccessBR.toLowerCase()));
       return matchSearch && matchBudget && matchAcreage && matchZoning && matchTimeline && matchRoad;
@@ -536,12 +537,6 @@ export default function BuyerDirectoryPage() {
   }, [buyerRequests, brSearch, filterBudget, filterAcreage, filterZoning, filterTimeline, filterRoadAccessBR]);
 
   // ── Helpers ──
-
-  const searchPlaceholder = tab === 'requests'
-    ? 'Search by state, county, or zip code...'
-    : view === 'active'
-    ? 'Filter active buyers by name, company, or state...'
-    : 'Search buyers by name, company, state, or use case...';
 
   const handleSearchChange = (val: string) => {
     setGlobalSearch(val);
@@ -592,9 +587,9 @@ export default function BuyerDirectoryPage() {
             </div>
             <Link
               href="/create-buyer-request"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-primary/90 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-primary px-3 py-2 text-xs sm:px-5 sm:py-3 sm:text-sm font-extrabold text-white shadow-sm hover:bg-primary/90 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:shrink-0 self-start"
             >
-              <span className="material-symbols-outlined text-lg">add_circle</span>
+              <span className="material-symbols-outlined text-base sm:text-lg">add_circle</span>
               Create Request
             </Link>
           </section>
@@ -608,8 +603,9 @@ export default function BuyerDirectoryPage() {
                   type="text"
                   value={tab === 'requests' ? brSearch : activeBrSearch}
                   onChange={e => handleSearchChange(e.target.value)}
-                  placeholder={searchPlaceholder}
-                  className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl pl-12 pr-10 py-3 text-sm font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                  placeholder=""
+                  aria-label="Search buyer directory"
+                  className="w-full bg-white border-2 border-primary/25 rounded-xl pl-12 pr-10 py-3 text-sm font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-inner"
                 />
                 {(tab === 'requests' ? brSearch : activeBrSearch) && (
                   <button
@@ -623,7 +619,7 @@ export default function BuyerDirectoryPage() {
               {tab === 'directory' && (
                 <>
                   <select value={activeSort} onChange={e => setActiveSort(e.target.value as 'newest' | 'oldest')} className="bg-white px-4 py-3 rounded-xl border border-outline-variant/25 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    <option value="newest">Most Recent</option>
+                    <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
                   </select>
                   <button
@@ -759,10 +755,9 @@ export default function BuyerDirectoryPage() {
                 </select>
                 <select value={filterTimeline} onChange={e => setFilterTimeline(e.target.value)} className={SELECT_CLS}>
                   <option value="">Timeline</option>
-                  <option value="Actively Buying">Actively Buying</option>
-                  <option value="1-3 months">1–3 months</option>
-                  <option value="3-6 months">3–6 months</option>
-                  <option value="6+ months">6+ months</option>
+                  <option value="60 days">60 days</option>
+                  <option value="90 days">90 days</option>
+                  <option value="N/A">N/A</option>
                 </select>
                 <select value={filterRoadAccessBR} onChange={e => setFilterRoadAccessBR(e.target.value)} className={SELECT_CLS}>
                   <option value="">Road Access</option>
