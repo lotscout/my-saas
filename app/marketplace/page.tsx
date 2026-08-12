@@ -470,6 +470,9 @@ export default function MarketplacePage() {
     [filteredListings]
   );
 
+  const activeFilterCount = (filterLotSizeMin || filterLotSizeMax || filterSqFtMin || filterSqFtMax ? 1 : 0)
+    + filterZoning.length + filterUtilities.length + filterRoadAccessProps.length;
+
   // State autocomplete suggestions
   const stateSuggestions = useMemo(() => {
     const q = searchQuery.trim();
@@ -648,17 +651,18 @@ export default function MarketplacePage() {
               )}
             </div>
 
-            {/* Search bar */}
-            <div className="mb-6">
-              <div className="relative max-w-xl" ref={searchContainerRef}>
+            {/* Mobile-first search / sort / filter */}
+            <div className="mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 max-w-2xl">
+                <div className="relative flex-1 min-w-0" ref={searchContainerRef}>
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                   onFocus={() => setShowSuggestions(true)}
-                  placeholder="Search by state, zip, county, or city..."
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-11 pr-10 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                  placeholder="Search location..."
+                  className="w-full bg-white border-2 border-primary/20 rounded-xl pl-11 pr-10 py-3 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all shadow-inner"
                 />
                 {searchQuery && (
                   <button
@@ -690,37 +694,34 @@ export default function MarketplacePage() {
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Mobile filter button — only visible on small screens */}
-            <div className="flex md:hidden items-center gap-3 mb-4">
-              {(() => {
-                const activeCount = (filterLotSizeMin || filterLotSizeMax || filterSqFtMin || filterSqFtMax ? 1 : 0)
-                  + filterZoning.length + filterUtilities.length + filterRoadAccessProps.length;
-                return (
-                  <button
-                    onClick={() => setShowFilterDrawer(true)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-all ${
-                      activeCount > 0 ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-base">tune</span>
-                    Filters{activeCount > 0 ? ` (${activeCount})` : ''}
-                  </button>
-                );
-              })()}
-              <select
-                value={listingsSort}
-                onChange={e => setListingsSort(e.target.value)}
-                className="bg-surface-container-low border-none rounded-lg px-3 py-2.5 text-sm font-bold text-primary focus:ring-0 cursor-pointer"
+              <div className="md:hidden relative shrink-0 h-[46px] w-[46px] rounded-xl border border-outline-variant/25 bg-white text-primary shadow-sm">
+                <span className="material-symbols-outlined absolute inset-0 flex items-center justify-center text-xl pointer-events-none">sort</span>
+                <select
+                  value={listingsSort}
+                  onChange={e => setListingsSort(e.target.value)}
+                  aria-label="Sort listings"
+                  className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+                >
+                  <option value="recommended">Recommended</option>
+                  <option value="newest">Newest</option>
+                  <option value="price_asc">Price: Low → High</option>
+                  <option value="price_desc">Price: High → Low</option>
+                  <option value="acres_asc">Acres: Small → Large</option>
+                  <option value="acres_desc">Acres: Large → Small</option>
+                </select>
+              </div>
+              <button
+                onClick={() => setShowFilterDrawer(true)}
+                aria-label="Filter listings"
+                className={`md:hidden relative shrink-0 h-[46px] w-[46px] rounded-xl border shadow-sm flex items-center justify-center transition-all ${
+                  activeFilterCount > 0 ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-white text-primary border-outline-variant/25'
+                }`}
               >
-                <option value="recommended">Recommended</option>
-                <option value="newest">Newest</option>
-                <option value="price_asc">Price: Low → High</option>
-                <option value="price_desc">Price: High → Low</option>
-                <option value="acres_asc">Acres: Small → Large</option>
-                <option value="acres_desc">Acres: Large → Small</option>
-              </select>
+                <span className="material-symbols-outlined text-xl">tune</span>
+                {activeFilterCount > 0 && <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-[#1D9E75] ring-2 ring-white" />}
+              </button>
+              </div>
             </div>
 
             {/* Mobile filter drawer */}
@@ -786,10 +787,10 @@ export default function MarketplacePage() {
                         {[['agricultural', 'Agricultural'], ['recreational', 'Recreational'], ['residential', 'Residential'], ['commercial', 'Commercial'], ['mixed', 'Mixed Use'], ['unrestricted', 'Unrestricted']].map(([val, label]) => (
                           <button key={val} onClick={() => toggleMultiFilter(setFilterZoning, val)}
                             className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
-                              filterZoning.includes(val) ? 'bg-primary/10 border-primary text-primary font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-primary/30'
+                              filterZoning.includes(val) ? 'bg-[#1D9E75]/10 border-[#1D9E75] text-[#14795A] font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-[#1D9E75]/30'
                             }`}
                           >
-                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterZoning.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'}`}>
+                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterZoning.includes(val) ? 'bg-[#1D9E75] border-[#1D9E75]' : 'border-outline-variant'}`}>
                               {filterZoning.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'10px'}}>check</span>}
                             </span>
                             {label}
@@ -805,10 +806,10 @@ export default function MarketplacePage() {
                         {['Water', 'Electric', 'Gas', 'Septic', 'Sewer'].map(val => (
                           <button key={val} onClick={() => toggleMultiFilter(setFilterUtilities, val)}
                             className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
-                              filterUtilities.includes(val) ? 'bg-primary/10 border-primary text-primary font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-primary/30'
+                              filterUtilities.includes(val) ? 'bg-[#1D9E75]/10 border-[#1D9E75] text-[#14795A] font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-[#1D9E75]/30'
                             }`}
                           >
-                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterUtilities.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'}`}>
+                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterUtilities.includes(val) ? 'bg-[#1D9E75] border-[#1D9E75]' : 'border-outline-variant'}`}>
                               {filterUtilities.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'10px'}}>check</span>}
                             </span>
                             {val}
@@ -824,10 +825,10 @@ export default function MarketplacePage() {
                         {['Paved Road', 'Gravel Road', 'Dirt Road', 'Private Road', 'Easement', 'No Road Access'].map(val => (
                           <button key={val} onClick={() => toggleMultiFilter(setFilterRoadAccessProps, val)}
                             className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
-                              filterRoadAccessProps.includes(val) ? 'bg-primary/10 border-primary text-primary font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-primary/30'
+                              filterRoadAccessProps.includes(val) ? 'bg-[#1D9E75]/10 border-[#1D9E75] text-[#14795A] font-semibold' : 'border-outline-variant/25 text-on-surface hover:border-[#1D9E75]/30'
                             }`}
                           >
-                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterRoadAccessProps.includes(val) ? 'bg-primary border-primary' : 'border-outline-variant'}`}>
+                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${filterRoadAccessProps.includes(val) ? 'bg-[#1D9E75] border-[#1D9E75]' : 'border-outline-variant'}`}>
                               {filterRoadAccessProps.includes(val) && <span className="material-symbols-outlined text-white" style={{fontSize:'10px'}}>check</span>}
                             </span>
                             {val}
@@ -846,7 +847,7 @@ export default function MarketplacePage() {
                     </button>
                     <button
                       onClick={() => setShowFilterDrawer(false)}
-                      className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
+                      className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#14795A] transition-colors"
                     >
                       Apply Filters
                     </button>
@@ -1175,13 +1176,17 @@ export default function MarketplacePage() {
                       </div>
 
                       {/* Card body */}
-                      <div className="p-4 flex-1 flex flex-col">
-                        <p className="text-2xl font-extrabold text-primary leading-tight">{price}</p>
-                        {acreage && <p className="text-sm font-bold text-on-surface mt-0.5">{acreage}</p>}
-                        <p className="text-sm text-secondary mt-1.5 truncate">{addressLine}</p>
-                        {countyState && <p className="text-xs text-secondary/70 mt-0.5">{countyState}</p>}
+                      <div className="p-3 sm:p-4 flex-1 flex flex-col">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xl sm:text-2xl font-extrabold text-primary leading-tight truncate">{price}</p>
+                            <p className="text-sm text-secondary mt-1 truncate">{addressLine}</p>
+                          </div>
+                          {acreage && <p className="shrink-0 text-xs sm:text-sm font-bold text-on-surface mt-1 whitespace-nowrap">{acreage}</p>}
+                        </div>
+                        {countyState && <p className="text-xs text-secondary/70 mt-1 truncate">{countyState}</p>}
                         {listing.zoning && (
-                          <div className="mt-3">
+                          <div className="hidden sm:block mt-3">
                             <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
                           </div>
                         )}
