@@ -32,9 +32,9 @@ interface AnalysisRequest {
 
 type AddrValidStatus = 'idle' | 'validating' | 'valid';
 
-const inputClass = 'w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-on-surface placeholder-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors text-sm';
+const inputClass = 'w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-3.5 py-2 text-on-surface placeholder-secondary/50 focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/30 focus:border-[#1D9E75] transition-colors text-sm leading-tight';
 const selectClass = `${inputClass} cursor-pointer`;
-const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wider mb-1.5';
+const labelClass = 'block text-[11px] font-bold text-secondary uppercase tracking-wider mb-1 whitespace-nowrap';
 
 export default function PropertyAnalysisPage() {
   const { tier, loading, isAdmin } = usePermissions();
@@ -366,24 +366,23 @@ export default function PropertyAnalysisPage() {
             {isPaid ? (
               <>
                 {/* Form header */}
-                <div className="px-8 pt-6 pb-5 border-b border-outline-variant/15">
-                  <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
-                  <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
+                <div className="px-5 sm:px-8 pt-4 pb-3 border-b border-outline-variant/15">
+                  <h2 className="font-headline text-base sm:text-xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
                 </div>
 
                 {/* Mode toggle */}
-                <div className="border-b border-outline-variant/20 px-6 py-4 flex items-center gap-4">
-                  <span className="text-sm font-semibold text-secondary">Search by:</span>
+                <div className="border-b border-outline-variant/20 px-5 sm:px-6 py-3 flex items-center gap-2 sm:gap-4 whitespace-nowrap">
+                  <span className="text-sm font-semibold text-secondary shrink-0">Search by:</span>
                   <div className="flex bg-surface-container-low rounded-xl p-1 gap-1">
                     <button
                       onClick={() => { setInputMode('address'); resetAddrValidation(); }}
-                      className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${inputMode === 'address' ? 'bg-primary text-on-primary shadow-sm' : 'text-secondary hover:text-on-surface'}`}
+                      className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${inputMode === 'address' ? 'bg-[#1D9E75] text-white shadow-sm' : 'text-secondary hover:text-on-surface'}`}
                     >
                       Address
                     </button>
                     <button
                       onClick={() => setInputMode('apn')}
-                      className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${inputMode === 'apn' ? 'bg-primary text-on-primary shadow-sm' : 'text-secondary hover:text-on-surface'}`}
+                      className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${inputMode === 'apn' ? 'bg-[#1D9E75] text-white shadow-sm' : 'text-secondary hover:text-on-surface'}`}
                     >
                       APN / Parcel ID
                     </button>
@@ -391,7 +390,7 @@ export default function PropertyAnalysisPage() {
                 </div>
 
                 {/* Form fields */}
-                <div className="p-8 space-y-6">
+                <div className="p-5 sm:p-8 space-y-4 sm:space-y-5">
                   {inputMode === 'address' ? (
                     <>
                       <div>
@@ -487,7 +486,7 @@ export default function PropertyAnalysisPage() {
                   <button
                     onClick={handleSubmit}
                     disabled={!canSubmit || submitting}
-                    className="w-full bg-primary text-on-primary font-bold py-4 rounded-xl text-base hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
+                    className="w-full bg-[#1D9E75] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#14795A] transition-all shadow-lg shadow-[#1D9E75]/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
                   >
                     {submitting ? (
                       <span className="flex items-center justify-center gap-2">
@@ -503,10 +502,9 @@ export default function PropertyAnalysisPage() {
               </>
             ) : (
               /* Free user: search bar */
-              <div className="p-8">
-                <div className="mb-6">
-                  <p className="text-secondary font-medium tracking-wide uppercase text-xs mb-1">Get Started</p>
-                  <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
+              <div className="p-5 sm:p-8">
+                <div className="mb-4">
+                  <h2 className="font-headline text-base sm:text-xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
                 </div>
                 <div className="flex flex-col gap-6">
                   <div className="relative">
@@ -524,7 +522,7 @@ export default function PropertyAnalysisPage() {
                       </div>
                       <button
                         type="button"
-                        className="bg-primary text-on-primary font-bold px-6 py-3 rounded-full transition-all flex items-center gap-2 group shadow-lg hover:opacity-95 active:scale-95 text-sm"
+                        className="bg-[#1D9E75] text-white font-bold px-5 py-2.5 rounded-full transition-all flex items-center gap-2 group shadow-lg hover:bg-[#14795A] active:scale-95 text-sm"
                       >
                         Analyze
                         <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-1">analytics</span>
@@ -539,7 +537,7 @@ export default function PropertyAnalysisPage() {
                           </p>
                         </div>
                         <div className="flex items-center gap-4 shrink-0">
-                          <a href="/pricing" className="bg-primary text-on-primary font-bold text-xs px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap">
+                          <a href="/pricing" className="bg-[#1D9E75] text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-[#14795A] transition-colors whitespace-nowrap">
                             View Plans →
                           </a>
                           <button
