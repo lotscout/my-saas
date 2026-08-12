@@ -393,8 +393,8 @@ export default function AdvisorPage() {
   const composer = (large: boolean) => (
     <form
       onSubmit={e => { e.preventDefault(); send(input); }}
-      className={`w-full flex items-end gap-2 bg-white rounded-2xl border border-black/10 px-3 py-2.5 ${large ? 'shadow-lg' : 'shadow-md'} ${limitHit ? 'opacity-60' : ''}`}
-      style={large ? { minHeight: '4rem' } : undefined}
+      className={`w-full flex items-end gap-2 bg-white rounded-2xl border border-black/10 px-2.5 py-2 sm:px-3 sm:py-2.5 ${large ? 'shadow-lg' : 'shadow-md'} ${limitHit ? 'opacity-60' : ''}`}
+      style={large ? { minHeight: '3.35rem' } : undefined}
     >
       <textarea
         ref={inputRef}
@@ -404,7 +404,7 @@ export default function AdvisorPage() {
         disabled={!!limitHit}
         rows={1}
         placeholder={limitHit ? 'Limit reached' : 'Ask anything about real estate...'}
-        className="flex-grow resize-none bg-transparent px-2 py-2 text-lg leading-relaxed placeholder:text-[#717973] focus:outline-none disabled:cursor-not-allowed max-h-40"
+        className="flex-grow resize-none bg-transparent px-2 py-1.5 text-base sm:text-lg leading-snug sm:leading-relaxed placeholder:text-[#717973] focus:outline-none disabled:cursor-not-allowed max-h-32 sm:max-h-40"
         style={{ color: INK }}
         aria-label="Scout"
       />
@@ -412,16 +412,16 @@ export default function AdvisorPage() {
         type="submit"
         disabled={loading || !!limitHit || !input.trim()}
         aria-label="Send"
-        className="shrink-0 w-11 h-11 flex items-center justify-center rounded-full text-white transition-transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="shrink-0 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full text-white transition-transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ backgroundColor: GREEN }}
       >
-        <span className="material-symbols-outlined text-xl">arrow_upward</span>
+        <span className="material-symbols-outlined text-lg sm:text-xl">arrow_upward</span>
       </button>
     </form>
   );
 
   const remainingLine = showRemaining && !limitHit && (
-    <p className="text-sm text-center mt-2" style={{ color: MUTED }}>
+    <p className="text-xs sm:text-sm text-center mt-1.5 sm:mt-2" style={{ color: MUTED }}>
       {access!.remaining} {access!.remaining === 1 ? 'question' : 'questions'} left
       {access!.status === 'guest' ? ' as a guest' : ' today'}.
       {access!.status === 'free' && (
@@ -433,10 +433,10 @@ export default function AdvisorPage() {
   const sidebarInner = (
     <div className="flex flex-col h-full">
       {/* Top rows — clean text items */}
-      <div className="px-2 pt-4">
+      <div className="px-2 pt-3 sm:pt-4">
         <button
           onClick={newChat}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-lg text-left transition-colors hover:bg-black/5"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-base sm:text-lg text-left transition-colors hover:bg-black/5"
           style={{ color: INK }}
         >
           <span className="material-symbols-outlined text-2xl" style={{ color: MUTED }}>add</span>
@@ -444,7 +444,7 @@ export default function AdvisorPage() {
         </button>
         <button
           onClick={() => { setShowSaved(true); setMobileSidebar(false); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-lg text-left transition-colors hover:bg-black/5"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-base sm:text-lg text-left transition-colors hover:bg-black/5"
           style={{ color: INK }}
         >
           <span className="material-symbols-outlined text-2xl" style={{ color: MUTED }}>bookmark</span>
@@ -466,7 +466,7 @@ export default function AdvisorPage() {
                 key={c.id}
                 onClick={() => loadConversation(c)}
                 title={c.title}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-lg text-left transition-colors ${c.id === currentId ? '' : 'hover:bg-black/5'}`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-base sm:text-lg text-left transition-colors ${c.id === currentId ? '' : 'hover:bg-black/5'}`}
                 style={{ color: INK, backgroundColor: c.id === currentId ? CHIP_BG : undefined }}
               >
                 <span className="material-symbols-outlined text-xl shrink-0" style={{ color: MUTED }}>chat_bubble</span>
@@ -483,7 +483,7 @@ export default function AdvisorPage() {
   );
 
   return (
-    <div className="bg-surface h-screen flex flex-col overflow-hidden">
+    <div className="bg-surface h-[100svh] flex flex-col overflow-hidden">
       <Header />
       <div className="h-16 shrink-0" aria-hidden />
 
@@ -497,32 +497,30 @@ export default function AdvisorPage() {
         {mobileSidebar && (
           <div className="md:hidden fixed inset-0 z-40">
             <div className="absolute inset-0 bg-black/30" onClick={() => setMobileSidebar(false)} />
-            <div className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-xl">{sidebarInner}</div>
+            <div className="absolute left-0 top-0 bottom-0 w-72 max-w-[82vw] bg-white shadow-xl">{sidebarInner}</div>
           </div>
         )}
 
         <div className="flex-grow flex flex-col min-w-0 min-h-0">
-          {/* Mobile controls (history + new chat) */}
-          <div className="md:hidden flex items-center justify-between px-4 py-2 border-b border-black/10 bg-white shrink-0">
-            <button onClick={() => setMobileSidebar(true)} className="flex items-center gap-1 text-sm font-semibold" style={{ color: INK }}>
-              <span className="material-symbols-outlined text-lg">history</span>
-              History
-            </button>
-            <button onClick={newChat} className="flex items-center gap-1 text-sm font-semibold" style={{ color: GREEN }}>
-              <span className="material-symbols-outlined text-lg">add</span>
-              New Chat
-            </button>
-          </div>
+          {/* Mobile pull-out history control */}
+          <button
+            onClick={() => setMobileSidebar(true)}
+            aria-label="Open Scout history"
+            className="md:hidden fixed left-2 top-20 z-30 w-10 h-10 rounded-full bg-white border border-black/10 shadow-md flex items-center justify-center active:scale-95"
+            style={{ color: INK }}
+          >
+            <span className="material-symbols-outlined text-xl">menu</span>
+          </button>
 
           {isEmpty ? (
             /* ── Centered empty state ── */
-            <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pb-6 min-h-0">
-              <div className="flex-grow flex flex-col items-center justify-center gap-6">
+            <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-3 sm:px-4 pb-3 sm:pb-6 min-h-0">
+              <div className="flex-grow flex flex-col items-center justify-center gap-3 sm:gap-6 pt-1">
                 <div className="flex flex-col items-center text-center">
-                  <h1 className="font-headline text-5xl sm:text-6xl md:text-7xl font-extrabold text-primary tracking-tighter leading-tight">
+                  <h1 className="font-headline text-4xl sm:text-6xl md:text-7xl font-extrabold text-primary tracking-tighter leading-tight">
                     Scout
                   </h1>
-                  <p className="mt-3 text-lg" style={{ color: MUTED }}>What are we scouting today?</p>
+                  <p className="mt-1 sm:mt-3 text-sm sm:text-lg" style={{ color: MUTED }}>What are we scouting today?</p>
                 </div>
 
                 {limitHit ? (
@@ -534,13 +532,13 @@ export default function AdvisorPage() {
                       {remainingLine}
                     </div>
 
-                    <div className="flex flex-wrap gap-2.5 justify-center max-w-2xl">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2.5 justify-center max-w-2xl">
                       {SUGGESTIONS.map(s => (
                         <button
                           key={s}
                           onClick={() => send(s)}
                           disabled={loading}
-                          className="text-base font-normal rounded-full px-4 py-2 border border-black/25 bg-white text-black transition-colors hover:bg-surface-container-low disabled:opacity-50"
+                          className="text-xs sm:text-base leading-tight font-normal rounded-full px-3 py-1.5 sm:px-4 sm:py-2 border border-black/25 bg-white text-black transition-colors hover:bg-surface-container-low disabled:opacity-50"
                         >
                           {s}
                         </button>
@@ -550,12 +548,12 @@ export default function AdvisorPage() {
                 )}
               </div>
 
-              <p className="text-xs text-center mt-4" style={{ color: MUTED }}>{DISCLAIMER}</p>
+              <p className="text-[10px] sm:text-xs text-center mt-2 sm:mt-4" style={{ color: MUTED }}>{DISCLAIMER}</p>
             </main>
           ) : (
             /* ── Active chat state ── */
-            <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-4 pb-4 min-h-0">
-              <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-6 py-4 min-h-0">
+            <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-3 sm:px-4 pb-3 sm:pb-4 min-h-0">
+              <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-4 sm:space-y-6 py-3 sm:py-4 min-h-0">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
                     {m.role === 'assistant' && (
@@ -565,7 +563,7 @@ export default function AdvisorPage() {
                     )}
 
                     <div
-                      className={`rounded-2xl px-4 py-3 text-lg leading-relaxed ${
+                      className={`rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 text-base sm:text-lg leading-snug sm:leading-relaxed ${
                         m.role === 'user' ? 'max-w-[75%] rounded-br-md whitespace-pre-wrap' : 'max-w-[85%] rounded-bl-md border border-black/5 shadow-sm'
                       }`}
                       style={m.role === 'user' ? { backgroundColor: CHIP_BG, color: INK } : { backgroundColor: '#ffffff', color: INK }}
@@ -608,7 +606,7 @@ export default function AdvisorPage() {
                   {remainingLine}
                 </>
               )}
-              <p className="text-xs text-center mt-3" style={{ color: MUTED }}>{DISCLAIMER}</p>
+              <p className="text-[10px] sm:text-xs text-center mt-2 sm:mt-3" style={{ color: MUTED }}>{DISCLAIMER}</p>
             </main>
           )}
         </div>
