@@ -60,29 +60,14 @@ const STATE_CENTROIDS: Record<string, [number, number]> = {
   WI: [44.6243, -89.9941], WY: [42.9957, -107.5512], DC: [38.8951, -77.0369],
 };
 
-const STATE_SAMPLE_IMAGE_KEYWORDS: Record<string, string> = {
-  AZ: 'arizona-desert-aerial-land',
-  CA: 'california-rural-aerial-land',
-  CO: 'colorado-mountain-land-aerial',
-  FL: 'florida-rural-land-aerial',
-  GA: 'georgia-rural-land-aerial',
-  ID: 'idaho-rural-land-aerial',
-  MT: 'montana-ranch-land-aerial',
-  NC: 'north-carolina-rural-land-aerial',
-  NV: 'nevada-desert-land-aerial',
-  NM: 'new-mexico-desert-land-aerial',
-  OR: 'oregon-rural-land-aerial',
-  TN: 'tennessee-rural-land-aerial',
-  TX: 'texas-ranch-land-aerial',
-  UT: 'utah-desert-land-aerial',
-  WA: 'washington-rural-land-aerial',
-  WY: 'wyoming-ranch-land-aerial',
-};
+const DESERT_SAMPLE_STATES = new Set(['AZ', 'CA', 'NV', 'NM', 'UT', 'WY']);
+const MOUNTAIN_SAMPLE_STATES = new Set(['CO', 'ID', 'MT', 'OR', 'WA']);
 
 function getSampleImageUrl(state: string | null) {
-  const stateCode = state?.trim().toUpperCase() || 'US';
-  const keywords = STATE_SAMPLE_IMAGE_KEYWORDS[stateCode] || 'aerial-rural-vacant-land';
-  return `https://source.unsplash.com/1400x760/?${encodeURIComponent(keywords)}&sig=${encodeURIComponent(stateCode)}`;
+  const stateCode = state?.trim().toUpperCase() || '';
+  if (DESERT_SAMPLE_STATES.has(stateCode)) return '/sample-listings/desert-aerial.jpg';
+  if (MOUNTAIN_SAMPLE_STATES.has(stateCode)) return '/sample-listings/mountain-aerial.jpg';
+  return '/sample-listings/pasture-aerial.jpg';
 }
 
 interface Listing {
@@ -517,9 +502,9 @@ export default function ListingDetailPage() {
               />
               <div className="hidden absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img alt="Sample aerial land image" src={sampleImageUrl} className="h-full w-full object-cover opacity-80 grayscale-[20%]" />
+                <img alt="Sample aerial land image" src={sampleImageUrl} className="h-full w-full object-cover opacity-85" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/20" />
-                <span className="absolute left-4 top-4 rounded-full bg-black/65 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#14795A] shadow-sm">
                   Sample image
                 </span>
               </div>
@@ -552,9 +537,9 @@ export default function ListingDetailPage() {
         ) : (
           <div className="relative overflow-hidden rounded-2xl border border-outline-variant/20 bg-gray-900 shadow-sm" style={{ height: 'clamp(240px, 40vh, 380px)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="Sample aerial land image" src={sampleImageUrl} className="absolute inset-0 h-full w-full object-cover opacity-80 grayscale-[20%]" />
+            <img alt="Sample aerial land image" src={sampleImageUrl} className="absolute inset-0 h-full w-full object-cover opacity-85" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/20" />
-            <span className="absolute left-4 top-4 rounded-full bg-black/65 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+            <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#14795A] shadow-sm">
               Sample image
             </span>
             <button

@@ -89,29 +89,14 @@ const LISTING_STATUS_META: Record<string, { label: string; className: string }> 
   rejected: { label: 'Rejected', className: 'bg-red-600 text-white' },
 };
 
-const STATE_SAMPLE_IMAGE_KEYWORDS: Record<string, string> = {
-  AZ: 'arizona-desert-aerial-land',
-  CA: 'california-rural-aerial-land',
-  CO: 'colorado-mountain-land-aerial',
-  FL: 'florida-rural-land-aerial',
-  GA: 'georgia-rural-land-aerial',
-  ID: 'idaho-rural-land-aerial',
-  MT: 'montana-ranch-land-aerial',
-  NC: 'north-carolina-rural-land-aerial',
-  NV: 'nevada-desert-land-aerial',
-  NM: 'new-mexico-desert-land-aerial',
-  OR: 'oregon-rural-land-aerial',
-  TN: 'tennessee-rural-land-aerial',
-  TX: 'texas-ranch-land-aerial',
-  UT: 'utah-desert-land-aerial',
-  WA: 'washington-rural-land-aerial',
-  WY: 'wyoming-ranch-land-aerial',
-};
+const DESERT_SAMPLE_STATES = new Set(['AZ', 'CA', 'NV', 'NM', 'UT', 'WY']);
+const MOUNTAIN_SAMPLE_STATES = new Set(['CO', 'ID', 'MT', 'OR', 'WA']);
 
 function getSampleImageUrl(state: string | null) {
-  const stateCode = state?.trim().toUpperCase() || 'US';
-  const keywords = STATE_SAMPLE_IMAGE_KEYWORDS[stateCode] || 'aerial-rural-vacant-land';
-  return `https://source.unsplash.com/900x520/?${encodeURIComponent(keywords)}&sig=${encodeURIComponent(stateCode)}`;
+  const stateCode = state?.trim().toUpperCase() || '';
+  if (DESERT_SAMPLE_STATES.has(stateCode)) return '/sample-listings/desert-aerial.jpg';
+  if (MOUNTAIN_SAMPLE_STATES.has(stateCode)) return '/sample-listings/mountain-aerial.jpg';
+  return '/sample-listings/pasture-aerial.jpg';
 }
 
 function getListingStatusMeta(status: string) {
@@ -1181,8 +1166,8 @@ export default function MarketplacePage() {
                             />
                             <div className="hidden absolute inset-0">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img alt="Sample aerial land image" className="h-full w-full object-cover opacity-80 grayscale-[20%]" src={sampleImgSrc} />
-                              <span className="absolute left-3 top-3 rounded-full bg-black/65 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                              <img alt="Sample aerial land image" className="h-full w-full object-cover opacity-85" src={sampleImgSrc} />
+                              <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#14795A] shadow-sm">
                                 Sample image
                               </span>
                             </div>
@@ -1190,8 +1175,8 @@ export default function MarketplacePage() {
                         ) : (
                           <div className="absolute inset-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img alt="Sample aerial land image" className="h-full w-full object-cover opacity-80 grayscale-[20%]" src={sampleImgSrc} />
-                            <span className="absolute left-3 top-3 rounded-full bg-black/65 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                            <img alt="Sample aerial land image" className="h-full w-full object-cover opacity-85" src={sampleImgSrc} />
+                            <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#14795A] shadow-sm">
                               Sample image
                             </span>
                           </div>
