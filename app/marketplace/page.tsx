@@ -89,6 +89,31 @@ const LISTING_STATUS_META: Record<string, { label: string; className: string }> 
   rejected: { label: 'Rejected', className: 'bg-red-600 text-white' },
 };
 
+const STATE_SAMPLE_IMAGE_KEYWORDS: Record<string, string> = {
+  AZ: 'arizona-desert-aerial-land',
+  CA: 'california-rural-aerial-land',
+  CO: 'colorado-mountain-land-aerial',
+  FL: 'florida-rural-land-aerial',
+  GA: 'georgia-rural-land-aerial',
+  ID: 'idaho-rural-land-aerial',
+  MT: 'montana-ranch-land-aerial',
+  NC: 'north-carolina-rural-land-aerial',
+  NV: 'nevada-desert-land-aerial',
+  NM: 'new-mexico-desert-land-aerial',
+  OR: 'oregon-rural-land-aerial',
+  TN: 'tennessee-rural-land-aerial',
+  TX: 'texas-ranch-land-aerial',
+  UT: 'utah-desert-land-aerial',
+  WA: 'washington-rural-land-aerial',
+  WY: 'wyoming-ranch-land-aerial',
+};
+
+function getSampleImageUrl(state: string | null) {
+  const stateCode = state?.trim().toUpperCase() || 'US';
+  const keywords = STATE_SAMPLE_IMAGE_KEYWORDS[stateCode] || 'aerial-rural-vacant-land';
+  return `https://source.unsplash.com/900x520/?${encodeURIComponent(keywords)}&sig=${encodeURIComponent(stateCode)}`;
+}
+
 function getListingStatusMeta(status: string) {
   return LISTING_STATUS_META[status] ?? {
     label: status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
@@ -1096,6 +1121,7 @@ export default function MarketplacePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
                 {filteredListings.map(listing => {
                   const imgSrc = listing.photos_urls?.find(url => !!url?.trim())?.trim() ?? null;
+                  const sampleImgSrc = getSampleImageUrl(listing.state);
                   const acreage = formatAcreage(listing.lot_size_acres, listing.lot_size_sqft);
                   const price = formatPrice(listing.asking_price);
                   const addressLine = listing.street_address?.trim()
@@ -1153,15 +1179,21 @@ export default function MarketplacePage() {
                                 event.currentTarget.nextElementSibling?.classList.remove('hidden');
                               }}
                             />
-                            <div className="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#F5F8F6] text-[#5C6D64]">
-                              <span className="material-symbols-outlined text-4xl text-[#9AA8A0]">image_not_supported</span>
-                              <span className="text-xs font-extrabold uppercase tracking-[0.18em]">No verified photo</span>
+                            <div className="hidden absolute inset-0">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img alt="Sample aerial land image" className="h-full w-full object-cover opacity-80 grayscale-[20%]" src={sampleImgSrc} />
+                              <span className="absolute left-3 top-3 rounded-full bg-black/65 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                                Sample image
+                              </span>
                             </div>
                           </>
                         ) : (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#F5F8F6] text-[#5C6D64]">
-                            <span className="material-symbols-outlined text-4xl text-[#9AA8A0]">image_not_supported</span>
-                            <span className="text-xs font-extrabold uppercase tracking-[0.18em]">No verified photo</span>
+                          <div className="absolute inset-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img alt="Sample aerial land image" className="h-full w-full object-cover opacity-80 grayscale-[20%]" src={sampleImgSrc} />
+                            <span className="absolute left-3 top-3 rounded-full bg-black/65 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                              Sample image
+                            </span>
                           </div>
                         )}
                         <div className="absolute top-3 right-3 z-10">
