@@ -419,12 +419,12 @@ export default function PricingPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <a className="block text-emerald-300/60 hover:text-emerald-50 hover:underline transition-opacity" href="#">Terms of Service</a>
-              <a className="block text-emerald-300/60 hover:text-emerald-50 hover:underline transition-opacity" href="#">Privacy Policy</a>
+              <a className="block text-emerald-300/60 hover:text-emerald-50 hover:underline transition-opacity" href="/terms">Terms of Service</a>
+              <a className="block text-emerald-300/60 hover:text-emerald-50 hover:underline transition-opacity" href="/privacy">Privacy Policy</a>
             </div>
             <div className="space-y-2">
-              <a className="block text-emerald-300/60 hover:text-emerald-50 hover:underline transition-opacity" href="#">Data Sources</a>
-              <a className="block text-emerald-300/60 hover:text-emerald-50 hover:underline transition-opacity" href="#">Contact Support</a>
+              <a className="block text-emerald-300/60 hover:text-emerald-50 hover:underline transition-opacity" href="/data-sources">Data Sources</a>
+              <a className="block text-emerald-300/60 hover:text-emerald-50 hover:underline transition-opacity" href="mailto:support@lotscout.com">Contact Support</a>
             </div>
           </div>
         </div>

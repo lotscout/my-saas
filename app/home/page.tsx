@@ -558,11 +558,11 @@ export default function HomePage() {
         <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto gap-8 font-body text-sm tracking-normal">
           <div className="text-xl font-bold text-emerald-50">LotScout</div>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
-            <a className="text-emerald-300/70 hover:text-white transition-colors" href="#">Terms of Service</a>
-            <a className="text-emerald-300/70 hover:text-white transition-colors" href="#">Privacy Policy</a>
-            <a className="text-emerald-300/70 hover:text-white transition-colors" href="#">Cookie Settings</a>
-            <a className="text-emerald-300/70 hover:text-white transition-colors" href="#">Contact Sales</a>
-            <a className="text-emerald-300/70 hover:text-white transition-colors" href="#">Data Sources</a>
+            <a className="text-emerald-300/70 hover:text-white transition-colors" href="/terms">Terms of Service</a>
+            <a className="text-emerald-300/70 hover:text-white transition-colors" href="/privacy">Privacy Policy</a>
+            <a className="text-emerald-300/70 hover:text-white transition-colors" href="mailto:support@lotscout.com?subject=Cookie%20settings">Cookie Settings</a>
+            <a className="text-emerald-300/70 hover:text-white transition-colors" href="mailto:support@lotscout.com?subject=Contact%20sales">Contact Sales</a>
+            <a className="text-emerald-300/70 hover:text-white transition-colors" href="/data-sources">Data Sources</a>
           </div>
           <div className="text-emerald-300/70">© 2026 LotScout Technologies. All rights reserved.</div>
         </div>

@@ -306,7 +306,7 @@ export default function BuyerRequestPage() {
             <h2 className="font-headline text-xl font-bold text-[#0D1F16] mb-2">Upgrade to Message Buyers</h2>
             <p className="text-[#5C6D64] text-sm mb-6 leading-relaxed">Direct buyer messaging requires a paid LotScout account. Choose a plan to connect with active buyers.</p>
             <div className="flex gap-3">
-              <Link href="/pricing" className="flex-1 bg-[#0D1F16] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">View Plans →</Link>
+              <Link href="/pricing" className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">View Plans →</Link>
               <button onClick={() => setShowUpgradeModal(false)} className="flex-1 border border-[#E2EAE6] text-[#5C6D64] py-3 rounded-xl font-bold text-sm hover:bg-[#F5F8F6] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">Maybe Later</button>
             </div>
           </div>

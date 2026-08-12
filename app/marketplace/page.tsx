@@ -1209,10 +1209,10 @@ export default function MarketplacePage() {
           <div className="text-emerald-200/40 font-body text-[10px] uppercase tracking-widest">© 2024 LotScout. All rights reserved.</div>
         </div>
         <div className="flex flex-wrap md:justify-end gap-x-10 gap-y-4 font-body text-xs tracking-widest uppercase font-bold">
-          <a className="text-emerald-200/60 hover:text-white transition-colors" href="#">Terms of Service</a>
-          <a className="text-emerald-200/60 hover:text-white transition-colors" href="#">Privacy Policy</a>
-          <a className="text-emerald-200/60 hover:text-white transition-colors" href="#">Data Sources</a>
-          <a className="text-emerald-200/60 hover:text-white transition-colors" href="#">Contact Support</a>
+          <a className="text-emerald-200/60 hover:text-white transition-colors" href="/terms">Terms of Service</a>
+          <a className="text-emerald-200/60 hover:text-white transition-colors" href="/privacy">Privacy Policy</a>
+          <a className="text-emerald-200/60 hover:text-white transition-colors" href="/data-sources">Data Sources</a>
+          <a className="text-emerald-200/60 hover:text-white transition-colors" href="mailto:support@lotscout.com">Contact Support</a>
         </div>
       </footer>
 

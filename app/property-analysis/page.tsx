@@ -815,10 +815,10 @@ export default function PropertyAnalysisPage() {
             <p className="font-body text-xs tracking-wide uppercase text-white/60">© 2026 LotScout. All rights reserved.</p>
           </div>
           <div className="flex flex-wrap gap-x-8 gap-y-4 justify-start md:justify-end">
-            <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="#">Terms of Service</a>
-            <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="#">Privacy Policy</a>
-            <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="#">Data Sources</a>
-            <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="#">Support</a>
+            <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="/terms">Terms of Service</a>
+            <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="/privacy">Privacy Policy</a>
+            <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="/data-sources">Data Sources</a>
+            <a className="text-white/60 hover:text-white transition-opacity text-xs uppercase tracking-wide font-body" href="mailto:support@lotscout.com">Support</a>
           </div>
         </div>
       </footer>
