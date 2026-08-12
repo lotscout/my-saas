@@ -15,7 +15,7 @@ const NAV = [
   { href: '/admin/dashboard',          label: 'Overview',          icon: 'dashboard'   },
   { href: '/admin/listings',           label: 'Listings Queue',    icon: 'list_alt'    },
   { href: '/admin/users',              label: 'User Management',   icon: 'group'       },
-  { href: '/admin/dashboard/messages', label: 'Messages',          icon: 'forum'       },
+  { href: '/admin/messages',           label: 'Messages',          icon: 'forum'       },
   { href: '/admin/messaging',          label: 'Buyer Messaging',   icon: 'chat'        },
   { href: '/admin/analysis',           label: 'Analysis Queue',    icon: 'analytics'   },
   { href: '/admin/dashboard/sources',  label: 'Marketing Sources', icon: 'track_changes' },
@@ -94,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Nav */}
         <nav className="flex-1 py-3 space-y-0.5 overflow-y-auto">
           {NAV.map(({ href, label, icon }) => {
-            const active = pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(href));
+            const active = pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(href + '/'));
             return (
               <a
                 key={href}
