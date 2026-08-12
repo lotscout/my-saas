@@ -79,8 +79,6 @@ function formatAcreage(acres: number | null, sqft: number | null): string {
   return [acresText, sqftText].filter(Boolean).join(' / ');
 }
 
-const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80';
-
 const LISTING_STATUS_META: Record<string, { label: string; className: string }> = {
   active: { label: 'Published', className: 'bg-[#1D9E75] text-white' },
   published: { label: 'Published', className: 'bg-[#1D9E75] text-white' },
@@ -1097,7 +1095,7 @@ export default function MarketplacePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
                 {filteredListings.map(listing => {
-                  const imgSrc = listing.photos_urls?.[0] ?? PLACEHOLDER_IMG;
+                  const imgSrc = listing.photos_urls?.find(url => !!url?.trim())?.trim() ?? null;
                   const acreage = formatAcreage(listing.lot_size_acres, listing.lot_size_sqft);
                   const price = formatPrice(listing.asking_price);
                   const addressLine = listing.street_address?.trim()
@@ -1143,8 +1141,29 @@ export default function MarketplacePage() {
                             )}
                           </div>
                         )}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt="Land listing" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={imgSrc} />
+                        {imgSrc ? (
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              alt="Land listing"
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              src={imgSrc}
+                              onError={(event) => {
+                                event.currentTarget.classList.add('hidden');
+                                event.currentTarget.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                            <div className="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#F5F8F6] text-[#5C6D64]">
+                              <span className="material-symbols-outlined text-4xl text-[#9AA8A0]">image_not_supported</span>
+                              <span className="text-xs font-extrabold uppercase tracking-[0.18em]">No verified photo</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#F5F8F6] text-[#5C6D64]">
+                            <span className="material-symbols-outlined text-4xl text-[#9AA8A0]">image_not_supported</span>
+                            <span className="text-xs font-extrabold uppercase tracking-[0.18em]">No verified photo</span>
+                          </div>
+                        )}
                         <div className="absolute top-3 right-3 z-10">
                           <button
                             onClick={(e) => toggleFavorite(e, listing.id)}
