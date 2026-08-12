@@ -188,7 +188,7 @@ export default function PricingPage() {
 
           {/* EXCLUSIVE */}
           <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
-            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Enterprise</p>
+            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Exclusive</p>
             {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.exclusive}/mo</del>}
             <div className="flex items-baseline gap-1 mb-0.5">
               <span className="text-4xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
@@ -292,7 +292,7 @@ export default function PricingPage() {
 
             {/* Exclusive */}
             <div className="p-5 flex flex-col border-l border-outline-variant/10">
-              <span className="text-secondary font-bold text-xs tracking-widest uppercase mb-2">Enterprise</span>
+              <span className="text-secondary font-bold text-xs tracking-widest uppercase mb-2">Exclusive</span>
               {isAnnual && <del className="text-secondary/40 text-sm font-medium mt-1">${MONTHLY_PRICES.exclusive}/mo</del>}
               <div className="flex items-baseline gap-1 mb-0.5">
                 <span className="text-3xl font-extrabold text-primary font-headline">${prices.exclusive}</span>
@@ -343,11 +343,11 @@ export default function PricingPage() {
 
         </div>
 
-        {/* Enterprise / custom solution */}
+        {/* Exclusive / custom solution */}
         <div className="mt-8 bg-surface-container-low rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
             <h3 className="font-headline text-lg font-bold text-primary mb-1">Need a custom solution?</h3>
-            <p className="text-secondary text-sm">Large brokerage or enterprise team? Let&apos;s build a plan that fits your volume.</p>
+            <p className="text-secondary text-sm">Large brokerage or high-volume team? Let&apos;s build a plan that fits your volume.</p>
           </div>
           <a
             href="mailto:support@lotscout.com"

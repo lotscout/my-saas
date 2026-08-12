@@ -244,9 +244,9 @@ export default function HomePage() {
           <div className="hidden md:flex items-center gap-8">
 
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            <Link href="/sign-in" className="px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border border-primary/30 text-primary text-xs sm:text-sm font-bold hover:bg-primary/5 transition-colors whitespace-nowrap">Sign In</Link>
-            <Link href="/sign-up" className="px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-primary text-white text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors whitespace-nowrap">Sign Up</Link>
+          <div className="flex items-center gap-1 sm:gap-3">
+            <Link href="/sign-in" className="px-2 py-1 sm:px-4 sm:py-2 rounded-md sm:rounded-lg border border-primary/30 text-primary text-[10px] sm:text-sm font-bold hover:bg-primary/5 transition-colors whitespace-nowrap leading-none">Sign In</Link>
+            <Link href="/sign-up" className="px-2 py-1 sm:px-4 sm:py-2 rounded-md sm:rounded-lg bg-[#1D9E75] text-white text-[10px] sm:text-sm font-bold hover:bg-[#16845F] transition-colors whitespace-nowrap leading-none">Sign Up</Link>
           </div>
         </div>
       </nav>
@@ -272,8 +272,8 @@ export default function HomePage() {
                 <HeroMap />
               </div>
               <div className="flex flex-col sm:flex-row gap-4 mb-10 justify-center md:justify-start">
-                <Link href="/sign-up" className="w-full sm:w-auto text-center bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-colors shadow-lg">Find Your Next Deal</Link>
-                <Link href="/sign-up" className="w-full sm:w-auto text-center border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-colors">List Your Property</Link>
+                <Link href="/sign-up" className="w-full sm:w-auto text-center bg-[#1D9E75] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#16845F] transition-colors shadow-lg">Find Your Next Deal</Link>
+                <Link href="/sign-up" className="w-full sm:w-auto text-center border-2 border-[#1D9E75] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#1D9E75]/15 transition-colors">List Your Property</Link>
               </div>
             </div>
             {/* Right column: interactive map */}
@@ -347,7 +347,7 @@ export default function HomePage() {
 
         {/* CTA */}
         <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8 flex justify-center">
-          <Link href="/sign-up" className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</Link>
+          <Link href="/sign-up" className="bg-[#1D9E75] text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Get Started</Link>
         </div>
       </section>
 
@@ -384,8 +384,10 @@ export default function HomePage() {
               { name: 'Keystone Industrial Sites', location: 'Columbus, OH', budget: '$1.2M to $6M', zoning: 'Industrial' },
             ].map((buyer, i) => (
               <div key={i} className="w-72 flex-none bg-white rounded-xl p-5 shadow-sm border border-surface-container-high min-h-[280px] flex flex-col text-left">
-                <div className="flex items-center justify-end mb-5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary bg-primary/5 px-2 py-0.5 rounded-full">Active</span>
+                <div className="flex items-center justify-start mb-5">
+                  <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
+                  </span>
                 </div>
                 <h3 className="font-headline font-extrabold text-primary text-lg leading-tight mb-4">{buyer.name}</h3>
                 <div className="space-y-3 text-sm flex-grow w-full">
@@ -408,7 +410,7 @@ export default function HomePage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8 flex justify-center">
-          <Link href="/sign-up" className="bg-primary text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">See More Buyers</Link>
+          <Link href="/sign-up" className="bg-[#1D9E75] text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">See More Buyers</Link>
         </div>
       </section>
 
@@ -507,7 +509,7 @@ export default function HomePage() {
                 <span className="text-secondary">/mo</span>
               </div>
               <PlanFeatures tier="standard" />
-              <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
+              <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-[#1D9E75] text-[#1D9E75] font-bold hover:bg-[#1D9E75]/10 transition-colors text-center block">Get Started</Link>
             </div>
             {/* Priority */}
             <div className="w-[86vw] max-w-sm flex-none snap-center bg-white p-5 sm:p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative mt-4 md:mt-0 md:w-auto md:max-w-none md:flex-auto">
@@ -518,7 +520,7 @@ export default function HomePage() {
                 <span className="text-secondary">/mo</span>
               </div>
               <PlanFeatures tier="priority" />
-              <Link href="/sign-up" className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all text-center block">Get Started</Link>
+              <Link href="/sign-up" className="w-full py-4 rounded-xl bg-[#1D9E75] text-white font-bold hover:shadow-lg transition-all text-center block">Get Started</Link>
             </div>
             {/* Exclusive */}
             <div className="w-[86vw] max-w-sm flex-none snap-center bg-white p-5 sm:p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high md:w-auto md:max-w-none md:flex-auto">
@@ -528,11 +530,11 @@ export default function HomePage() {
                 <span className="text-secondary">/mo</span>
               </div>
               <PlanFeatures tier="enterprise" />
-              <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-primary-fixed text-primary font-bold hover:bg-primary-fixed/10 transition-colors text-center block">Get Started</Link>
+              <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-[#1D9E75] text-[#1D9E75] font-bold hover:bg-[#1D9E75]/10 transition-colors text-center block">Get Started</Link>
             </div>
           </div>
           <p className="mt-8 sm:mt-10 text-center text-secondary text-base sm:text-lg">
-            Enterprise: Looking for something else related to land development, market updates, or economic data? Contact us at{' '}
+            Exclusive: Looking for something else related to land development, market updates, or economic data? Contact us at{' '}
             <a href="mailto:support@lotscout.com" className="font-semibold text-emerald-600 hover:underline">support@lotscout.com</a>
           </p>
 
@@ -547,7 +549,7 @@ export default function HomePage() {
           <p className="text-on-primary-container text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
             LotScout connects serious buyers and sellers of off-market land directly. No realtors. No commission. No waiting on the MLS. Just the right match at the right time.
           </p>
-          <Link href="/sign-up" className="block sm:inline-block w-full sm:w-auto bg-white text-primary px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:bg-surface-container-low transition-colors active:scale-95 text-center">Get Started Free</Link>
+          <Link href="/sign-up" className="inline-block bg-[#1D9E75] text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-[#16845F] transition-colors active:scale-95 text-center">Get Started Free</Link>
         </div>
       </section>
 
