@@ -257,7 +257,7 @@ export default function CreateBuyerRequestPage() {
       if (!res.ok) throw new Error(json.error ?? 'Submission failed')
 
       setToast('Your buying criteria is now live.')
-      setTimeout(() => router.push('/marketplace'), 1500)
+      setTimeout(() => router.push(`/buyer-requests/${json.requestId}`), 900)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {

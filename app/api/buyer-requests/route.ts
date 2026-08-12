@@ -49,6 +49,15 @@ export async function POST(request: NextRequest) {
 
     const service = createServiceClient();
 
+    const { data: profile } = await service
+      .from('profiles')
+      .select('first_name, last_name, company_name, email, phone, website')
+      .eq('id', user.id)
+      .single();
+
+    const buyerName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || null;
+    const buyerEmail = profile?.email || user.email || null;
+
     const baseInsert = {
       user_id: user.id,
       status: 'active',
@@ -82,6 +91,11 @@ export async function POST(request: NextRequest) {
       lot_size_min: body.lot_size_min ?? null,
       lot_size_max: body.lot_size_max ?? null,
       lot_size_label: body.lot_size_label ?? null,
+      display_name: buyerName,
+      display_company: profile?.company_name ?? null,
+      contact_email: buyerEmail,
+      contact_phone: profile?.phone ?? null,
+      contact_website: profile?.website ?? null,
     };
 
     let { data: buyerRequest, error: insertError } = await service
@@ -90,8 +104,8 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (insertError && /target_cities|lot_size_(min|max|label)/i.test(insertError.message)) {
-      console.warn('[buyer-requests] lot-size/cities columns missing — saving without them. Run the migration to enable.');
+    if (insertError && /target_cities|lot_size_(min|max|label)|display_(name|company)|contact_(email|phone|website)/i.test(insertError.message)) {
+      console.warn('[buyer-requests] optional columns missing — saving without optional display/contact fields. Run migrations to enable.');
       ({ data: buyerRequest, error: insertError } = await service
         .from('buyer_requests')
         .insert(baseInsert)
@@ -104,14 +118,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError?.message ?? 'Insert failed' }, { status: 500 });
     }
 
-    const { data: profile } = await service
-      .from('profiles')
-      .select('first_name, last_name, email')
-      .eq('id', user.id)
-      .single();
-
-    const buyerName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'there';
-    const buyerEmail = profile?.email || user.email;
+    const emailBuyerName = buyerName || 'there';
     const submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 
     const regionsList = [body.target_state, body.target_county, body.target_city, body.target_zip]
@@ -133,7 +140,7 @@ export async function POST(request: NextRequest) {
         html: `
           <h2 style="color:#1B4332">New Buyer Request (Auto-Published)</h2>
           <table cellpadding="8" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
-            <tr><td style="font-weight:bold;color:#666">Buyer Name</td><td>${buyerName}</td></tr>
+            <tr><td style="font-weight:bold;color:#666">Buyer Name</td><td>${emailBuyerName}</td></tr>
             <tr><td style="font-weight:bold;color:#666">Email</td><td>${buyerEmail}</td></tr>
             <tr><td style="font-weight:bold;color:#666">Target Regions</td><td>${regionsList}</td></tr>
             <tr><td style="font-weight:bold;color:#666">Budget</td><td>${budgetRange}</td></tr>
@@ -159,7 +166,7 @@ export async function POST(request: NextRequest) {
               </div>
               <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
                 <h2 style="color:#1B4332;margin-top:0">Request Submitted!</h2>
-                <p>Hi ${buyerName},</p>
+                <p>Hi ${emailBuyerName},</p>
                 <p>Your buying criteria has been successfully submitted and is <strong>now live</strong> in the buyer directory.</p>
                 <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin:24px 0">
                   <p style="margin:0 0 12px;color:#666;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Your Criteria</p>
