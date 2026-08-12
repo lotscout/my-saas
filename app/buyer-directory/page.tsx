@@ -615,15 +615,21 @@ export default function BuyerDirectoryPage() {
               </div>
               {tab === 'directory' && (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => setActiveSort(prev => prev === 'newest' ? 'oldest' : 'newest')}
-                    aria-label={`Sort by ${activeSort === 'newest' ? 'oldest' : 'newest'}`}
-                    title={activeSort === 'newest' ? 'Newest first' : 'Oldest first'}
-                    className="shrink-0 inline-flex h-[46px] w-[46px] items-center justify-center rounded-xl border border-outline-variant/25 text-primary hover:bg-surface-container-low focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
+                  <div
+                    title="Sort"
+                    className="relative shrink-0 h-[46px] w-[46px] rounded-xl border border-outline-variant/25 text-primary hover:bg-surface-container-low focus-within:ring-2 focus-within:ring-primary/20 transition-colors"
                   >
-                    <span className="material-symbols-outlined text-xl">sort</span>
-                  </button>
+                    <span className="material-symbols-outlined absolute inset-0 flex items-center justify-center text-xl pointer-events-none">sort</span>
+                    <select
+                      value={activeSort}
+                      onChange={e => setActiveSort(e.target.value as 'newest' | 'oldest')}
+                      aria-label="Sort buyer directory"
+                      className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+                    >
+                      <option value="newest">Newest</option>
+                      <option value="oldest">Oldest</option>
+                    </select>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setShowActiveFilters(prev => !prev)}
