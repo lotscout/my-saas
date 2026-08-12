@@ -285,7 +285,7 @@ export default function CreateBuyerRequestPage() {
   return (
     <>
     <Header />
-    <main className="max-w-[1440px] mx-auto px-6 lg:px-10 pt-24 pb-12">
+    <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 pt-24 pb-12">
       {/* Toast */}
       {toast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-primary text-white px-6 py-3 rounded-xl shadow-lg font-semibold text-sm flex items-center gap-2">
@@ -314,7 +314,7 @@ export default function CreateBuyerRequestPage() {
               Finding a property requires a paid LotScout account. Choose a plan to get started and get matched with the right properties.
             </p>
             <div className="flex gap-3">
-              <Link href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">
+              <Link href="/pricing" className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors">
                 View Plans →
               </Link>
               <button onClick={() => router.push('/marketplace')} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">
@@ -326,9 +326,9 @@ export default function CreateBuyerRequestPage() {
       )}
 
       {/* Page header */}
-      <header className="mb-12 max-w-3xl">
-        <h1 className="font-headline text-5xl font-extrabold text-primary tracking-[-0.03em] mb-4">Post Buying Criteria</h1>
-        <p className="text-lg text-secondary font-light leading-relaxed">Tell sellers exactly what you're looking for and get matched with the right properties.</p>
+      <header className="mb-6 sm:mb-12 max-w-3xl">
+        <h1 className="font-headline text-2xl sm:text-5xl font-extrabold text-primary tracking-[-0.03em] mb-2 sm:mb-4">Post Buying Criteria</h1>
+        <p className="text-sm sm:text-lg text-secondary font-light leading-snug sm:leading-relaxed">Tell sellers what you're looking for and get matched with the right properties.</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -339,16 +339,16 @@ export default function CreateBuyerRequestPage() {
 
               {/* ── 1. Property Details ── */}
               <section className="p-4 sm:p-8 lg:p-10">
-                <div className="flex items-center gap-3 mb-8">
-                  <span className="material-symbols-outlined text-primary text-3xl">landscape</span>
-                  <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Property Details</h2>
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
+                  <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">landscape</span>
+                  <h2 className="font-headline text-lg sm:text-2xl font-bold text-primary tracking-tight">Property Details</h2>
                 </div>
-                <div className="space-y-10">
+                <div className="space-y-6 sm:space-y-10">
 
                   {/* Target Regions */}
                   <div>
-                    <label className="block text-sm font-semibold text-primary mb-4">Target Regions</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <label className="block text-sm font-semibold text-primary mb-3 sm:mb-4">Target Regions</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-3 sm:mb-4">
                       {[
                         { key: 'state', label: 'State', placeholder: 'e.g. Montana' },
                         { key: 'county', label: 'County', placeholder: 'e.g. Missoula' },
@@ -362,7 +362,7 @@ export default function CreateBuyerRequestPage() {
                             value={formData[key]}
                             onChange={e => set(key, e.target.value)}
                             placeholder={placeholder}
-                            className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5 px-4"
+                            className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 text-sm py-2 px-3 sm:py-2.5 sm:px-4"
                           />
                         </div>
                       ))}
@@ -374,7 +374,7 @@ export default function CreateBuyerRequestPage() {
                         value={formData.location_notes}
                         onChange={e => { set('location_notes', e.target.value); checkProfanity('location_notes', e.target.value) }}
                         placeholder="Mention specific areas or boundaries..."
-                        className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5 px-4"
+                        className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 text-sm py-2 px-3 sm:py-2.5 sm:px-4"
                       />
                       {profanityErrors.location_notes && <p className="text-xs text-error mt-1">Please remove inappropriate language.</p>}
                     </div>
@@ -385,7 +385,7 @@ export default function CreateBuyerRequestPage() {
                         value={formData.target_cities}
                         onChange={e => set('target_cities', e.target.value)}
                         placeholder="e.g. Denver, Aurora, Lakewood"
-                        className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm py-2.5 px-4"
+                        className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 text-sm py-2 px-3 sm:py-2.5 sm:px-4"
                       />
                     </div>
                   </div>
@@ -395,14 +395,14 @@ export default function CreateBuyerRequestPage() {
                     <label className="block text-sm font-semibold text-primary mb-4">
                       Zoning Preference <span className="text-error">*</span>
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                       {ZONING_OPTIONS.map(opt => (
-                        <label key={opt} className="flex items-center gap-3 p-3 bg-surface rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors">
+                        <label key={opt} className="flex items-center gap-3 p-2.5 sm:p-3 bg-surface rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors">
                           <input
                             type="checkbox"
                             checked={(formData.zoning as string[]).includes(opt)}
                             onChange={() => { toggleArray('zoning', opt); setValidationErrors(prev => ({ ...prev, zoning: '' })) }}
-                            className="rounded border-outline-variant text-primary focus:ring-primary h-5 w-5"
+                            className="rounded border-outline-variant text-[#1D9E75] focus:ring-[#1D9E75] h-5 w-5"
                           />
                           <span className="text-sm font-medium text-on-surface">{opt}</span>
                         </label>
@@ -432,7 +432,7 @@ export default function CreateBuyerRequestPage() {
                         ))}
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-8">
                       <div className="space-y-2">
                         <label className="block text-sm font-semibold text-primary">
                           Min Acreage <span className="text-error">*</span>
@@ -442,7 +442,7 @@ export default function CreateBuyerRequestPage() {
                           value={formData.min_acreage}
                           onChange={e => { set('min_acreage', e.target.value); setValidationErrors(prev => ({ ...prev, min_acreage: '' })) }}
                           placeholder="e.g. 5"
-                          className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                          className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                         />
                         {validationErrors.min_acreage && <p className="text-xs text-error">{validationErrors.min_acreage}</p>}
                       </div>
@@ -453,7 +453,7 @@ export default function CreateBuyerRequestPage() {
                           value={formData.max_acreage}
                           onChange={e => set('max_acreage', e.target.value)}
                           placeholder="e.g. 50"
-                          className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                          className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                         />
                       </div>
                     </div>
@@ -462,7 +462,7 @@ export default function CreateBuyerRequestPage() {
                       <select
                         value={formData.lot_size_range}
                         onChange={e => set('lot_size_range', e.target.value)}
-                        className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                        className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                       >
                         <option value="">No preference</option>
                         {LOT_SIZE_RANGES.map(r => <option key={r.label} value={r.label}>{r.label}</option>)}
@@ -471,7 +471,7 @@ export default function CreateBuyerRequestPage() {
                   </div>
 
                   {/* Road Access & Utilities */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                     <div>
                       <label className="block text-sm font-semibold text-primary mb-3">Road Access</label>
                       <div className="flex flex-wrap gap-2">
@@ -483,7 +483,7 @@ export default function CreateBuyerRequestPage() {
                               onChange={() => toggleArray('road_access', opt)}
                               className="hidden peer"
                             />
-                            <span className="px-4 py-2 rounded-full border border-outline-variant text-sm font-medium peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:border-primary-container cursor-pointer transition-all block">
+                            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-outline-variant text-sm font-medium peer-checked:bg-[#1D9E75]/10 peer-checked:text-[#14795A] peer-checked:border-[#1D9E75] cursor-pointer transition-all block">
                               {opt}
                             </span>
                           </label>
@@ -501,7 +501,7 @@ export default function CreateBuyerRequestPage() {
                               onChange={() => toggleArray('utilities', opt)}
                               className="hidden peer"
                             />
-                            <span className="px-4 py-2 rounded-full border border-outline-variant text-sm font-medium peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:border-primary-container cursor-pointer transition-all block">
+                            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-outline-variant text-sm font-medium peer-checked:bg-[#1D9E75]/10 peer-checked:text-[#14795A] peer-checked:border-[#1D9E75] cursor-pointer transition-all block">
                               {opt}
                             </span>
                           </label>
@@ -515,11 +515,11 @@ export default function CreateBuyerRequestPage() {
 
               {/* ── 2. Budget & Pricing ── */}
               <section className="p-4 sm:p-8 lg:p-10 bg-surface/30">
-                <div className="flex items-center gap-3 mb-8">
-                  <span className="material-symbols-outlined text-primary text-3xl">payments</span>
-                  <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Budget &amp; Pricing</h2>
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
+                  <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">payments</span>
+                  <h2 className="font-headline text-lg sm:text-2xl font-bold text-primary tracking-tight">Budget &amp; Pricing</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 mb-6 sm:mb-8">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-primary">
                       Min Budget ($) <span className="text-error">*</span>
@@ -529,7 +529,7 @@ export default function CreateBuyerRequestPage() {
                       value={formData.min_budget}
                       onChange={e => { set('min_budget', e.target.value); setValidationErrors(prev => ({ ...prev, min_budget: '' })) }}
                       placeholder="10,000"
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                     />
                     {validationErrors.min_budget && <p className="text-xs text-error">{validationErrors.min_budget}</p>}
                   </div>
@@ -542,7 +542,7 @@ export default function CreateBuyerRequestPage() {
                       value={formData.max_budget}
                       onChange={e => { set('max_budget', e.target.value); setValidationErrors(prev => ({ ...prev, max_budget: '' })) }}
                       placeholder="500,000"
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                     />
                     {validationErrors.max_budget && <p className="text-xs text-error">{validationErrors.max_budget}</p>}
                   </div>
@@ -553,7 +553,7 @@ export default function CreateBuyerRequestPage() {
                       value={formData.price_per_acre}
                       onChange={e => set('price_per_acre', e.target.value)}
                       placeholder="Target per acre"
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                     />
                   </div>
                 </div>
@@ -563,13 +563,13 @@ export default function CreateBuyerRequestPage() {
                     {FINANCING_OPTIONS.map(({ value, label, sub }) => (
                       <label
                         key={value}
-                        className="flex-1 flex items-center gap-3 p-4 border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-low transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                        className="flex-1 flex items-center gap-3 p-3 sm:p-4 border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-low transition-all has-[:checked]:border-[#1D9E75] has-[:checked]:bg-[#1D9E75]/5"
                       >
                         <input
                           type="checkbox"
                           checked={(formData.financing as string[]).includes(value)}
                           onChange={() => toggleArray('financing', value)}
-                          className="text-primary focus:ring-primary h-5 w-5"
+                          className="text-[#1D9E75] focus:ring-[#1D9E75] h-5 w-5"
                         />
                         <div>
                           <p className="font-bold text-primary">{label}</p>
@@ -583,17 +583,17 @@ export default function CreateBuyerRequestPage() {
 
               {/* ── 3. Intended Use ── */}
               <section className="p-4 sm:p-8 lg:p-10">
-                <div className="flex items-center gap-3 mb-8">
-                  <span className="material-symbols-outlined text-primary text-3xl">category</span>
-                  <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Intended Use</h2>
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
+                  <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">category</span>
+                  <h2 className="font-headline text-lg sm:text-2xl font-bold text-primary tracking-tight">Intended Use</h2>
                 </div>
-                <div className="space-y-8">
+                <div className="space-y-5 sm:space-y-8">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-primary">Primary Use Case</label>
                     <select
                       value={formData.primary_use_case}
                       onChange={e => set('primary_use_case', e.target.value)}
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                     >
                       <option value="">Select a use case</option>
                       {USE_CASES.map(uc => <option key={uc} value={uc}>{uc}</option>)}
@@ -606,7 +606,7 @@ export default function CreateBuyerRequestPage() {
                         type="button"
                         onClick={generateDescription}
                         disabled={aiStreaming}
-                        className="flex items-center gap-2 text-xs font-bold text-primary-container bg-primary-fixed hover:bg-primary-fixed-dim px-3 py-1.5 rounded-full transition-all disabled:opacity-60"
+                        className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold text-white bg-[#1D9E75] hover:bg-[#14795A] px-2.5 sm:px-3 py-1.5 rounded-full transition-all disabled:opacity-60"
                       >
                         <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
                         {aiStreaming ? 'Writing…' : 'Write with AI'}
@@ -619,7 +619,7 @@ export default function CreateBuyerRequestPage() {
                       onChange={e => set('use_case_description', e.target.value)}
                       onBlur={e => checkProfanity('use_case_description', e.target.value)}
                       placeholder="Describe what you plan to do with the land..."
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                     />
                     <div className="flex justify-between">
                       {profanityErrors.use_case_description
@@ -637,7 +637,7 @@ export default function CreateBuyerRequestPage() {
                       onChange={e => set('specific_requirements', e.target.value)}
                       onBlur={e => checkProfanity('specific_requirements', e.target.value)}
                       placeholder="Water rights, specific soil types, topographic needs..."
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                     />
                     {profanityErrors.specific_requirements && <p className="text-xs text-error">Please remove inappropriate language.</p>}
                   </div>
@@ -646,11 +646,11 @@ export default function CreateBuyerRequestPage() {
 
               {/* ── 4. Purchase Timeline ── */}
               <section className="p-4 sm:p-8 lg:p-10 bg-surface/30">
-                <div className="flex items-center gap-3 mb-8">
-                  <span className="material-symbols-outlined text-primary text-3xl">calendar_month</span>
-                  <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Purchase Timeline</h2>
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
+                  <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">calendar_month</span>
+                  <h2 className="font-headline text-lg sm:text-2xl font-bold text-primary tracking-tight">Purchase Timeline</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-10">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-primary">
                       Target Close Date <span className="text-error">*</span>
@@ -659,7 +659,7 @@ export default function CreateBuyerRequestPage() {
                       type="date"
                       value={formData.target_close_date}
                       onChange={e => { set('target_close_date', e.target.value); setValidationErrors(prev => ({ ...prev, target_close_date: '' })) }}
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                     />
                     {validationErrors.target_close_date && <p className="text-xs text-error">{validationErrors.target_close_date}</p>}
                   </div>
@@ -676,7 +676,7 @@ export default function CreateBuyerRequestPage() {
                             onChange={() => set('timeline_urgency', opt)}
                             className="hidden peer"
                           />
-                          <span className="px-5 py-1.5 rounded-full text-sm font-medium text-secondary peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm block transition-all">
+                          <span className="px-3 sm:px-5 py-1.5 rounded-full text-sm font-medium text-secondary peer-checked:bg-[#1D9E75] peer-checked:text-white peer-checked:shadow-sm block transition-all">
                             {opt}
                           </span>
                         </label>
@@ -684,7 +684,7 @@ export default function CreateBuyerRequestPage() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-8 flex items-center justify-between p-4 bg-white rounded-xl border border-outline-variant/30">
+                <div className="mt-5 sm:mt-8 flex items-center justify-between gap-3 p-3 sm:p-4 bg-white rounded-xl border border-outline-variant/30">
                   <div className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-secondary">support_agent</span>
                     <div>
@@ -699,31 +699,31 @@ export default function CreateBuyerRequestPage() {
                       onChange={e => set('working_with_agent', e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                    <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1D9E75]" />
                   </label>
                 </div>
               </section>
 
               {/* ── 5. Contact Preferences ── */}
               <section className="p-4 sm:p-8 lg:p-10">
-                <div className="flex items-center gap-3 mb-8">
-                  <span className="material-symbols-outlined text-primary text-3xl">contact_support</span>
-                  <h2 className="font-headline text-2xl font-bold text-primary tracking-tight">Contact Preferences</h2>
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
+                  <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">contact_support</span>
+                  <h2 className="font-headline text-lg sm:text-2xl font-bold text-primary tracking-tight">Contact Preferences</h2>
                 </div>
-                <div className="space-y-8">
+                <div className="space-y-5 sm:space-y-8">
                   <div>
                     <label className="block text-sm font-semibold text-primary mb-4">
                       Preferred Contact Methods <span className="text-error">*</span>
                       <span className="text-xs font-normal text-secondary ml-2">(Select all that apply)</span>
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                       {CONTACT_METHODS.map(method => (
-                        <label key={method} className="flex items-center gap-3 p-3 bg-surface rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors">
+                        <label key={method} className="flex items-center gap-3 p-2.5 sm:p-3 bg-surface rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors">
                           <input
                             type="checkbox"
                             checked={(formData.contact_methods as string[]).includes(method)}
                             onChange={() => { toggleArray('contact_methods', method); setValidationErrors(prev => ({ ...prev, contact_methods: '' })) }}
-                            className="rounded border-outline-variant text-primary focus:ring-primary h-5 w-5"
+                            className="rounded border-outline-variant text-[#1D9E75] focus:ring-[#1D9E75] h-5 w-5"
                           />
                           <span className="text-sm font-medium text-on-surface">{method}</span>
                         </label>
@@ -739,7 +739,7 @@ export default function CreateBuyerRequestPage() {
                       onChange={e => set('additional_notes', e.target.value)}
                       onBlur={e => checkProfanity('additional_notes', e.target.value)}
                       placeholder="Anything else sellers should know?"
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all py-3 px-4"
+                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                     />
                     {profanityErrors.additional_notes && <p className="text-xs text-error">Please remove inappropriate language.</p>}
                   </div>
@@ -747,19 +747,19 @@ export default function CreateBuyerRequestPage() {
               </section>
 
               {/* ── Footer actions ── */}
-              <div className="p-6 lg:p-8 bg-surface-container-lowest border-t border-surface-container flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="p-4 sm:p-6 lg:p-8 bg-surface-container-lowest border-t border-surface-container flex flex-col sm:flex-row justify-between items-center gap-4">
                 {submitError && <p className="text-sm text-error font-medium">{submitError}</p>}
                 <div className="flex justify-between items-center w-full gap-4">
                   <button
                     type="button"
-                    className="px-8 py-3 bg-surface-container-high text-secondary hover:bg-surface-container-highest font-bold rounded-xl transition-all"
+                    className="px-4 sm:px-8 py-2.5 sm:py-3 bg-surface-container-high text-secondary hover:bg-surface-container-highest font-bold rounded-xl transition-all text-sm"
                   >
                     Save Draft
                   </button>
                   <button
                     type="submit"
                     disabled={submitting || !isFormReady}
-                    className="flex items-center gap-2 px-10 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-5 sm:px-10 py-2.5 sm:py-3 bg-[#1D9E75] text-white font-bold rounded-xl shadow-lg shadow-[#1D9E75]/20 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed text-sm"
                   >
                     {submitting ? 'Posting…' : 'Find a Property'}
                     <span className="material-symbols-outlined">arrow_forward</span>
@@ -782,7 +782,7 @@ export default function CreateBuyerRequestPage() {
                   <p className="text-sm text-[#274e3d]">Priority and Exclusive members get their buying criteria featured at the top of the buyer directory and matched directly with incoming listings.</p>
                 </div>
               </div>
-              <Link href="/pricing" className="whitespace-nowrap px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
+              <Link href="/pricing" className="whitespace-nowrap px-6 py-2.5 bg-[#1D9E75] text-white font-bold rounded-lg hover:bg-[#14795A] transition-colors">
                 Upgrade Now
               </Link>
             </div>
@@ -790,7 +790,7 @@ export default function CreateBuyerRequestPage() {
         </div>
 
         {/* Sidebar */}
-        <aside className="lg:col-span-4 space-y-8">
+        <aside className="hidden lg:block lg:col-span-4 space-y-8">
           <div className="bg-white p-8 rounded-xl shadow-sm border border-surface-container-low">
             <h3 className="font-headline text-xl font-bold text-primary mb-4">Why post your criteria?</h3>
             <ul className="space-y-6">
