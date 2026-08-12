@@ -582,12 +582,12 @@ export default function BuyerDirectoryPage() {
           {/* Page header */}
           <section className="mb-7 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h1 className="font-headline text-3xl sm:text-5xl font-extrabold text-primary tracking-tight leading-tight">Buyer Directory</h1>
+              <h1 className="font-headline text-2xl sm:text-5xl font-extrabold text-primary tracking-tight leading-tight">Buyer Directory</h1>
               <p className="text-secondary text-base mt-2 max-w-2xl">Search active land buyers and review their acquisition criteria.</p>
             </div>
             <Link
               href="/create-buyer-request"
-              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-primary px-3 py-2 text-xs sm:px-5 sm:py-3 sm:text-sm font-extrabold text-white shadow-sm hover:bg-primary/90 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:shrink-0 self-start"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-[#1D9E75] px-3 py-2 text-xs sm:px-5 sm:py-3 sm:text-sm font-extrabold text-white shadow-sm hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75] md:shrink-0 self-start"
             >
               <span className="material-symbols-outlined text-base sm:text-lg">add_circle</span>
               Create Request
@@ -596,7 +596,7 @@ export default function BuyerDirectoryPage() {
 
           {/* Search / sort / filter */}
           <div className="bg-white rounded-2xl border border-outline-variant/15 shadow-sm p-3 sm:p-4 mb-7">
-            <div className="flex flex-col lg:flex-row gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="relative flex-1">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
                 <input
@@ -618,16 +618,26 @@ export default function BuyerDirectoryPage() {
               </div>
               {tab === 'directory' && (
                 <>
-                  <select value={activeSort} onChange={e => setActiveSort(e.target.value as 'newest' | 'oldest')} className="bg-white px-4 py-3 rounded-xl border border-outline-variant/25 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    <option value="newest">Newest</option>
-                    <option value="oldest">Oldest</option>
-                  </select>
                   <button
-                    onClick={() => setShowActiveFilters(prev => !prev)}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-outline-variant/25 text-sm font-bold text-primary hover:bg-surface-container-low transition-colors"
+                    type="button"
+                    onClick={() => setActiveSort(prev => prev === 'newest' ? 'oldest' : 'newest')}
+                    aria-label={`Sort by ${activeSort === 'newest' ? 'oldest' : 'newest'}`}
+                    title={activeSort === 'newest' ? 'Newest first' : 'Oldest first'}
+                    className="shrink-0 inline-flex h-[46px] w-[46px] items-center justify-center rounded-xl border border-outline-variant/25 text-primary hover:bg-surface-container-low focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
                   >
-                    <span className="material-symbols-outlined text-lg">tune</span>
-                    Filter
+                    <span className="material-symbols-outlined text-xl">sort</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowActiveFilters(prev => !prev)}
+                    aria-label="Filter buyer directory"
+                    title="Filter"
+                    className="relative shrink-0 inline-flex h-[46px] w-[46px] items-center justify-center rounded-xl border border-outline-variant/25 text-primary hover:bg-surface-container-low focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-xl">tune</span>
+                    {(activeBrState || activeBrBudget || activeBrAcreage || activeBrZoning || activeBrRoadAccess) && (
+                      <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-[#1D9E75] ring-2 ring-white" />
+                    )}
                   </button>
                 </>
               )}

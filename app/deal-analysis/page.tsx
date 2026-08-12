@@ -81,10 +81,10 @@ export default function DealAnalysisPage() {
     <div className="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-primary min-h-screen">
       <Header />
 
-      <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-8">
+      <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-4 sm:px-8">
         {/* Page heading */}
         <header className="mb-8">
-          <h1 className="font-headline text-4xl font-extrabold text-primary tracking-tight mb-1">Deal Analysis</h1>
+          <h1 className="font-headline text-2xl sm:text-4xl font-extrabold text-primary tracking-tight mb-1">Deal Analysis</h1>
           <p className="text-secondary mt-2 text-sm max-w-xl">
             Submit a property for a full deal analysis. Our team will review the
             parcel data, zoning, comps, and financing potential, then deliver a
