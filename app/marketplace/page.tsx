@@ -89,14 +89,42 @@ const LISTING_STATUS_META: Record<string, { label: string; className: string }> 
   rejected: { label: 'Rejected', className: 'bg-red-600 text-white' },
 };
 
+const SAMPLE_IMAGE_POOLS = {
+  desert: [
+    '/sample-listings/desert-aerial.jpg',
+    '/sample-listings/arid-grid-aerial.jpg',
+    '/sample-listings/canyon-aerial.jpg',
+  ],
+  mountain: [
+    '/sample-listings/mountain-aerial.jpg',
+    '/sample-listings/pine-foothills-aerial.jpg',
+    '/sample-listings/grassland-aerial.jpg',
+  ],
+  green: [
+    '/sample-listings/pasture-aerial.jpg',
+    '/sample-listings/green-acreage-aerial.jpg',
+    '/sample-listings/wooded-aerial.jpg',
+    '/sample-listings/coastal-plain-aerial.jpg',
+  ],
+};
+
 const DESERT_SAMPLE_STATES = new Set(['AZ', 'CA', 'NV', 'NM', 'UT', 'WY']);
 const MOUNTAIN_SAMPLE_STATES = new Set(['CO', 'ID', 'MT', 'OR', 'WA']);
 
-function getSampleImageUrl(state: string | null) {
+function stableSampleIndex(seed: string, size: number) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return hash % size;
+}
+
+function getSampleImageUrl(state: string | null, seed: string) {
   const stateCode = state?.trim().toUpperCase() || '';
-  if (DESERT_SAMPLE_STATES.has(stateCode)) return '/sample-listings/desert-aerial.jpg';
-  if (MOUNTAIN_SAMPLE_STATES.has(stateCode)) return '/sample-listings/mountain-aerial.jpg';
-  return '/sample-listings/pasture-aerial.jpg';
+  const pool = DESERT_SAMPLE_STATES.has(stateCode)
+    ? SAMPLE_IMAGE_POOLS.desert
+    : MOUNTAIN_SAMPLE_STATES.has(stateCode)
+    ? SAMPLE_IMAGE_POOLS.mountain
+    : SAMPLE_IMAGE_POOLS.green;
+  return pool[stableSampleIndex(`${stateCode}:${seed}`, pool.length)];
 }
 
 function getListingStatusMeta(status: string) {
@@ -1106,7 +1134,7 @@ export default function MarketplacePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
                 {filteredListings.map(listing => {
                   const imgSrc = listing.photos_urls?.find(url => !!url?.trim())?.trim() ?? null;
-                  const sampleImgSrc = getSampleImageUrl(listing.state);
+                  const sampleImgSrc = getSampleImageUrl(listing.state, listing.id);
                   const acreage = formatAcreage(listing.lot_size_acres, listing.lot_size_sqft);
                   const price = formatPrice(listing.asking_price);
                   const addressLine = listing.street_address?.trim()

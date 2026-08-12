@@ -60,14 +60,42 @@ const STATE_CENTROIDS: Record<string, [number, number]> = {
   WI: [44.6243, -89.9941], WY: [42.9957, -107.5512], DC: [38.8951, -77.0369],
 };
 
+const SAMPLE_IMAGE_POOLS = {
+  desert: [
+    '/sample-listings/desert-aerial.jpg',
+    '/sample-listings/arid-grid-aerial.jpg',
+    '/sample-listings/canyon-aerial.jpg',
+  ],
+  mountain: [
+    '/sample-listings/mountain-aerial.jpg',
+    '/sample-listings/pine-foothills-aerial.jpg',
+    '/sample-listings/grassland-aerial.jpg',
+  ],
+  green: [
+    '/sample-listings/pasture-aerial.jpg',
+    '/sample-listings/green-acreage-aerial.jpg',
+    '/sample-listings/wooded-aerial.jpg',
+    '/sample-listings/coastal-plain-aerial.jpg',
+  ],
+};
+
 const DESERT_SAMPLE_STATES = new Set(['AZ', 'CA', 'NV', 'NM', 'UT', 'WY']);
 const MOUNTAIN_SAMPLE_STATES = new Set(['CO', 'ID', 'MT', 'OR', 'WA']);
 
-function getSampleImageUrl(state: string | null) {
+function stableSampleIndex(seed: string, size: number) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return hash % size;
+}
+
+function getSampleImageUrl(state: string | null, seed: string) {
   const stateCode = state?.trim().toUpperCase() || '';
-  if (DESERT_SAMPLE_STATES.has(stateCode)) return '/sample-listings/desert-aerial.jpg';
-  if (MOUNTAIN_SAMPLE_STATES.has(stateCode)) return '/sample-listings/mountain-aerial.jpg';
-  return '/sample-listings/pasture-aerial.jpg';
+  const pool = DESERT_SAMPLE_STATES.has(stateCode)
+    ? SAMPLE_IMAGE_POOLS.desert
+    : MOUNTAIN_SAMPLE_STATES.has(stateCode)
+    ? SAMPLE_IMAGE_POOLS.mountain
+    : SAMPLE_IMAGE_POOLS.green;
+  return pool[stableSampleIndex(`${stateCode}:${seed}`, pool.length)];
 }
 
 interface Listing {
@@ -373,7 +401,7 @@ export default function ListingDetailPage() {
   const generatedTitle = acreageText ? `${acreageText} Acres in ${titleLocation}` : `Land in ${titleLocation}`;
   const titleSublineBase = [countyDisplay, listing.state].filter(Boolean).join(', ');
   const titleSubline = listing.zip_code ? `${titleSublineBase} ${listing.zip_code}` : titleSublineBase;
-  const sampleImageUrl = getSampleImageUrl(listing.state);
+  const sampleImageUrl = getSampleImageUrl(listing.state, listing.id);
 
   const detailItems: [string, string][] = [
     ...((listing.road_access?.length ?? 0) > 0 ? [['Road Access', listing.road_access!.join(', ')] as [string, string]] : []),
