@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
+import { syncResendContact } from '@/lib/resend-contacts';
 
 export async function POST(request: NextRequest) {
   const {
@@ -82,6 +83,12 @@ export async function POST(request: NextRequest) {
   if (error) {
     console.error('Profile upsert error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  try {
+    await syncResendContact({ email, firstName, lastName });
+  } catch (resendErr) {
+    console.error('Resend contact sync error:', resendErr);
   }
 
   return NextResponse.json({ ok: true });

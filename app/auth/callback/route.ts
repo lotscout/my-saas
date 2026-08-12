@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { Resend } from 'resend'
 import { logEmail } from '@/lib/email-logger'
+import { syncResendContact } from '@/lib/resend-contacts'
 
 function buildWelcomeEmail(firstName: string | null, baseUrl: string): string {
   const greeting = firstName ? `Welcome to LotScout, ${firstName}!` : 'Welcome to LotScout!'
@@ -165,6 +166,14 @@ export async function GET(request: NextRequest) {
 
         if (profile?.is_admin) {
           destination = '/admin/dashboard'
+        }
+
+        if (user.email) {
+          try {
+            await syncResendContact({ email: user.email, firstName: firstName ?? profile?.first_name ?? null, lastName })
+          } catch (contactErr) {
+            console.error('[auth/callback] Resend contact sync error:', contactErr)
+          }
         }
 
         // Step 4: send welcome email to new users
