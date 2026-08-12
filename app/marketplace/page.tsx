@@ -1226,15 +1226,6 @@ export default function MarketplacePage() {
         />
       )}
 
-      {/* FAB */}
-      <div className="fixed bottom-6 right-6 z-[60]">
-        <button
-          onClick={handleCreateListing}
-          className="bg-primary text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform ring-4 ring-white/10"
-        >
-          <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
-        </button>
-      </div>
     </div>
   );
 }
