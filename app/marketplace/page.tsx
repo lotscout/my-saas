@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import BoostModal from '@/components/BoostModal';
 import SendMessageModal from '@/components/SendMessageModal';
+import { PageHeader, PrimaryLink, SecondaryAction } from '@/components/ui/LotScoutUI';
 
 const STATE_NAMES: Record<string, string> = {
   'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
@@ -577,35 +578,25 @@ export default function MarketplacePage() {
       )}
 
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1400px] mx-auto">
-        {/* Header */}
-        <section className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-          <div className="max-w-2xl">
-            <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
-              Marketplace
-            </h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 md:justify-end">
-            <button
+        <PageHeader
+          title="Marketplace"
+          actions={(
+            <>
+              <SecondaryAction
               type="button"
               onClick={handleMyListingsClick}
-              className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition-all ${
-                showMyListings
-                  ? 'bg-primary text-white hover:bg-primary/90'
-                  : 'bg-white text-primary border border-outline-variant/25 hover:border-primary/30 hover:bg-surface-container-low'
-              }`}
+              className={showMyListings ? 'bg-primary text-white hover:bg-primary/90' : ''}
             >
               <span className="material-symbols-outlined text-lg">inventory_2</span>
               My Listings
-            </button>
-            <Link
-              href="/create-listing"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-emerald-700 transition-colors"
-            >
+              </SecondaryAction>
+              <PrimaryLink href="/create-listing">
               <span className="material-symbols-outlined text-lg">add_circle</span>
               Create Listing
-            </Link>
-          </div>
-        </section>
+              </PrimaryLink>
+            </>
+          )}
+        />
 
 
         {/* ── PROPERTIES ── */}

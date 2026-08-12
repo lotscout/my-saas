@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { containsProfanity } from '@/lib/profanity-filter'
 import Header from '@/components/Header'
+import { PageHeader, SurfaceCard } from '@/components/ui/LotScoutUI'
 
 type Profile = {
   id: string
@@ -325,16 +326,16 @@ export default function CreateBuyerRequestPage() {
         </div>
       )}
 
-      {/* Page header */}
-      <header className="mb-6 sm:mb-12 max-w-3xl">
-        <h1 className="font-headline text-2xl sm:text-5xl font-extrabold text-primary tracking-[-0.03em] mb-2 sm:mb-4">Post Buying Criteria</h1>
-        <p className="text-sm sm:text-lg text-secondary font-light leading-snug sm:leading-relaxed">Tell sellers what you're looking for and get matched with the right properties.</p>
-      </header>
+      <PageHeader
+        title="Post Buying Criteria"
+        description="Tell sellers what you're looking for and get matched with the right properties."
+        className="sm:mb-12"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Main form */}
         <div className="lg:col-span-8">
-          <div className="bg-surface-container-lowest rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+          <SurfaceCard className="bg-surface-container-lowest rounded-xl overflow-hidden">
             <form onSubmit={handleSubmit} className="divide-y divide-surface-container">
 
               {/* ── 1. Property Details ── */}
@@ -768,7 +769,7 @@ export default function CreateBuyerRequestPage() {
               </div>
 
             </form>
-          </div>
+          </SurfaceCard>
 
           {/* Upgrade banner — Standard tier only */}
           {profile?.tier === 'standard' && (

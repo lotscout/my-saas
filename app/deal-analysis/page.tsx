@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Header from '@/components/Header';
+import { PageHeader, SurfaceCard } from '@/components/ui/LotScoutUI';
 import { usePermissions } from '@/hooks/usePermissions';
 import { createClient } from '@/lib/supabase/client';
 
@@ -82,20 +83,15 @@ export default function DealAnalysisPage() {
       <Header />
 
       <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-4 sm:px-8">
-        {/* Page heading */}
-        <header className="mb-8">
-          <h1 className="font-headline text-2xl sm:text-4xl font-extrabold text-primary tracking-tight mb-1">Deal Analysis</h1>
-          <p className="text-secondary mt-2 text-sm max-w-xl">
-            Submit a property for a full deal analysis. Our team will review the
-            parcel data, zoning, comps, and financing potential, then deliver a
-            detailed report straight to your inbox.
-          </p>
-        </header>
+        <PageHeader
+          title="Deal Analysis"
+          description="Submit a property for a full deal analysis. Our team will review parcel data, zoning, comps, and financing potential."
+        />
 
         <div className="max-w-2xl">
           {submitState === 'success' ? (
             /* ── Success state ─────────────────────────────────── */
-            <div className="bg-surface-container rounded-2xl border border-outline-variant/20 p-8 text-center">
+            <SurfaceCard className="bg-surface-container p-8 text-center">
               <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
                 <svg
                   className="w-7 h-7 text-emerald-600"
@@ -135,7 +131,7 @@ export default function DealAnalysisPage() {
               >
                 Submit Another
               </button>
-            </div>
+            </SurfaceCard>
           ) : (
             /* ── Form ─────────────────────────────────────────── */
             <form

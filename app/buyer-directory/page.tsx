@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
+import { PageHeader, PrimaryLink, SurfaceCard } from '@/components/ui/LotScoutUI';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
 import { getBuyerName } from '@/lib/getBuyerName';
 
@@ -579,23 +580,19 @@ export default function BuyerDirectoryPage() {
 
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
 
-          {/* Page header */}
-          <section className="mb-7 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <h1 className="font-headline text-2xl sm:text-5xl font-extrabold text-primary tracking-tight leading-tight">Buyer Directory</h1>
-              <p className="text-secondary text-base mt-2 max-w-2xl">Search active land buyers and review their acquisition criteria.</p>
-            </div>
-            <Link
-              href="/create-buyer-request"
-              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-[#1D9E75] px-3 py-2 text-xs sm:px-5 sm:py-3 sm:text-sm font-extrabold text-white shadow-sm hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75] md:shrink-0 self-start"
-            >
-              <span className="material-symbols-outlined text-base sm:text-lg">add_circle</span>
-              Create Request
-            </Link>
-          </section>
+          <PageHeader
+            title="Buyer Directory"
+            description="Search active land buyers and review their acquisition criteria."
+            actions={(
+              <PrimaryLink href="/create-buyer-request" className="rounded-xl px-3 py-2 text-xs sm:px-5 sm:py-3 sm:text-sm md:shrink-0 self-start">
+                <span className="material-symbols-outlined text-base sm:text-lg">add_circle</span>
+                Create Request
+              </PrimaryLink>
+            )}
+          />
 
           {/* Search / sort / filter */}
-          <div className="bg-white rounded-2xl border border-outline-variant/15 shadow-sm p-3 sm:p-4 mb-7">
+          <SurfaceCard className="p-3 sm:p-4 mb-7">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="relative flex-1">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
@@ -642,7 +639,7 @@ export default function BuyerDirectoryPage() {
                 </>
               )}
             </div>
-          </div>
+          </SurfaceCard>
 
           {/* ── DIRECTORY TAB ── */}
           {tab === 'directory' && (
