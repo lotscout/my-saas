@@ -581,11 +581,8 @@ export default function MarketplacePage() {
         <section className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="max-w-2xl">
             <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight mb-4">
-              Scout Your <span className="text-emerald-600">Next Deal</span>
+              Marketplace
             </h1>
-            <p className="text-slate-500 font-body text-lg leading-relaxed">
-              Advanced land acquisition powered by cartographic precision. Browse 2,400+ off-market listings throughout the U.S
-            </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 md:justify-end">
             <button
