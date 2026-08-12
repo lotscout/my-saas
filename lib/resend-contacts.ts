@@ -11,19 +11,6 @@ type SyncContactInput = {
 type ResendAudience = { id: string; name: string };
 type ResendContact = { id: string; email: string };
 
-function isValidEmail(email: string) {
-  const [localPart, domain] = email.split('@');
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    && Boolean(localPart)
-    && Boolean(domain)
-    && !localPart.startsWith('.')
-    && !localPart.endsWith('.')
-    && !localPart.includes('..')
-    && !domain.startsWith('.')
-    && !domain.endsWith('.')
-    && !domain.includes('..');
-}
-
 async function resendFetch(path: string, init: RequestInit = {}) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error('Missing RESEND_API_KEY');
@@ -61,7 +48,7 @@ async function findContactId(audienceId: string, email: string) {
 
 export async function syncResendContact(input: SyncContactInput) {
   const email = input.email?.trim().toLowerCase();
-  if (!email || !isValidEmail(email)) return { ok: false, skipped: true, reason: 'invalid_email' };
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, skipped: true, reason: 'invalid_email' };
 
   const audienceId = await getAudienceId();
   const payload = {

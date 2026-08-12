@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
 import { syncResendContact } from '@/lib/resend-contacts';
-import { sendWelcomeEmailIfNeeded } from '@/lib/welcome-email';
 
 export async function POST(request: NextRequest) {
   const {
@@ -54,15 +53,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: profanityError(profaneField) }, { status: 400 });
   }
 
-  const trimmedFirstName = typeof firstName === 'string' ? firstName.trim() : '';
-  const trimmedLastName = typeof lastName === 'string' ? lastName.trim() : '';
-
   const payload: Record<string, unknown> = {
     id: userId,
     email,
-    first_name: trimmedFirstName || null,
-    last_name: trimmedLastName || null,
-    full_name: [trimmedFirstName, trimmedLastName].filter(Boolean).join(' ').trim() || null,
+    first_name: typeof firstName === 'string' ? firstName.trim() || null : null,
+    last_name: typeof lastName === 'string' ? lastName.trim() || null : null,
+    full_name: [firstName, lastName].filter(Boolean).join(' ').trim() || null,
     updated_at: new Date().toISOString(),
   };
 
@@ -90,20 +86,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await syncResendContact({ email, firstName: trimmedFirstName, lastName: trimmedLastName });
+    await syncResendContact({ email, firstName, lastName });
   } catch (resendErr) {
     console.error('Resend contact sync error:', resendErr);
-  }
-
-  try {
-    await sendWelcomeEmailIfNeeded({
-      supabase,
-      userId,
-      email,
-      firstName: trimmedFirstName || null,
-    });
-  } catch (welcomeErr) {
-    console.error('Welcome email send error:', welcomeErr);
   }
 
   return NextResponse.json({ ok: true });
