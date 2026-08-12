@@ -11,12 +11,12 @@ const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 // Downloading a report is gated the same way saving is: admin, Scout Pro, or any paid plan.
 async function canDownload(userId: string): Promise<boolean> {
   const svc = createServiceClient();
-  const r1 = await svc.from('profiles').select('is_admin, has_search_pro').eq('id', userId).single();
+  const r1 = await svc.from('profiles').select('is_admin, has_search_pro, subscription_tier').eq('id', userId).single();
   if (!r1.error && r1.data) {
-    if ((r1.data as any).is_admin || (r1.data as any).has_search_pro) return true;
+    if ((r1.data as any).is_admin || (r1.data as any).has_search_pro || PAID_TIERS.has((r1.data as any).subscription_tier ?? '')) return true;
   } else {
-    const r2 = await svc.from('profiles').select('is_admin').eq('id', userId).single();
-    if ((r2.data as any)?.is_admin) return true;
+    const r2 = await svc.from('profiles').select('is_admin, subscription_tier').eq('id', userId).single();
+    if ((r2.data as any)?.is_admin || PAID_TIERS.has((r2.data as any)?.subscription_tier ?? '')) return true;
   }
   const { data: sub } = await svc.from('subscriptions').select('tier, status').eq('user_id', userId).maybeSingle();
   return !!(sub && (sub as any).status === 'active' && PAID_TIERS.has((sub as any).tier));

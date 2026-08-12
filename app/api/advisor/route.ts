@@ -59,19 +59,21 @@ interface Access {
 // Unlimited access = admin, standalone Scout Pro, or any active LotScout paid plan.
 async function getUserAccess(userId: string): Promise<Access> {
   const supabase = createServiceClient();
-  let isAdmin = false, hasPro = false;
+  let isAdmin = false, hasPro = false, profileTier: string | null = null;
 
-  const r1 = await supabase.from('profiles').select('is_admin, has_search_pro').eq('id', userId).single();
+  const r1 = await supabase.from('profiles').select('is_admin, has_search_pro, subscription_tier').eq('id', userId).single();
   if (!r1.error && r1.data) {
     isAdmin = !!(r1.data as any).is_admin;
     hasPro = !!(r1.data as any).has_search_pro;
+    profileTier = (r1.data as any).subscription_tier ?? null;
   } else {
-    // has_search_pro column may not exist yet — fall back to just is_admin.
-    const r2 = await supabase.from('profiles').select('is_admin').eq('id', userId).single();
+    // Optional columns may not exist yet — fall back to the stable fields.
+    const r2 = await supabase.from('profiles').select('is_admin, subscription_tier').eq('id', userId).single();
     isAdmin = !!(r2.data as any)?.is_admin;
+    profileTier = (r2.data as any)?.subscription_tier ?? null;
   }
 
-  if (isAdmin || hasPro) return { status: 'pro', unlimited: true, canSave: true };
+  if (isAdmin || hasPro || PAID_TIERS.has(profileTier ?? '')) return { status: 'pro', unlimited: true, canSave: true };
 
   const { data: sub } = await supabase
     .from('subscriptions')

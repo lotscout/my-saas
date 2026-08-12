@@ -150,7 +150,11 @@ export default function AdvisorPage() {
         if (!j) return;
         if (j.access) {
           setAccess(j.access);
-          if (j.access.status === 'guest') {
+          if (j.access.unlimited) {
+            setLimitHit(null);
+            try { localStorage.removeItem(GUEST_COUNT_KEY); } catch {}
+            setGuestCount(0);
+          } else if (j.access.status === 'guest') {
             if (gc >= GUEST_LIMIT || (j.access.remaining !== null && j.access.remaining <= 0)) setLimitHit('guest');
           } else {
             // Logged-in: clear any stale guest counter, honor the daily free limit.
@@ -269,7 +273,11 @@ export default function AdvisorPage() {
         remaining,
         limit: a?.limit ?? (statusHdr === 'guest' ? 3 : statusHdr === 'free' ? 5 : null),
       }));
-      if (!unlimited && remaining !== null && remaining <= 0) {
+      if (unlimited) {
+        setLimitHit(null);
+        try { localStorage.removeItem(GUEST_COUNT_KEY); } catch {}
+        setGuestCount(0);
+      } else if (remaining !== null && remaining <= 0) {
         setLimitHit(statusHdr === 'guest' ? 'guest' : 'free');
       }
     } catch {
