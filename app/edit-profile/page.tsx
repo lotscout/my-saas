@@ -182,17 +182,17 @@ export default function EditProfilePage() {
 
       <div className="pt-16 flex min-h-screen">
         <main className="flex-1 bg-surface-container-low p-4 sm:p-8 md:p-12">
-          <div className="max-w-5xl mx-auto space-y-12">
+          <div className="max-w-5xl mx-auto space-y-5 sm:space-y-12">
 
             {/* Page Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-outline-variant/30 pb-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 border-b border-outline-variant/30 pb-5 sm:pb-8">
               <div className="space-y-1">
-                <h1 className="text-3xl font-headline font-extrabold text-primary tracking-tight">Edit Profile</h1>
-                <p className="text-secondary font-medium">Update your digital identity and investment preferences on the LotScout network.</p>
+                <h1 className="text-2xl sm:text-3xl font-headline font-extrabold text-primary tracking-tight">Edit Profile</h1>
+                <p className="text-secondary text-sm sm:text-base font-medium leading-snug">Update your profile and account details.</p>
               </div>
-              <div className="flex gap-4">
-                <button onClick={() => router.push('/profile')} className="px-6 py-2.5 rounded-xl text-primary font-semibold border border-outline/20 hover:bg-surface-container-high transition-all">Discard Changes</button>
-                <button onClick={handleSave} disabled={saving} className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+              <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-4 w-full md:w-auto">
+                <button onClick={() => router.push('/profile')} className="px-3 sm:px-6 py-2.5 rounded-xl text-primary text-sm font-semibold border border-outline/20 hover:bg-surface-container-high transition-all">Discard</button>
+                <button onClick={handleSave} disabled={saving} className="px-4 sm:px-8 py-2.5 rounded-xl bg-[#1D9E75] text-white text-sm font-bold shadow-xl shadow-[#1D9E75]/20 hover:bg-[#14795A] active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                   {saving ? 'Saving...' : 'Save Profile'}
                 </button>
               </div>
@@ -200,12 +200,12 @@ export default function EditProfilePage() {
 
             {/* Profile Identity Section */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="lg:col-span-4 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6">
-                <h3 className="font-headline text-xl font-bold text-primary flex items-center gap-2">
+              <div className="lg:col-span-4 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-4 sm:space-y-6">
+                <h3 className="font-headline text-lg sm:text-xl font-bold text-primary flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary-container">badge</span>
                   Profile Identity
                 </h3>
-                <div className="relative group w-40 h-40 mx-auto flex items-center justify-center bg-surface rounded-full border-4 border-surface shadow-md overflow-hidden">
+                <div className="relative group w-28 h-28 sm:w-40 sm:h-40 mx-auto flex items-center justify-center bg-surface rounded-full border-4 border-surface shadow-md overflow-hidden">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover rounded-full" />
@@ -243,12 +243,12 @@ export default function EditProfilePage() {
                 </p>
               </div>
 
-              <div className="lg:col-span-8 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="lg:col-span-8 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-primary tracking-wide uppercase">First Name</label>
                     <input
-                      className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:bg-surface-container-lowest transition-all"
+                      className="w-full bg-surface-container-low border-none rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-on-surface focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all"
                       placeholder="First name"
                       value={firstName}
                       onChange={e => setFirstName(e.target.value)}
@@ -257,7 +257,7 @@ export default function EditProfilePage() {
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-primary tracking-wide uppercase">Last Name</label>
                     <input
-                      className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:bg-surface-container-lowest transition-all"
+                      className="w-full bg-surface-container-low border-none rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-on-surface focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all"
                       placeholder="Last name"
                       value={lastName}
                       onChange={e => setLastName(e.target.value)}
@@ -267,7 +267,7 @@ export default function EditProfilePage() {
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-primary tracking-wide uppercase">Professional Bio</label>
                   <textarea
-                    className="w-full bg-surface-container-low border-none rounded-xl p-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:bg-surface-container-lowest transition-all"
+                    className="w-full bg-surface-container-low border-none rounded-xl p-3 sm:p-4 text-on-surface focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all"
                     placeholder="Describe your experience in land acquisition or development..."
                     rows={4}
                     value={bio}
@@ -280,13 +280,13 @@ export default function EditProfilePage() {
             {/* Contact & Company Section */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Contact Information */}
-              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6">
-                <h3 className="font-headline text-xl font-bold text-primary">Contact Information</h3>
-                <div className="space-y-4">
+              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-4 sm:space-y-6">
+                <h3 className="font-headline text-lg sm:text-xl font-bold text-primary">Contact Information</h3>
+                <div className="space-y-3 sm:space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-secondary uppercase mb-1">Phone Number</label>
                     <input
-                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
+                      className="w-full bg-surface-container-low border-none rounded-lg px-3 sm:px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-[#1D9E75]/20"
                       type="tel"
                       placeholder="+1 (555) 000-0000"
                       value={phone}
@@ -306,7 +306,7 @@ export default function EditProfilePage() {
                   <div>
                     <label className="block text-xs font-bold text-secondary uppercase mb-1">State</label>
                     <select
-                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
+                      className="w-full bg-surface-container-low border-none rounded-lg px-3 sm:px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-[#1D9E75]/20"
                       value={state}
                       onChange={e => setState(e.target.value)}
                     >
@@ -319,7 +319,7 @@ export default function EditProfilePage() {
                   <div>
                     <label className="block text-xs font-bold text-secondary uppercase mb-1">County</label>
                     <input
-                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
+                      className="w-full bg-surface-container-low border-none rounded-lg px-3 sm:px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-[#1D9E75]/20"
                       type="text"
                       placeholder="e.g. Travis County"
                       value={county}
@@ -344,15 +344,15 @@ export default function EditProfilePage() {
               </div>
 
               {/* Company */}
-              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-6 flex flex-col">
+              <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-4 sm:space-y-6 flex flex-col">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-headline text-xl font-bold text-primary">Company</h3>
+                  <h3 className="font-headline text-lg sm:text-xl font-bold text-primary">Company</h3>
                 </div>
                 <div className="space-y-4 flex-1">
                   <div>
                     <label className="block text-xs font-bold text-secondary uppercase mb-1">Company Name</label>
                     <input
-                      className="w-full bg-surface-container-low border-none rounded-lg px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-primary-fixed-dim"
+                      className="w-full bg-surface-container-low border-none rounded-lg px-3 sm:px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-[#1D9E75]/20"
                       placeholder="Your company or firm name"
                       type="text"
                       value={companyName}
@@ -364,9 +364,9 @@ export default function EditProfilePage() {
             </section>
 
             {/* Account Management Section */}
-            <section className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-8">
-              <div className="flex items-center justify-between border-b border-outline-variant/30 pb-4">
-                <h3 className="font-headline text-xl font-bold text-primary">Account Management</h3>
+            <section className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-5 sm:space-y-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant/30 pb-4">
+                <h3 className="font-headline text-lg sm:text-xl font-bold text-primary">Account Management</h3>
                 {tier && (
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-secondary uppercase tracking-wider">Current Tier:</span>
@@ -380,13 +380,13 @@ export default function EditProfilePage() {
                   <p className="text-sm text-secondary leading-relaxed">Upgrade your plan to unlock more listings, advanced analytics, and priority support.</p>
                 </div>
                 <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
-                  <a href="/pricing" className="w-full md:w-auto px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container transition-all shadow-lg shadow-primary/10 active:scale-95 text-center">Upgrade Plan</a>
+                  <a href="/pricing" className="w-full md:w-auto px-8 py-3 bg-[#1D9E75] text-white font-bold rounded-xl hover:bg-[#14795A] transition-all shadow-lg shadow-[#1D9E75]/10 active:scale-95 text-center">Upgrade Plan</a>
                 </div>
               </div>
             </section>
 
             {/* Footer / Safety Note */}
-            <footer className="bg-primary/5 p-6 rounded-2xl border border-primary-fixed-dim/20 flex flex-col md:flex-row items-center gap-6">
+            <footer className="bg-primary/5 p-4 sm:p-6 rounded-2xl border border-primary-fixed-dim/20 flex flex-col md:flex-row items-center gap-4 sm:gap-6">
               <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                 <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>security</span>
               </div>

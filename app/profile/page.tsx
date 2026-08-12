@@ -60,12 +60,12 @@ export default function ProfilePage() {
     <div className="bg-surface text-on-surface font-body">
       <Header />
 
-      <main className="pt-24 pb-20 max-w-screen-xl mx-auto px-4 sm:px-8 space-y-12">
+      <main className="pt-24 pb-10 sm:pb-20 max-w-screen-xl mx-auto px-4 sm:px-8 space-y-5 sm:space-y-12">
         {/* Hero Section */}
-        <section className="bg-surface-container-low border border-outline-variant/30 rounded-[2.5rem] p-8 md:p-14 relative overflow-hidden shadow-sm">
+        <section className="bg-surface-container-low border border-outline-variant/30 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-8 md:p-14 relative overflow-hidden shadow-sm">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/5 to-transparent"></div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center md:items-center gap-10">
-            <div className="w-48 h-48 rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-surface shrink-0 flex items-center justify-center">
+          <div className="relative z-10 flex flex-col md:flex-row items-center md:items-center gap-5 sm:gap-10">
+            <div className="w-24 h-24 sm:w-48 sm:h-48 rounded-2xl sm:rounded-[2.5rem] overflow-hidden shadow-xl sm:shadow-2xl border-4 border-white bg-surface shrink-0 flex items-center justify-center">
               {profile?.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -74,11 +74,11 @@ export default function ProfilePage() {
                   src={profile.avatar_url}
                 />
               ) : (
-                <span className="material-symbols-outlined text-primary/30" style={{ fontSize: '80px' }}>account_circle</span>
+                <span className="material-symbols-outlined text-primary/30 text-5xl sm:text-[80px]">account_circle</span>
               )}
             </div>
-            <div className="flex-1 space-y-6 text-center md:text-left">
-              <div className="space-y-3">
+            <div className="flex-1 space-y-4 sm:space-y-6 text-center md:text-left w-full min-w-0">
+              <div className="space-y-2 sm:space-y-3 min-w-0">
                 {profile?.tier && (
                   <div className="flex flex-wrap justify-center md:justify-start gap-2">
                     <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 border border-primary/20">
@@ -87,25 +87,26 @@ export default function ProfilePage() {
                     </span>
                   </div>
                 )}
-                <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+                <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tight sm:tracking-tighter leading-tight break-words">
                   {firstPart}{restPart ? <> <span className="text-emerald-600">{restPart}</span></> : null}
                 </h1>
                 {profile?.company_name && (
-                  <p className="text-secondary text-lg md:text-xl max-w-2xl font-medium leading-relaxed">
+                  <p className="text-secondary text-sm sm:text-lg md:text-xl max-w-2xl font-medium leading-snug sm:leading-relaxed">
                     {profile.company_name}
                   </p>
                 )}
                 {email && !profile?.company_name && (
-                  <p className="text-secondary text-base max-w-2xl font-medium">{email}</p>
+                  <p className="text-secondary text-sm sm:text-base max-w-2xl font-medium break-all">{email}</p>
                 )}
               </div>
               <div className="pt-2">
                 <Link
-                  className="inline-flex items-center gap-3 bg-primary text-on-primary px-8 py-4 rounded-2xl text-base font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 sm:gap-3 bg-[#1D9E75] text-white px-5 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold hover:bg-[#14795A] transition-all shadow-lg shadow-[#1D9E75]/20"
                   href="/edit-profile"
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>settings</span>
-                  Edit Profile &amp; Account Settings
+                  <span className="sm:hidden">Edit Profile</span>
+                  <span className="hidden sm:inline">Edit Profile &amp; Account Settings</span>
                 </Link>
               </div>
             </div>
@@ -113,9 +114,9 @@ export default function ProfilePage() {
         </section>
 
         {/* Combined About & Account Details */}
-        <section className="bg-white p-5 sm:p-10 rounded-[2.5rem] border border-outline-variant/30 shadow-sm">
-          <h2 className="text-2xl font-bold text-primary mb-6 font-headline">About</h2>
-          <div className="space-y-4 text-on-surface-variant leading-relaxed font-body text-lg">
+        <section className="bg-white p-4 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-outline-variant/30 shadow-sm">
+          <h2 className="text-xl sm:text-2xl font-bold text-primary mb-3 sm:mb-6 font-headline">About</h2>
+          <div className="space-y-4 text-on-surface-variant leading-relaxed font-body text-sm sm:text-lg">
             {profile?.bio ? (
               <p>{profile.bio}</p>
             ) : (
@@ -123,47 +124,24 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <div className="mt-10 pt-8 border-t border-outline-variant/30 grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <div className="mt-5 sm:mt-10 pt-5 sm:pt-8 border-t border-outline-variant/30 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8">
             <div className="space-y-1">
               <p className="text-xs font-bold uppercase tracking-widest text-secondary">Email</p>
-              <p className="text-base font-headline font-semibold text-on-surface break-all">{email ?? '—'}</p>
+              <p className="text-sm sm:text-base font-headline font-semibold text-on-surface break-all">{email ?? '—'}</p>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-bold uppercase tracking-widest text-secondary">Membership</p>
-              <p className="text-base font-headline font-semibold text-on-surface">{profile?.tier ? (TIER_LABELS[profile.tier] ?? profile.tier) : 'Free'}</p>
+              <p className="text-sm sm:text-base font-headline font-semibold text-on-surface">{profile?.tier ? (TIER_LABELS[profile.tier] ?? profile.tier) : 'Free'}</p>
             </div>
             {profile?.company_name && (
               <div className="space-y-1">
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary">Company</p>
-                <p className="text-base font-headline font-semibold text-on-surface">{profile.company_name}</p>
+                <p className="text-sm sm:text-base font-headline font-semibold text-on-surface">{profile.company_name}</p>
               </div>
             )}
           </div>
         </section>
       </main>
-
-      {/* Bottom Nav Bar (Mobile only) */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-outline-variant/30 px-6 py-3 flex justify-between items-center z-50">
-        <Link href="/marketplace" className="flex flex-col items-center gap-1 text-secondary">
-          <span className="material-symbols-outlined">storefront</span>
-          <span className="text-[10px] font-bold">Market</span>
-        </Link>
-        <button className="flex flex-col items-center gap-1 text-secondary">
-          <span className="material-symbols-outlined">filter_alt</span>
-          <span className="text-[10px] font-medium">Criteria</span>
-        </button>
-        <button className="bg-primary p-3 rounded-full -mt-10 shadow-lg text-white">
-          <span className="material-symbols-outlined">add</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 text-secondary">
-          <span className="material-symbols-outlined">bookmark</span>
-          <span className="text-[10px] font-medium">Saved</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 text-primary">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
-          <span className="text-[10px] font-bold">Profile</span>
-        </button>
-      </div>
     </div>
   );
 }
