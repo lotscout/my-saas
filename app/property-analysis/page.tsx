@@ -18,6 +18,7 @@ const US_STATES = [
 
 interface AnalysisRequest {
   id: string;
+  user_id?: string;
   input_type: string;
   street_address: string | null;
   city: string | null;
@@ -110,9 +111,16 @@ export default function PropertyAnalysisPage() {
   const loadRequests = useCallback(async () => {
     setRequestsLoading(true);
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setRequests([]);
+      setRequestsLoading(false);
+      return;
+    }
     const { data } = await supabase
       .from('property_analysis_requests')
-      .select('id, input_type, street_address, city, county, state, zip_code, apn, status, report_url, submitted_at')
+      .select('id, user_id, input_type, street_address, city, county, state, zip_code, apn, status, report_url, submitted_at')
+      .eq('user_id', user.id)
       .order('submitted_at', { ascending: false });
     setRequests(data ?? []);
     setRequestsLoading(false);
@@ -234,8 +242,18 @@ export default function PropertyAnalysisPage() {
     }
   }
 
-  function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  function formatNumericDate(iso: string) {
+    return new Date(iso).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  }
+
+  function completionDate(req: AnalysisRequest) {
+    // Until a completion timestamp column exists, show the request date for completed reports.
+    return formatNumericDate(req.submitted_at);
+  }
+
+  function requestLabel(req: AnalysisRequest) {
+    if (req.input_type === 'address') return req.street_address || '—';
+    return req.apn ? `APN ${req.apn}` : 'APN —';
   }
 
   function statusBadge(status: string) {
@@ -593,13 +611,11 @@ export default function PropertyAnalysisPage() {
           <div className="flex flex-col">
             <div className="rounded-2xl border border-outline-variant/30 overflow-hidden shadow-xl flex-1">
 
-              <div className="bg-primary px-8 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="bg-primary px-5 sm:px-8 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
                   <span className="material-symbols-outlined text-white/70">description</span>
-                  <span className="text-white font-headline font-bold tracking-tight">Sample Analysis Report</span>
-                  <span className="bg-emerald-400/20 text-emerald-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-widest border border-emerald-400/30">Preview</span>
+                  <span className="text-white font-headline font-bold tracking-tight whitespace-nowrap truncate">Sample Analysis Report</span>
                 </div>
-                <span className="text-white/50 text-xs">Generated Apr 12, 2026 • LotScout AI</span>
               </div>
 
               <div className="bg-white p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -719,12 +735,12 @@ export default function PropertyAnalysisPage() {
                     </div>
                   </div>
 
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+                  <div className="bg-white border border-outline-variant/20 rounded-xl p-5 shadow-sm">
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="material-symbols-outlined text-sm text-emerald-700" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                      <p className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest">AI Summary</p>
+                      <span className="material-symbols-outlined text-sm text-black/60" style={{ fontVariationSettings: "'FILL' 1" }}>summarize</span>
+                      <p className="text-[10px] font-extrabold text-black uppercase tracking-widest">Summary</p>
                     </div>
-                    <p className="text-sm text-emerald-900 leading-relaxed">
+                    <p className="text-sm text-black leading-relaxed">
                       This 18.4-acre parcel in Bastrop County presents a compelling acquisition opportunity. Comparable sales indicate stable appreciation of ~2% annually, and the property sits outside the 100-year flood plain. Utility infrastructure is within 0.4 miles. Recommended for hold-and-develop strategy with a 3–5 year horizon.
                     </p>
                   </div>
@@ -768,51 +784,13 @@ export default function PropertyAnalysisPage() {
                   <p className="text-secondary text-sm">No requests yet. Submit a property above to get started.</p>
                 </div>
               ) : (
-                <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-outline-variant/20 bg-surface-container-lowest">
-                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Date Submitted</th>
-                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Address / APN</th>
-                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">County</th>
-                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">State</th>
-                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Status</th>
-                          <th className="text-left px-6 py-4 text-xs font-bold text-secondary uppercase tracking-wider">Report</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {requests.map((req, i) => (
-                          <tr key={req.id} className={`border-b border-outline-variant/10 last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-container-lowest/40'}`}>
-                            <td className="px-6 py-4 text-secondary whitespace-nowrap">{formatDate(req.submitted_at)}</td>
-                            <td className="px-6 py-4 text-on-surface font-medium max-w-xs">
-                              {req.input_type === 'address'
-                                ? [req.street_address, req.city].filter(Boolean).join(', ') || '—'
-                                : `APN: ${req.apn ?? '—'}`}
-                            </td>
-                            <td className="px-6 py-4 text-on-surface">{req.county || '—'}</td>
-                            <td className="px-6 py-4 text-on-surface">{req.state}</td>
-                            <td className="px-6 py-4">{statusBadge(req.status)}</td>
-                            <td className="px-6 py-4">
-                              {req.status === 'complete' && req.report_url ? (
-                                <a
-                                  href={req.report_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 bg-primary text-on-primary font-bold text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                                >
-                                  <span className="material-symbols-outlined text-sm">open_in_new</span>
-                                  View Report
-                                </a>
-                              ) : (
-                                <span className="text-secondary text-xs">—</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden divide-y divide-outline-variant/10">
+                  {requests.map(req => (
+                    <div key={req.id} className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3">
+                      <p className="min-w-0 flex-1 text-sm font-bold text-on-surface truncate whitespace-nowrap">{requestLabel(req)}</p>
+                      <p className="shrink-0 text-xs font-semibold text-secondary whitespace-nowrap">{completionDate(req)}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </>
