@@ -287,16 +287,16 @@ export default function HomePage() {
 
 
       {/* SECTION 2: Social Proof Stats */}
-      <section className="py-8 sm:py-16 bg-[#1D9E75] text-white px-4 sm:px-8">
-        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 sm:gap-8">
+      <section className="py-8 sm:py-14 bg-[#F5F8F6] px-4 sm:px-8 border-y border-[#E2EAE6]">
+        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 sm:gap-5">
           {[
             { stat: '$4.51M', label: 'Commission Saved' },
             { stat: '$77M+',  label: 'Land Transactions' },
             { stat: '905+',   label: 'Active Listings' },
           ].map(({ stat, label }) => (
-            <div key={label} className="text-center px-2 py-3 sm:p-8 bg-white/5 rounded-xl sm:rounded-2xl">
-              <div className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-1 sm:mb-2 text-primary-fixed leading-none">{stat}</div>
-              <div className="text-on-primary-container font-medium uppercase tracking-wide sm:tracking-widest text-[9px] sm:text-xs leading-tight">{label}</div>
+            <div key={label} className="text-center px-2 py-4 sm:p-7 bg-white rounded-xl sm:rounded-2xl border border-[#E2EAE6] shadow-sm">
+              <div className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-1 sm:mb-2 text-[#14795A] leading-none">{stat}</div>
+              <div className="text-[#5C6D64] font-bold uppercase tracking-wide sm:tracking-widest text-[9px] sm:text-xs leading-tight">{label}</div>
             </div>
           ))}
         </div>
