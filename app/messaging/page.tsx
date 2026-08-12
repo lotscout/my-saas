@@ -13,6 +13,7 @@ interface Participant {
   last_name: string | null;
   company_name: string | null;
   avatar_url: string | null;
+  display_name?: string | null;
   email?: string | null;
   full_name?: string | null;
 }
@@ -50,6 +51,7 @@ interface Message {
 
 function participantName(p: Participant | null): string {
   if (!p) return 'User';
+  if (p.display_name && !isBadName(p.display_name)) return p.display_name;
   // Filter uploader / seed / test values so the wrong-name problem cannot recur.
   if (p.company_name && !isBadName(p.company_name)) return p.company_name;
   const name = [p.first_name, p.last_name].filter(Boolean).join(' ');

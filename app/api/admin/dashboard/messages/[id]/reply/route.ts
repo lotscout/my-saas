@@ -33,7 +33,7 @@ export async function POST(
   // Verify sender is a managed participant in this conversation
   const { data: conv } = await service
     .from('conversations')
-    .select('id, buyer_id, seller_id')
+    .select('id, buyer_id, seller_id, listing_id')
     .eq('id', conversationId)
     .single();
 
@@ -75,5 +75,26 @@ export async function POST(
     .eq('id', conversationId)
     .then(({ error: e }) => { if (e) console.warn('[admin/messages/reply] preview update failed:', e); });
 
-  return NextResponse.json({ message: { ...message, sender_name: 'Managed User', sender_type: 'user' } });
+  let senderName = 'Managed User';
+  if (sender_id === conv.seller_id && conv.listing_id) {
+    const { data: listing } = await service
+      .from('listings')
+      .select('owner_name')
+      .eq('id', conv.listing_id)
+      .single();
+    if (listing?.owner_name?.trim()) senderName = listing.owner_name.trim();
+  }
+  if (senderName === 'Managed User') {
+    const { data: profile } = await service
+      .from('profiles')
+      .select('first_name, last_name, full_name, email')
+      .eq('id', sender_id)
+      .single();
+    senderName = profile?.full_name
+      || [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
+      || profile?.email
+      || senderName;
+  }
+
+  return NextResponse.json({ message: { ...message, sender_name: senderName, sender_type: 'user' } });
 }

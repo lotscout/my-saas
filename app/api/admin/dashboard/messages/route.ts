@@ -30,8 +30,10 @@ export async function GET() {
       .limit(200),
     service
       .from('profiles')
-      .select('id, first_name, last_name, full_name, email, managed_by_lotscout')
-      .eq('managed_by_lotscout', true),
+      .select('id')
+      .eq('managed_by_lotscout', true)
+      // Production may lag this migration; don't break read-only admin visibility.
+      .then(res => res.error ? { data: [] } : res),
     service
       .from('messages')
       .select('conversation_id')
@@ -53,12 +55,21 @@ export async function GET() {
   ].filter((id): id is string => !!id))];
 
   // Fetch all participant profiles
-  const { data: profileRows } = allUserIds.length > 0
+  const profilesRes = allUserIds.length > 0
     ? await service
         .from('profiles')
         .select('id, first_name, last_name, full_name, email, managed_by_lotscout')
         .in('id', allUserIds)
-    : { data: [] };
+    : { data: [], error: null };
+
+  const { data: profileRows } = profilesRes.error
+    ? (allUserIds.length > 0
+        ? await service
+            .from('profiles')
+            .select('id, first_name, last_name, full_name, email')
+            .in('id', allUserIds)
+        : { data: [] })
+    : profilesRes;
 
   const profileMap: Record<string, {
     id: string;
@@ -68,18 +79,18 @@ export async function GET() {
     email: string | null;
     managed_by_lotscout: boolean;
   }> = {};
-  for (const p of profileRows ?? []) profileMap[p.id] = p;
+  for (const p of profileRows ?? []) profileMap[p.id] = { ...p, managed_by_lotscout: 'managed_by_lotscout' in p ? Boolean(p.managed_by_lotscout) : false };
 
   // Listing info
   const listingIds = [...new Set(convs.map(c => c.listing_id).filter((id): id is string => !!id))];
   const { data: listingRows } = listingIds.length > 0
     ? await service
         .from('listings')
-        .select('id, title, street_address, county, state')
+        .select('id, title, street_address, county, state, owner_name')
         .in('id', listingIds)
     : { data: [] };
 
-  const listingMap: Record<string, { id: string; title: string | null; street_address: string | null; county: string | null; state: string | null }> = {};
+  const listingMap: Record<string, { id: string; title: string | null; street_address: string | null; county: string | null; state: string | null; owner_name?: string | null }> = {};
   for (const l of listingRows ?? []) listingMap[l.id] = l;
 
   // Recent messages to determine last sender (for "unresponded" filter)
@@ -110,7 +121,12 @@ export async function GET() {
   const activeTodayIds = new Set((activeTodayRes.data ?? []).map(m => m.conversation_id).filter(Boolean));
 
   // Helper: build participant profile
-  function buildParticipant(id: string | null) {
+  function buildParticipant(id: string | null, overrideName?: string | null) {
+    if (overrideName?.trim()) {
+      const initials = overrideName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
+      const p = id ? profileMap[id] : null;
+      return { id: id ?? '', name: overrideName.trim(), email: p?.email ?? null, initials, managed_by_lotscout: p?.managed_by_lotscout ?? false };
+    }
     if (!id) return { id: '', name: 'Unknown', email: null, initials: '?', managed_by_lotscout: false };
     const p = profileMap[id];
     if (!p) return { id, name: 'User', email: null, initials: '?', managed_by_lotscout: false };
@@ -120,9 +136,9 @@ export async function GET() {
   }
 
   const enrichedConvs = convs.map(c => {
-    const buyer  = buildParticipant(c.buyer_id);
-    const seller = buildParticipant(c.seller_id);
     const listing = c.listing_id ? (listingMap[c.listing_id] ?? null) : null;
+    const buyer  = buildParticipant(c.buyer_id);
+    const seller = buildParticipant(c.seller_id, listing?.owner_name);
     const lastMsg = lastMsgByConv[c.id];
     const managedParticipants = [
       buyer.managed_by_lotscout  ? c.buyer_id  : null,

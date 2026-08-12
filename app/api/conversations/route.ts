@@ -11,6 +11,7 @@ type ProfileRow = {
   avatar_url: string | null;
   email?: string | null;
   full_name?: string | null;
+  display_name?: string | null;
 };
 
 type BuyerRequestNameRow = {
@@ -28,8 +29,7 @@ type ListingRow = {
   state: string | null;
   lot_size_acres: number | null;
   asking_price: number | null;
-  seller_first_name: string | null;
-  seller_last_name: string | null;
+  owner_name: string | null;
 };
 
 function hasStoredName(p: ProfileRow | undefined): boolean {
@@ -157,12 +157,13 @@ export async function GET() {
     }
   }
 
-  // Fetch listings — includes seller name fields for name fallback and address/price for display
+  // Fetch listings — includes owner_name so imported/managed seller conversations
+  // show the actual seller display name instead of the shared seed account name.
   const listingMap: Record<string, ListingRow> = {};
   if (listingIds.length > 0) {
     const { data: listings } = await service
       .from('listings')
-      .select('id, title, street_address, county, state, lot_size_acres, asking_price, seller_first_name, seller_last_name')
+      .select('id, title, street_address, county, state, lot_size_acres, asking_price, owner_name')
       .in('id', listingIds);
     for (const l of listings ?? []) listingMap[l.id] = l as ListingRow;
   }
@@ -187,7 +188,7 @@ export async function GET() {
 
     // Name priority:
     //   1. DB-stored profile company_name  (explicit business entity — never overridden)
-    //   2. Listing seller_first_name + seller_last_name  (real deal seller, beats signup-trigger names)
+    //   2. Listing owner_name  (real/imported seller, beats shared seed account names)
     //   3. Buyer request display_company/display_name for buyer-directory conversations
     //   4. Profile first_name + last_name / auth-metadata name
     //   5. Email
@@ -195,18 +196,15 @@ export async function GET() {
     // The signup trigger copies auth metadata first_name/last_name into the profiles row,
     // so test accounts like "FB Buyer" have a stored name in the DB. We must NOT let that
     // block the listing seller name, so we only guard on company_name (a real business entity).
-    if (
-      otherProfile &&
-      resolvedOtherId === c.seller_id &&
-      listing &&
-      (listing.seller_first_name || listing.seller_last_name) &&
-      !dbProfileMap[resolvedOtherId]?.company_name
-    ) {
+    if (otherProfile && resolvedOtherId === c.seller_id && listing && isDisplayableName(listing.owner_name)) {
+      const splitOwner = splitName(listing.owner_name);
       otherProfile = {
         ...otherProfile,
-        company_name: null, // clear any auth-metadata company_name
-        first_name: listing.seller_first_name,
-        last_name: listing.seller_last_name,
+        company_name: null, // listing owner_name is the seller label for this conversation
+        first_name: splitOwner.first_name,
+        last_name: splitOwner.last_name,
+        full_name: listing.owner_name,
+        display_name: listing.owner_name,
       };
     }
 
