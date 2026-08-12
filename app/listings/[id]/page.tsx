@@ -110,6 +110,11 @@ function fmtCloseDate(dateStr: string): string {
   return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function isPublicSourceMetadata(text: string | null) {
+  if (!text) return false;
+  return /^(source|imported|scraped)\s*:/i.test(text.trim()) || /facebook|vacant land for sale by owner/i.test(text);
+}
+
 function SingleListingMap({ county, state }: { county: string | null; state: string | null }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<unknown>(null);
@@ -370,7 +375,7 @@ export default function ListingDetailPage() {
 
   const descriptionParts = [
     listing.property_description || null,
-    listing.additional_information || null,
+    isPublicSourceMetadata(listing.additional_information) ? null : listing.additional_information || null,
   ].filter(Boolean) as string[];
 
   const locationItems = [
