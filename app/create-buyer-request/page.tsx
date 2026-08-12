@@ -40,30 +40,9 @@ const FINANCING_OPTIONS = [
   { value: 'Seeking Financing', label: 'Seeking Financing', sub: 'Open to external loan options' },
 ]
 
-const USE_CASES = [
-  'Homesteading / Off-grid living',
-  'Long-term Investment',
-  'Recreational (Hunting/Camping)',
-  'Subdivision / Development',
-  'Commercial Agriculture',
-  'Row Crop Production',
-  'Livestock/Ranching',
-  'Timber/Forestry',
-  'Conservation/Preservation',
-  'Other',
-]
-
-const URGENCY_OPTIONS = ['Flexible', 'Ready Now', 'Urgent']
+const URGENCY_OPTIONS = ['Flexible', 'Urgent']
 
 const CONTACT_METHODS = ['Email', 'Phone Call', 'Text Message', 'In-App Messaging']
-
-const LOT_SIZE_RANGES: { label: string; min: number; max: number | null }[] = [
-  { label: 'Under 1 acre', min: 0, max: 1 },
-  { label: '1 to 5 acres', min: 1, max: 5 },
-  { label: '5 to 20 acres', min: 5, max: 20 },
-  { label: '20 to 100 acres', min: 20, max: 100 },
-  { label: '100+ acres', min: 100, max: null },
-]
 
 export default function CreateBuyerRequestPage() {
   const router = useRouter()
@@ -74,8 +53,6 @@ export default function CreateBuyerRequestPage() {
     zip_code: '',
     city: '',
     target_cities: '',
-    lot_size_range: '',
-    location_notes: '',
     zoning: [] as string[],
     area_unit: 'acres',
     min_acreage: '',
@@ -84,11 +61,7 @@ export default function CreateBuyerRequestPage() {
     utilities: [] as string[],
     min_budget: '',
     max_budget: '',
-    price_per_acre: '',
     financing: [] as string[],
-    primary_use_case: '',
-    use_case_description: '',
-    specific_requirements: '',
     target_close_date: '',
     timeline_urgency: 'Flexible',
     working_with_agent: false,
@@ -101,7 +74,6 @@ export default function CreateBuyerRequestPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [toast, setToast] = useState('')
-  const [aiStreaming, setAiStreaming] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [profanityErrors, setProfanityErrors] = useState<Record<string, boolean>>({})
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
@@ -157,7 +129,11 @@ export default function CreateBuyerRequestPage() {
     if (!formData.max_budget || Number(String(formData.max_budget).replace(/,/g, '')) <= 0)
       errors.max_budget = 'Maximum budget is required'
     if (!formData.min_acreage || Number(formData.min_acreage) <= 0)
-      errors.min_acreage = 'Minimum acreage is required'
+      errors.min_acreage = 'Minimum lot size is required'
+    if (!formData.max_acreage || Number(formData.max_acreage) <= 0)
+      errors.max_acreage = 'Maximum lot size is required'
+    if (formData.min_acreage && formData.max_acreage && Number(formData.max_acreage) < Number(formData.min_acreage))
+      errors.max_acreage = 'Maximum must be greater than minimum'
     if (!formData.target_close_date)
       errors.target_close_date = 'Target close date is required'
     if (!(formData.contact_methods as string[]).length)
@@ -165,42 +141,6 @@ export default function CreateBuyerRequestPage() {
     if (!(formData.zoning as string[]).length)
       errors.zoning = 'Select at least one zoning preference'
     return errors
-  }
-
-  async function generateDescription() {
-    setAiStreaming(true)
-    set('use_case_description', '')
-    try {
-      const res = await fetch('/api/generate-description', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          state: formData.state,
-          county: formData.county,
-          lotSize: formData.min_acreage,
-          lotSizeUnit: formData.area_unit,
-          zoning: (formData.zoning as string[]).join(', '),
-          roadAccess: formData.road_access,
-          utilities: formData.utilities,
-          context: [
-            formData.primary_use_case ? `Use case: ${formData.primary_use_case}` : '',
-            formData.min_budget ? `Budget: $${formData.min_budget} – $${formData.max_budget}` : '',
-          ].filter(Boolean).join('. '),
-        }),
-      })
-      if (!res.ok || !res.body) throw new Error('Stream failed')
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let text = ''
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-        text += decoder.decode(value, { stream: true })
-        set('use_case_description', text)
-      }
-    } finally {
-      setAiStreaming(false)
-    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -227,26 +167,19 @@ export default function CreateBuyerRequestPage() {
           target_city: formData.city || null,
           target_zip: formData.zip_code || null,
           target_cities: formData.target_cities?.trim() || null,
-          ...(() => {
-            const r = LOT_SIZE_RANGES.find(x => x.label === formData.lot_size_range);
-            return r
-              ? { lot_size_min: r.min, lot_size_max: r.max, lot_size_label: r.label }
-              : { lot_size_min: null, lot_size_max: null, lot_size_label: null };
-          })(),
+          lot_size_min: Number(formData.min_acreage),
+          lot_size_max: Number(formData.max_acreage),
+          lot_size_label: null,
           target_regions: [formData.state, formData.county, formData.city].filter(Boolean),
           budget_min: formData.min_budget ? Number(String(formData.min_budget).replace(/,/g, '')) : null,
           budget_max: formData.max_budget ? Number(String(formData.max_budget).replace(/,/g, '')) : null,
-          price_per_acre: formData.price_per_acre ? Number(String(formData.price_per_acre).replace(/,/g, '')) : null,
-          min_acreage: formData.min_acreage ? Number(formData.min_acreage) : null,
-          max_acreage: formData.max_acreage ? Number(formData.max_acreage) : null,
+          min_acreage: Number(formData.min_acreage),
+          max_acreage: Number(formData.max_acreage),
           area_unit: formData.area_unit || 'acres',
           zoning_preference: formData.zoning,
           road_access: formData.road_access,
           utilities: formData.utilities,
           financing: formData.financing,
-          use_case: [formData.primary_use_case, formData.use_case_description].filter(Boolean).join(' — ') || null,
-          use_case_description: formData.use_case_description || null,
-          specific_requirements: formData.specific_requirements || null,
           timeline: formData.timeline_urgency || null,
           target_close_date: formData.target_close_date || null,
           working_with_agent: formData.working_with_agent,
@@ -270,6 +203,8 @@ export default function CreateBuyerRequestPage() {
     Number(String(formData.min_budget || '').replace(/,/g, '')) > 0 &&
     Number(String(formData.max_budget || '').replace(/,/g, '')) > 0 &&
     Number(formData.min_acreage) > 0 &&
+    Number(formData.max_acreage) > 0 &&
+    Number(formData.max_acreage) >= Number(formData.min_acreage) &&
     !!formData.target_close_date &&
     (formData.contact_methods as string[]).length > 0 &&
     (formData.zoning as string[]).length > 0 &&
@@ -368,17 +303,6 @@ export default function CreateBuyerRequestPage() {
                         </div>
                       ))}
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-wider font-bold text-secondary">Specifics / Notes</label>
-                      <textarea
-                        rows={2}
-                        value={formData.location_notes}
-                        onChange={e => { set('location_notes', e.target.value); checkProfanity('location_notes', e.target.value) }}
-                        placeholder="Mention specific areas or boundaries..."
-                        className="w-full bg-surface border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 text-sm py-2 px-3 sm:py-2.5 sm:px-4"
-                      />
-                      {profanityErrors.location_notes && <p className="text-xs text-error mt-1">Please remove inappropriate language.</p>}
-                    </div>
                     <div className="space-y-1 mt-4">
                       <label className="text-[10px] uppercase tracking-wider font-bold text-secondary">Target Cities <span className="font-normal normal-case">(optional, comma separated)</span></label>
                       <input
@@ -412,31 +336,12 @@ export default function CreateBuyerRequestPage() {
                     {validationErrors.zoning && <p className="text-xs text-error mt-2">{validationErrors.zoning}</p>}
                   </div>
 
-                  {/* Acreage */}
+                  {/* Lot Size */}
                   <div>
-                    <div className="flex justify-end mb-2">
-                      <div className="flex p-1 bg-surface-container-high rounded-lg w-fit">
-                        {(['acres', 'sqft'] as const).map(unit => (
-                          <label key={unit} className="cursor-pointer">
-                            <input
-                              type="radio"
-                              name="area_unit"
-                              value={unit}
-                              checked={formData.area_unit === unit}
-                              onChange={() => set('area_unit', unit)}
-                              className="hidden peer"
-                            />
-                            <span className="px-3 py-1 rounded text-[10px] font-bold uppercase peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm block transition-all text-secondary">
-                              {unit === 'acres' ? 'Acres' : 'Sq Ft'}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
                     <div className="grid grid-cols-2 gap-3 sm:gap-8">
                       <div className="space-y-2">
                         <label className="block text-sm font-semibold text-primary">
-                          Min Acreage <span className="text-error">*</span>
+                          Min <span className="text-error">*</span>
                         </label>
                         <input
                           type="number"
@@ -448,26 +353,16 @@ export default function CreateBuyerRequestPage() {
                         {validationErrors.min_acreage && <p className="text-xs text-error">{validationErrors.min_acreage}</p>}
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-primary">Max Acreage</label>
+                        <label className="block text-sm font-semibold text-primary">Max <span className="text-error">*</span></label>
                         <input
                           type="number"
                           value={formData.max_acreage}
-                          onChange={e => set('max_acreage', e.target.value)}
+                          onChange={e => { set('max_acreage', e.target.value); setValidationErrors(prev => ({ ...prev, max_acreage: '' })) }}
                           placeholder="e.g. 50"
                           className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
                         />
+                        {validationErrors.max_acreage && <p className="text-xs text-error">{validationErrors.max_acreage}</p>}
                       </div>
-                    </div>
-                    <div className="space-y-2 mt-6">
-                      <label className="block text-sm font-semibold text-primary">Lot Size Range <span className="text-xs font-normal text-secondary">(optional preset)</span></label>
-                      <select
-                        value={formData.lot_size_range}
-                        onChange={e => set('lot_size_range', e.target.value)}
-                        className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
-                      >
-                        <option value="">No preference</option>
-                        {LOT_SIZE_RANGES.map(r => <option key={r.label} value={r.label}>{r.label}</option>)}
-                      </select>
                     </div>
                   </div>
 
@@ -520,7 +415,7 @@ export default function CreateBuyerRequestPage() {
                   <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">payments</span>
                   <h2 className="font-headline text-lg sm:text-2xl font-bold text-primary tracking-tight">Budget &amp; Pricing</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 mb-6 sm:mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-primary">
                       Min Budget ($) <span className="text-error">*</span>
@@ -547,16 +442,6 @@ export default function CreateBuyerRequestPage() {
                     />
                     {validationErrors.max_budget && <p className="text-xs text-error">{validationErrors.max_budget}</p>}
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-primary">Price Per Acre ($)</label>
-                    <input
-                      type="text"
-                      value={formData.price_per_acre}
-                      onChange={e => set('price_per_acre', e.target.value)}
-                      placeholder="Target per acre"
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
-                    />
-                  </div>
                 </div>
                 <div className="space-y-4">
                   <label className="block text-sm font-semibold text-primary">Financing Preferences</label>
@@ -582,70 +467,7 @@ export default function CreateBuyerRequestPage() {
                 </div>
               </section>
 
-              {/* ── 3. Intended Use ── */}
-              <section className="p-4 sm:p-8 lg:p-10">
-                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
-                  <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">category</span>
-                  <h2 className="font-headline text-lg sm:text-2xl font-bold text-primary tracking-tight">Intended Use</h2>
-                </div>
-                <div className="space-y-5 sm:space-y-8">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-primary">Primary Use Case</label>
-                    <select
-                      value={formData.primary_use_case}
-                      onChange={e => set('primary_use_case', e.target.value)}
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
-                    >
-                      <option value="">Select a use case</option>
-                      {USE_CASES.map(uc => <option key={uc} value={uc}>{uc}</option>)}
-                    </select>
-                  </div>
-                  <div className="space-y-3 relative">
-                    <div className="flex justify-between items-center">
-                      <label className="block text-sm font-semibold text-primary">Use Case Description</label>
-                      <button
-                        type="button"
-                        onClick={generateDescription}
-                        disabled={aiStreaming}
-                        className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold text-white bg-[#1D9E75] hover:bg-[#14795A] px-2.5 sm:px-3 py-1.5 rounded-full transition-all disabled:opacity-60"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
-                        {aiStreaming ? 'Writing…' : 'Write with AI'}
-                      </button>
-                    </div>
-                    <textarea
-                      rows={4}
-                      maxLength={500}
-                      value={formData.use_case_description}
-                      onChange={e => set('use_case_description', e.target.value)}
-                      onBlur={e => checkProfanity('use_case_description', e.target.value)}
-                      placeholder="Describe what you plan to do with the land..."
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
-                    />
-                    <div className="flex justify-between">
-                      {profanityErrors.use_case_description
-                        ? <p className="text-xs text-error">Please remove inappropriate language.</p>
-                        : <span />}
-                      <p className="text-xs text-secondary">{(formData.use_case_description as string).length}/500</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-primary">Specific Requirements</label>
-                    <textarea
-                      rows={3}
-                      maxLength={500}
-                      value={formData.specific_requirements}
-                      onChange={e => set('specific_requirements', e.target.value)}
-                      onBlur={e => checkProfanity('specific_requirements', e.target.value)}
-                      placeholder="Water rights, specific soil types, topographic needs..."
-                      className="w-full bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all py-2.5 sm:py-3 px-3 sm:px-4"
-                    />
-                    {profanityErrors.specific_requirements && <p className="text-xs text-error">Please remove inappropriate language.</p>}
-                  </div>
-                </div>
-              </section>
-
-              {/* ── 4. Purchase Timeline ── */}
+              {/* ── 3. Purchase Timeline ── */}
               <section className="p-4 sm:p-8 lg:p-10 bg-surface/30">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
                   <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">calendar_month</span>
@@ -705,7 +527,7 @@ export default function CreateBuyerRequestPage() {
                 </div>
               </section>
 
-              {/* ── 5. Contact Preferences ── */}
+              {/* ── 4. Contact Preferences ── */}
               <section className="p-4 sm:p-8 lg:p-10">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
                   <span className="material-symbols-outlined text-primary text-xl sm:text-3xl">contact_support</span>
