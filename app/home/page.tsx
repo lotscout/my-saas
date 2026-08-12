@@ -9,21 +9,22 @@ function Link({ href, children, ...props }: AnchorHTMLAttributes<HTMLAnchorEleme
 // Full feature list shown in every pricing card. Features not included in a
 // tier are dimmed (opacity-40) with a dash instead of a green check.
 const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; exclusive: boolean }[] = [
-  { name: 'Unlimited Scout AI Search',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'LotScout AI Search',                              standard: true,  priority: true,  exclusive: true  },
   { name: 'Land Marketplace Access',                         standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  exclusive: true  },
   { name: 'Custom Company Profile',                          standard: true,  priority: true,  exclusive: true  },
   { name: 'Buyer Directory Access',                          standard: true,  priority: true,  exclusive: true  },
   { name: 'Property Analysis Reports',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'Market Updates',                                  standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  exclusive: true  },
   { name: 'Unlimited Listings',                              standard: false, priority: true,  exclusive: true  },
   { name: 'Promoted Lot Requests',                           standard: false, priority: true,  exclusive: true  },
   { name: 'Financing Partners Access',                       standard: false, priority: true,  exclusive: true  },
   { name: '24/7 Support',                                    standard: false, priority: true,  exclusive: true  },
-  { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, exclusive: true  },
+  { name: 'Designated Account Manager',                    standard: false, priority: false, exclusive: true  },
   { name: 'Early Access to New Listings',                    standard: false, priority: false, exclusive: true  },
   { name: 'Early Access to New Buyers',                      standard: false, priority: false, exclusive: true  },
-  { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, exclusive: true  },
+  { name: 'Hands-On Listing Support',                         standard: false, priority: false, exclusive: true  },
   { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, exclusive: true  },
 ];
 

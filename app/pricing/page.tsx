@@ -10,28 +10,29 @@ const GRID_CLS = 'grid grid-cols-[1.5fr_1fr_1fr_1fr]';
 
 // Full feature list — every tier shows all rows; unavailable rows render dimmed.
 const FEATURES = [
-  { name: 'Unlimited Scout AI Search',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'LotScout AI Search',                              standard: true,  priority: true,  exclusive: true  },
   { name: 'Land Marketplace Access',                         standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  exclusive: true  },
   { name: 'Custom Company Profile',                          standard: true,  priority: true,  exclusive: true  },
   { name: 'Buyer Directory Access',                          standard: true,  priority: true,  exclusive: true  },
   { name: 'Property Analysis Reports',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'Market Updates',                                  standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  exclusive: true  },
   { name: 'Unlimited Listings',                              standard: false, priority: true,  exclusive: true  },
   { name: 'Promoted Lot Requests',                           standard: false, priority: true,  exclusive: true  },
   { name: 'Financing Partners Access',                       standard: false, priority: true,  exclusive: true  },
   { name: '24/7 Support',                                    standard: false, priority: true,  exclusive: true  },
-  { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, exclusive: true  },
+  { name: 'Designated Account Manager',                    standard: false, priority: false, exclusive: true  },
   { name: 'Early Access to New Listings',                    standard: false, priority: false, exclusive: true  },
   { name: 'Early Access to New Buyers',                      standard: false, priority: false, exclusive: true  },
-  { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, exclusive: true  },
+  { name: 'Hands-On Listing Support',                         standard: false, priority: false, exclusive: true  },
   { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, exclusive: true  },
 ];
 
 const KEY_FEATURES = {
-  standard: ['3 listings/month', '24hr property reports', 'Marketplace + buyer directory', 'Scout AI access'],
+  standard: ['3 listings/month', '24hr property reports', 'Marketplace + buyer directory', 'LotScout AI Search'],
   priority: ['Unlimited listings', '15min property reports', 'Promoted lot requests', '24/7 support'],
-  exclusive: ['Everything in Priority', 'Financing partners', 'Dedicated account manager', 'White-glove onboarding'],
+  exclusive: ['Everything in Priority', 'Financing partners', 'Designated account manager', 'White-glove onboarding'],
 };
 
 function Check() {
