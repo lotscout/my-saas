@@ -55,13 +55,28 @@ export async function POST(request: NextRequest) {
     const supabaseAdmin = adminSupabase();
     const { data: existingSub } = await supabaseAdmin
       .from('subscriptions')
-      .select('stripe_customer_id')
+      .select('stripe_customer_id, tier, status')
       .eq('user_id', user.id)
       .single();
     const existingCustomerId = existingSub?.stripe_customer_id ?? undefined;
 
+    if (isSearchPro) {
+      const paidTiers = new Set(['standard', 'priority', 'exclusive']);
+      const alreadyIncludedBySubscription = existingSub?.status === 'active' && paidTiers.has(existingSub?.tier ?? '');
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('subscription_tier, has_search_pro')
+        .eq('id', user.id)
+        .maybeSingle();
+      const alreadyIncludedByProfile = paidTiers.has((profile as any)?.subscription_tier ?? '') || !!(profile as any)?.has_search_pro;
+
+      if (alreadyIncludedBySubscription || alreadyIncludedByProfile) {
+        return NextResponse.json({ error: 'LotScout Search is already included with your account.' }, { status: 400 });
+      }
+    }
+
     const successPath = isSearchPro
-      ? '/pricing?search_pro=success'
+      ? '/scout?search_pro=success'
       : isOneTime
         ? '/property-analysis?report=success'
         : '/success';
@@ -73,7 +88,7 @@ export async function POST(request: NextRequest) {
       ...(existingCustomerId ? { customer: existingCustomerId } : {}),
       ...(isOneTime ? {} : { metadata: { tier: tier ?? '', ...(isSearchPro ? { type: 'search_pro' } : {}) } }),
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}${successPath}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}${isSearchPro ? '/scout' : '/pricing'}`,
     });
 
     return NextResponse.json({ url: session.url });

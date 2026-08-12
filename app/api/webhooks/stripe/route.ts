@@ -119,12 +119,48 @@ export async function POST(request: NextRequest) {
           await logWebhookEvent(supabase, event.type, null, 'error', 'search_pro: missing userId');
           break;
         }
+
+        const stripeCustomerId = session.customer as string;
+        const stripeSubscriptionId = session.subscription as string;
+        let periodStart: Date | null = null;
+        let periodEnd: Date | null = null;
+        let stripePriceId: string | null = null;
+
+        if (stripeSubscriptionId) {
+          try {
+            const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+            const subAny = stripeSub as any;
+            periodStart = new Date(subAny.current_period_start * 1000);
+            periodEnd = new Date(subAny.current_period_end * 1000);
+            stripePriceId = stripeSub.items.data[0]?.price?.id ?? null;
+          } catch (e) {
+            console.error('Failed to retrieve Search Pro subscription:', e);
+          }
+        }
+
+        const { error: subError } = await supabase
+          .from('subscriptions')
+          .upsert({
+            user_id: userId,
+            stripe_customer_id: stripeCustomerId,
+            stripe_subscription_id: stripeSubscriptionId,
+            stripe_price_id: stripePriceId,
+            tier: 'search_pro',
+            status: 'active',
+            current_period_start: periodStart,
+            current_period_end: periodEnd,
+            cancel_at_period_end: false,
+            updated_at: new Date(),
+          }, { onConflict: 'user_id' });
+
+        if (subError) console.error('Failed to upsert Search Pro subscription on checkout:', subError);
+
         const { error: spErr } = await supabase
           .from('profiles')
           .update(safeProfileUpdate({ has_search_pro: true }))
           .eq('id', userId);
         if (spErr) console.error('Failed to set has_search_pro on checkout:', spErr);
-        await logWebhookEvent(supabase, event.type, userId, spErr ? 'error' : 'processed', 'search_pro subscription activated');
+        await logWebhookEvent(supabase, event.type, userId, spErr || subError ? 'error' : 'processed', 'search_pro subscription activated');
         break;
       }
 
@@ -232,12 +268,26 @@ export async function POST(request: NextRequest) {
       // Handle Search Pro subscription updates (status changes, renewals)
       if (isSearchProPrice) {
         const hasSearchPro = subscription.status === 'active' || subscription.status === 'trialing';
+        const { error: spSubUpdateErr } = await supabase
+          .from('subscriptions')
+          .update({
+            status: subscription.status,
+            cancel_at_period_end: subscription.cancel_at_period_end,
+            stripe_price_id: priceId,
+            tier: 'search_pro',
+            current_period_start: new Date((subscription as any).current_period_start * 1000),
+            current_period_end: new Date((subscription as any).current_period_end * 1000),
+            updated_at: new Date(),
+          })
+          .eq('user_id', subRow.user_id);
+        if (spSubUpdateErr) console.error('Failed to update Search Pro subscription row:', spSubUpdateErr);
+
         const { error: spUpdateErr } = await supabase
           .from('profiles')
           .update(safeProfileUpdate({ has_search_pro: hasSearchPro }))
           .eq('id', subRow.user_id);
         if (spUpdateErr) console.error('Failed to sync has_search_pro on subscription.updated:', spUpdateErr);
-        await logWebhookEvent(supabase, event.type, subRow.user_id, spUpdateErr ? 'error' : 'processed', `search_pro has_search_pro=${hasSearchPro}`);
+        await logWebhookEvent(supabase, event.type, subRow.user_id, spUpdateErr || spSubUpdateErr ? 'error' : 'processed', `search_pro has_search_pro=${hasSearchPro}`);
         break;
       }
 
@@ -292,12 +342,23 @@ export async function POST(request: NextRequest) {
       // If this was a Search Pro subscription, clear has_search_pro
       const deletedPriceId = subscription.items.data[0]?.price?.id ?? null;
       if (deletedPriceId === process.env.STRIPE_SEARCH_PRO_MONTHLY_PRICE_ID) {
+        const { error: spSubDeleteErr } = await supabase
+          .from('subscriptions')
+          .update({
+            tier: 'search_pro',
+            status: 'canceled',
+            cancelled_at: new Date(),
+            updated_at: new Date(),
+          })
+          .eq('user_id', subRow.user_id);
+        if (spSubDeleteErr) console.error('Failed to mark Search Pro subscription canceled:', spSubDeleteErr);
+
         const { error: spDeleteErr } = await supabase
           .from('profiles')
           .update(safeProfileUpdate({ has_search_pro: false }))
           .eq('id', subRow.user_id);
         if (spDeleteErr) console.error('Failed to clear has_search_pro on subscription deletion:', spDeleteErr);
-        await logWebhookEvent(supabase, event.type, subRow.user_id, spDeleteErr ? 'error' : 'processed', 'search_pro subscription canceled');
+        await logWebhookEvent(supabase, event.type, subRow.user_id, spDeleteErr || spSubDeleteErr ? 'error' : 'processed', 'search_pro subscription canceled');
         break;
       }
 

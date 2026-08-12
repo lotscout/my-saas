@@ -308,7 +308,7 @@ export default function AdvisorPage() {
     setMobileSidebar(false);
   }
 
-  // Scout is included in every LotScout plan now — upgrading means viewing the plans.
+  // Scout is included in every paid LotScout plan, or available standalone.
   function upgrade() {
     window.location.href = '/pricing';
   }
@@ -384,16 +384,16 @@ export default function AdvisorPage() {
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached the guest limit.</p>
           <p className="text-base mb-4" style={{ color: MUTED }}>Sign up free to continue.</p>
-          <a href="/signup" className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
+          <a href="/sign-up" className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
             Sign Up Free
           </a>
         </>
       ) : (
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to any LotScout plan for unlimited Scout and saved reports.</p>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Get LotScout Search for $20/mo, or upgrade to any paid LotScout plan, for unlimited Scout and saved reports.</p>
           <a href="/pricing" className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
-            View plans
+            View options
           </a>
         </>
       )}
@@ -435,7 +435,7 @@ export default function AdvisorPage() {
       {access!.remaining} {access!.remaining === 1 ? 'question' : 'questions'} left
       {access!.status === 'guest' ? ' as a guest' : ' today'}.
       {access!.status === 'free' && (
-        <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Upgrade for unlimited</button>
+        <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Get unlimited</button>
       )}
     </p>
   );
@@ -622,7 +622,7 @@ export default function AdvisorPage() {
         </div>
       </div>
 
-      {/* Scout is included in every LotScout plan; upgrade links to /pricing. */}
+      {/* Scout is included in every paid LotScout plan, or available standalone; upgrade links to /pricing. */}
 
       {/* Saved reports (saved this session) */}
       {showSaved && (

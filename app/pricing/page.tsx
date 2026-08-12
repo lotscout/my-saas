@@ -54,6 +54,7 @@ function Dash() {
 const MONTHLY_PRICES   = { standard: 129, priority: 249, exclusive: 599  };
 const ANNUAL_EFFECTIVE = { standard: 97,  priority: 187, exclusive: 449  }; // effective $/mo
 const ANNUAL_TOTALS    = { standard: 1161, priority: 2241, exclusive: 5391 }; // billed /yr
+const SEARCH_MONTHLY_PRICE = 20;
 
 // Full feature list rendered in every mobile pricing card. Features not included
 // in the tier are dimmed (opacity-40) with a dash instead of a green check.
@@ -105,6 +106,7 @@ export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [expandedMobileTier, setExpandedMobileTier] = useState<'standard' | 'priority' | 'exclusive' | null>(null);
   const { tier: userTier } = useUserTier();
+  const hasPaidLotScoutPlan = userTier === 'standard' || userTier === 'priority' || userTier === 'exclusive';
 
   const prices = isAnnual ? ANNUAL_EFFECTIVE : MONTHLY_PRICES;
 
@@ -126,6 +128,10 @@ export default function PricingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ priceKey }),
       });
+      if (res.status === 401) {
+        window.location.href = '/sign-up';
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.open(data.url, '_blank');
@@ -169,6 +175,31 @@ export default function PricingPage() {
               </button>
             </div>
             <span className="text-emerald-700 text-xs font-bold text-center">Get 3 months free (25% off) with annual billing</span>
+          </div>
+
+          {/* LOTSCOUT SEARCH — standalone */}
+          <div className="bg-white rounded-3xl border-2 border-[#1D9E75]/30 p-5 shadow-sm">
+            <p className="text-[#1D9E75] font-bold text-sm tracking-widest uppercase mb-2">LotScout Search</p>
+            <div className="flex items-baseline gap-1 mb-0.5">
+              <span className="text-4xl font-extrabold text-primary font-headline">${SEARCH_MONTHLY_PRICE}</span>
+              <span className="text-secondary font-medium text-sm">/mo</span>
+            </div>
+            <p className="text-xs text-secondary/70 mb-4">Standalone AI access · included with paid LotScout plans</p>
+            <button
+              onClick={() => handleCheckout('searchProMonthly')}
+              disabled={!!loading || hasPaidLotScoutPlan}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
+            >
+              {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get LotScout Search'}
+            </button>
+            <ul className="mt-4 space-y-2.5">
+              {['Unlimited AI search questions', 'Saved Scout reports', 'Market and land research', 'No marketplace plan required'].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm font-medium text-on-surface">
+                  <Check />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* PRIORITY — Most Popular */}
@@ -255,6 +286,30 @@ export default function PricingPage() {
               {expandedMobileTier === 'exclusive' ? 'Hide all features' : 'See all features'}
             </button>
             {expandedMobileTier === 'exclusive' && <TierFeatures tier="exclusive" />}
+          </div>
+        </div>
+
+        {/* Standalone Scout Search product */}
+        <div className="hidden md:flex mb-6 bg-white rounded-2xl border border-[#1D9E75]/25 p-6 shadow-sm items-center justify-between gap-6">
+          <div>
+            <p className="text-[#1D9E75] text-xs font-black uppercase tracking-widest mb-2">Standalone AI product</p>
+            <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">LotScout Search</h2>
+            <p className="mt-1 text-sm text-secondary max-w-2xl">
+              Unlimited Scout AI search and saved reports for ${SEARCH_MONTHLY_PRICE}/month. Included automatically with Standard, Priority, and Exclusive plans.
+            </p>
+          </div>
+          <div className="shrink-0 w-64">
+            <div className="flex items-baseline gap-1 justify-end mb-2">
+              <span className="text-4xl font-extrabold text-primary font-headline">${SEARCH_MONTHLY_PRICE}</span>
+              <span className="text-secondary font-medium text-sm">/mo</span>
+            </div>
+            <button
+              onClick={() => handleCheckout('searchProMonthly')}
+              disabled={!!loading || hasPaidLotScoutPlan}
+              className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
+            >
+              {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get LotScout Search'}
+            </button>
           </div>
         </div>
 
