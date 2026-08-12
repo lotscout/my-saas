@@ -95,7 +95,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
             <div className="shrink-0">
               <Link
                 href={`/messaging?to=${contactUserId}`}
-                className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/10 whitespace-nowrap"
+                className="flex items-center gap-2 bg-[#1D9E75] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#14795A] transition-colors shadow-lg shadow-[#1D9E75]/10 whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-base">mail</span>
                 Contact {firstName}
@@ -145,7 +145,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
                 <div className="mt-auto pt-2">
                   <Link
                     href={`/listings/${listing.id}`}
-                    className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 bg-[#1D9E75] text-white py-2.5 rounded-xl font-bold text-sm hover:bg-[#14795A] transition-colors"
                   >
                     View Listing
                     <span className="material-symbols-outlined text-sm">arrow_forward</span>

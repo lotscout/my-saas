@@ -224,7 +224,7 @@ export default function CreateBuyerRequestPage() {
     <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 pt-24 pb-12">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-primary text-white px-6 py-3 rounded-xl shadow-lg font-semibold text-sm flex items-center gap-2">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#1D9E75] text-white px-6 py-3 rounded-xl shadow-lg font-semibold text-sm flex items-center gap-2">
           <span className="material-symbols-outlined text-base">check_circle</span>
           {toast}
         </div>

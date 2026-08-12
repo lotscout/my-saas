@@ -23,7 +23,7 @@ export default function LockedFeature({ children, requiredTier, message, classNa
         <p className="text-sm font-semibold text-on-surface max-w-[220px] leading-snug">{message}</p>
         <Link
           href="/pricing"
-          className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm"
+          className="bg-[#1D9E75] hover:bg-[#14795A] text-white px-5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm"
         >
           View Plans
         </Link>

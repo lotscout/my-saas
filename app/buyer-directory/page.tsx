@@ -356,7 +356,7 @@ function EmptyState({ icon, title, subtitle, actionLabel, onAction }: {
       <p className="font-headline text-2xl font-extrabold text-primary mb-2">{title}</p>
       <p className="text-base max-w-md mx-auto leading-relaxed">{subtitle}</p>
       {actionLabel && onAction && (
-        <button onClick={onAction} className="mt-6 inline-flex items-center justify-center rounded-xl bg-primary text-white px-5 py-3 text-sm font-extrabold hover:bg-primary/90 transition-colors">
+        <button onClick={onAction} className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#1D9E75] text-white px-5 py-3 text-sm font-extrabold hover:bg-[#14795A] transition-colors">
           {actionLabel}
         </button>
       )}
@@ -567,7 +567,7 @@ export default function BuyerDirectoryPage() {
               Direct buyer contact requires a paid LotScout account. Upgrade to see full contact details and message buyers directly.
             </p>
             <div className="flex gap-3">
-              <Link href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">
+              <Link href="/pricing" className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors">
                 View Plans →
               </Link>
               <button onClick={() => setShowUpgradeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">

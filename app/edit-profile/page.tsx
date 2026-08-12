@@ -226,7 +226,7 @@ export default function EditProfilePage() {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
                     aria-label="Upload profile picture"
-                    className="absolute bottom-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="absolute bottom-2 right-2 p-2 bg-[#1D9E75] text-white rounded-full shadow-lg hover:scale-110 transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <span className="material-symbols-outlined text-sm">photo_camera</span>
                   </button>

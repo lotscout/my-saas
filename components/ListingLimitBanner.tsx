@@ -29,7 +29,7 @@ export default function ListingLimitBanner({ listingsUsed, tier }: ListingLimitB
         </div>
         <Link
           href="/pricing"
-          className="flex-none bg-primary text-white px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-primary/90 transition-colors whitespace-nowrap"
+          className="flex-none bg-[#1D9E75] text-white px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-[#14795A] transition-colors whitespace-nowrap"
         >
           Upgrade
         </Link>

@@ -212,7 +212,7 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout(getPriceKey('standard'))}
               disabled={!!loading || userTier === 'standard'}
-              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
             >
               {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Standard'}
             </button>
@@ -400,7 +400,7 @@ export default function PricingPage() {
           </div>
           <a
             href="mailto:support@lotscout.com"
-            className="shrink-0 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all active:scale-95"
+            className="shrink-0 bg-[#1D9E75] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#14795A] transition-all active:scale-95"
           >
             Contact Sales
           </a>

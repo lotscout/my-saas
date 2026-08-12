@@ -236,7 +236,7 @@ export default function DealAnalysisPage() {
               <button
                 type="submit"
                 disabled={submitState === 'loading'}
-                className="w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="w-full bg-[#1D9E75] text-white font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {submitState === 'loading'
                   ? 'Submitting…'

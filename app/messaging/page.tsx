@@ -297,7 +297,7 @@ export default function MessagingPage() {
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Upgrade to Send Messages</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">Messaging buyers and sellers is available on paid plans. Upgrade to start closing deals.</p>
             <div className="flex gap-3">
-              <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
+              <a href="/pricing" className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors">View Plans →</a>
               <button onClick={() => setShowSendUpgradeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
             </div>
           </div>
@@ -325,7 +325,7 @@ export default function MessagingPage() {
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
                   {label}
                   {conversations.length > 0 && (
-                    <span className="ml-auto text-xs font-bold bg-primary text-white rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+                    <span className="ml-auto text-xs font-bold bg-[#1D9E75] text-white rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
                       {conversations.length}
                     </span>
                   )}
@@ -495,7 +495,7 @@ export default function MessagingPage() {
                               <div className="flex flex-col gap-1">
                                 <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                                   isOwn
-                                    ? 'bg-primary text-on-primary rounded-br-none'
+                                    ? 'bg-[#1D9E75] text-white rounded-br-none'
                                     : 'bg-surface-container-low text-on-surface rounded-bl-none'
                                 }`}>
                                   {msg.body}
@@ -537,7 +537,7 @@ export default function MessagingPage() {
                         <button
                           onClick={sendMessage}
                           disabled={!newMessage.trim() || sending}
-                          className="bg-primary text-on-primary p-2.5 rounded-xl flex items-center justify-center shadow-md hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="bg-[#1D9E75] text-white p-2.5 rounded-xl flex items-center justify-center shadow-md hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           {sending ? (
                             <span className="material-symbols-outlined text-xl animate-spin">progress_activity</span>

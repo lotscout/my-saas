@@ -400,7 +400,7 @@ export default function ListingDetailPage() {
               Direct seller messaging requires a paid LotScout account. Choose a plan to connect with active sellers.
             </p>
             <div className="flex gap-3">
-              <Link href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">
+              <Link href="/pricing" className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors">
                 View Plans →
               </Link>
               <button onClick={() => setShowUpgradeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">

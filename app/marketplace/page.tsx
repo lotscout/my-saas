@@ -82,8 +82,8 @@ function formatAcreage(acres: number | null, sqft: number | null): string {
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80';
 
 const LISTING_STATUS_META: Record<string, { label: string; className: string }> = {
-  active: { label: 'Published', className: 'bg-emerald-600 text-white' },
-  published: { label: 'Published', className: 'bg-emerald-600 text-white' },
+  active: { label: 'Published', className: 'bg-[#1D9E75] text-white' },
+  published: { label: 'Published', className: 'bg-[#1D9E75] text-white' },
   pending_review: { label: 'Under Review', className: 'bg-amber-500 text-white' },
   revision_needed: { label: 'Under Review', className: 'bg-amber-500 text-white' },
   sold: { label: 'Sold', className: 'bg-blue-600 text-white' },
@@ -175,7 +175,7 @@ function SellerContact({ name, listingId }: { name: string | null; listingId: st
       <p className="text-sm font-bold text-primary mb-2">{name || 'Private Seller'}</p>
       <Link
         href={`/listings/${listingId}`}
-        className="w-full flex items-center justify-center gap-2 bg-primary text-white py-2 rounded-xl font-bold text-xs hover:bg-primary/90 transition-colors"
+        className="w-full flex items-center justify-center gap-2 bg-[#1D9E75] text-white py-2 rounded-xl font-bold text-xs hover:bg-[#14795A] transition-colors"
       >
         <span className="material-symbols-outlined text-sm">forum</span>
         Contact via LotScout
@@ -545,7 +545,7 @@ export default function MarketplacePage() {
             <h2 className="font-headline text-xl font-bold text-primary mb-2">Create a Listing</h2>
             <p className="text-secondary text-sm mb-6 leading-relaxed">Listing your property requires a paid LotScout account. Choose a plan to get started.</p>
             <div className="flex gap-3">
-              <a href="/pricing" className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors">View Plans →</a>
+              <a href="/pricing" className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors">View Plans →</a>
               <button onClick={() => setShowFreeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
             </div>
           </div>
@@ -585,7 +585,7 @@ export default function MarketplacePage() {
               <SecondaryAction
               type="button"
               onClick={handleMyListingsClick}
-              className={showMyListings ? 'bg-primary text-white hover:bg-primary/90' : ''}
+              className={showMyListings ? 'bg-[#1D9E75] text-white hover:bg-[#14795A]' : ''}
             >
               <span className="material-symbols-outlined text-lg">inventory_2</span>
               My Listings
@@ -857,7 +857,7 @@ export default function MarketplacePage() {
                       <button
                         onClick={() => setOpenFilter(openFilter === 'lotsize' ? null : 'lotsize')}
                         className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
-                          lotSizeActive ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                          lotSizeActive ? 'bg-[#1D9E75] text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
                         }`}
                       >
                         {btnLabel}
@@ -901,7 +901,7 @@ export default function MarketplacePage() {
                               </div>
                               <button
                                 onClick={() => setOpenFilter(null)}
-                                className="w-full bg-primary text-white py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors"
+                                className="w-full bg-[#1D9E75] text-white py-2 rounded-lg text-sm font-bold hover:bg-[#14795A] transition-colors"
                               >
                                 Apply
                               </button>
@@ -930,7 +930,7 @@ export default function MarketplacePage() {
                               </div>
                               <button
                                 onClick={() => setOpenFilter(null)}
-                                className="w-full bg-primary text-white py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors"
+                                className="w-full bg-[#1D9E75] text-white py-2 rounded-lg text-sm font-bold hover:bg-[#14795A] transition-colors"
                               >
                                 Apply
                               </button>
@@ -947,7 +947,7 @@ export default function MarketplacePage() {
                   <button
                     onClick={() => setOpenFilter(openFilter === 'zoning' ? null : 'zoning')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
-                      filterZoning.length > 0 ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                      filterZoning.length > 0 ? 'bg-[#1D9E75] text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
                     }`}
                   >
                     {filterZoning.length > 0 ? `Zoning (${filterZoning.length})` : 'Zoning Type'}
@@ -981,7 +981,7 @@ export default function MarketplacePage() {
                   <button
                     onClick={() => setOpenFilter(openFilter === 'utilities' ? null : 'utilities')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
-                      filterUtilities.length > 0 ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                      filterUtilities.length > 0 ? 'bg-[#1D9E75] text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
                     }`}
                   >
                     {filterUtilities.length > 0 ? `Utilities (${filterUtilities.length})` : 'Utilities Access'}
@@ -1015,7 +1015,7 @@ export default function MarketplacePage() {
                   <button
                     onClick={() => setOpenFilter(openFilter === 'roadaccess' ? null : 'roadaccess')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all text-sm font-semibold ${
-                      filterRoadAccessProps.length > 0 ? 'bg-primary text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
+                      filterRoadAccessProps.length > 0 ? 'bg-[#1D9E75] text-white border-primary' : 'bg-surface-container-low text-primary border-transparent hover:border-primary/20'
                     }`}
                   >
                     {filterRoadAccessProps.length > 0 ? `Road Access (${filterRoadAccessProps.length})` : 'Road Access'}

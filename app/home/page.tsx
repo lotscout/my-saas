@@ -8,26 +8,26 @@ function Link({ href, children, ...props }: AnchorHTMLAttributes<HTMLAnchorEleme
 
 // Full feature list shown in every pricing card. Features not included in a
 // tier are dimmed (opacity-40) with a dash instead of a green check.
-const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; enterprise: boolean }[] = [
-  { name: 'Unlimited Scout AI Search',                       standard: true,  priority: true,  enterprise: true  },
-  { name: 'Land Marketplace Access',                         standard: true,  priority: true,  enterprise: true  },
-  { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  enterprise: true  },
-  { name: 'Custom Company Profile',                          standard: true,  priority: true,  enterprise: true  },
-  { name: 'Buyer Directory Access',                          standard: true,  priority: true,  enterprise: true  },
-  { name: 'Property Analysis Reports',                       standard: true,  priority: true,  enterprise: true  },
-  { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  enterprise: true  },
-  { name: 'Unlimited Listings',                              standard: false, priority: true,  enterprise: true  },
-  { name: 'Promoted Lot Requests',                           standard: false, priority: true,  enterprise: true  },
-  { name: 'Financing Partners Access',                       standard: false, priority: true,  enterprise: true  },
-  { name: '24/7 Support',                                    standard: false, priority: true,  enterprise: true  },
-  { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, enterprise: true  },
-  { name: 'Early Access to New Listings',                    standard: false, priority: false, enterprise: true  },
-  { name: 'Early Access to New Buyers',                      standard: false, priority: false, enterprise: true  },
-  { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, enterprise: true  },
-  { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, enterprise: true  },
+const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; exclusive: boolean }[] = [
+  { name: 'Unlimited Scout AI Search',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'Land Marketplace Access',                         standard: true,  priority: true,  exclusive: true  },
+  { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  exclusive: true  },
+  { name: 'Custom Company Profile',                          standard: true,  priority: true,  exclusive: true  },
+  { name: 'Buyer Directory Access',                          standard: true,  priority: true,  exclusive: true  },
+  { name: 'Property Analysis Reports',                       standard: true,  priority: true,  exclusive: true  },
+  { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  exclusive: true  },
+  { name: 'Unlimited Listings',                              standard: false, priority: true,  exclusive: true  },
+  { name: 'Promoted Lot Requests',                           standard: false, priority: true,  exclusive: true  },
+  { name: 'Financing Partners Access',                       standard: false, priority: true,  exclusive: true  },
+  { name: '24/7 Support',                                    standard: false, priority: true,  exclusive: true  },
+  { name: 'Dedicated Full-Time Account Manager',             standard: false, priority: false, exclusive: true  },
+  { name: 'Early Access to New Listings',                    standard: false, priority: false, exclusive: true  },
+  { name: 'Early Access to New Buyers',                      standard: false, priority: false, exclusive: true  },
+  { name: 'Hands-On Listing Support and Deal Guidance',      standard: false, priority: false, exclusive: true  },
+  { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, exclusive: true  },
 ];
 
-function PlanFeatures({ tier }: { tier: 'standard' | 'priority' | 'enterprise' }) {
+function PlanFeatures({ tier }: { tier: 'standard' | 'priority' | 'exclusive' }) {
   return (
     <ul className="space-y-1.5 sm:space-y-2 mb-6 sm:mb-8 flex-grow">
       {ALL_FEATURES.map((f) => {
@@ -287,7 +287,7 @@ export default function HomePage() {
 
 
       {/* SECTION 2: Social Proof Stats */}
-      <section className="py-8 sm:py-16 bg-primary text-white px-4 sm:px-8">
+      <section className="py-8 sm:py-16 bg-[#1D9E75] text-white px-4 sm:px-8">
         <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 sm:gap-8">
           {[
             { stat: '$4.51M', label: 'Commission Saved' },
@@ -513,7 +513,7 @@ export default function HomePage() {
             </div>
             {/* Priority */}
             <div className="w-[86vw] max-w-sm flex-none snap-center bg-white p-5 sm:p-8 rounded-2xl flex flex-col shadow-xl border-2 border-primary relative mt-4 md:mt-0 md:w-auto md:max-w-none md:flex-auto">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#1D9E75] text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
               <div className="flex items-baseline gap-1 mb-4">
                 <span className="text-4xl font-extrabold text-primary">$249</span>
@@ -529,7 +529,7 @@ export default function HomePage() {
                 <span className="text-4xl font-extrabold text-primary">$599</span>
                 <span className="text-secondary">/mo</span>
               </div>
-              <PlanFeatures tier="enterprise" />
+              <PlanFeatures tier="exclusive" />
               <Link href="/sign-up" className="w-full py-4 rounded-xl border-2 border-[#1D9E75] text-[#1D9E75] font-bold hover:bg-[#1D9E75]/10 transition-colors text-center block">Get Started</Link>
             </div>
           </div>

@@ -16,7 +16,7 @@ export default function SuccessPage() {
           </p>
           <Link
             href="/marketplace"
-            className="inline-block px-10 py-4 bg-emerald-600 text-white font-bold text-lg rounded-xl hover:bg-emerald-700 transition-colors shadow-lg"
+            className="inline-block px-10 py-4 bg-[#1D9E75] text-white font-bold text-lg rounded-xl hover:bg-[#14795A] transition-colors shadow-lg"
           >
             Go to Marketplace
           </Link>

@@ -299,7 +299,7 @@ export default function PropertyAnalysisPage() {
             </div>
             <button
               onClick={() => setDeliveryPopup(null)}
-              className="w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:opacity-90 transition-opacity"
+              className="w-full bg-[#1D9E75] text-white font-bold py-3 rounded-xl hover:bg-[#14795A] transition-opacity"
             >
               Got it
             </button>
@@ -320,7 +320,7 @@ export default function PropertyAnalysisPage() {
             </p>
             <button
               onClick={() => { setShowDuplicateModal(false); document.getElementById('past-requests')?.scrollIntoView({ behavior: 'smooth' }); }}
-              className="w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:opacity-90 transition-opacity"
+              className="w-full bg-[#1D9E75] text-white font-bold py-3 rounded-xl hover:bg-[#14795A] transition-opacity"
             >
               View My Requests
             </button>
@@ -593,7 +593,7 @@ export default function PropertyAnalysisPage() {
                   { icon: 'description',  step: '03', title: 'Export Comprehensive Report', body: 'Download a detailed PDF report containing zoning insights, risk assessments, and comparable property maps.' },
                 ].map(({ icon, step, title, body }) => (
                   <div key={step} className="flex gap-5 bg-surface-container-low p-5 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
-                    <div className="flex-none w-10 h-10 bg-primary text-on-primary rounded-lg flex items-center justify-center shadow-inner">
+                    <div className="flex-none w-10 h-10 bg-[#1D9E75] text-white rounded-lg flex items-center justify-center shadow-inner">
                       <span className="material-symbols-outlined text-base">{icon}</span>
                     </div>
                     <div>
@@ -757,7 +757,7 @@ export default function PropertyAnalysisPage() {
                   <p className="font-bold text-primary text-sm">Want faster results?</p>
                   <p className="text-secondary text-xs mt-0.5">Standard and Priority plans deliver within 24 hours. Exclusive delivers within 15 minutes.</p>
                 </div>
-                <a href="/pricing" className="shrink-0 bg-primary text-on-primary font-bold text-xs px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap">
+                <a href="/pricing" className="shrink-0 bg-[#1D9E75] text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-[#14795A] transition-opacity whitespace-nowrap">
                   Upgrade →
                 </a>
               </div>
@@ -799,7 +799,7 @@ export default function PropertyAnalysisPage() {
               <span className="material-symbols-outlined text-primary text-4xl mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
               <h3 className="font-headline text-2xl font-bold text-primary mb-2">Unlock Property Analysis</h3>
               <p className="text-secondary text-sm leading-relaxed mb-6 max-w-sm">Get detailed AI-powered reports including comparable sales, zoning insights, and risk scoring for any parcel in the US.</p>
-              <a href="/pricing" className="inline-flex items-center gap-2 bg-primary text-on-primary font-bold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">
+              <a href="/pricing" className="inline-flex items-center gap-2 bg-[#1D9E75] text-white font-bold px-8 py-3.5 rounded-xl hover:bg-[#14795A] transition-opacity shadow-lg shadow-[#1D9E75]/20">
                 View Plans <span className="material-symbols-outlined">arrow_forward</span>
               </a>
             </div>
@@ -808,7 +808,7 @@ export default function PropertyAnalysisPage() {
 
       </main>
 
-      <footer className="bg-primary text-on-primary w-full py-12 mt-16">
+      <footer className="bg-[#1D9E75] text-white w-full py-12 mt-16">
         <div className="max-w-screen-2xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col gap-2">
             <span className="text-lg font-bold text-white font-headline">LotScout</span>

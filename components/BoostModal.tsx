@@ -87,7 +87,7 @@ export default function BoostModal({ listingId, listingTitle, tier, onClose }: P
               <p className="text-2xl font-extrabold text-primary">${weeklyRate.toFixed(2)}<span className="text-sm font-normal text-secondary">/wk</span></p>
             </div>
             {isExclusive && (
-              <div className="bg-emerald-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest">
+              <div className="bg-[#1D9E75] text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest">
                 90% off
               </div>
             )}
@@ -159,7 +159,7 @@ export default function BoostModal({ listingId, listingTitle, tier, onClose }: P
           <button
             onClick={handleBoost}
             disabled={weeks < 1 || loading}
-            className="w-full bg-primary text-on-primary font-bold py-4 rounded-xl text-base hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] flex items-center justify-center gap-2"
+            className="w-full bg-[#1D9E75] text-white font-bold py-4 rounded-xl text-base hover:bg-[#14795A] transition-all shadow-lg shadow-[#1D9E75]/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] flex items-center justify-center gap-2"
           >
             {loading ? (
               <>

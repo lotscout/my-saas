@@ -51,7 +51,7 @@ export default function UpgradeModal({ featureName, requiredTier, onDismiss }: U
         <div className="flex gap-3">
           <Link
             href="/pricing"
-            className="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-primary/90 transition-colors"
+            className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors"
           >
             Upgrade Now
           </Link>
