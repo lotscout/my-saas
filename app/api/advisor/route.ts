@@ -36,6 +36,43 @@ function extractText(msg: any): string {
   }
 }
 
+function buildFallbackReport(history: { role: 'user' | 'assistant'; content: string }[]): string {
+  const userQuestions = history.filter(m => m.role === 'user').map(m => m.content.trim()).filter(Boolean);
+  const assistantAnswers = history.filter(m => m.role === 'assistant').map(m => m.content.trim()).filter(Boolean);
+  const titleSeed = userQuestions[0] || 'Scout conversation';
+  const latestAnswer = assistantAnswers.at(-1) || '';
+  return [
+    `# Scout Report: ${titleSeed.slice(0, 80)}`,
+    '',
+    '## Summary',
+    latestAnswer || 'This report summarizes the Scout conversation and key real estate considerations discussed.',
+    '',
+    '## Questions Covered',
+    ...userQuestions.map(q => `- ${q}`),
+  ].join('\n');
+}
+
+async function summarizeConversationAsReport(history: { role: 'user' | 'assistant'; content: string }[]): Promise<string> {
+  const transcript = history
+    .map(m => `${m.role === 'user' ? 'User' : 'Scout'}: ${m.content.trim()}`)
+    .join('\n\n')
+    .slice(0, 30000);
+
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const msg = await anthropic.messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 1400,
+    temperature: 0.2,
+    system: 'You turn Scout real estate chat transcripts into concise saved reports. Summarize the whole conversation, not just the final answer. Do not include raw chat formatting. Keep it practical, polished, and easy to scan. Use short markdown sections. Never use em dashes.',
+    messages: [{
+      role: 'user',
+      content: `Create a saved LotScout report from this full Scout conversation. Include: a clear title, executive summary, key takeaways, market/property considerations, recommended next steps, and any caveats or data limitations mentioned.\n\n${transcript}`,
+    }],
+  });
+  const report = extractText(msg).trim();
+  return report || buildFallbackReport(history);
+}
+
 // Classify an error into a non-sensitive category for logs and debugging output.
 function classifyError(err: unknown): string {
   const anyErr = err as any;
@@ -303,14 +340,30 @@ export async function POST(request: NextRequest) {
     if (!user) return Response.json({ error: 'Sign in required' }, { status: 401 });
     const access = await getUserAccess(user.id);
     if (!access.canSave) return Response.json({ error: 'Upgrade to any LotScout plan to save reports.' }, { status: 403 });
-    const content = String(body.content ?? '').trim().slice(0, 20000);
+    const saveHistory = Array.isArray(body?.messages)
+      ? body.messages
+          .filter((m: any) => (m?.role === 'user' || m?.role === 'assistant') && typeof m?.content === 'string' && m.content.trim())
+          .slice(-30)
+          .map((m: any) => ({ role: m.role as 'user' | 'assistant', content: String(m.content).slice(0, 8000) }))
+      : [];
+    let content = '';
+    if (saveHistory.length > 0) {
+      try {
+        content = (await summarizeConversationAsReport(saveHistory)).trim().slice(0, 20000);
+      } catch (err) {
+        console.error('[advisor] report summary error:', err instanceof Error ? err.message : err);
+        content = buildFallbackReport(saveHistory).slice(0, 20000);
+      }
+    } else {
+      content = String(body.content ?? '').trim().slice(0, 20000);
+    }
     if (!content) return Response.json({ error: 'Nothing to save' }, { status: 400 });
     try {
       await createServiceClient().from('saved_reports').insert({ user_id: user.id, content });
     } catch {
       return Response.json({ error: 'Could not save report (saved_reports table may not exist yet).' }, { status: 500 });
     }
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, content });
   }
 
   // --- Chat ---

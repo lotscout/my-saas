@@ -313,14 +313,16 @@ export default function AdvisorPage() {
     window.location.href = '/pricing';
   }
 
-  async function saveReport(content: string, idx: number) {
+  async function saveReport(idx: number) {
     try {
       const res = await fetch('/api/advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save', content }),
+        body: JSON.stringify({ action: 'save', messages }),
       });
       if (res.ok) {
+        const j = await res.json().catch(() => ({}));
+        const content = String(j?.content || '').trim() || 'Saved Scout report';
         setSaved(s => ({ ...s, [idx]: true }));
         const title = (content.trim().split('\n')[0] || 'Saved report').slice(0, 60);
         setSavedReports(prev => [{ title, content }, ...prev]);
@@ -333,8 +335,8 @@ export default function AdvisorPage() {
     }
   }
 
-  function handleSaveClick(content: string, idx: number) {
-    if (access?.canSave) { saveReport(content, idx); return; }
+  function handleSaveClick(idx: number) {
+    if (access?.canSave) { saveReport(idx); return; }
     if (access?.status === 'free') { upgrade(); return; }
     alert('Saving reports requires a LotScout plan. Sign up free, then upgrade to any plan to save market reports.');
   }
@@ -590,16 +592,16 @@ export default function AdvisorPage() {
                     {/* Save as Report */}
                     {m.role === 'assistant' && m.content && !streaming && access && (
                       <button
-                        onClick={() => handleSaveClick(m.content, i)}
+                        onClick={() => handleSaveClick(i)}
                         disabled={!!saved[i]}
-                        title={access.canSave ? 'Save this as a report' : 'Saving reports requires a LotScout plan'}
+                        title={access.canSave ? 'Summarize and save this chat as a report' : 'Saving reports requires a LotScout plan'}
                         className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
                         style={{ color: saved[i] ? MUTED : access.canSave ? GREEN : MUTED }}
                       >
                         <span className="material-symbols-outlined text-base">
                           {saved[i] ? 'check' : access.canSave ? 'bookmark_add' : 'lock'}
                         </span>
-                        {saved[i] ? 'Saved' : 'Save as Report'}
+                        {saved[i] ? 'Saved' : 'Save chat as Report'}
                       </button>
                     )}
                   </div>
@@ -637,7 +639,7 @@ export default function AdvisorPage() {
               {savedReports.length === 0 ? (
                 <p className="text-sm text-center py-8" style={{ color: MUTED }}>
                   {access?.canSave
-                    ? 'No saved reports yet. Use Save as Report under any answer to save it here.'
+                    ? 'No saved reports yet. Use Save chat as Report under any answer to summarize the full conversation.'
                     : 'Saving reports requires a LotScout plan.'}
                 </p>
               ) : (
