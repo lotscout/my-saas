@@ -505,7 +505,7 @@ export default function HomePage() {
             <div className="w-[86vw] max-w-sm flex-none snap-center bg-white p-5 sm:p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high md:w-auto md:max-w-none md:flex-auto">
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Standard</h3>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$97</span>
+                <span className="text-4xl font-extrabold text-primary">$129</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <PlanFeatures tier="standard" />
@@ -516,7 +516,7 @@ export default function HomePage() {
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Popular</div>
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Priority</h3>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$197</span>
+                <span className="text-4xl font-extrabold text-primary">$249</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <PlanFeatures tier="priority" />
@@ -526,7 +526,7 @@ export default function HomePage() {
             <div className="w-[86vw] max-w-sm flex-none snap-center bg-white p-5 sm:p-8 rounded-2xl flex flex-col shadow-sm border border-surface-container-high md:w-auto md:max-w-none md:flex-auto">
               <h3 className="font-headline text-xl font-bold text-primary mb-2">Exclusive</h3>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-extrabold text-primary">$529</span>
+                <span className="text-4xl font-extrabold text-primary">$599</span>
                 <span className="text-secondary">/mo</span>
               </div>
               <PlanFeatures tier="enterprise" />

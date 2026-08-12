@@ -50,9 +50,9 @@ function Dash() {
 }
 
 // Correct monthly prices. Annual = 9 months paid (3 months free = 25% off).
-const MONTHLY_PRICES   = { standard: 97,  priority: 197,  exclusive: 529  };
-const ANNUAL_EFFECTIVE = { standard: 73,  priority: 148,  exclusive: 397  }; // effective $/mo
-const ANNUAL_TOTALS    = { standard: 873, priority: 1773, exclusive: 4761 }; // billed /yr
+const MONTHLY_PRICES   = { standard: 129, priority: 249, exclusive: 599  };
+const ANNUAL_EFFECTIVE = { standard: 97,  priority: 187, exclusive: 449  }; // effective $/mo
+const ANNUAL_TOTALS    = { standard: 1161, priority: 2241, exclusive: 5391 }; // billed /yr
 
 // Full feature list rendered in every mobile pricing card. Features not included
 // in the tier are dimmed (opacity-40) with a dash instead of a green check.

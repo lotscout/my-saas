@@ -40,7 +40,7 @@ const TIER_BADGE_CLS: Record<string, string> = {
   exclusive: 'bg-purple-100 text-purple-700',
 };
 
-const TIER_PRICES: Record<string, number> = { standard: 97, priority: 297, exclusive: 599 };
+const TIER_PRICES: Record<string, number> = { standard: 129, priority: 249, exclusive: 599 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
