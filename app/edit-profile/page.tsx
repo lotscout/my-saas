@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
+import { containsProfanity } from '@/lib/profanity-filter';
 
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
@@ -77,39 +78,47 @@ export default function EditProfilePage() {
 
   async function handleSave() {
     setSaving(true);
+    setToast(null);
+
+    const profileFields = [
+      { label: 'first name', value: firstName },
+      { label: 'last name', value: lastName },
+      { label: 'phone', value: phone },
+      { label: 'bio', value: bio },
+      { label: 'company name', value: companyName },
+      { label: 'state', value: state },
+      { label: 'county', value: county },
+    ];
+    const profaneField = profileFields.find(field => containsProfanity(field.value));
+    if (profaneField) {
+      setSaving(false);
+      setToastOk(false);
+      setToast(`Please remove inappropriate language from ${profaneField.label}.`);
+      return;
+    }
+
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
-    const basePayload = {
-      id: user.id,
-      email: user.email,
-      first_name: firstName.trim() || null,
-      last_name: lastName.trim() || null,
-      phone: phone.trim() || null,
-      bio: bio.trim() || null,
-      company_name: companyName.trim() || null,
-      state: state.trim() || null,
-      county: county.trim() || null,
-      updated_at: new Date().toISOString(),
-    };
-    const payload = { ...basePayload, contact_visible: contactVisible };
-
-    let { error } = await supabase
-      .from('profiles')
-      .upsert(payload, { onConflict: 'id' })
-      .select('id, first_name, last_name, email')
-      .single();
-
-    // If the contact_visible column hasn't been migrated yet, save the rest so profile editing still works.
-    if (error && /contact_visible/i.test(error.message)) {
-      console.warn('[edit-profile] contact_visible column missing — saving without it. Run the migration to enable this preference.');
-      ({ error } = await supabase
-        .from('profiles')
-        .upsert(basePayload, { onConflict: 'id' })
-        .select('id, first_name, last_name, email')
-        .single());
-    }
+    const res = await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.id,
+        email: user.email,
+        firstName,
+        lastName,
+        phone,
+        bio,
+        companyName,
+        state,
+        county,
+        contactVisible,
+      }),
+    });
+    const json = await res.json().catch(() => ({}));
+    const error = res.ok ? null : new Error(json.error || 'Save failed');
 
     setSaving(false);
     if (error) {

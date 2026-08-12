@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/service';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { findProfaneField, profanityError } from '@/lib/profanity-validation';
 
 // Build a stored seller name as first name + last initial (e.g. "Marcus T.").
 function formatOwnerName(first: string | null, last: string | null): string | null {
@@ -150,6 +151,22 @@ export async function POST(request: NextRequest) {
     if (!cityClean) return NextResponse.json({ error: 'City is required' }, { status: 400 });
     if (!stateClean) return NextResponse.json({ error: 'State is required' }, { status: 400 });
     if (!zipCodeClean) return NextResponse.json({ error: 'Zip code is required' }, { status: 400 });
+
+    const profaneField = findProfaneField([
+      { label: 'title', value: title },
+      { label: 'property description', value: propertyDescription },
+      { label: 'city', value: city },
+      { label: 'state', value: state },
+      { label: 'county', value: county },
+      { label: 'street address', value: streetAddress },
+      { label: 'APN', value: apn },
+      { label: 'zoning', value: zoning },
+      { label: 'additional information', value: additionalInformation },
+      { label: 'digital signature', value: digitalSignature },
+    ]);
+    if (profaneField) {
+      return NextResponse.json({ error: profanityError(profaneField) }, { status: 400 });
+    }
 
     const rawLotSize = lotSizeValue ? Number(lotSizeValue) : null;
     const lotSizeAcres = rawLotSize && rawLotSize > 0

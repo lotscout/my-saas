@@ -103,6 +103,21 @@ export default function CreateListingPage() {
     setSubmitting(true)
     setSubmitError('')
     try {
+      const fieldsToCheck = [
+        { label: 'title', value: formData.title },
+        { label: 'property description', value: formData.property_description },
+        { label: 'city', value: formData.city },
+        { label: 'state', value: formData.state },
+        { label: 'county', value: formData.county },
+        { label: 'street address', value: formData.street_address },
+        { label: 'APN', value: formData.apn },
+        { label: 'zoning', value: formData.zoning },
+        { label: 'additional information', value: formData.additional_information },
+        { label: 'digital signature', value: formData.digital_signature },
+      ]
+      const profaneField = fieldsToCheck.find(field => typeof field.value === 'string' && containsProfanity(field.value))
+      if (profaneField) throw new Error(`Please remove inappropriate language from ${profaneField.label}.`)
+
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
