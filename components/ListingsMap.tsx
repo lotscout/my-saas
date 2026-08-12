@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface MapListing {
   id: string;
@@ -38,6 +38,7 @@ function formatAcreage(acres: number | null, sqft: number | null): string {
 
 export default function ListingsMap({ listings, filteredIds, highlightedId, onPinClick }: ListingsMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const [mapUnlocked, setMapUnlocked] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapInstanceRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,7 +70,15 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
       if (!mapInstanceRef.current) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         delete (L.Icon.Default.prototype as any)._getIconUrl;
-        const map = L.map(mapRef.current!, { zoomControl: true }).setView([39.5, -98.35], 4);
+        const map = L.map(mapRef.current!, {
+          zoomControl: true,
+          scrollWheelZoom: false,
+          dragging: false,
+          touchZoom: false,
+          doubleClickZoom: false,
+          boxZoom: false,
+          keyboard: false,
+        }).setView([39.5, -98.35], 4);
         mapInstanceRef.current = map;
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -138,6 +147,26 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
     return () => { cancelled = true; };
   }, [listings]); // re-runs when listings arrive or change
 
+  // Keep the map from hijacking normal page scroll/touch. Users explicitly unlock it
+  // when they want to pan or pinch the map; wheel zoom stays off to avoid fly-away zooms.
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const toggle = (handler: { enable?: () => void; disable?: () => void } | undefined, enabled: boolean) => {
+      if (!handler) return;
+      if (enabled) handler.enable?.();
+      else handler.disable?.();
+    };
+
+    toggle(map.dragging, mapUnlocked);
+    toggle(map.touchZoom, mapUnlocked);
+    toggle(map.doubleClickZoom, mapUnlocked);
+    toggle(map.boxZoom, mapUnlocked);
+    toggle(map.keyboard, mapUnlocked);
+    map.scrollWheelZoom?.disable?.();
+  }, [mapUnlocked]);
+
   // Destroy map on unmount
   useEffect(() => {
     return () => {
@@ -184,6 +213,15 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
   return (
     <div className="relative w-full h-full rounded-2xl overflow-hidden border border-outline-variant/20">
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+      <button
+        type="button"
+        onClick={() => setMapUnlocked(v => !v)}
+        className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow text-xs font-bold text-slate-700 flex items-center gap-1.5 z-[1000] border border-black/10"
+        aria-pressed={mapUnlocked}
+      >
+        <span className="material-symbols-outlined text-base">{mapUnlocked ? 'lock_open' : 'lock'}</span>
+        {mapUnlocked ? 'Map unlocked' : 'Move map'}
+      </button>
       <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow text-xs font-semibold text-slate-600 flex items-center gap-3 z-[1000]">
         <span className="flex items-center gap-1.5">
           <span style={{ width:10,height:10,borderRadius:'50%',background:'#1D9E75',display:'inline-block',border:'2px solid white',boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
