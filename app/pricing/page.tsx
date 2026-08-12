@@ -28,6 +28,12 @@ const FEATURES = [
   { name: 'White-Glove Onboarding and Setup',                standard: false, priority: false, exclusive: true  },
 ];
 
+const KEY_FEATURES = {
+  standard: ['3 listings/month', '24hr property reports', 'Marketplace + buyer directory', 'Scout AI access'],
+  priority: ['Unlimited listings', '15min property reports', 'Promoted lot requests', '24/7 support'],
+  exclusive: ['Everything in Priority', 'Financing partners', 'Dedicated account manager', 'White-glove onboarding'],
+};
+
 function Check() {
   return (
     <span
@@ -52,13 +58,13 @@ const ANNUAL_TOTALS    = { standard: 873, priority: 1773, exclusive: 4761 }; // 
 // in the tier are dimmed (opacity-40) with a dash instead of a green check.
 function TierFeatures({ tier, dark = false }: { tier: 'standard' | 'priority' | 'exclusive'; dark?: boolean }) {
   return (
-    <ul className="mt-5 space-y-2">
+    <ul className="mt-4 space-y-2">
       {FEATURES.map((f) => {
         const included = f[tier] === true;
         return (
           <li
             key={f.name}
-            className={`flex items-center gap-2 text-lg ${dark ? 'text-emerald-50' : 'text-on-surface'} ${included ? '' : 'opacity-40'}`}
+            className={`flex items-center gap-2 text-sm ${dark ? 'text-emerald-50' : 'text-on-surface'} ${included ? '' : 'opacity-40'}`}
           >
             {included ? (
               <span className="inline-flex items-center justify-center rounded-full shrink-0" style={{ backgroundColor: '#1D9E75', width: '18px', height: '18px' }}>
@@ -80,9 +86,23 @@ function TierFeatures({ tier, dark = false }: { tier: 'standard' | 'priority' | 
   );
 }
 
+function KeyFeatures({ tier, dark = false }: { tier: keyof typeof KEY_FEATURES; dark?: boolean }) {
+  return (
+    <ul className="mt-4 space-y-2.5">
+      {KEY_FEATURES[tier].map((feature) => (
+        <li key={feature} className={`flex items-center gap-2 text-sm font-medium ${dark ? 'text-emerald-50' : 'text-on-surface'}`}>
+          <Check />
+          <span>{feature}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
+  const [expandedMobileTier, setExpandedMobileTier] = useState<'standard' | 'priority' | 'exclusive' | null>(null);
   const { tier: userTier } = useUserTier();
 
   const prices = isAnnual ? ANNUAL_EFFECTIVE : MONTHLY_PRICES;
@@ -126,6 +146,11 @@ export default function PricingPage() {
 
         {/* ── Mobile stacked tier cards ── */}
         <div className="md:hidden space-y-5">
+          <div className="text-center px-2">
+            <h1 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Choose your plan</h1>
+            <p className="mt-1 text-sm text-secondary">Start with Priority if you want unlimited listings and faster reports.</p>
+          </div>
+
           {/* Billing toggle (shares isAnnual with the desktop table) */}
           <div className="flex flex-col items-center gap-2">
             <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full">
@@ -145,29 +170,9 @@ export default function PricingPage() {
             <span className="text-emerald-700 text-xs font-bold text-center">Get 3 months free (25% off) with annual billing</span>
           </div>
 
-          {/* STANDARD */}
-          <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
-            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Standard</p>
-            {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.standard}/mo</del>}
-            <div className="flex items-baseline gap-1 mb-0.5">
-              <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
-              <span className="text-secondary font-medium text-sm">/mo</span>
-            </div>
-            {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
-            <p className="text-xs text-secondary/70 mb-4">{billingSubtext('standard')}</p>
-            <button
-              onClick={() => handleCheckout(getPriceKey('standard'))}
-              disabled={!!loading || userTier === 'standard'}
-              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
-            >
-              {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
-            </button>
-            <TierFeatures tier="standard" />
-          </div>
-
           {/* PRIORITY — Most Popular */}
-          <div className="rounded-3xl p-6 shadow-lg relative text-white" style={{ backgroundColor: '#1b4332' }}>
-            <span className="absolute top-5 right-5 bg-emerald-400 text-emerald-950 text-[10px] font-black px-3 py-1 rounded-full tracking-wide uppercase">Most Popular</span>
+          <div className="rounded-3xl p-5 shadow-lg relative text-white" style={{ backgroundColor: '#1b4332' }}>
+            <span className="absolute top-4 right-4 bg-emerald-400 text-emerald-950 text-[10px] font-black px-3 py-1 rounded-full tracking-wide uppercase">Best Value</span>
             <p className="text-emerald-200 font-bold text-sm tracking-widest uppercase mb-2">Priority</p>
             {isAnnual && <del className="text-emerald-200/40 text-sm font-medium">${MONTHLY_PRICES.priority}/mo</del>}
             <div className="flex items-baseline gap-1 mb-0.5">
@@ -181,13 +186,49 @@ export default function PricingPage() {
               disabled={!!loading || userTier === 'priority'}
               className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-emerald-900 text-emerald-200 cursor-default' : 'bg-emerald-300 text-emerald-950 hover:bg-emerald-200'}`}
             >
-              {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
+              {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Priority'}
             </button>
-            <TierFeatures tier="priority" dark />
+            <KeyFeatures tier="priority" dark />
+            <button
+              type="button"
+              onClick={() => setExpandedMobileTier(expandedMobileTier === 'priority' ? null : 'priority')}
+              className="mt-4 w-full text-center text-xs font-bold text-emerald-200 underline underline-offset-4"
+            >
+              {expandedMobileTier === 'priority' ? 'Hide all features' : 'See all features'}
+            </button>
+            {expandedMobileTier === 'priority' && <TierFeatures tier="priority" dark />}
+          </div>
+
+          {/* STANDARD */}
+          <div className="bg-white rounded-3xl border border-outline-variant/20 p-5 shadow-sm">
+            <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Standard</p>
+            {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.standard}/mo</del>}
+            <div className="flex items-baseline gap-1 mb-0.5">
+              <span className="text-4xl font-extrabold text-primary font-headline">${prices.standard}</span>
+              <span className="text-secondary font-medium text-sm">/mo</span>
+            </div>
+            {isAnnual && <p className="text-xs text-emerald-700 font-semibold mb-0.5">Save 25% · 3 months free</p>}
+            <p className="text-xs text-secondary/70 mb-4">{billingSubtext('standard')}</p>
+            <button
+              onClick={() => handleCheckout(getPriceKey('standard'))}
+              disabled={!!loading || userTier === 'standard'}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
+            >
+              {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Standard'}
+            </button>
+            <KeyFeatures tier="standard" />
+            <button
+              type="button"
+              onClick={() => setExpandedMobileTier(expandedMobileTier === 'standard' ? null : 'standard')}
+              className="mt-4 w-full text-center text-xs font-bold text-primary underline underline-offset-4"
+            >
+              {expandedMobileTier === 'standard' ? 'Hide all features' : 'See all features'}
+            </button>
+            {expandedMobileTier === 'standard' && <TierFeatures tier="standard" />}
           </div>
 
           {/* EXCLUSIVE */}
-          <div className="bg-white rounded-3xl border border-outline-variant/20 p-6 shadow-sm">
+          <div className="bg-white rounded-3xl border border-outline-variant/20 p-5 shadow-sm">
             <p className="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Exclusive</p>
             {isAnnual && <del className="text-secondary/40 text-sm font-medium">${MONTHLY_PRICES.exclusive}/mo</del>}
             <div className="flex items-baseline gap-1 mb-0.5">
@@ -202,9 +243,17 @@ export default function PricingPage() {
               className={`w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'hover:opacity-90'}`}
               style={userTier === 'exclusive' ? undefined : { backgroundColor: '#1b4332' }}
             >
-              {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
+              {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Exclusive'}
             </button>
-            <TierFeatures tier="exclusive" />
+            <KeyFeatures tier="exclusive" />
+            <button
+              type="button"
+              onClick={() => setExpandedMobileTier(expandedMobileTier === 'exclusive' ? null : 'exclusive')}
+              className="mt-4 w-full text-center text-xs font-bold text-primary underline underline-offset-4"
+            >
+              {expandedMobileTier === 'exclusive' ? 'Hide all features' : 'See all features'}
+            </button>
+            {expandedMobileTier === 'exclusive' && <TierFeatures tier="exclusive" />}
           </div>
         </div>
 

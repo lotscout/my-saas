@@ -298,7 +298,7 @@ export default function CreateListingPage() {
           </p>
           <a
             href="/pricing"
-            className="inline-block bg-primary text-on-primary font-headline font-bold px-8 py-3 rounded-xl hover:brightness-125 transition-all shadow-lg shadow-primary/10"
+            className="inline-block bg-[#1D9E75] text-white font-headline font-bold px-8 py-3 rounded-xl hover:brightness-125 transition-all shadow-lg shadow-[#1D9E75]/10"
           >
             View Plans →
           </a>
@@ -308,25 +308,25 @@ export default function CreateListingPage() {
 
     {/* Success toast */}
     {toast && (
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-primary text-on-primary px-6 py-3 rounded-full shadow-xl font-bold text-sm flex items-center gap-2">
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#1D9E75] text-white px-6 py-3 rounded-full shadow-xl font-bold text-sm flex items-center gap-2">
         <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
         {toast}
       </div>
     )}
 
-    <main className="flex-grow pt-32 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+    <main className="flex-grow pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-12 max-w-[1440px] mx-auto w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12">
 
         {/* Left: Heading & Stepper */}
         <div className="lg:col-span-4 flex flex-col justify-start">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-primary tracking-tight mb-4 leading-tight font-headline">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight mb-2 sm:mb-4 leading-tight font-headline">
             Create Land Listing
           </h1>
-          <p className="text-secondary text-lg font-medium mb-12">{stepSubtitle}</p>
+          <p className="text-secondary text-sm sm:text-lg font-medium mb-4 sm:mb-12">{stepSubtitle}</p>
 
           {/* Mobile progress bar */}
-          <div className="lg:hidden relative w-full h-1 bg-surface-container-highest rounded-full overflow-hidden mb-8">
-            <div className={`absolute top-0 left-0 h-full bg-primary rounded-full ${progressWidth}`} />
+          <div className="lg:hidden relative w-full h-1 bg-surface-container-highest rounded-full overflow-hidden mb-5 sm:mb-8">
+            <div className={`absolute top-0 left-0 h-full bg-[#1D9E75] rounded-full ${progressWidth}`} />
           </div>
 
           {/* Desktop vertical stepper */}
@@ -339,7 +339,7 @@ export default function CreateListingPage() {
               return (
                 <div key={num} className={`relative flex items-start space-x-6 ${num < STEPS.length ? 'pb-12' : ''}`}>
                   <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ring-4 ring-background
-                    ${done ? 'bg-primary-fixed text-primary' : active ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface'}`}>
+                    ${done ? 'bg-primary-fixed text-primary' : active ? 'bg-[#1D9E75] text-white' : 'bg-surface-container-high text-on-surface'}`}>
                     {done
                       ? <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'wght' 700" }}>check</span>
                       : num}
@@ -362,7 +362,7 @@ export default function CreateListingPage() {
             <>
               <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/10">
                 <div className="p-4 sm:p-8 md:p-12">
-                  <div className="space-y-10">
+                  <div className="space-y-6 sm:space-y-10">
 
                     {/* Ownership Type dropdown */}
                     <div>
@@ -374,7 +374,7 @@ export default function CreateListingPage() {
                           id="ownership_type"
                           value={formData.ownership_type ?? ''}
                           onChange={e => set('ownership_type', e.target.value)}
-                          className="w-full bg-surface-container-low border-none rounded-lg px-5 py-4 text-on-surface-variant font-medium appearance-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all"
+                          className="w-full bg-surface-container-low border-none rounded-lg px-5 py-4 text-on-surface-variant font-medium appearance-none focus:ring-2 focus:ring-[#1D9E75]/20 focus:bg-surface-container-lowest transition-all"
                         >
                           <option value="" disabled>Select your legal role...</option>
                           <option value="owner">Owner</option>
@@ -392,14 +392,14 @@ export default function CreateListingPage() {
                     <div className="h-px w-full bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent" />
 
                     {/* Certification checkbox */}
-                    <div className="flex items-start space-x-4 p-6 bg-surface-container-low/50 rounded-xl">
+                    <div className="flex items-start space-x-3 sm:space-x-4 p-4 sm:p-6 bg-surface-container-low/50 rounded-xl">
                       <div className="flex items-center h-6">
                         <input
                           id="certify"
                           type="checkbox"
                           checked={formData.ownership_certified ?? false}
                           onChange={e => set('ownership_certified', e.target.checked)}
-                          className="h-5 w-5 rounded-md border-outline-variant text-primary focus:ring-primary/20"
+                          className="h-5 w-5 rounded-md border-outline-variant text-primary focus:ring-[#1D9E75]/20"
                         />
                       </div>
                       <div className="text-sm leading-6">
@@ -411,11 +411,11 @@ export default function CreateListingPage() {
                     </div>
                   </div>
 
-                  <div className="mt-12 flex justify-end items-center space-x-4">
-                    <button className="text-secondary font-bold text-sm px-6 py-3 hover:text-primary transition-colors">Save Draft</button>
+                  <div className="mt-8 sm:mt-12 flex justify-between sm:justify-end items-center gap-3 sm:space-x-4">
+                    <button className="text-secondary font-bold text-sm px-3 sm:px-6 py-2.5 sm:py-3 hover:text-primary transition-colors">Save Draft</button>
                     <button
                       onClick={() => setCurrentStep(2)}
-                      className="bg-primary text-white font-bold px-10 py-4 rounded-xl flex items-center space-x-2 transition-transform active:scale-95 shadow-lg shadow-primary/10"
+                      className="bg-[#1D9E75] text-white font-bold px-6 sm:px-10 py-3 sm:py-4 rounded-xl flex items-center space-x-2 transition-transform active:scale-95 shadow-lg shadow-[#1D9E75]/10"
                     >
                       <span>Next</span>
                       <span className="material-symbols-outlined text-lg">arrow_forward</span>
@@ -423,12 +423,12 @@ export default function CreateListingPage() {
                   </div>
                 </div>
 
-                <div className="bg-primary-fixed text-on-primary-fixed px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center space-x-3">
+                <div className="hidden sm:flex bg-primary-fixed text-on-primary-fixed px-8 py-5 flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
                     <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                     <p className="text-sm font-bold tracking-tight">Listings created by LotScout are 4X as likely to be viewed by buyers. Upgrade to Exclusive for hands-on listing support.</p>
                   </div>
-                  <a href="/pricing" className="text-xs font-black uppercase tracking-widest bg-primary text-white px-4 py-2 rounded-full hover:bg-on-primary-container transition-colors whitespace-nowrap">Upgrade Now</a>
+                  <a href="/pricing" className="text-xs font-black uppercase tracking-widest bg-[#1D9E75] text-white px-4 py-2 rounded-full hover:bg-on-primary-container transition-colors whitespace-nowrap">Upgrade Now</a>
                 </div>
               </div>
             </>
@@ -438,13 +438,13 @@ export default function CreateListingPage() {
           {currentStep === 2 && (
             <>
               <div className="bg-surface-container-lowest p-4 sm:p-8 md:p-12 rounded-xl border border-outline-variant/15 shadow-sm">
-                <div className="space-y-12">
+                <div className="space-y-7 sm:space-y-12">
 
                   {/* Core Details */}
-                  <section className="space-y-6">
-                    <div className="flex items-center space-x-3">
+                  <section className="space-y-4 sm:space-y-6">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                       <span className="material-symbols-outlined text-primary-fixed-dim">edit_note</span>
-                      <h2 className="font-headline text-xl font-bold text-primary tracking-tight">Core Details</h2>
+                      <h2 className="font-headline text-lg sm:text-xl font-bold text-primary tracking-tight">Core Details</h2>
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center justify-between mb-1">
@@ -467,19 +467,19 @@ export default function CreateListingPage() {
                         onChange={e => set('title', e.target.value)}
                         onBlur={e => setProfanityErrors(prev => ({ ...prev, title: containsProfanity(e.target.value) }))}
                         placeholder="e.g. 40-Acre Highland Retreat with River Access"
-                        className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline-variant"
+                        className="w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all placeholder:text-outline-variant"
                       />
                       {profanityErrors.title && <p className="text-xs text-error font-medium mt-1">Please remove inappropriate language</p>}
                     </div>
                   </section>
 
                   {/* Location */}
-                  <section className="space-y-6">
-                    <div className="flex items-center space-x-3">
+                  <section className="space-y-4 sm:space-y-6">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                       <span className="material-symbols-outlined text-primary-fixed-dim">location_on</span>
-                      <h2 className="font-headline text-xl font-bold text-primary tracking-tight">Location</h2>
+                      <h2 className="font-headline text-lg sm:text-xl font-bold text-primary tracking-tight">Location</h2>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                       <div className="md:col-span-2 space-y-1">
                         <label className="block text-sm font-bold text-secondary tracking-wide">Address <span className="font-medium text-secondary/70">(or APN required)</span></label>
                         <input
@@ -487,7 +487,7 @@ export default function CreateListingPage() {
                           value={formData.street_address ?? ''}
                           onChange={e => { set('street_address', e.target.value); setStep2Errors(prev => ({ ...prev, address: '' })) }}
                           placeholder="Street name"
-                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.address ? 'ring-2 ring-error' : ''}`}
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all ${step2Errors.address ? 'ring-2 ring-error' : ''}`}
                         />
                       </div>
                       <div className="space-y-1">
@@ -497,12 +497,12 @@ export default function CreateListingPage() {
                           value={formData.apn ?? ''}
                           onChange={e => { set('apn', e.target.value); setStep2Errors(prev => ({ ...prev, address: '' })) }}
                           placeholder="00-000-00"
-                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.address ? 'ring-2 ring-error' : ''}`}
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all ${step2Errors.address ? 'ring-2 ring-error' : ''}`}
                         />
                       </div>
                     </div>
                     {step2Errors.address && <p className="text-xs text-error font-medium -mt-4">{step2Errors.address}</p>}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                       <div className="col-span-2 md:col-span-1 space-y-1">
                         <label className="block text-sm font-bold text-secondary tracking-wide">City *</label>
                         <input
@@ -510,7 +510,7 @@ export default function CreateListingPage() {
                           value={formData.city ?? ''}
                           onChange={e => { set('city', e.target.value); setStep2Errors(prev => ({ ...prev, city: '' })) }}
                           placeholder="City"
-                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.city ? 'ring-2 ring-error' : ''}`}
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all ${step2Errors.city ? 'ring-2 ring-error' : ''}`}
                         />
                         {step2Errors.city && <p className="text-xs text-error font-medium mt-1">{step2Errors.city}</p>}
                       </div>
@@ -520,7 +520,7 @@ export default function CreateListingPage() {
                           <select
                             value={formData.state ?? ''}
                             onChange={e => { set('state', e.target.value); setStep2Errors(prev => ({ ...prev, state: '' })) }}
-                            className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all appearance-none ${step2Errors.state ? 'ring-2 ring-error' : ''}`}
+                            className={`w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all appearance-none ${step2Errors.state ? 'ring-2 ring-error' : ''}`}
                           >
                             <option value="">Select State</option>
                             {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -536,7 +536,7 @@ export default function CreateListingPage() {
                           value={formData.county ?? ''}
                           onChange={e => set('county', e.target.value)}
                           placeholder="County Name"
-                          className="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all"
+                          className="w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all"
                         />
                       </div>
                       <div className="col-span-2 md:col-span-1 space-y-1">
@@ -546,7 +546,7 @@ export default function CreateListingPage() {
                           value={formData.zip_code ?? ''}
                           onChange={e => { set('zip_code', e.target.value); setStep2Errors(prev => ({ ...prev, zip_code: '' })) }}
                           placeholder="00000"
-                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.zip_code ? 'ring-2 ring-error' : ''}`}
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all ${step2Errors.zip_code ? 'ring-2 ring-error' : ''}`}
                         />
                         {step2Errors.zip_code && <p className="text-xs text-error font-medium mt-1">{step2Errors.zip_code}</p>}
                       </div>
@@ -554,12 +554,12 @@ export default function CreateListingPage() {
                   </section>
 
                   {/* Lot Features */}
-                  <section className="space-y-8">
-                    <div className="flex items-center space-x-3">
+                  <section className="space-y-5 sm:space-y-8">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                       <span className="material-symbols-outlined text-primary-fixed-dim">landscape</span>
-                      <h2 className="font-headline text-xl font-bold text-primary tracking-tight">Lot Features</h2>
+                      <h2 className="font-headline text-lg sm:text-xl font-bold text-primary tracking-tight">Lot Features</h2>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                       <div className="space-y-4">
                         <div className="space-y-1">
                           <label className="block text-sm font-bold text-secondary tracking-wide">Lot Size *</label>
@@ -592,7 +592,7 @@ export default function CreateListingPage() {
                             <select
                               value={formData.zoning ?? ''}
                               onChange={e => { set('zoning', e.target.value); setStep2Errors(prev => ({ ...prev, zoning: '' })) }}
-                              className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all appearance-none ${step2Errors.zoning ? 'ring-2 ring-error' : ''}`}
+                              className={`w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all appearance-none ${step2Errors.zoning ? 'ring-2 ring-error' : ''}`}
                             >
                               <option value="">Select Zoning</option>
                               <option value="Residential">Residential</option>
@@ -615,7 +615,7 @@ export default function CreateListingPage() {
                                 type="checkbox"
                                 checked={(formData.road_access ?? []).includes(opt)}
                                 onChange={() => { toggleArray('road_access', opt); setStep2Errors(prev => ({ ...prev, road_access: '' })) }}
-                                className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20"
+                                className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-[#1D9E75]/20"
                               />
                               <span className="group-hover:text-primary transition-colors">{opt}</span>
                             </label>
@@ -630,7 +630,7 @@ export default function CreateListingPage() {
                                 type="checkbox"
                                 checked={(formData.utilities ?? []).includes(opt)}
                                 onChange={() => { toggleArray('utilities', opt); setStep2Errors(prev => ({ ...prev, utilities: '' })) }}
-                                className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20"
+                                className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-[#1D9E75]/20"
                               />
                               <span className="group-hover:text-primary transition-colors">{opt}</span>
                             </label>
@@ -644,9 +644,9 @@ export default function CreateListingPage() {
                   {/* Detailed Description */}
                   <section className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2 sm:space-x-3">
                         <span className="material-symbols-outlined text-primary-fixed-dim">auto_awesome</span>
-                        <h2 className="font-headline text-xl font-bold text-primary tracking-tight">Detailed Description</h2>
+                        <h2 className="font-headline text-lg sm:text-xl font-bold text-primary tracking-tight">Detailed Description</h2>
                       </div>
                     </div>
                     <textarea
@@ -656,7 +656,7 @@ export default function CreateListingPage() {
                       placeholder="The narrative story of your land. Discuss topography, views, wildlife, and potential uses..."
                       rows={8}
                       maxLength={1000}
-                      className="w-full bg-surface-container-low border-none rounded-lg p-6 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline-variant leading-relaxed"
+                      className="w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-6 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all placeholder:text-outline-variant leading-relaxed"
                     />
                     <div className="flex justify-between items-center">
                       {profanityErrors.additional_information
@@ -670,11 +670,11 @@ export default function CreateListingPage() {
 
                   {/* Pricing & Timeline */}
                   <section className="space-y-6 pt-4 border-t border-surface-container-high">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                       <span className="material-symbols-outlined text-primary-fixed-dim">payments</span>
-                      <h2 className="font-headline text-xl font-bold text-primary tracking-tight">Pricing &amp; Timeline</h2>
+                      <h2 className="font-headline text-lg sm:text-xl font-bold text-primary tracking-tight">Pricing &amp; Timeline</h2>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                       <div className="space-y-1">
                         <label className="block text-sm font-bold text-secondary tracking-wide">Asking Price ($) *</label>
                         <input
@@ -682,7 +682,7 @@ export default function CreateListingPage() {
                           value={formData.asking_price ?? ''}
                           onChange={e => { set('asking_price', e.target.value); setStep2Errors(prev => ({ ...prev, asking_price: '' })) }}
                           placeholder="50,000"
-                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.asking_price ? 'ring-2 ring-error' : ''}`}
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all ${step2Errors.asking_price ? 'ring-2 ring-error' : ''}`}
                         />
                         {step2Errors.asking_price && <p className="text-xs text-error font-medium">{step2Errors.asking_price}</p>}
                       </div>
@@ -693,7 +693,7 @@ export default function CreateListingPage() {
                           value={formData.comparable_market_value ?? ''}
                           onChange={e => { set('comparable_market_value', e.target.value); setStep2Errors(prev => ({ ...prev, comparable_market_value: '' })) }}
                           placeholder="55,000"
-                          className={`w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.comparable_market_value ? 'ring-2 ring-error' : ''}`}
+                          className={`w-full bg-surface-container-low border-none rounded-lg p-3 sm:p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all ${step2Errors.comparable_market_value ? 'ring-2 ring-error' : ''}`}
                         />
                         {step2Errors.comparable_market_value && <p className="text-xs text-error font-medium">{step2Errors.comparable_market_value}</p>}
                       </div>
@@ -704,7 +704,7 @@ export default function CreateListingPage() {
                           type="checkbox"
                           checked={formData.price_negotiable ?? false}
                           onChange={e => set('price_negotiable', e.target.checked)}
-                          className="w-6 h-6 rounded-lg border-outline-variant text-primary focus:ring-primary/20"
+                          className="w-6 h-6 rounded-lg border-outline-variant text-primary focus:ring-[#1D9E75]/20"
                         />
                         <div>
                           <span className="block font-headline text-sm font-bold text-primary tracking-tight">Price Negotiable</span>
@@ -717,7 +717,7 @@ export default function CreateListingPage() {
                           type="date"
                           value={formData.preferred_close_date ?? ''}
                           onChange={e => { set('preferred_close_date', e.target.value); setStep2Errors(prev => ({ ...prev, preferred_close_date: '' })) }}
-                          className={`w-full md:w-64 bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 transition-all ${step2Errors.preferred_close_date ? 'ring-2 ring-error' : ''}`}
+                          className={`w-full md:w-64 bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all ${step2Errors.preferred_close_date ? 'ring-2 ring-error' : ''}`}
                         />
                         {step2Errors.preferred_close_date && <p className="text-xs text-error font-medium">{step2Errors.preferred_close_date}</p>}
                       </div>
@@ -725,7 +725,7 @@ export default function CreateListingPage() {
                   </section>
 
                   {/* Navigation */}
-                  <div className="flex items-center justify-between pt-10">
+                  <div className="flex items-center justify-between gap-3 pt-6 sm:pt-10">
                     <button
                       type="button"
                       onClick={() => setCurrentStep(1)}
@@ -737,9 +737,9 @@ export default function CreateListingPage() {
                     <button
                       type="button"
                       onClick={handleStep2Next}
-                      className="bg-primary text-on-primary px-12 py-4 rounded-xl font-headline font-bold tracking-tight shadow-xl shadow-primary/10 hover:brightness-125 transition-all flex items-center space-x-3"
+                      className="bg-[#1D9E75] text-white px-5 sm:px-12 py-3 sm:py-4 rounded-xl font-headline font-bold tracking-tight shadow-xl shadow-[#1D9E75]/10 hover:bg-[#14795A] transition-all flex items-center space-x-2 sm:space-x-3 text-sm sm:text-base"
                     >
-                      <span>Continue to Media</span>
+                      <span className="sm:hidden">Continue</span><span className="hidden sm:inline">Continue to Media</span>
                       <span className="material-symbols-outlined">arrow_forward</span>
                     </button>
                   </div>
@@ -747,7 +747,7 @@ export default function CreateListingPage() {
               </div>
 
               {/* Upgrade banner */}
-              <div className="mt-12 bg-primary-fixed text-on-primary-fixed p-6 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-primary/5">
+              <div className="hidden sm:flex mt-12 bg-primary-fixed text-on-primary-fixed p-6 rounded-xl flex-col md:flex-row items-center justify-between gap-4 border border-primary/5">
                 <div className="flex items-center space-x-4">
                   <div className="bg-primary-container p-3 rounded-full text-on-primary-container">
                     <span className="material-symbols-outlined">rocket_launch</span>
@@ -768,7 +768,7 @@ export default function CreateListingPage() {
           {currentStep === 3 && (
             <div className="flex flex-col gap-8">
               <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 md:p-12 shadow-sm border border-surface-container">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12">
 
                   {/* Photos Upload */}
                   <div className="space-y-4">
@@ -839,7 +839,7 @@ export default function CreateListingPage() {
                       onBlur={e => setProfanityErrors(prev => ({ ...prev, additional_information: containsProfanity(e.target.value) }))}
                       placeholder="Describe terrain features, access roads, utilities, or specific land use potential..."
                       rows={5}
-                      className="w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary/20 rounded-xl text-on-surface placeholder:text-outline/60 p-5"
+                      className="w-full bg-surface-container-low border-none focus:ring-2 focus:ring-[#1D9E75]/20 rounded-xl text-on-surface placeholder:text-outline/60 p-3 sm:p-5"
                     />
                     {profanityErrors.additional_information && <p className="text-xs text-error font-medium mt-1">Please remove inappropriate language</p>}
                   </div>
@@ -847,7 +847,7 @@ export default function CreateListingPage() {
                   {/* Contact Preferences */}
                   <div className="md:col-span-2 space-y-4 pt-4">
                     <h3 className="text-primary font-headline font-bold text-lg border-b border-surface-container-low pb-2">Contact Preferences *</h3>
-                    <div className="flex flex-wrap gap-6 pt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 pt-2">
                       {[
                         { label: 'Email',                         value: 'Email'       },
                         { label: 'Phone Call',                    value: 'Phone Call'  },
@@ -859,7 +859,7 @@ export default function CreateListingPage() {
                             type="checkbox"
                             checked={(formData.contact_methods ?? []).includes(value)}
                             onChange={() => { toggleArray('contact_methods', value); setStep3ContactError('') }}
-                            className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20 bg-surface-container-low"
+                            className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-[#1D9E75]/20 bg-surface-container-low"
                           />
                           <span className="text-on-surface font-medium group-hover:text-primary transition-colors">{label}</span>
                         </label>
@@ -870,18 +870,18 @@ export default function CreateListingPage() {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-16">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 mt-8 sm:mt-16">
                   <button
                     type="button"
                     onClick={() => setCurrentStep(2)}
-                    className="w-full sm:w-auto px-10 py-3.5 rounded-full bg-surface-container-high text-secondary font-headline font-bold tracking-tight hover:bg-surface-variant transition-all"
+                    className="w-full sm:w-auto px-8 sm:px-10 py-3 rounded-xl sm:rounded-full bg-surface-container-high text-secondary font-headline font-bold tracking-tight hover:bg-surface-variant transition-all"
                   >
                     Previous
                   </button>
                   <button
                     type="button"
                     onClick={handleStep3Next}
-                    className="w-full sm:w-auto px-14 py-3.5 rounded-full bg-primary text-on-primary font-headline font-bold tracking-tight hover:scale-105 transition-all shadow-xl shadow-primary/10"
+                    className="w-full sm:w-auto px-10 sm:px-14 py-3 rounded-xl sm:rounded-full bg-[#1D9E75] text-white font-headline font-bold tracking-tight hover:bg-[#14795A] transition-all shadow-xl shadow-[#1D9E75]/10"
                   >
                     Next
                   </button>
@@ -889,9 +889,9 @@ export default function CreateListingPage() {
               </div>
 
               {/* Upgrade Banner */}
-              <div className="bg-primary-fixed/30 border-l-4 border-primary p-6 rounded-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+              <div className="hidden sm:flex bg-primary-fixed/30 border-l-4 border-primary p-6 rounded-xl flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
                 <div className="flex items-start gap-4 relative z-10">
-                  <div className="bg-primary text-on-primary w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                  <div className="bg-[#1D9E75] text-white w-12 h-12 rounded-full flex items-center justify-center shrink-0">
                     <span className="material-symbols-outlined">bolt</span>
                   </div>
                   <div>
@@ -899,7 +899,7 @@ export default function CreateListingPage() {
                     <p className="text-sm">Upgrade to Premium for featured map placement and drone photography assistance.</p>
                   </div>
                 </div>
-                <button className="bg-primary text-on-primary px-6 py-2 rounded-lg font-headline font-bold text-sm tracking-tight relative z-10 whitespace-nowrap">
+                <button className="bg-[#1D9E75] text-white px-6 py-2 rounded-lg font-headline font-bold text-sm tracking-tight relative z-10 whitespace-nowrap">
                   View Upgrade Plans
                 </button>
                 <div className="absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
@@ -911,17 +911,17 @@ export default function CreateListingPage() {
           {currentStep === 4 && (
             <div className="flex-grow">
               <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-8 md:p-12 shadow-sm border border-outline-variant/10">
-                <section className="space-y-6">
+                <section className="space-y-4 sm:space-y-6">
 
                   {/* Compliance checkboxes */}
                   <div className="grid grid-cols-1 gap-4">
-                    <label className="group relative flex items-start gap-4 p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
+                    <label className="group relative flex items-start gap-3 sm:gap-4 p-4 sm:p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
                       <div className="flex items-center h-6">
                         <input
                           type="checkbox"
                           checked={formData.legal_confirmation ?? false}
                           onChange={e => set('legal_confirmation', e.target.checked)}
-                          className="w-5 h-5 rounded border-outline text-primary focus:ring-primary transition-all"
+                          className="w-5 h-5 rounded border-outline text-primary focus:ring-[#1D9E75] transition-all"
                         />
                       </div>
                       <div>
@@ -930,13 +930,13 @@ export default function CreateListingPage() {
                       </div>
                     </label>
 
-                    <label className="group relative flex items-start gap-4 p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
+                    <label className="group relative flex items-start gap-3 sm:gap-4 p-4 sm:p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
                       <div className="flex items-center h-6">
                         <input
                           type="checkbox"
                           checked={formData.platform_understanding ?? false}
                           onChange={e => set('platform_understanding', e.target.checked)}
-                          className="w-5 h-5 rounded border-outline text-primary focus:ring-primary transition-all"
+                          className="w-5 h-5 rounded border-outline text-primary focus:ring-[#1D9E75] transition-all"
                         />
                       </div>
                       <div>
@@ -945,13 +945,13 @@ export default function CreateListingPage() {
                       </div>
                     </label>
 
-                    <label className="group relative flex items-start gap-4 p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
+                    <label className="group relative flex items-start gap-3 sm:gap-4 p-4 sm:p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
                       <div className="flex items-center h-6">
                         <input
                           type="checkbox"
                           checked={formData.state_compliance ?? false}
                           onChange={e => set('state_compliance', e.target.checked)}
-                          className="w-5 h-5 rounded border-outline text-primary focus:ring-primary transition-all"
+                          className="w-5 h-5 rounded border-outline text-primary focus:ring-[#1D9E75] transition-all"
                         />
                       </div>
                       <div>
@@ -962,7 +962,7 @@ export default function CreateListingPage() {
                   </div>
 
                   {/* Digital signature */}
-                  <div className="mt-12 pt-8 border-t border-outline-variant/20">
+                  <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-outline-variant/20">
                     <h3 className="text-lg font-bold text-primary mb-6">Digital Signature &amp; Date</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -972,7 +972,7 @@ export default function CreateListingPage() {
                           value={formData.digital_signature ?? ''}
                           onChange={e => set('digital_signature', e.target.value)}
                           placeholder="Johnathan Q. Surveyor"
-                          className="w-full bg-surface-container-low border-none rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline-variant"
+                          className="w-full bg-surface-container-low border-none rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all placeholder:text-outline-variant"
                         />
                       </div>
                       <div className="space-y-2">
@@ -981,7 +981,7 @@ export default function CreateListingPage() {
                           type="date"
                           value={formData.signature_date ?? TODAY}
                           onChange={e => set('signature_date', e.target.value)}
-                          className="w-full bg-surface-container-low border-none rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/20 transition-all"
+                          className="w-full bg-surface-container-low border-none rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 focus:ring-2 focus:ring-[#1D9E75]/20 transition-all"
                         />
                       </div>
                     </div>
@@ -995,7 +995,7 @@ export default function CreateListingPage() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-12">
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4 mt-8 sm:mt-12">
                     <button
                       type="button"
                       onClick={() => setCurrentStep(3)}
@@ -1007,7 +1007,7 @@ export default function CreateListingPage() {
                       type="button"
                       onClick={handleSubmit}
                       disabled={submitting}
-                      className="w-full md:w-auto px-12 py-3 font-bold text-on-primary bg-primary rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/10 disabled:opacity-60 flex items-center justify-center gap-2"
+                      className="w-full md:w-auto px-12 py-3 font-bold text-on-primary bg-[#1D9E75] rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[#1D9E75]/10 disabled:opacity-60 flex items-center justify-center gap-2"
                     >
                       {submitting && <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>}
                       {submitting ? 'Submitting…' : 'Submit for Review'}
@@ -1017,7 +1017,7 @@ export default function CreateListingPage() {
               </div>
 
               {/* Upgrade banner */}
-              <div className="mt-8 p-4 bg-primary-fixed rounded-xl flex items-center gap-4 border border-primary/5">
+              <div className="hidden sm:flex mt-8 p-4 bg-primary-fixed rounded-xl items-center gap-4 border border-primary/5">
                 <div className="bg-white/40 p-2 rounded-lg">
                   <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                 </div>
