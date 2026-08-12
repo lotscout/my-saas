@@ -1,6 +1,6 @@
 // Values that indicate the uploader account or seed/test data — never display these.
 // Kept lowercase; matching is case-insensitive substring.
-const BAD_TOKENS = ['bobby oliver', 'seed', 'sample', '@lotscout.com', 'test'];
+const BAD_TOKENS = ['bobby oliver', 'lotscout seller', 'seed', 'sample', '@lotscout.com', 'test'];
 
 // True when a candidate name is empty or looks like an uploader / seed / test value.
 export function isBadName(value: string | null | undefined): boolean {

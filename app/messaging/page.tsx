@@ -21,6 +21,7 @@ interface Participant {
 interface ListingContext {
   id: string;
   title: string | null;
+  owner_name?: string | null;
   street_address: string | null;
   county: string | null;
   state: string | null;
@@ -59,6 +60,24 @@ function participantName(p: Participant | null): string {
   if (p.full_name && !isBadName(p.full_name)) return p.full_name;
   if (p.email && !isBadName(p.email)) return p.email;
   return 'User';
+}
+
+function conversationDisplayName(conv: Conversation | null, currentUserId?: string | null): string {
+  if (!conv) return 'User';
+  // For listing conversations, the listing owner is the seller identity users
+  // expect to see. This prevents shared/import/admin accounts like Bobby or
+  // "LotScout Seller" from leaking into the inbox label.
+  const currentUserIsBuyer = !!currentUserId && conv.buyer_id === currentUserId;
+  if (currentUserIsBuyer && conv.listing?.owner_name && !isBadName(conv.listing.owner_name)) return conv.listing.owner_name;
+  return participantName(conv.other_participant);
+}
+
+function conversationInitials(conv: Conversation | null, currentUserId?: string | null): string {
+  const display = conversationDisplayName(conv, currentUserId);
+  if (display && display !== 'User') {
+    return display.split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
+  }
+  return initials(conv?.other_participant ?? null);
 }
 
 function initials(p: Participant | null): string {
@@ -252,7 +271,7 @@ export default function MessagingPage() {
   const filteredConvs = conversations.filter(conv => {
     if (!searchQuery) return true;
     const other = getOtherParticipant(conv);
-    const name = participantName(other).toLowerCase();
+    const name = conversationDisplayName(conv, currentUserId).toLowerCase();
     const preview = (conv.last_message_preview ?? '').toLowerCase();
     const subject = (conv.subject ?? '').toLowerCase();
     const q = searchQuery.toLowerCase();
@@ -370,11 +389,11 @@ export default function MessagingPage() {
                       >
                         <div className="flex items-start gap-3">
                           <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shrink-0">
-                            {initials(other)}
+                            {conversationInitials(conv, currentUserId)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start mb-0.5">
-                              <span className="font-bold text-sm text-primary truncate">{participantName(other)}</span>
+                              <span className="font-bold text-sm text-primary truncate">{conversationDisplayName(conv, currentUserId)}</span>
                               {conv.last_message_at && (
                                 <span className="text-[10px] text-secondary shrink-0 ml-2">{relativeTime(conv.last_message_at)}</span>
                               )}
@@ -421,11 +440,11 @@ export default function MessagingPage() {
                         <span className="material-symbols-outlined text-base">arrow_back</span>
                       </button>
                       <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shrink-0">
-                        {initials(otherParticipant)}
+                        {conversationInitials(selectedConv, currentUserId)}
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-headline font-extrabold text-primary text-sm leading-tight">
-                          {participantName(otherParticipant)}
+                          {conversationDisplayName(selectedConv, currentUserId)}
                         </h3>
                         {selectedConv.listing_id && (() => {
                           const line = listingPropertyLine(selectedConv.listing);
@@ -470,7 +489,7 @@ export default function MessagingPage() {
                             <div className={`flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : ''} max-w-[75%] ${isOwn ? 'ml-auto' : ''}`}>
                               {!isOwn && (
                                 <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold shrink-0 mb-1">
-                                  {initials(otherParticipant)}
+                                  {conversationInitials(selectedConv, currentUserId)}
                                 </div>
                               )}
                               <div className="flex flex-col gap-1">

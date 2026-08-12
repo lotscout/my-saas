@@ -236,9 +236,10 @@ export async function GET() {
       other_participant: otherProfile,
       listing: listing
         ? {
-            id: listing.id,
-            title: listing.title,
-            street_address: listing.street_address,
+          id: listing.id,
+          title: listing.title,
+          owner_name: listing.owner_name,
+          street_address: listing.street_address,
             county: listing.county,
             state: listing.state,
             lot_size_acres: listing.lot_size_acres,
