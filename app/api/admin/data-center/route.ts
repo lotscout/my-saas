@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { isAdminEmail } from '@/lib/admin';
+import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -35,10 +36,85 @@ function fullName(row: any) {
   return row?.full_name || [row?.first_name, row?.last_name].filter(Boolean).join(' ') || row?.email || 'Unknown';
 }
 
+function tierFromPrice(price: Stripe.Price | null | undefined) {
+  const productName = typeof price?.product === 'object' && price.product && !('deleted' in price.product)
+    ? price.product.name
+    : '';
+  const text = `${price?.nickname ?? ''} ${productName}`.toLowerCase();
+  if (text.includes('search')) return 'search_pro';
+  if (text.includes('exclusive')) return 'exclusive';
+  if (text.includes('priority')) return 'priority';
+  if (text.includes('standard')) return 'standard';
+  if (price?.unit_amount === 2000) return 'search_pro';
+  return 'paid';
+}
+
+async function getLiveStripeSubscriptions() {
+  if (!process.env.STRIPE_SECRET_KEY) return { rows: [] as any[], mrrCents: 0, ok: false };
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const rows: any[] = [];
+  let starting_after: string | undefined;
+
+  do {
+    const page = await stripe.subscriptions.list({
+      status: 'all',
+      limit: 100,
+      expand: ['data.customer'],
+      ...(starting_after ? { starting_after } : {}),
+    });
+
+    const active = page.data.filter((s) => ['active', 'trialing', 'past_due'].includes(s.status));
+    const enriched = await Promise.all(active.map(async (sub) => {
+      const item = sub.items.data[0];
+      let price = item?.price ?? null;
+      if (price?.id) {
+        try {
+          price = await stripe.prices.retrieve(price.id, { expand: ['product'] });
+        } catch {
+          // keep item price fallback
+        }
+      }
+      const customer = typeof sub.customer === 'object' && sub.customer && !('deleted' in sub.customer) ? sub.customer : null;
+      const interval = price?.recurring?.interval ?? 'month';
+      const intervalCount = price?.recurring?.interval_count ?? 1;
+      const amount = price?.unit_amount ?? 0;
+      const monthlyCents = interval === 'year' ? amount / (12 * intervalCount) : amount / intervalCount;
+      const product = typeof price?.product === 'object' && price.product && !('deleted' in price.product)
+        ? price.product.name
+        : null;
+      return {
+        id: sub.id,
+        source: 'stripe_live',
+        user: customer?.name || customer?.email || 'Stripe customer',
+        email: customer?.email ?? null,
+        tier: tierFromPrice(price),
+        status: sub.status,
+        amount: amount / 100,
+        interval,
+        mrr: Math.round(monthlyCents) / 100,
+        product,
+        price_id: price?.id ?? null,
+        customer_id: customer?.id ?? String(sub.customer),
+        period_end: new Date(((item as any)?.current_period_end ?? (sub as any).current_period_end ?? sub.start_date) * 1000).toISOString(),
+        cancel_at_period_end: !!sub.cancel_at_period_end,
+        updated_at: new Date(((sub as any).updated ?? sub.created) * 1000).toISOString(),
+      };
+    }));
+    rows.push(...enriched);
+    starting_after = page.has_more ? page.data[page.data.length - 1]?.id : undefined;
+  } while (starting_after);
+
+  return { rows, mrrCents: rows.reduce((sum, row) => sum + Math.round((row.mrr ?? 0) * 100), 0), ok: true };
+}
+
 export async function GET() {
   if (!(await checkIsAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
   const service = createServiceClient();
+  const stripeLive = await getLiveStripeSubscriptions().catch((error) => {
+    console.error('[data-center] Stripe live subscription lookup failed:', error);
+    return { rows: [] as any[], mrrCents: 0, ok: false };
+  });
   const now = Date.now();
   const dayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
   const weekAgo = new Date(now - 7 * 24 * 3600 * 1000).toISOString();
@@ -111,23 +187,29 @@ export async function GET() {
 
   const subscriptionRows = (subscriptions ?? []).map((s: any) => ({
     id: s.id,
+    source: 'supabase',
     user: fullName(profileMap.get(s.user_id)),
     email: profileMap.get(s.user_id)?.email ?? null,
     tier: s.tier,
     status: s.status,
+    amount: null,
+    interval: null,
+    mrr: null,
     price_id: s.stripe_price_id,
     period_end: s.current_period_end,
     cancel_at_period_end: !!s.cancel_at_period_end,
     updated_at: s.updated_at,
   }));
 
-  const monthlyCentsByTier: Record<string, number> = { standard: 12900, priority: 24900, exclusive: 59900, search_pro: 2000 };
   const revenue = {
-    activeSubscriptions: countValue(activeSubs),
+    activeSubscriptions: stripeLive.ok ? stripeLive.rows.length : countValue(activeSubs),
     canceledSubscriptions: countValue(canceledSubs),
-    estimatedMonthlyRecurring: moneyFromCents(subscriptionRows
-      .filter((s) => ['active', 'trialing'].includes(s.status))
-      .reduce((sum, s) => sum + (monthlyCentsByTier[s.tier] ?? 0), 0)),
+    estimatedMonthlyRecurring: stripeLive.ok
+      ? moneyFromCents(stripeLive.mrrCents)
+      : moneyFromCents(subscriptionRows
+          .filter((s) => ['active', 'trialing'].includes(s.status))
+          .reduce((sum, s) => sum + Math.round((s.mrr ?? 0) * 100), 0)),
+    source: stripeLive.ok ? 'stripe_live' : 'supabase_cache',
   };
 
   const tableHealthSource = [
@@ -149,7 +231,7 @@ export async function GET() {
     },
     sections: {
       users: (users ?? []).map((u: any) => ({ id: u.id, name: fullName(u), email: u.email, company: u.company_name, role: u.role, tier: u.subscription_tier, search: !!u.has_search_pro, admin: !!u.is_admin, test: !!u.is_test_profile, location: [u.county, u.state].filter(Boolean).join(', '), source: u.signup_source, created_at: u.created_at })),
-      subscriptions: subscriptionRows,
+      subscriptions: [...stripeLive.rows, ...subscriptionRows],
       listings: (listings ?? []).map((l: any) => ({ id: l.id, title: l.title || 'Untitled', seller: l.owner_name || fullName(profileMap.get(l.user_id)), status: l.status, location: [l.city, l.county, l.state].filter(Boolean).join(', '), price: l.asking_price, acres: l.lot_size_acres, promoted: !!l.promoted, views: l.view_count ?? 0, created_at: l.created_at })),
       buyerRequests: (buyerRequests ?? []).map((b: any) => ({ id: b.id, buyer: b.display_name || b.display_company || fullName(profileMap.get(b.user_id)), status: b.status, location: [b.target_city, b.target_county, b.target_state || b.state].filter(Boolean).join(', '), budget: [b.budget_min, b.budget_max], timeline: b.timeline, views: b.view_count ?? 0, created_at: b.created_at })),
       messages: (messages ?? []).map((m: any) => ({ id: m.id, sender: fullName(profileMap.get(m.sender_id)), conversation_id: m.conversation_id, preview: short(m.body, 120), read: !!m.is_read, created_at: m.created_at })),
