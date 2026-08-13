@@ -1,26 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
-import { isAdminEmail } from '@/lib/admin';
+import { getAdminUser } from '@/lib/admin-server';
 
 export const dynamic = 'force-dynamic';
-
-async function getAdminUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  if (isAdminEmail(user.email)) return user;
-  const service = createServiceClient();
-  const { data } = await service.from('profiles').select('is_admin').eq('id', user.id).single();
-  return data?.is_admin === true ? user : null;
-}
 
 // POST /api/admin/messages/send  { conversation_id, body }
 // Inserts an admin/support reply into the conversation's message thread so BOTH
 // participants see it. The message is attributed to the signed-in admin, whose id is
 // neither the buyer nor the seller — that is how the thread view labels it "LotScout Support".
 export async function POST(req: NextRequest) {
-  const admin = await getAdminUser();
+  const admin = await getAdminUser(req);
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
   const { conversation_id, body } = (await req.json()) as { conversation_id?: string; body?: string };

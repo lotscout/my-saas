@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -110,10 +111,22 @@ export default function AdminMessagesPage() {
   const [sendMsg, setSendMsg]             = useState<{ text: string; ok: boolean } | null>(null);
   const threadBottomRef = useRef<HTMLDivElement>(null);
 
+  async function adminFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    return fetch(input, {
+      ...init,
+      headers: {
+        ...(init.headers ?? {}),
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+      },
+    });
+  }
+
   // ── Load conversation list (source of truth = messages table) ──────────────
   const loadConversations = useCallback(async () => {
     setLoading(true);
-    const r = await fetch('/api/admin/messages/conversations', { cache: 'no-store' });
+    const r = await adminFetch('/api/admin/messages/conversations', { cache: 'no-store' });
     const d = await r.json();
     setConversations(d.conversations ?? []);
     setTotals(d.totals ?? null);
@@ -126,7 +139,7 @@ export default function AdminMessagesPage() {
   const loadThread = useCallback(async (id: string) => {
     setThreadLoading(true);
     setThread([]);
-    const r = await fetch(`/api/admin/messages/thread/${id}`, { cache: 'no-store' });
+    const r = await adminFetch(`/api/admin/messages/thread/${id}`, { cache: 'no-store' });
     const d = await r.json();
     setThread(d.messages ?? []);
     setThreadLoading(false);
@@ -169,7 +182,7 @@ export default function AdminMessagesPage() {
     if (!selectedId || !replyText.trim()) return;
     setSending(true);
     setSendMsg(null);
-    const r = await fetch('/api/admin/messages/send', {
+    const r = await adminFetch('/api/admin/messages/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ conversation_id: selectedId, body: replyText }),

@@ -1,22 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
-import { isAdminEmail, ADMIN_EMAILS } from '@/lib/admin';
+import { ADMIN_EMAILS, isAdminEmail } from '@/lib/admin';
+import { checkIsAdmin } from '@/lib/admin-server';
 import { getBuyerName } from '@/lib/getBuyerName';
 import { getSellerName } from '@/lib/getSellerName';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-async function checkIsAdmin(): Promise<boolean> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
-  if (isAdminEmail(user.email)) return true;
-  const service = createServiceClient();
-  const { data } = await service.from('profiles').select('*').eq('id', user.id).single();
-  return data?.is_admin === true;
-}
 
 type ProfileRow = {
   id: string;
@@ -46,7 +36,7 @@ function sellerDisplay(p: ProfileRow): string {
 
 // GET /api/admin/messages/thread/[id] → full ordered thread for one conversation.
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await checkIsAdmin())) {
+  if (!(await checkIsAdmin(_req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
