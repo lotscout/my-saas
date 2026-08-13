@@ -46,6 +46,7 @@ export async function PATCH(
 
   const updates: Record<string, unknown> = { status };
   if (report_url) updates.report_url = report_url;
+  if (status === 'completed') updates.completed_at = new Date().toISOString();
 
   const { error: updateError } = await service
     .from('property_analysis_requests')

@@ -29,6 +29,7 @@ interface AnalysisRequest {
   status: string;
   report_url: string | null;
   submitted_at: string;
+  completed_at: string | null;
 }
 
 type AddrValidStatus = 'idle' | 'validating' | 'valid';
@@ -119,7 +120,7 @@ export default function PropertyAnalysisPage() {
     }
     const { data } = await supabase
       .from('property_analysis_requests')
-      .select('id, user_id, input_type, street_address, city, county, state, zip_code, apn, status, report_url, submitted_at')
+      .select('id, user_id, input_type, street_address, city, county, state, zip_code, apn, status, report_url, submitted_at, completed_at')
       .eq('user_id', user.id)
       .order('submitted_at', { ascending: false });
     setRequests(data ?? []);
@@ -247,8 +248,7 @@ export default function PropertyAnalysisPage() {
   }
 
   function completionDate(req: AnalysisRequest) {
-    // Until a completion timestamp column exists, show the request date for completed reports.
-    return formatNumericDate(req.submitted_at);
+    return formatNumericDate(req.completed_at || req.submitted_at);
   }
 
   function requestLabel(req: AnalysisRequest) {
@@ -263,10 +263,14 @@ export default function PropertyAnalysisPage() {
     const styles: Record<string, string> = {
       in_progress: 'bg-blue-50 text-blue-700 border-blue-200',
       complete: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      rejected: 'bg-red-50 text-red-700 border-red-200',
     };
     const labels: Record<string, string> = {
       in_progress: 'In Progress',
       complete: 'Complete',
+      completed: 'Complete',
+      rejected: 'Rejected',
     };
     return (
       <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${styles[status] ?? 'bg-surface-container text-secondary border-outline-variant/30'}`}>
@@ -786,9 +790,32 @@ export default function PropertyAnalysisPage() {
               ) : (
                 <div className="bg-white border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden divide-y divide-outline-variant/10">
                   {requests.map(req => (
-                    <div key={req.id} className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3">
-                      <p className="min-w-0 flex-1 text-sm font-bold text-on-surface truncate whitespace-nowrap">{requestLabel(req)}</p>
-                      <p className="shrink-0 text-xs font-semibold text-secondary whitespace-nowrap">{completionDate(req)}</p>
+                    <div key={req.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <p className="min-w-0 text-sm font-bold text-on-surface truncate whitespace-nowrap">{requestLabel(req)}</p>
+                          {statusBadge(req.status)}
+                        </div>
+                        <p className="mt-1 text-xs font-semibold text-secondary whitespace-nowrap">
+                          {req.report_url ? 'Report ready' : 'Submitted'} · {completionDate(req)}
+                        </p>
+                      </div>
+                      {req.report_url ? (
+                        <a
+                          href={req.report_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#1D9E75] px-4 py-2 text-xs font-extrabold text-white hover:bg-[#14795A] transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">picture_as_pdf</span>
+                          View PDF
+                        </a>
+                      ) : (
+                        <span className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-xl bg-surface-container-low px-4 py-2 text-xs font-bold text-secondary border border-outline-variant/20">
+                          <span className="material-symbols-outlined text-base">schedule</span>
+                          Awaiting PDF
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>

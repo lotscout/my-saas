@@ -43,7 +43,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('property_analysis_requests')
-    .select('id, input_type, street_address, city, county, state, zip_code, apn, status, report_url, submitted_at')
+    .select('id, input_type, street_address, city, county, state, zip_code, apn, status, report_url, submitted_at, completed_at')
     .eq('user_id', user.id)
     .order('submitted_at', { ascending: false });
 
