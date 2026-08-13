@@ -17,6 +17,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { Resend } from 'resend';
 import { logEmail } from '@/lib/email-logger';
+import { sendAdminAlert } from '@/lib/admin-alerts';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -94,6 +95,48 @@ export async function POST(request: NextRequest) {
     .then(({ error: updErr }) => {
       if (updErr) console.warn('[api/messages] conversation preview update failed:', updErr);
     });
+
+  try {
+    const { data: senderProfile } = await service
+      .from('profiles')
+      .select('first_name, last_name, full_name, email, company_name')
+      .eq('id', user.id)
+      .single();
+
+    const { data: recipientProfile } = await service
+      .from('profiles')
+      .select('first_name, last_name, full_name, email, company_name')
+      .eq('id', recipientId)
+      .single();
+
+    const senderName = senderProfile?.full_name
+      || [senderProfile?.first_name, senderProfile?.last_name].filter(Boolean).join(' ')
+      || senderProfile?.company_name
+      || user.email
+      || 'Unknown User';
+    const recipientName = recipientProfile?.full_name
+      || [recipientProfile?.first_name, recipientProfile?.last_name].filter(Boolean).join(' ')
+      || recipientProfile?.company_name
+      || recipientProfile?.email
+      || 'Unknown recipient';
+
+    await sendAdminAlert({
+      subject: `New LotScout message from ${senderName}`,
+      title: 'New user message',
+      rows: [
+        ['From', `${senderName}${senderProfile?.email ? ` (${senderProfile.email})` : ''}`],
+        ['To', `${recipientName}${recipientProfile?.email ? ` (${recipientProfile.email})` : ''}`],
+        ['Message', trimmedBody],
+        ['Conversation ID', conversationId],
+      ],
+      ctaHref: '/admin/messages',
+      ctaLabel: 'Open Messages',
+      emailType: 'admin_new_message',
+      userId: user.id,
+    });
+  } catch (alertErr) {
+    console.error('[api/messages] admin alert failed:', alertErr);
+  }
 
   // Check if recipient is a test profile — triggers email + admin notification
   console.log('[api/messages] checking test profile for recipientId:', recipientId);

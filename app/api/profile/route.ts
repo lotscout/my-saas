@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
 import { syncResendContact } from '@/lib/resend-contacts';
+import { sendAdminAlert } from '@/lib/admin-alerts';
 
 export async function POST(request: NextRequest) {
   const {
@@ -73,6 +74,12 @@ export async function POST(request: NextRequest) {
   if (county !== undefined) payload.county = typeof county === 'string' ? county.trim() || null : null;
   if (contactVisible !== undefined) payload.contact_visible = contactVisible === true;
 
+  const { data: existingProfile } = await supabase
+    .from('profiles')
+    .select('id, created_at')
+    .eq('id', userId)
+    .maybeSingle();
+
   let { error } = await supabase.from('profiles').upsert(payload);
 
   if (error && /contact_visible/i.test(error.message)) {
@@ -89,6 +96,25 @@ export async function POST(request: NextRequest) {
     await syncResendContact({ email, firstName, lastName });
   } catch (resendErr) {
     console.error('Resend contact sync error:', resendErr);
+  }
+
+  if (!existingProfile) {
+    await sendAdminAlert({
+      subject: 'New LotScout signup',
+      title: 'New user signed up',
+      rows: [
+        ['Name', [firstName, lastName].filter(Boolean).join(' ').trim() || 'Not provided'],
+        ['Email', email],
+        ['Company', companyName],
+        ['Location', [county, state].filter(Boolean).join(', ')],
+        ['Source', signupSource || 'direct'],
+        ['Campaign', signupCampaign],
+      ],
+      ctaHref: '/admin/dashboard/data-center',
+      ctaLabel: 'View Data Center',
+      emailType: 'admin_new_signup',
+      userId,
+    });
   }
 
   return NextResponse.json({ ok: true });
