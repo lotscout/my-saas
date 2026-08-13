@@ -21,17 +21,19 @@ export async function POST(req: NextRequest) {
 
   const { data: conv } = await service
     .from('conversations')
-    .select('id')
+    .select('id, buyer_id, seller_id')
     .eq('id', conversation_id)
     .maybeSingle();
   if (!conv) return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
 
   const trimmed = body.trim();
+  const senderId = conv.seller_id || conv.buyer_id || admin.id;
 
-  // Only columns that exist on the production messages table.
+  // Attribute admin-entered support replies to the conversation participant so
+  // user-facing notifications show the real buyer/seller name, never "Admin User".
   const { data: inserted, error } = await service
     .from('messages')
-    .insert({ conversation_id, sender_id: admin.id, body: trimmed })
+    .insert({ conversation_id, sender_id: senderId, body: trimmed })
     .select('id, conversation_id, sender_id, body, is_read, created_at')
     .single();
 
@@ -54,9 +56,9 @@ export async function POST(req: NextRequest) {
       body: inserted.body,
       created_at: inserted.created_at,
       is_read: inserted.is_read ?? false,
-      role: 'admin',
-      is_admin: true,
-      sender_name: 'LotScout Support',
+      role: senderId === conv.seller_id ? 'seller' : senderId === conv.buyer_id ? 'buyer' : 'admin',
+      is_admin: false,
+      sender_name: 'Sent by LotScout',
     },
   });
 }

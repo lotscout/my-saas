@@ -43,27 +43,46 @@ export async function GET() {
   if (convIds.length) {
     const { data: msgData } = await supabase
       .from('messages')
-      .select('id, sender_id, created_at')
+      .select('id, conversation_id, sender_id, created_at')
       .in('conversation_id', convIds)
       .eq('is_read', false)
       .neq('sender_id', user.id)
       .order('created_at', { ascending: false })
       .limit(15);
     const msgs = (msgData ?? []) as any[];
-    const senderIds = [...new Set(msgs.map(m => m.sender_id as string))];
+    const msgConvIds = [...new Set(msgs.map(m => m.conversation_id as string).filter(Boolean))];
+    const { data: msgConvs } = msgConvIds.length
+      ? await supabase.from('conversations').select('id, buyer_id, seller_id').in('id', msgConvIds)
+      : { data: [] };
+    const convById = new Map((msgConvs ?? []).map((c: any) => [c.id, c]));
+
+    const senderIds = [...new Set([
+      ...msgs.map(m => m.sender_id as string),
+      ...(msgConvs ?? []).flatMap((c: any) => [c.buyer_id, c.seller_id]),
+    ].filter(Boolean))];
     const namesById: Record<string, string> = {};
+    const adminById: Record<string, boolean> = {};
     if (senderIds.length) {
       const { data: senderData } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, company_name')
+        .select('id, first_name, last_name, company_name, is_admin')
         .in('id', senderIds);
-      for (const s of (senderData ?? []) as any[]) namesById[s.id as string] = displayName(s);
+      for (const s of (senderData ?? []) as any[]) {
+        namesById[s.id as string] = displayName(s);
+        adminById[s.id as string] = !!s.is_admin;
+      }
     }
     for (const m of msgs) {
+      const conv = convById.get(m.conversation_id as string) as any;
+      const senderId = m.sender_id as string;
+      let displaySenderId = senderId;
+      if (adminById[senderId] && conv) {
+        displaySenderId = user.id === conv.buyer_id ? conv.seller_id : conv.buyer_id;
+      }
       items.push({
         id: `msg-${m.id}`,
         type: 'message',
-        text: `New message from ${namesById[m.sender_id as string] ?? 'a user'}`,
+        text: `New message from ${namesById[displaySenderId] ?? 'a user'}`,
         href: '/messaging',
         created_at: m.created_at as string,
       });
