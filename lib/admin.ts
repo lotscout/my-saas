@@ -14,8 +14,9 @@ export const ADMIN_EMAILS = [
   'bobby@lotscout.com',
   'bobby.r.oliver@gmail.com',
   'support@lotscout.com',
+  'admin@lotscout.com',
 ];
 
 export function isAdminEmail(email: string | null | undefined): boolean {
-  return ADMIN_EMAILS.includes(email ?? '');
+  return ADMIN_EMAILS.includes((email ?? '').trim().toLowerCase());
 }

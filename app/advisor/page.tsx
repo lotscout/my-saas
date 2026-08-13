@@ -128,6 +128,9 @@ export default function AdvisorPage() {
   const [savedReports, setSavedReports] = useState<{ title: string; content: string }[]>([]);
   const [mobileSidebar, setMobileSidebar] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadLoading, setLeadLoading] = useState(false);
+  const [leadError, setLeadError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -341,6 +344,29 @@ export default function AdvisorPage() {
     alert('Saving reports requires a LotScout plan. Sign up free, then upgrade to any plan to save market reports.');
   }
 
+  async function captureScoutLead(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLeadError(null);
+    setLeadLoading(true);
+    try {
+      const res = await fetch('/api/scout/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: leadEmail, guestQuestions: guestCount || GUEST_LIMIT }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setLeadError(data.error || 'Could not save email. Please try again.');
+        return;
+      }
+      window.location.href = data.redirect || `/sign-up?email=${encodeURIComponent(leadEmail.trim())}&source=scout`;
+    } catch {
+      setLeadError('Could not save email. Please try again.');
+    } finally {
+      setLeadLoading(false);
+    }
+  }
+
   async function downloadPdf(r: { title: string; content: string }) {
     try {
       const res = await fetch('/api/advisor/pdf', {
@@ -383,10 +409,22 @@ export default function AdvisorPage() {
       {limitHit === 'guest' ? (
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached the guest limit.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Sign up free to continue.</p>
-          <a href="/sign-up" className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
-            Sign Up Free
-          </a>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Enter your email to keep using Scout, then create a password to save your searches.</p>
+          <form onSubmit={captureScoutLead} className="space-y-3">
+            <input
+              type="email"
+              value={leadEmail}
+              onChange={e => setLeadEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
+              className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/25"
+              style={{ color: INK }}
+            />
+            {leadError && <p className="text-sm text-red-600">{leadError}</p>}
+            <button type="submit" disabled={leadLoading} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: GREEN }}>
+              {leadLoading ? 'Saving…' : 'Continue with Scout'}
+            </button>
+          </form>
         </>
       ) : (
         <>

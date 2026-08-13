@@ -1,13 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [prefilledEmail, setPrefilledEmail] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get('email')?.trim() ?? '';
+    if (email) setPrefilledEmail(email);
+    if (params.get('source') === 'scout') {
+      localStorage.setItem('utm_source', 'scout');
+      localStorage.setItem('utm_medium', 'email_capture');
+      localStorage.setItem('utm_campaign', 'scout_limit');
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -162,6 +174,8 @@ export default function SignUpPage() {
                 id="email"
                 name="email"
                 type="email"
+                value={prefilledEmail}
+                onChange={e => setPrefilledEmail(e.target.value)}
                 autoComplete="email"
                 placeholder="jane@example.com"
                 required
