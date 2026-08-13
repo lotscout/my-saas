@@ -17,6 +17,7 @@ const SECTION_META: Record<string, { label: string; icon: string; desc: string }
   buyerRequests: { label: 'Buyer requests', icon: 'person_search', desc: 'Demand side activity, budgets, timelines, views.' },
   messages: { label: 'Messages', icon: 'forum', desc: 'Latest conversations and unread/read status.' },
   scout: { label: 'LotScout Search / Scout', icon: 'smart_toy', desc: 'Recent AI questions and usage.' },
+  scoutLeads: { label: 'Scout leads', icon: 'mark_email_unread', desc: 'Emails captured after the guest Scout limit.' },
   analyses: { label: 'Property analysis', icon: 'analytics', desc: 'Submitted reports and completion status.' },
   marketReports: { label: 'Market reports', icon: 'summarize', desc: 'Market report requests, status, payment/frequency.' },
   emails: { label: 'Emails & webhook logs', icon: 'mail', desc: 'Resend sends, internal webhook audit logs, status.' },
@@ -24,7 +25,7 @@ const SECTION_META: Record<string, { label: string; icon: string; desc: string }
   tableHealth: { label: 'Supabase table health', icon: 'database', desc: 'Live counts and API reachability per table.' },
 };
 
-const SECTION_ORDER = ['users', 'subscriptions', 'listings', 'buyerRequests', 'messages', 'scout', 'analyses', 'marketReports', 'emails', 'searchUsage', 'tableHealth'];
+const SECTION_ORDER = ['users', 'subscriptions', 'listings', 'buyerRequests', 'messages', 'scout', 'scoutLeads', 'analyses', 'marketReports', 'emails', 'searchUsage', 'tableHealth'];
 
 function fmtDate(value: string | null | undefined) {
   if (!value) return '—';
@@ -188,8 +189,8 @@ export default function AdminDataCenterPage() {
       {error && <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
       <section className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-6">
-        <Stat label="Users" value={loading ? '—' : k?.users?.total?.toLocaleString() ?? '—'} sub={`${k?.users?.new7d ?? 0} new 7d`} icon="group" />
-        <Stat label="MRR Estimate" value={loading ? '—' : money(k?.revenue?.estimatedMonthlyRecurring)} sub={`${k?.revenue?.activeSubscriptions ?? 0} active subs`} icon="payments" />
+        <Stat label="Users" value={loading ? '—' : k?.users?.total?.toLocaleString() ?? '—'} sub={`${k?.users?.new7d ?? 0} new 7d · ${k?.users?.source ?? 'source'}`} icon="group" />
+        <Stat label="MRR" value={loading ? '—' : money(k?.revenue?.estimatedMonthlyRecurring)} sub={`${k?.revenue?.activeSubscriptions ?? 0} active subs · ${k?.revenue?.source ?? 'source'}`} icon="payments" />
         <Stat label="Listings" value={loading ? '—' : k?.marketplace?.listings?.toLocaleString() ?? '—'} sub={`${k?.marketplace?.active ?? 0} active · ${k?.marketplace?.pending ?? 0} pending`} icon="home_work" />
         <Stat label="Buyer Requests" value={loading ? '—' : k?.buyers?.total?.toLocaleString() ?? '—'} sub={`${k?.buyers?.active ?? 0} active`} icon="person_search" />
         <Stat label="Scout Questions" value={loading ? '—' : k?.scout?.questions?.toLocaleString() ?? '—'} sub={`${k?.scout?.questions7d ?? 0} in 7d`} icon="smart_toy" />
@@ -200,7 +201,7 @@ export default function AdminDataCenterPage() {
         <Card title="Revenue" icon="payments">
           <div className="grid grid-cols-3 gap-3 text-center">
             <div><p className="text-xl font-black text-on-surface">{money(k?.revenue?.estimatedMonthlyRecurring)}</p><p className="text-xs text-on-surface/45">est. monthly</p></div>
-            <div><p className="text-xl font-black text-on-surface">{k?.users?.paidProfiles ?? 0}</p><p className="text-xs text-on-surface/45">paid plans</p></div>
+            <div><p className="text-xl font-black text-on-surface">{k?.users?.paidProfiles ?? 0}</p><p className="text-xs text-on-surface/45">paid customers</p></div>
             <div><p className="text-xl font-black text-on-surface">{k?.users?.searchOnly ?? 0}</p><p className="text-xs text-on-surface/45">Search add-ons</p></div>
           </div>
         </Card>

@@ -107,6 +107,20 @@ async function getLiveStripeSubscriptions() {
   return { rows, mrrCents: rows.reduce((sum, row) => sum + Math.round((row.mrr ?? 0) * 100), 0), ok: true };
 }
 
+async function getAuthUsers(service: ReturnType<typeof createServiceClient>) {
+  const users: any[] = [];
+  let page = 1;
+  const perPage = 1000;
+  while (true) {
+    const { data, error } = await service.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+    users.push(...data.users);
+    if (data.users.length < perPage) break;
+    page += 1;
+  }
+  return users;
+}
+
 export async function GET() {
   if (!(await checkIsAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
@@ -115,6 +129,13 @@ export async function GET() {
     console.error('[data-center] Stripe live subscription lookup failed:', error);
     return { rows: [] as any[], mrrCents: 0, ok: false };
   });
+  const authLive = await getAuthUsers(service).then(
+    (rows) => ({ rows, ok: true }),
+    (error) => {
+      console.error('[data-center] Supabase Auth user lookup failed:', error);
+      return { rows: [] as any[], ok: false };
+    }
+  );
   const now = Date.now();
   const dayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
   const weekAgo = new Date(now - 7 * 24 * 3600 * 1000).toISOString();
@@ -126,7 +147,7 @@ export async function GET() {
     listingsTotal, activeListings, pendingListings, deletedListings, soldListings, promotedListings,
     buyerTotal, activeBuyers, pendingBuyers,
     messagesTotal, conversationsTotal, unreadMessages,
-    scoutQuestions, scout7d, scoutToday, searchUsageRows,
+    scoutQuestions, scout7d, scoutToday, searchUsageRows, scoutLeadsTotal,
     analysisTotal, pendingAnalysis, marketReportsTotal, emailsTotal, emails7d,
   ] = await Promise.all([
     service.from('profiles').select('*', { count: 'exact', head: true }),
@@ -153,6 +174,7 @@ export async function GET() {
     service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user').gte('created_at', weekAgo),
     service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user').gte('created_at', dayAgo),
     service.from('search_usage').select('user_id, usage_date, count').order('usage_date', { ascending: false }).limit(100),
+    service.from('scout_leads').select('*', { count: 'exact', head: true }),
     service.from('property_analysis_requests').select('*', { count: 'exact', head: true }),
     service.from('property_analysis_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     service.from('market_report_requests').select('*', { count: 'exact', head: true }),
@@ -162,7 +184,7 @@ export async function GET() {
 
   const [
     { data: users }, { data: subscriptions }, { data: listings }, { data: buyerRequests },
-    { data: messages }, { data: scout }, { data: analyses }, { data: marketReports }, { data: emails },
+    { data: messages }, { data: scout }, { data: scoutLeads }, { data: analyses }, { data: marketReports }, { data: emails },
   ] = await Promise.all([
     service.from('profiles').select('id,email,full_name,first_name,last_name,company_name,role,subscription_tier,has_search_pro,is_admin,is_test_profile,state,county,signup_source,created_at,updated_at').order('created_at', { ascending: false }).limit(25),
     service.from('subscriptions').select('id,user_id,tier,status,stripe_price_id,current_period_start,current_period_end,cancel_at_period_end,cancelled_at,created_at,updated_at').order('updated_at', { ascending: false }).limit(25),
@@ -170,6 +192,7 @@ export async function GET() {
     service.from('buyer_requests').select('id,user_id,display_name,display_company,status,target_city,target_county,target_state,state,budget_min,budget_max,timeline,view_count,created_at').order('created_at', { ascending: false }).limit(25),
     service.from('messages').select('id,conversation_id,sender_id,body,is_read,created_at').order('created_at', { ascending: false }).limit(25),
     service.from('advisor_conversations').select('id,user_id,role,content,created_at').eq('role', 'user').order('created_at', { ascending: false }).limit(25),
+    service.from('scout_leads').select('id,email,source,status,guest_questions,created_at,updated_at').order('created_at', { ascending: false }).limit(25),
     service.from('property_analysis_requests').select('id,user_id,user_name,user_email,street_address,city,county,state,status,submitted_at,completed_at').order('submitted_at', { ascending: false }).limit(20),
     service.from('market_report_requests').select('id,email,first_name,last_name,county,state,status,is_paid,report_frequency,created_at').order('created_at', { ascending: false }).limit(20),
     service.from('email_logs').select('id,user_id,to_email,from_email,subject,email_type,status,created_at').order('created_at', { ascending: false }).limit(30),
@@ -184,6 +207,39 @@ export async function GET() {
     ? await service.from('profiles').select('id,email,full_name,first_name,last_name,company_name').in('id', [...profileIds])
     : { data: [] };
   const profileMap = new Map((relatedProfiles ?? []).map((p: any) => [p.id, p]));
+
+  const authUserIds = authLive.rows.map((u: any) => u.id).filter(Boolean);
+  const { data: authProfiles } = authUserIds.length
+    ? await service.from('profiles').select('id,email,full_name,first_name,last_name,company_name,role,subscription_tier,has_search_pro,is_admin,is_test_profile,state,county,signup_source,created_at,updated_at').in('id', authUserIds)
+    : { data: [] };
+  const authProfileMap = new Map((authProfiles ?? []).map((p: any) => [p.id, p]));
+  const authCreated = (since: string) => authLive.rows.filter((u: any) => new Date(u.created_at).getTime() >= new Date(since).getTime()).length;
+  const userRows = authLive.ok
+    ? [...authLive.rows]
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 25)
+        .map((u: any) => {
+          const p = authProfileMap.get(u.id) as any;
+          const name = p ? fullName(p) : (u.user_metadata?.full_name || u.email || 'Unknown');
+          return {
+            id: u.id,
+            source: 'supabase_auth',
+            name,
+            email: u.email,
+            company: p?.company_name,
+            role: p?.role,
+            tier: p?.subscription_tier,
+            search: !!p?.has_search_pro,
+            admin: !!p?.is_admin,
+            test: !!p?.is_test_profile,
+            confirmed: !!u.email_confirmed_at,
+            location: [p?.county, p?.state].filter(Boolean).join(', '),
+            signup_source: p?.signup_source,
+            created_at: u.created_at,
+            profile_created_at: p?.created_at ?? null,
+          };
+        })
+    : (users ?? []).map((u: any) => ({ id: u.id, source: 'profiles_fallback', name: fullName(u), email: u.email, company: u.company_name, role: u.role, tier: u.subscription_tier, search: !!u.has_search_pro, admin: !!u.is_admin, test: !!u.is_test_profile, location: [u.county, u.state].filter(Boolean).join(', '), signup_source: u.signup_source, created_at: u.created_at }));
 
   const subscriptionRows = (subscriptions ?? []).map((s: any) => ({
     id: s.id,
@@ -215,32 +271,45 @@ export async function GET() {
   const tableHealthSource = [
     ['profiles', usersTotal], ['subscriptions', activeSubs], ['listings', listingsTotal], ['buyer_requests', buyerTotal],
     ['messages', messagesTotal], ['conversations', conversationsTotal], ['advisor_conversations', scoutQuestions],
-    ['search_usage', searchUsageRows], ['property_analysis_requests', analysisTotal], ['market_report_requests', marketReportsTotal], ['email_logs', emailsTotal],
+    ['search_usage', searchUsageRows], ['scout_leads', scoutLeadsTotal], ['property_analysis_requests', analysisTotal], ['market_report_requests', marketReportsTotal], ['email_logs', emailsTotal],
   ] as const;
 
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
     kpis: {
-      users: { total: countValue(usersTotal), new24h: countValue(users24h), new7d: countValue(users7d), new30d: countValue(users30d), paidProfiles: countValue(paidProfiles), searchOnly: countValue(searchProfiles) },
+      users: {
+        total: authLive.ok ? authLive.rows.length : countValue(usersTotal),
+        new24h: authLive.ok ? authCreated(dayAgo) : countValue(users24h),
+        new7d: authLive.ok ? authCreated(weekAgo) : countValue(users7d),
+        new30d: authLive.ok ? authCreated(monthAgo) : countValue(users30d),
+        paidProfiles: stripeLive.ok ? new Set(stripeLive.rows.map((s) => s.email || s.customer_id)).size : countValue(paidProfiles),
+        searchOnly: countValue(searchProfiles),
+        source: authLive.ok ? 'supabase_auth' : 'profiles_fallback',
+        profileRows: countValue(usersTotal),
+      },
       revenue,
       marketplace: { listings: countValue(listingsTotal), active: countValue(activeListings), pending: countValue(pendingListings), deleted: countValue(deletedListings), sold: countValue(soldListings), promoted: countValue(promotedListings) },
       buyers: { total: countValue(buyerTotal), active: countValue(activeBuyers), pending: countValue(pendingBuyers) },
       messaging: { messages: countValue(messagesTotal), conversations: countValue(conversationsTotal), unread: countValue(unreadMessages) },
-      scout: { questions: countValue(scoutQuestions), questions7d: countValue(scout7d), questions24h: countValue(scoutToday), limitedUsersTracked: searchUsageRows.error ? null : (searchUsageRows.data ?? []).length },
+      scout: { questions: countValue(scoutQuestions), questions7d: countValue(scout7d), questions24h: countValue(scoutToday), leads: countValue(scoutLeadsTotal), limitedUsersTracked: searchUsageRows.error ? null : (searchUsageRows.data ?? []).length },
       operations: { propertyAnalysis: countValue(analysisTotal), pendingAnalysis: countValue(pendingAnalysis), marketReports: countValue(marketReportsTotal), emails: countValue(emailsTotal), emails7d: countValue(emails7d) },
     },
     sections: {
-      users: (users ?? []).map((u: any) => ({ id: u.id, name: fullName(u), email: u.email, company: u.company_name, role: u.role, tier: u.subscription_tier, search: !!u.has_search_pro, admin: !!u.is_admin, test: !!u.is_test_profile, location: [u.county, u.state].filter(Boolean).join(', '), source: u.signup_source, created_at: u.created_at })),
+      users: userRows,
       subscriptions: [...stripeLive.rows, ...subscriptionRows],
       listings: (listings ?? []).map((l: any) => ({ id: l.id, title: l.title || 'Untitled', seller: l.owner_name || fullName(profileMap.get(l.user_id)), status: l.status, location: [l.city, l.county, l.state].filter(Boolean).join(', '), price: l.asking_price, acres: l.lot_size_acres, promoted: !!l.promoted, views: l.view_count ?? 0, created_at: l.created_at })),
       buyerRequests: (buyerRequests ?? []).map((b: any) => ({ id: b.id, buyer: b.display_name || b.display_company || fullName(profileMap.get(b.user_id)), status: b.status, location: [b.target_city, b.target_county, b.target_state || b.state].filter(Boolean).join(', '), budget: [b.budget_min, b.budget_max], timeline: b.timeline, views: b.view_count ?? 0, created_at: b.created_at })),
       messages: (messages ?? []).map((m: any) => ({ id: m.id, sender: fullName(profileMap.get(m.sender_id)), conversation_id: m.conversation_id, preview: short(m.body, 120), read: !!m.is_read, created_at: m.created_at })),
       scout: (scout ?? []).map((s: any) => ({ id: s.id, user: fullName(profileMap.get(s.user_id)), email: profileMap.get(s.user_id)?.email ?? null, question: short(s.content, 160), created_at: s.created_at })),
+      scoutLeads: (scoutLeads ?? []).map((s: any) => ({ id: s.id, email: s.email, source: s.source, status: s.status, guest_questions: s.guest_questions, created_at: s.created_at, updated_at: s.updated_at })),
       analyses: (analyses ?? []).map((a: any) => ({ id: a.id, user: a.user_name || fullName(profileMap.get(a.user_id)), email: a.user_email || profileMap.get(a.user_id)?.email || null, location: [a.street_address, a.city, a.county, a.state].filter(Boolean).join(', '), status: a.status, created_at: a.submitted_at, completed_at: a.completed_at })),
       marketReports: (marketReports ?? []).map((m: any) => ({ id: m.id, name: [m.first_name, m.last_name].filter(Boolean).join(' ') || m.email, email: m.email, location: [m.county, m.state].filter(Boolean).join(', '), status: m.status, paid: !!m.is_paid, frequency: m.report_frequency, created_at: m.created_at })),
       emails: (emails ?? []).map((e: any) => ({ id: e.id, to: e.to_email, subject: e.subject, type: e.email_type, status: e.status, created_at: e.created_at })),
       searchUsage: (searchUsageRows.data ?? []).map((u: any) => ({ user_id: u.user_id, date: u.usage_date, count: u.count })),
-      tableHealth: tableHealthSource.map(([name, result]) => ({ table: name, count: result.error ? null : result.count, ok: !result.error, error: result.error?.message ?? null })),
+      tableHealth: [
+        { table: 'auth.users', count: authLive.ok ? authLive.rows.length : null, ok: authLive.ok, source: 'supabase_auth', error: authLive.ok ? null : 'Auth admin lookup failed' },
+        ...tableHealthSource.map(([name, result]) => ({ table: name, count: result.error ? null : result.count, ok: !result.error, source: 'supabase_table', error: result.error?.message ?? null })),
+      ],
     },
   });
 }
