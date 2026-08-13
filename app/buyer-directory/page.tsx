@@ -581,7 +581,7 @@ export default function BuyerDirectoryPage() {
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
 
           <PageHeader
-            title="Buyer Directory"
+            title={<>Buyer <span className="text-[#1D9E75]">Directory</span></>}
             description="Search active land buyers and review their acquisition criteria."
             actions={(
               <PrimaryLink href="/create-buyer-request" className="rounded-xl px-3 py-2 text-xs sm:px-5 sm:py-3 sm:text-sm md:shrink-0 self-start">
