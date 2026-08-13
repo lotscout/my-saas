@@ -64,7 +64,15 @@ export async function POST(request: NextRequest) {
     .eq('id', user.id)
     .single();
 
+  const { data: activeSubscription } = await supabase
+    .from('subscriptions')
+    .select('tier')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .maybeSingle();
+
   const isAdmin = profile?.is_admin === true;
+  const effectiveTier = activeSubscription?.tier ?? profile?.subscription_tier ?? '';
 
   // Admins bypass all limits
   if (!isAdmin) {
@@ -80,7 +88,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Enforce monthly limits
       const TIER_LIMITS: Record<string, number | null> = { standard: 5, priority: 15, exclusive: null };
-      const tierKey = profile?.subscription_tier ?? '';
+      const tierKey = effectiveTier;
       const monthlyLimit = TIER_LIMITS[tierKey] ?? 0;
 
       if (monthlyLimit !== null) {
@@ -154,7 +162,7 @@ export async function POST(request: NextRequest) {
       ? `${body.streetAddress}, ${body.city}, ${body.state} ${body.zipCode}${body.county ? ` (${body.county} County)` : ''}`
       : `APN ${body.apn} · ${body.county} County, ${body.state}`;
 
-    const isFastTier = profile?.subscription_tier === 'exclusive';
+    const isFastTier = effectiveTier === 'exclusive';
     const turnaround = isFastTier
       ? 'Your report will be ready within <strong>15 minutes</strong>.'
       : 'Your report will be ready within <strong>24 hours</strong>.';
@@ -205,6 +213,6 @@ export async function POST(request: NextRequest) {
     console.error('Email error:', emailErr);
   }
 
-  const isFastTier = profile?.subscription_tier === 'exclusive';
+  const isFastTier = effectiveTier === 'exclusive';
   return NextResponse.json({ success: true, requestId: req.id, turnaround: isFastTier ? '15 minutes' : '24 hours' });
 }

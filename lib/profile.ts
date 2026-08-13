@@ -34,7 +34,7 @@ export async function getUserProfile(
     .select('tier')
     .eq('user_id', user.id)
     .eq('status', 'active')
-    .single();
+    .maybeSingle();
 
   // Use DB column when it exists; fall back to email list until migration runs
   const is_admin = data.is_admin !== undefined && data.is_admin !== null
@@ -47,7 +47,7 @@ export async function getUserProfile(
     first_name: data.first_name ?? null,
     last_name: data.last_name ?? null,
     email: data.email ?? user.email ?? null,
-    tier: (sub?.tier ?? null) as Tier,
+    tier: (sub?.tier ?? data.subscription_tier ?? null) as Tier,
     is_admin,
   };
 }
