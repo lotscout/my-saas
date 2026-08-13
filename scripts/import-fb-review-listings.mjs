@@ -42,6 +42,14 @@ function bool(value) {
   return ['true', 'yes', '1'].includes(String(value ?? '').trim().toLowerCase());
 }
 
+function normalizeAskingPrice(input, lotSizeAcres) {
+  const price = input === null || input === undefined || input === '' ? null : Number(input);
+  if (!Number.isFinite(price) || price <= 0) return price === 0 ? 0 : null;
+  const acres = lotSizeAcres === null || lotSizeAcres === undefined || lotSizeAcres === '' ? null : Number(lotSizeAcres);
+  if (!Number.isFinite(acres) || acres <= 0) return Math.round(price);
+  return price < 5000 ? Math.round(price * acres) : Math.round(price);
+}
+
 function arr(value) {
   return String(value ?? '').split('|').map(s => s.trim()).filter(Boolean);
 }
@@ -119,7 +127,7 @@ function normalizeRow(r) {
     zoning: cleanText(r.zoning) || '',
     road_access: arr(r.road_access),
     utilities: arr(r.utilities),
-    asking_price: num(r.asking_price) ?? 0,
+    asking_price: normalizeAskingPrice(num(r.asking_price) ?? 0, acres),
     price_negotiable: bool(r.price_negotiable),
     owner_financing: bool(r.owner_financing),
     contact_methods: contactMethods,

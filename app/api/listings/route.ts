@@ -2,6 +2,7 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
+import { normalizeAskingPrice } from '@/lib/listing-price';
 
 // Build a stored seller name as first name + last initial (e.g. "Marcus T.").
 function formatOwnerName(first: string | null, last: string | null): string | null {
@@ -191,6 +192,8 @@ export async function POST(request: NextRequest) {
       .single();
     const ownerName = formatOwnerName(creatorProfile?.first_name ?? null, creatorProfile?.last_name ?? null);
 
+    const normalizedAskingPrice = normalizeAskingPrice(askingPrice, lotSizeAcres);
+
     const payload = {
       user_id:                 user.id,
       owner_name:              ownerName,
@@ -210,7 +213,7 @@ export async function POST(request: NextRequest) {
       zoning:                  zoning                 ?? null,
       road_access:             roadAccess             ?? [],
       utilities:               utilities              ?? [],
-      asking_price:            askingPrice            ? Number(askingPrice)            : null,
+      asking_price:            normalizedAskingPrice,
       comparable_market_value: comparableMarketValue  ? Number(comparableMarketValue)  : null,
       price_negotiable:        priceNegotiable        ?? false,
       preferred_close_date:    preferredCloseDate     ?? null,
