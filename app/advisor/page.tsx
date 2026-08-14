@@ -27,7 +27,7 @@ const SUGGESTIONS = [
   'What cities are in highest demand for single-family homes?',
   'What policy changes should builders be watching right now?',
   'Where is new construction demand outpacing housing supply?',
-  'Which Colorado markets have the strongest builder activity?',
+  'Which markets have the strongest builder activity?',
   'What land and zoning trends could affect development timelines?',
 ];
 
