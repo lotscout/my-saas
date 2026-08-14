@@ -24,11 +24,11 @@ interface Access {
 }
 
 const SUGGESTIONS = [
-  'What is the real estate market doing right now?',
-  'Is it a good time to buy or sell?',
-  'How do I evaluate an investment property?',
-  'What should builders know about the current market?',
-  'Where are the best markets to invest in 2026?',
+  'What cities are in highest demand for single-family homes?',
+  'What policy changes should builders be watching right now?',
+  'Where is new construction demand outpacing housing supply?',
+  'Which Colorado markets have the strongest builder activity?',
+  'What land and zoning trends could affect development timelines?',
 ];
 
 const DISCLAIMER = 'Educational information only, not financial, legal, or investment advice.';
