@@ -90,7 +90,7 @@ export default function FundingPartnersPage() {
 
             {/* Description — always visible to entice upgrade */}
             <p className="text-secondary text-sm leading-relaxed flex-1 mb-5">
-              Unlock $50K–$250K in business funding at 0% APR to increase buying power.
+              Unlock $50K–$250K in 0% APR business funding with no-impact eligibility checks and fast funding approvals.
             </p>
 
             {/* CTA — locked state for non-access users */}
