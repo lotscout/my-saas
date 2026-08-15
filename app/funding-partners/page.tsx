@@ -85,12 +85,12 @@ export default function FundingPartnersPage() {
                 !hasAccess ? 'blur-sm select-none pointer-events-none' : ''
               }`}
             >
-              0% Interest Funding
+              Business Funding at 0% APR
             </p>
 
             {/* Description — always visible to entice upgrade */}
             <p className="text-secondary text-sm leading-relaxed flex-1 mb-5">
-              0% interest funding strategies for land investors looking to increase buying power.
+              Unlock $50K–$250K in business funding at 0% APR to increase buying power.
             </p>
 
             {/* CTA — locked state for non-access users */}
