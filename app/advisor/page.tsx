@@ -409,7 +409,7 @@ export default function AdvisorPage() {
       {limitHit === 'guest' ? (
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached the guest limit.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Enter your email to keep using Scout, then create a password to save your searches.</p>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Enter your email to keep using Scout Search, then create a password to save your searches.</p>
           <form onSubmit={captureScoutLead} className="space-y-3">
             <input
               type="email"
@@ -422,14 +422,14 @@ export default function AdvisorPage() {
             />
             {leadError && <p className="text-sm text-red-600">{leadError}</p>}
             <button type="submit" disabled={leadLoading} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: GREEN }}>
-              {leadLoading ? 'Saving…' : 'Continue with Scout'}
+              {leadLoading ? 'Saving…' : 'Continue with Scout Search'}
             </button>
           </form>
         </>
       ) : (
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Get LotScout Search for $20/mo, or upgrade to any paid LotScout plan, for unlimited Scout and saved reports.</p>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Get Scout Search for $20/mo, or upgrade to any paid LotScout plan, for unlimited Scout Search and saved reports.</p>
           <a href="/pricing" className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
             View options
           </a>
@@ -454,7 +454,7 @@ export default function AdvisorPage() {
         placeholder={limitHit ? 'Limit reached' : 'Ask anything about real estate...'}
         className="flex-grow resize-none bg-transparent px-2 py-1.5 text-base sm:text-lg leading-snug sm:leading-relaxed placeholder:text-[#717973] focus:outline-none disabled:cursor-not-allowed max-h-32 sm:max-h-40"
         style={{ color: INK }}
-        aria-label="Scout"
+        aria-label="Scout Search"
       />
       <button
         type="submit"
@@ -553,7 +553,7 @@ export default function AdvisorPage() {
           {/* Mobile pull-out history control */}
           <button
             onClick={() => setMobileSidebar(true)}
-            aria-label="Open Scout history"
+            aria-label="Open Scout Search history"
             className="md:hidden fixed left-2 top-20 z-30 w-10 h-10 rounded-full bg-white border border-black/10 shadow-md flex items-center justify-center active:scale-95"
             style={{ color: INK }}
           >
@@ -566,9 +566,9 @@ export default function AdvisorPage() {
               <div className="flex-grow flex flex-col items-center justify-center gap-3 sm:gap-6 pt-1">
                 <div className="flex flex-col items-center text-center">
                   <h1 className="font-headline text-4xl sm:text-6xl md:text-7xl font-extrabold text-primary tracking-tighter leading-tight">
-                    Scout
+                    Scout Search
                   </h1>
-                  <p className="mt-1 sm:mt-3 text-sm sm:text-lg" style={{ color: MUTED }}>What are we scouting today?</p>
+                  <p className="mt-1 sm:mt-3 text-sm sm:text-lg" style={{ color: MUTED }}>What land market are we researching today?</p>
                 </div>
 
                 {limitHit ? (
@@ -606,7 +606,7 @@ export default function AdvisorPage() {
                   <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
                     {m.role === 'assistant' && (
                       <div className="mb-1.5">
-                        <span className="text-sm font-bold" style={{ color: INK }}>Scout</span>
+                        <span className="text-sm font-bold" style={{ color: INK }}>Scout Search</span>
                       </div>
                     )}
 
