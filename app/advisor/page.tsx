@@ -410,6 +410,10 @@ export default function AdvisorPage() {
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached the guest limit.</p>
           <p className="text-base mb-4" style={{ color: MUTED }}>Enter your email to keep using Scout Search, then create a password to save your searches.</p>
+          <p className="text-sm mb-4" style={{ color: MUTED }}>
+            Already have a LotScout account?{' '}
+            <a href="/sign-in?redirect=/scout" className="font-semibold hover:underline" style={{ color: GREEN }}>Sign in to continue</a>.
+          </p>
           <form onSubmit={captureScoutLead} className="space-y-3">
             <input
               type="email"

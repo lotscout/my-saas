@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -13,6 +13,16 @@ export default function SignInPage() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [redirectPath, setRedirectPath] = useState('/marketplace');
+
+  useEffect(() => {
+    const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+    const safeRedirect =
+      redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+        ? redirectParam
+        : '/marketplace';
+    setRedirectPath(safeRedirect);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -106,7 +116,7 @@ export default function SignInPage() {
 
           {/* Google Sign In */}
           <a
-            href="/api/auth/google"
+            href={`/api/auth/google?next=${encodeURIComponent(redirectPath)}`}
             className="w-full flex items-center justify-center gap-3 border border-surface-container-high bg-white text-on-surface py-3 rounded-xl font-semibold text-sm hover:bg-surface-container-low transition-colors mb-4"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
@@ -208,7 +218,7 @@ export default function SignInPage() {
         {/* Sign up link */}
         <p className="text-center text-sm text-secondary mt-6">
           Don&apos;t have an account?{' '}
-          <Link href="/sign-up" className="text-primary font-semibold hover:underline">Sign Up</Link>
+          <Link href={`/sign-up${redirectPath !== '/marketplace' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} className="text-primary font-semibold hover:underline">Sign Up</Link>
         </p>
       </div>
     </div>
