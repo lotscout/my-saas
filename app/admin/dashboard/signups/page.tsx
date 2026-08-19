@@ -48,7 +48,7 @@ const TIER_BADGE_CLS: Record<string, string> = {
 const SOURCE_COLORS = ['#1D9E75', '#2563EB', '#D97706', '#7C3AED', '#6B7280'];
 
 const FUNNEL_STEPS = [
-  { label: 'Visitors',     color: '#1D9E75', note: 'Analytics not connected' },
+  { label: 'Visitors',     color: '#1D9E75', note: 'Tracked in Vercel Analytics' },
   { label: 'Free Signup',  color: '#0F6E56' },
   { label: '$9 Report',    color: '#2563EB' },
   { label: 'Paid Plan',    color: '#059669' },
