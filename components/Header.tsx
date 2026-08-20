@@ -40,9 +40,19 @@ export default function Header() {
   // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  // Prevent the marketplace/map from scrolling underneath the mobile menu
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileOpen]);
+
   return (
     <>
-      <header className="fixed top-0 w-full z-[3000] bg-white border-b border-emerald-900/10 shadow-sm">
+      <header className="fixed top-0 w-full z-[10000] bg-white border-b border-emerald-900/10 shadow-sm">
         <div className="flex justify-between items-center px-4 sm:px-8 h-16 mx-auto">
 
           {/* Logo */}
@@ -83,7 +93,7 @@ export default function Header() {
                 <span className="material-symbols-outlined">account_circle</span>
               </button>
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden z-[3010]">
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden z-[10010]">
                   <a
                     href="/profile"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-primary font-headline font-semibold hover:bg-emerald-50 transition-colors"
@@ -108,6 +118,7 @@ export default function Header() {
               className="md:hidden p-2 text-primary hover:bg-emerald-50 rounded-full transition-all"
               onClick={() => setMobileOpen((prev) => !prev)}
               aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
             >
               <span className="material-symbols-outlined">
                 {mobileOpen ? 'close' : 'menu'}
@@ -119,8 +130,8 @@ export default function Header() {
 
       {/* Mobile nav overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-16 z-[2990] bg-white md:hidden">
-          <nav className="flex flex-col font-headline font-bold min-h-[calc(100vh-4rem)] bg-white px-4 py-4">
+        <div className="fixed left-0 right-0 bottom-0 top-16 z-[9990] bg-white md:hidden overflow-y-auto overscroll-contain">
+          <nav className="flex min-h-full flex-col bg-white px-4 py-4 font-headline font-bold shadow-2xl">
             {NAV_LINKS.map(({ label, href }) => {
               const isActive = href !== '#' && pathname === href;
               return (
