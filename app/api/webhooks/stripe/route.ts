@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { moveResendContactToPaid } from '@/lib/resend-contacts';
 
 function adminSupabase() {
   return createClient(
@@ -43,6 +44,34 @@ function safeProfileUpdate(fields: Record<string, unknown>): Record<string, unkn
     else console.error(`[webhook] Blocked attempt to write disallowed profile field: ${k}`);
   }
   return safe;
+}
+
+async function syncPaidUserToResend(
+  supabase: ReturnType<typeof adminSupabase>,
+  userId: string,
+  detail: string
+) {
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('email, first_name, last_name')
+      .eq('id', userId)
+      .single();
+
+    if (error || !profile?.email) {
+      console.error('[webhook] Resend paid sync skipped: profile email not found', { userId, detail, error: error?.message });
+      return;
+    }
+
+    await moveResendContactToPaid({
+      email: profile.email,
+      firstName: profile.first_name ?? null,
+      lastName: profile.last_name ?? null,
+    });
+  } catch (err) {
+    // Do not fail Stripe processing if Resend has a transient issue.
+    console.error('[webhook] Resend paid sync error:', err);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -160,6 +189,7 @@ export async function POST(request: NextRequest) {
           .update(safeProfileUpdate({ has_search_pro: true }))
           .eq('id', userId);
         if (spErr) console.error('Failed to set has_search_pro on checkout:', spErr);
+        if (!spErr && !subError) await syncPaidUserToResend(supabase, userId, 'search_pro checkout');
         await logWebhookEvent(supabase, event.type, userId, spErr || subError ? 'error' : 'processed', 'search_pro subscription activated');
         break;
       }
@@ -229,6 +259,8 @@ export async function POST(request: NextRequest) {
 
       if (profileTierError) console.error('Failed to sync tier to profiles on checkout:', profileTierError);
 
+      if (!subError && !profileTierError) await syncPaidUserToResend(supabase, userId, `checkout tier=${tier}`);
+
       await logWebhookEvent(
         supabase, event.type, userId,
         subError || profileTierError ? 'error' : 'processed',
@@ -287,6 +319,7 @@ export async function POST(request: NextRequest) {
           .update(safeProfileUpdate({ has_search_pro: hasSearchPro }))
           .eq('id', subRow.user_id);
         if (spUpdateErr) console.error('Failed to sync has_search_pro on subscription.updated:', spUpdateErr);
+        if (hasSearchPro && !spUpdateErr && !spSubUpdateErr) await syncPaidUserToResend(supabase, subRow.user_id, 'search_pro subscription.updated');
         await logWebhookEvent(supabase, event.type, subRow.user_id, spUpdateErr || spSubUpdateErr ? 'error' : 'processed', `search_pro has_search_pro=${hasSearchPro}`);
         break;
       }
@@ -313,6 +346,10 @@ export async function POST(request: NextRequest) {
           .update(safeProfileUpdate({ subscription_tier: newTier }))
           .eq('id', subRow.user_id);
         if (profileErr) console.error('Failed to sync tier to profiles on subscription.updated:', profileErr);
+      }
+
+      if ((subscription.status === 'active' || subscription.status === 'trialing') && newTier && !subUpdateError) {
+        await syncPaidUserToResend(supabase, subRow.user_id, `subscription.updated tier=${newTier}`);
       }
 
       await logWebhookEvent(

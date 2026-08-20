@@ -1,11 +1,16 @@
 const RESEND_API_BASE = 'https://api.resend.com';
 const DEFAULT_AUDIENCE_NAME = 'General';
+const DEFAULT_SIGNED_UP_AUDIENCE_NAME = 'LotScout Signed Up Users';
+const DEFAULT_PAID_AUDIENCE_NAME = 'LotScout Paid Users';
+
+type ResendAudienceKey = 'general' | 'signed_up' | 'paid';
 
 type SyncContactInput = {
   email: string | null | undefined;
   firstName?: string | null;
   lastName?: string | null;
   unsubscribed?: boolean;
+  audience?: ResendAudienceKey;
 };
 
 type ResendAudience = { id: string; name: string };
@@ -25,17 +30,38 @@ async function resendFetch(path: string, init: RequestInit = {}) {
   });
 }
 
-async function getAudienceId() {
-  if (process.env.RESEND_AUDIENCE_ID) return process.env.RESEND_AUDIENCE_ID;
+function audienceEnv(audience: ResendAudienceKey) {
+  switch (audience) {
+    case 'signed_up':
+      return {
+        id: process.env.RESEND_SIGNED_UP_AUDIENCE_ID,
+        name: process.env.RESEND_SIGNED_UP_AUDIENCE_NAME || DEFAULT_SIGNED_UP_AUDIENCE_NAME,
+      };
+    case 'paid':
+      return {
+        id: process.env.RESEND_PAID_AUDIENCE_ID,
+        name: process.env.RESEND_PAID_AUDIENCE_NAME || DEFAULT_PAID_AUDIENCE_NAME,
+      };
+    case 'general':
+    default:
+      return {
+        id: process.env.RESEND_AUDIENCE_ID,
+        name: process.env.RESEND_AUDIENCE_NAME || DEFAULT_AUDIENCE_NAME,
+      };
+  }
+}
 
-  const audienceName = process.env.RESEND_AUDIENCE_NAME || DEFAULT_AUDIENCE_NAME;
+async function getAudienceId(audience: ResendAudienceKey = 'general') {
+  const configured = audienceEnv(audience);
+  if (configured.id) return configured.id;
+
   const res = await resendFetch('/audiences');
   if (!res.ok) throw new Error(`Resend audience lookup failed: ${res.status}`);
 
   const json = await res.json();
-  const audience = (json?.data ?? []).find((item: ResendAudience) => item.name === audienceName);
-  if (!audience?.id) throw new Error(`Resend audience not found: ${audienceName}`);
-  return audience.id as string;
+  const found = (json?.data ?? []).find((item: ResendAudience) => item.name === configured.name);
+  if (!found?.id) throw new Error(`Resend audience not found: ${configured.name}`);
+  return found.id as string;
 }
 
 async function findContactId(audienceId: string, email: string) {
@@ -46,11 +72,19 @@ async function findContactId(audienceId: string, email: string) {
   return contact?.id ?? null;
 }
 
-export async function syncResendContact(input: SyncContactInput) {
-  const email = input.email?.trim().toLowerCase();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, skipped: true, reason: 'invalid_email' };
+function normalizeEmail(email: string | null | undefined) {
+  return email?.trim().toLowerCase() ?? '';
+}
 
-  const audienceId = await getAudienceId();
+function validEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+export async function syncResendContact(input: SyncContactInput) {
+  const email = normalizeEmail(input.email);
+  if (!email || !validEmail(email)) return { ok: false, skipped: true, reason: 'invalid_email' };
+
+  const audienceId = await getAudienceId(input.audience ?? 'general');
   const payload = {
     email,
     first_name: input.firstName?.trim() || undefined,
@@ -63,20 +97,45 @@ export async function syncResendContact(input: SyncContactInput) {
     body: JSON.stringify(payload),
   });
 
-  if (createRes.ok) return { ok: true, action: 'created' };
+  if (createRes.ok) return { ok: true, action: 'created', audience: input.audience ?? 'general' };
 
   // Resend returns a conflict when the contact already exists. Update in place when possible.
   if (createRes.status === 409 || createRes.status === 422) {
     const contactId = await findContactId(audienceId, email);
-    if (!contactId) return { ok: true, action: 'exists' };
+    if (!contactId) return { ok: true, action: 'exists', audience: input.audience ?? 'general' };
 
     const updateRes = await resendFetch(`/audiences/${audienceId}/contacts/${contactId}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });
-    if (updateRes.ok) return { ok: true, action: 'updated' };
+    if (updateRes.ok) return { ok: true, action: 'updated', audience: input.audience ?? 'general' };
     throw new Error(`Resend contact update failed: ${updateRes.status}`);
   }
 
   throw new Error(`Resend contact create failed: ${createRes.status}`);
+}
+
+export async function removeResendContact(emailInput: string | null | undefined, audience: ResendAudienceKey) {
+  const email = normalizeEmail(emailInput);
+  if (!email || !validEmail(email)) return { ok: true, skipped: true, reason: 'invalid_email' };
+
+  const audienceId = await getAudienceId(audience);
+  const contactId = await findContactId(audienceId, email);
+  if (!contactId) return { ok: true, action: 'not_found', audience };
+
+  const res = await resendFetch(`/audiences/${audienceId}/contacts/${contactId}`, { method: 'DELETE' });
+  if (res.ok || res.status === 404) return { ok: true, action: 'removed', audience };
+  throw new Error(`Resend contact delete failed: ${res.status}`);
+}
+
+export async function moveResendContactToPaid(input: Omit<SyncContactInput, 'audience'>) {
+  await syncResendContact({ ...input, audience: 'paid' });
+  try {
+    await removeResendContact(input.email, 'signed_up');
+  } catch (err) {
+    // Paid tagging is the important part. Do not fail Stripe processing if the
+    // cleanup from the free-user audience has a transient issue.
+    console.error('[resend-contacts] paid audience cleanup error:', err);
+  }
+  return { ok: true, action: 'moved_to_paid' };
 }

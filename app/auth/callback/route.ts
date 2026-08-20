@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { Resend } from 'resend'
 import { logEmail } from '@/lib/email-logger'
 import { syncResendContact } from '@/lib/resend-contacts'
+import { blockInstantlyColdProspect } from '@/lib/instantly'
 
 function buildWelcomeEmail(firstName: string | null, baseUrl: string): string {
   const greeting = firstName ? `Welcome to LotScout, ${firstName}!` : 'Welcome to LotScout!'
@@ -170,9 +171,16 @@ export async function GET(request: NextRequest) {
 
         if (user.email) {
           try {
-            await syncResendContact({ email: user.email, firstName: firstName ?? profile?.first_name ?? null, lastName })
+            await syncResendContact({ email: user.email, firstName: firstName ?? profile?.first_name ?? null, lastName, audience: 'signed_up' })
           } catch (contactErr) {
             console.error('[auth/callback] Resend contact sync error:', contactErr)
+          }
+
+          try {
+            const instantlyResult = await blockInstantlyColdProspect(user.email)
+            if (!instantlyResult.ok) console.error('[auth/callback] Instantly blocklist error:', instantlyResult)
+          } catch (instantlyErr) {
+            console.error('[auth/callback] Instantly suppression error:', instantlyErr)
           }
         }
 
