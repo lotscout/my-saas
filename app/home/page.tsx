@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, type AnchorHTMLAttributes } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 function Link({ href, children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) {
   return <a href={href} {...props}>{children}</a>;
@@ -233,6 +235,15 @@ function HeroMap() {
 }
 
 export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace('/marketplace');
+    });
+  }, [router]);
+
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-primary">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-surface-container-high">
