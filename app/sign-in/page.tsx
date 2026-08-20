@@ -13,6 +13,7 @@ export default function SignInPage() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [redirectPath, setRedirectPath] = useState('/marketplace');
 
   useEffect(() => {
@@ -154,15 +155,26 @@ export default function SignInPage() {
                 <label htmlFor="password" className="block text-sm font-semibold text-on-surface">Password</label>
                 <button type="button" onClick={() => { setResetSent(false); setError(null); const el = document.getElementById('forgot-section'); el?.classList.toggle('hidden'); }} className="text-xs font-semibold text-primary hover:underline">Forgot Password?</button>
               </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="Your password"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-surface-container-high bg-surface text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors text-sm"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  placeholder="Your password"
+                  required
+                  className="w-full px-4 py-3 pr-12 rounded-xl border border-surface-container-high bg-surface text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                >
+                  <span className="material-symbols-outlined text-xl">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                </button>
+              </div>
             </div>
 
             <label className="flex items-center gap-3 cursor-pointer select-none">
