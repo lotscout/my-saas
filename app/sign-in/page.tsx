@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { track } from '@vercel/analytics';
 
 export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
@@ -15,12 +16,28 @@ export default function SignInPage() {
   const [redirectPath, setRedirectPath] = useState('/marketplace');
 
   useEffect(() => {
-    const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+    const params = new URLSearchParams(window.location.search);
+    const redirectParam = params.get('redirect');
     const safeRedirect =
       redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
         ? redirectParam
         : '/marketplace';
     setRedirectPath(safeRedirect);
+
+    const utmSource = params.get('utm_source');
+    const utmMedium = params.get('utm_medium');
+    const utmCampaign = params.get('utm_campaign');
+    if (utmSource || utmMedium || utmCampaign) {
+      if (utmSource) localStorage.setItem('utm_source', utmSource);
+      if (utmMedium) localStorage.setItem('utm_medium', utmMedium);
+      if (utmCampaign) localStorage.setItem('utm_campaign', utmCampaign);
+      track('email_cta_landing', {
+        source: utmSource || 'unknown',
+        medium: utmMedium || 'unknown',
+        campaign: utmCampaign || 'unknown',
+        path: window.location.pathname,
+      });
+    }
   }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -67,6 +84,12 @@ export default function SignInPage() {
         : null;
 
     if (safeRedirect) {
+      track('login_completed', {
+        destination: safeRedirect,
+        source: localStorage.getItem('utm_source') || 'direct',
+        medium: localStorage.getItem('utm_medium') || '',
+        campaign: localStorage.getItem('utm_campaign') || '',
+      });
       window.location.replace(safeRedirect);
       return;
     }
@@ -75,10 +98,17 @@ export default function SignInPage() {
     if (signedInUser) {
       const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', signedInUser.id).single();
       if (profile?.is_admin) {
+        track('login_completed', { destination: '/admin/dashboard' });
         window.location.replace('/admin/dashboard');
         return;
       }
     }
+    track('login_completed', {
+      destination: '/marketplace',
+      source: localStorage.getItem('utm_source') || 'direct',
+      medium: localStorage.getItem('utm_medium') || '',
+      campaign: localStorage.getItem('utm_campaign') || '',
+    });
     window.location.replace('/marketplace');
   }
 
