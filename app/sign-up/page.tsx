@@ -8,12 +8,14 @@ import { track } from '@vercel/analytics';
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [prefilledEmail, setPrefilledEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
     const params = new URLSearchParams(window.location.search);
     const email = params.get('email')?.trim() ?? '';
     if (email) setPrefilledEmail(email);
@@ -153,7 +155,7 @@ export default function SignUpPage() {
             <div className="flex-1 h-px bg-surface-container-high" />
           </div>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4" method="post" onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-semibold text-on-surface mb-1.5">First Name</label>
@@ -251,10 +253,10 @@ export default function SignUpPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !hydrated}
               className="w-full bg-[#1D9E75] text-white py-3.5 rounded-xl font-bold text-base hover:bg-[#14795A] transition-colors shadow-sm mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {!hydrated ? 'Loading...' : loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
         </div>

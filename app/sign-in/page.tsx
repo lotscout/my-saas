@@ -8,6 +8,7 @@ import { track } from '@vercel/analytics';
 export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
@@ -16,6 +17,7 @@ export default function SignInPage() {
   const [redirectPath, setRedirectPath] = useState('/marketplace');
 
   useEffect(() => {
+    setHydrated(true);
     const params = new URLSearchParams(window.location.search);
     const redirectParam = params.get('redirect');
     const safeRedirect =
@@ -164,7 +166,7 @@ export default function SignInPage() {
             <div className="flex-1 h-px bg-surface-container-high" />
           </div>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4" method="post" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-on-surface mb-1.5">Email</label>
               <input
@@ -221,10 +223,10 @@ export default function SignInPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !hydrated}
               className="w-full bg-[#1D9E75] text-white py-3.5 rounded-xl font-bold text-base hover:bg-[#14795A] transition-colors shadow-sm mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {!hydrated ? 'Loading...' : loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
