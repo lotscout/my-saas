@@ -297,7 +297,7 @@ export default function MarketplacePage() {
   async function toggleFavorite(e: React.MouseEvent, listingId: string) {
     e.preventDefault();
     e.stopPropagation();
-    if (!profile?.id) { router.push('/login'); return; }
+    if (!profile?.id) { router.push('/sign-in?redirect=/marketplace'); return; }
     setSavingId(listingId);
     try {
       const res = await fetch('/api/favorites', {
@@ -495,7 +495,7 @@ export default function MarketplacePage() {
 
   function handleMyListingsClick() {
     if (!profile?.id) {
-      router.push('/login');
+      router.push('/sign-in?redirect=/marketplace');
       return;
     }
     setShowMyListings(prev => !prev);

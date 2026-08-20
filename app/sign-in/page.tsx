@@ -2,11 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SignInPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -69,7 +67,7 @@ export default function SignInPage() {
         : null;
 
     if (safeRedirect) {
-      router.push(safeRedirect);
+      window.location.replace(safeRedirect);
       return;
     }
 
@@ -77,11 +75,11 @@ export default function SignInPage() {
     if (signedInUser) {
       const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', signedInUser.id).single();
       if (profile?.is_admin) {
-        router.push('/admin/dashboard');
+        window.location.replace('/admin/dashboard');
         return;
       }
     }
-    router.push('/marketplace');
+    window.location.replace('/marketplace');
   }
 
   async function handleForgotPassword(e: React.FormEvent<HTMLFormElement>) {
