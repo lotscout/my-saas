@@ -42,7 +42,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 w-full z-50 bg-white border-b border-emerald-900/10 shadow-sm">
+      <header className="fixed top-0 w-full z-[3000] bg-white border-b border-emerald-900/10 shadow-sm">
         <div className="flex justify-between items-center px-4 sm:px-8 h-16 mx-auto">
 
           {/* Logo */}
@@ -83,7 +83,7 @@ export default function Header() {
                 <span className="material-symbols-outlined">account_circle</span>
               </button>
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden z-50">
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden z-[3010]">
                   <a
                     href="/profile"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-primary font-headline font-semibold hover:bg-emerald-50 transition-colors"
@@ -119,7 +119,7 @@ export default function Header() {
 
       {/* Mobile nav drawer — same bg-white as header, no z-index bleed */}
       {mobileOpen && (
-        <div className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-emerald-900/10 shadow-md md:hidden">
+        <div className="fixed top-16 left-0 right-0 z-[2990] bg-white border-b border-emerald-900/10 shadow-md md:hidden">
           <nav className="flex flex-col font-headline font-bold">
             {NAV_LINKS.map(({ label, href }) => {
               const isActive = href !== '#' && pathname === href;
