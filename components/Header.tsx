@@ -117,22 +117,23 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Mobile nav drawer — same bg-white as header, no z-index bleed */}
+      {/* Mobile nav overlay */}
       {mobileOpen && (
-        <div className="fixed top-16 left-0 right-0 z-[2990] bg-white border-b border-emerald-900/10 shadow-md md:hidden">
-          <nav className="flex flex-col font-headline font-bold">
+        <div className="fixed inset-0 top-16 z-[2990] bg-white md:hidden">
+          <nav className="flex flex-col font-headline font-bold min-h-[calc(100vh-4rem)] bg-white px-4 py-4">
             {NAV_LINKS.map(({ label, href }) => {
               const isActive = href !== '#' && pathname === href;
               return (
                 <a
                   key={label}
                   href={href}
-                  className={`px-6 py-4 text-base border-b border-surface-container-high transition-colors ${
-                    isActive ? 'text-primary bg-emerald-50' : 'text-primary/70 hover:text-primary hover:bg-emerald-50'
+                  className={`flex items-center justify-between rounded-2xl px-5 py-4 text-lg transition-colors ${
+                    isActive ? 'text-primary bg-emerald-50' : 'text-primary/75 hover:text-primary hover:bg-emerald-50'
                   }`}
                   onClick={() => setMobileOpen(false)}
                 >
-                  {label}
+                  <span>{label}</span>
+                  {isActive && <span className="material-symbols-outlined text-xl">check</span>}
                 </a>
               );
             })}
