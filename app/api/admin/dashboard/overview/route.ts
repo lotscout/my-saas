@@ -24,6 +24,17 @@ type Profile = {
   first_name: string | null; last_name: string | null; company_name: string | null;
 };
 
+type ScoutQuestionRow = {
+  id: string;
+  user_id: string | null;
+  session_id?: string | null;
+  conversation_id?: string | null;
+  question?: string | null;
+  content?: string | null;
+  created_at: string;
+  metadata?: Record<string, any> | null;
+};
+
 function safeUserName(
   p: { full_name: string | null; first_name: string | null; last_name: string | null } | undefined | null
 ): string | null {
@@ -55,7 +66,7 @@ export async function GET() {
     service.from('buyer_requests').select('*', { count: 'exact', head: true }),
     service.from('messages').select('*', { count: 'exact', head: true }),
     service.from('conversations').select('*', { count: 'exact', head: true }),
-    service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user'),
+    service.from('scout_events').select('*', { count: 'exact', head: true }).eq('event_type', 'question_submitted'),
     service.from('property_analysis_requests').select('*', { count: 'exact', head: true }),
     service.from('market_report_requests').select('*', { count: 'exact', head: true }),
     service.from('email_logs').select('*', { count: 'exact', head: true }),
@@ -99,8 +110,8 @@ export async function GET() {
     service.from('buyer_requests')
       .select('id, display_name, display_company, target_state, target_county, target_city, target_regions, state, status, created_at, user_id')
       .order('created_at', { ascending: false }).limit(RECENT),
-    service.from('advisor_conversations')
-      .select('id, user_id, content, created_at').eq('role', 'user')
+    service.from('scout_events')
+      .select('id, user_id, session_id, conversation_id, question, metadata, created_at').eq('event_type', 'question_submitted')
       .order('created_at', { ascending: false }).limit(RECENT),
     service.from('property_analysis_requests')
       .select('id, street_address, city, state, status, submitted_at, user_name, user_email')
@@ -113,6 +124,19 @@ export async function GET() {
       .order('created_at', { ascending: false }).limit(8),
   ]);
 
+  let scoutQuestionCount = scoutQuestions.count ?? 0;
+  let scoutQuestionRows = (scoutRows ?? []) as ScoutQuestionRow[];
+  if (scoutQuestions.error || !scoutQuestionRows.length) {
+    const [{ count }, { data }] = await Promise.all([
+      service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user'),
+      service.from('advisor_conversations')
+        .select('id, user_id, content, created_at').eq('role', 'user')
+        .order('created_at', { ascending: false }).limit(RECENT),
+    ]);
+    scoutQuestionCount = count ?? scoutQuestionCount;
+    scoutQuestionRows = (data ?? []) as ScoutQuestionRow[];
+  }
+
   // Resolve the profiles referenced by listings, buyer requests, scout, and messages.
   const convIds = [...new Set((messageRows ?? []).map(m => m.conversation_id).filter((x): x is string => !!x))];
   const { data: convRows } = convIds.length
@@ -123,7 +147,7 @@ export async function GET() {
   const profileIds = new Set<string>();
   for (const l of listingRows ?? []) if (l.user_id) profileIds.add(l.user_id);
   for (const b of buyerRows ?? []) if (b.user_id) profileIds.add(b.user_id);
-  for (const s of scoutRows ?? []) if (s.user_id) profileIds.add(s.user_id);
+  for (const s of scoutQuestionRows) if (s.user_id) profileIds.add(s.user_id);
   for (const c of convRows ?? []) { if (c.buyer_id) profileIds.add(c.buyer_id); if (c.seller_id) profileIds.add(c.seller_id); }
 
   const { data: profRows } = profileIds.size
@@ -159,12 +183,13 @@ export async function GET() {
     created_at: b.created_at,
   }));
 
-  const scout = (scoutRows ?? []).map(s => {
+  const scout = scoutQuestionRows.map(s => {
     const p = s.user_id ? profMap.get(s.user_id) : undefined;
+    const access = s.metadata?.access_status ? String(s.metadata.access_status) : null;
     return {
       id: s.id,
-      asker: safeUserName(p) ?? (p?.email ?? 'Guest'),
-      question: (s.content ?? '').slice(0, 140),
+      asker: safeUserName(p) ?? (p?.email ?? (access === 'guest' ? 'Guest' : 'Unknown')),
+      question: (s.question ?? s.content ?? '').slice(0, 180),
       created_at: s.created_at,
     };
   });
@@ -207,7 +232,7 @@ export async function GET() {
   });
 
   return NextResponse.json({
-    totals,
+    totals: { ...totals, scoutQuestions: scoutQuestionCount },
     signups, listings, buyerRequests, scout, analysis, marketReports, messages,
   });
 }

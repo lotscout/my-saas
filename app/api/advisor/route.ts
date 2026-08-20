@@ -148,6 +148,36 @@ async function incrementFree(userId: string, current: number): Promise<void> {
   } catch { /* table may not exist yet */ }
 }
 
+async function insertScoutEvent({
+  userId,
+  sessionId,
+  conversationId,
+  eventType,
+  question,
+  metadata = {},
+}: {
+  userId: string | null;
+  sessionId: string | null;
+  conversationId: string | null;
+  eventType: string;
+  question?: string | null;
+  metadata?: Record<string, unknown>;
+}): Promise<void> {
+  try {
+    await createServiceClient().from('scout_events').insert({
+      user_id: userId,
+      session_id: sessionId,
+      conversation_id: conversationId,
+      event_type: eventType,
+      question: question ? question.slice(0, 2000) : null,
+      metadata,
+    });
+  } catch (err) {
+    // Analytics/admin logging must never block Scout answers.
+    console.error('[advisor] scout event insert failed:', err instanceof Error ? err.message : err);
+  }
+}
+
 function guestCount(request: NextRequest): number {
   const raw = request.cookies.get(GUEST_COOKIE)?.value;
   const n = raw ? parseInt(raw, 10) : 0;
@@ -248,7 +278,7 @@ async function buildLotScoutContext(userId: string | null): Promise<string> {
   return parts.join('\n\n') || 'No LotScout market data is currently available.';
 }
 
-async function insertMessage(userId: string, role: string, content: string, conversationId: string | null) {
+async function insertMessage(userId: string | null, role: string, content: string, conversationId: string | null) {
   const svc = createServiceClient();
   try {
     const payload: Record<string, any> = { user_id: userId, role, content };
@@ -377,6 +407,7 @@ export async function POST(request: NextRequest) {
   }
   const lastUser = history[history.length - 1].content;
   const conversationId = typeof body.conversationId === 'string' && body.conversationId ? body.conversationId : null;
+  const sessionId = typeof body.sessionId === 'string' && body.sessionId ? body.sessionId.slice(0, 120) : null;
 
   // --- Enforce access limits BEFORE calling the model ---
   let statusLabel: Access['status'] = 'guest';
@@ -419,6 +450,19 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Search is not configured on the server.', type: 'config' }, { status: 500 });
   }
 
+  await insertScoutEvent({
+    userId: user?.id ?? null,
+    sessionId,
+    conversationId,
+    eventType: 'question_submitted',
+    question: lastUser,
+    metadata: {
+      access_status: statusLabel,
+      unlimited,
+      remaining_after: remainingAfter,
+    },
+  });
+
   // Context is best-effort — a Supabase hiccup must not crash the whole answer.
   let context = 'No LotScout market data is currently available.';
   try {
@@ -430,10 +474,10 @@ export async function POST(request: NextRequest) {
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  // Persist the user's message for conversation history (logged-in only).
-  if (user) {
-    await insertMessage(user.id, 'user', lastUser, conversationId);
-  }
+  // Persist every Scout question for admin visibility. Logged-in users keep full
+  // conversation history; guests are stored with user_id=null so cold traffic
+  // questions still show in the admin dashboard.
+  await insertMessage(user?.id ?? null, 'user', lastUser, conversationId);
 
   // web_search server tool (Sonnet 5 supports the _20260209 variant). Passed via `as any`
   // to stay resilient to SDK tool-type version differences.

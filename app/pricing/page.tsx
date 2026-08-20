@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
+import { track } from '@vercel/analytics';
 
 // Shared responsive grid: feature-label column + 3 tier columns.
 // fr units always fit the container width, so the table never overflows horizontally.
@@ -122,6 +123,11 @@ export default function PricingPage() {
 
   async function handleCheckout(priceKey: string) {
     setLoading(priceKey);
+    track('checkout_started', {
+      price_key: priceKey,
+      billing: isAnnual ? 'annual' : 'monthly',
+      source: 'pricing',
+    });
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',

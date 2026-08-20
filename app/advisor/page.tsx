@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Header from '@/components/Header';
+import { track } from '@vercel/analytics';
 
 interface Msg {
   role: 'user' | 'assistant';
@@ -35,6 +36,7 @@ const DISCLAIMER = 'Educational information only, not financial, legal, or inves
 const GUEST_LIMIT = 3;
 const GUEST_COUNT_KEY = 'ls_guest_count';
 const SESSION_KEY = 'ls_advisor_session';
+const ANALYTICS_SESSION_KEY = 'ls_scout_analytics_session';
 
 // Stitch palette
 const INK = '#0D1F16';
@@ -48,6 +50,18 @@ function newId(): string {
     const r = (Math.random() * 16) | 0;
     return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
   });
+}
+
+function getAnalyticsSessionId(): string {
+  try {
+    const existing = localStorage.getItem(ANALYTICS_SESSION_KEY);
+    if (existing) return existing;
+    const id = newId();
+    localStorage.setItem(ANALYTICS_SESSION_KEY, id);
+    return id;
+  } catch {
+    return newId();
+  }
 }
 
 // Lightweight markdown for AI messages: strips leading # from headings and renders
@@ -131,10 +145,15 @@ export default function AdvisorPage() {
   const [leadEmail, setLeadEmail] = useState('');
   const [leadLoading, setLeadLoading] = useState(false);
   const [leadError, setLeadError] = useState<string | null>(null);
+  const [analyticsSessionId, setAnalyticsSessionId] = useState<string>('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    const sid = getAnalyticsSessionId();
+    setAnalyticsSessionId(sid);
+    track('scout_page_view', { path: '/scout' });
+
     // Always start Scout on a fresh chat when the page opens.
     // Saved conversations remain available in Recents, but are never auto-loaded.
     try { sessionStorage.removeItem(SESSION_KEY); } catch {}
@@ -200,6 +219,7 @@ export default function AdvisorPage() {
     const isGuest = access?.status === 'guest';
     if (isGuest && guestCount >= GUEST_LIMIT) {
       setLimitHit('guest');
+      track('scout_guest_limit_hit', { source: 'client_preflight', guest_count: guestCount });
       return;
     }
 
@@ -218,18 +238,23 @@ export default function AdvisorPage() {
     const withUser: Msg[] = [...prior, { role: 'user', content: q }];
     setMessages([...withUser, { role: 'assistant', content: '' }]);
     setLoading(true);
+    track('scout_question_submitted', {
+      access_status: access?.status ?? 'unknown',
+      question_number: isGuest ? guestCount + 1 : messages.filter(m => m.role === 'user').length + 1,
+    });
 
     try {
       const res = await fetch('/api/advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: withUser, conversationId: currentId }),
+        body: JSON.stringify({ messages: withUser, conversationId: currentId, sessionId: analyticsSessionId }),
       });
 
       if (res.status === 429) {
         const j = await res.json().catch(() => ({}));
         setMessages(prior); // revert the unanswered question
         setLimitHit(j?.reason === 'guest_limit' ? 'guest' : 'free');
+        track(j?.reason === 'guest_limit' ? 'scout_guest_limit_hit' : 'scout_free_limit_hit', { source: 'server' });
         return;
       }
       if (!res.ok) {
@@ -269,6 +294,11 @@ export default function AdvisorPage() {
       const unlimited = res.headers.get('X-Advisor-Unlimited') === 'true';
       const canSave = res.headers.get('X-Advisor-Can-Save') === 'true';
       const remaining = remainingHdr !== null ? parseInt(remainingHdr, 10) : null;
+      track('scout_answer_received', {
+        access_status: statusHdr,
+        response_chars: finalContent.length,
+        remaining: remaining ?? -1,
+      });
       setAccess(a => ({
         status: statusHdr,
         unlimited,
@@ -340,7 +370,7 @@ export default function AdvisorPage() {
 
   function handleSaveClick(idx: number) {
     if (access?.canSave) { saveReport(idx); return; }
-    if (access?.status === 'free') { upgrade(); return; }
+    if (access?.status === 'free') { track('scout_upgrade_click', { source: 'save_report' }); upgrade(); return; }
     alert('Saving reports requires a LotScout plan. Sign up free, then upgrade to any plan to save market reports.');
   }
 
@@ -348,6 +378,7 @@ export default function AdvisorPage() {
     e.preventDefault();
     setLeadError(null);
     setLeadLoading(true);
+    track('scout_signup_click', { source: 'guest_limit_card', guest_questions: guestCount || GUEST_LIMIT });
     try {
       const res = await fetch('/api/scout/leads', {
         method: 'POST',
@@ -359,6 +390,7 @@ export default function AdvisorPage() {
         setLeadError(data.error || 'Could not save email. Please try again.');
         return;
       }
+      track('scout_lead_captured', { source: 'guest_limit_card', guest_questions: guestCount || GUEST_LIMIT });
       window.location.href = data.redirect || `/sign-up?email=${encodeURIComponent(leadEmail.trim())}&source=scout`;
     } catch {
       setLeadError('Could not save email. Please try again.');
@@ -412,7 +444,7 @@ export default function AdvisorPage() {
           <p className="text-base mb-4" style={{ color: MUTED }}>Enter your email to keep using Scout Search, then create a password to save your searches.</p>
           <p className="text-sm mb-4" style={{ color: MUTED }}>
             Already have a LotScout account?{' '}
-            <a href="/sign-in?redirect=/scout" className="font-semibold hover:underline" style={{ color: GREEN }}>Sign in to continue</a>.
+          <a href="/sign-in?redirect=/scout" onClick={() => track('scout_signin_click', { source: 'guest_limit_card' })} className="font-semibold hover:underline" style={{ color: GREEN }}>Sign in to continue</a>.
           </p>
           <form onSubmit={captureScoutLead} className="space-y-3">
             <input
@@ -434,7 +466,7 @@ export default function AdvisorPage() {
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
           <p className="text-base mb-4" style={{ color: MUTED }}>Get Scout Search for $20/mo, or upgrade to any paid LotScout plan, for unlimited Scout Search and saved reports.</p>
-          <a href="/pricing" className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
+          <a href="/pricing" onClick={() => track('scout_upgrade_click', { source: 'free_limit_card' })} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
             View options
           </a>
         </>

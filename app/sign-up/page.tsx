@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { track } from '@vercel/analytics';
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,15 @@ export default function SignUpPage() {
     const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
     const confirmPassword = (form.elements.namedItem('confirmPassword') as HTMLInputElement).value;
+    const signupSource = localStorage.getItem('utm_source') || 'direct';
+    const signupMedium = localStorage.getItem('utm_medium') || '';
+    const signupCampaign = localStorage.getItem('utm_campaign') || '';
+
+    track('signup_started', {
+      source: signupSource,
+      medium: signupMedium,
+      campaign: signupCampaign,
+    });
 
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
@@ -56,10 +66,6 @@ export default function SignUpPage() {
     }
 
     if (data.user) {
-      const signupSource = localStorage.getItem('utm_source') || 'direct';
-      const signupMedium = localStorage.getItem('utm_medium') || '';
-      const signupCampaign = localStorage.getItem('utm_campaign') || '';
-
       await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -77,6 +83,11 @@ export default function SignUpPage() {
       localStorage.removeItem('utm_source');
       localStorage.removeItem('utm_medium');
       localStorage.removeItem('utm_campaign');
+      track('signup_completed', {
+        source: signupSource,
+        medium: signupMedium,
+        campaign: signupCampaign,
+      });
     }
 
     setEmailSent(true);
