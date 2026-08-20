@@ -76,7 +76,11 @@ export async function PATCH(
           from: 'LotScout <support@lotscout.com>',
           to: userEmail,
           subject: 'Your property analysis is ready — LotScout',
+          text: `Hi ${userName}, your LotScout property analysis for ${location} is ready.${report_url ? ` View it here: ${report_url}` : ''}`,
           html: `
+            <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;line-height:1px;font-size:1px">
+              Hi ${userName}, your LotScout property analysis is ready.
+            </div>
             <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
               <div style="background:#012d1d;padding:24px 32px;border-radius:12px 12px 0 0">
                 <h1 style="color:white;margin:0;font-size:22px">LotScout</h1>
@@ -102,7 +106,11 @@ export async function PATCH(
           from: 'LotScout <support@lotscout.com>',
           to: userEmail,
           subject: 'Update on your property analysis request — LotScout',
+          text: `Hi ${userName}, we have an update on your LotScout property analysis request for ${location}.`,
           html: `
+            <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;line-height:1px;font-size:1px">
+              Hi ${userName}, we have an update on your LotScout property analysis request.
+            </div>
             <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
               <div style="background:#012d1d;padding:24px 32px;border-radius:12px 12px 0 0">
                 <h1 style="color:white;margin:0;font-size:22px">LotScout</h1>

@@ -12,6 +12,9 @@ function buildWelcomeEmail(firstName: string | null, baseUrl: string): string {
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f4f6f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;line-height:1px;font-size:1px">
+    Hi, welcome to LotScout. Your account is ready and the marketplace is waiting.
+  </div>
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f5;padding:40px 0">
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%">
@@ -215,6 +218,7 @@ export async function GET(request: NextRequest) {
                 to: user.email,
                 subject: 'Welcome to LotScout',
                 html: buildWelcomeEmail(profile?.first_name ?? firstName ?? null, baseUrl),
+                text: `Hi, welcome to LotScout. Your account is ready. Explore the marketplace: ${baseUrl}/marketplace`,
               })
               await logEmail({
                 user_id: user.id,
