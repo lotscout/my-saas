@@ -258,7 +258,7 @@ export default function AdminDashboardPage() {
       </Section>
 
       {/* ── 5. Scout Questions Asked ── */}
-      <Section title="Scout Questions Asked" icon="smart_toy" count={t?.scoutQuestions ?? null} viewAllHref="/admin/dashboard/data-center" viewAllLabel="Open data center" loading={loading} empty={(data?.scout.length ?? 0) === 0}>
+      <Section title="Scout Questions Asked" icon="smart_toy" count={t?.scoutQuestions ?? null} viewAllHref="/admin/dashboard/scout-questions" viewAllLabel="View all questions" loading={loading} empty={(data?.scout.length ?? 0) === 0}>
         {data?.scout.map(s => (
           <Row key={s.id}
             primary={<span className="font-normal text-on-surface">“{s.question}”</span>}

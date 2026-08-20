@@ -66,7 +66,7 @@ export async function GET() {
     service.from('buyer_requests').select('*', { count: 'exact', head: true }),
     service.from('messages').select('*', { count: 'exact', head: true }),
     service.from('conversations').select('*', { count: 'exact', head: true }),
-    service.from('scout_events').select('*', { count: 'exact', head: true }).eq('event_type', 'question_submitted'),
+    service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user'),
     service.from('property_analysis_requests').select('*', { count: 'exact', head: true }),
     service.from('market_report_requests').select('*', { count: 'exact', head: true }),
     service.from('email_logs').select('*', { count: 'exact', head: true }),
@@ -110,8 +110,8 @@ export async function GET() {
     service.from('buyer_requests')
       .select('id, display_name, display_company, target_state, target_county, target_city, target_regions, state, status, created_at, user_id')
       .order('created_at', { ascending: false }).limit(RECENT),
-    service.from('scout_events')
-      .select('id, user_id, session_id, conversation_id, question, metadata, created_at').eq('event_type', 'question_submitted')
+    service.from('advisor_conversations')
+      .select('id, user_id, content, created_at').eq('role', 'user')
       .order('created_at', { ascending: false }).limit(RECENT),
     service.from('property_analysis_requests')
       .select('id, street_address, city, state, status, submitted_at, user_name, user_email')
@@ -124,18 +124,8 @@ export async function GET() {
       .order('created_at', { ascending: false }).limit(8),
   ]);
 
-  let scoutQuestionCount = scoutQuestions.count ?? 0;
-  let scoutQuestionRows = (scoutRows ?? []) as ScoutQuestionRow[];
-  if (scoutQuestions.error || !scoutQuestionRows.length) {
-    const [{ count }, { data }] = await Promise.all([
-      service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user'),
-      service.from('advisor_conversations')
-        .select('id, user_id, content, created_at').eq('role', 'user')
-        .order('created_at', { ascending: false }).limit(RECENT),
-    ]);
-    scoutQuestionCount = count ?? scoutQuestionCount;
-    scoutQuestionRows = (data ?? []) as ScoutQuestionRow[];
-  }
+  const scoutQuestionCount = scoutQuestions.count ?? 0;
+  const scoutQuestionRows = (scoutRows ?? []) as ScoutQuestionRow[];
 
   // Resolve the profiles referenced by listings, buyer requests, scout, and messages.
   const convIds = [...new Set((messageRows ?? []).map(m => m.conversation_id).filter((x): x is string => !!x))];

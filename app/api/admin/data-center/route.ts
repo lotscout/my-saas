@@ -170,9 +170,9 @@ export async function GET() {
     service.from('messages').select('*', { count: 'exact', head: true }),
     service.from('conversations').select('*', { count: 'exact', head: true }),
     service.from('messages').select('*', { count: 'exact', head: true }).eq('is_read', false),
-    service.from('scout_events').select('*', { count: 'exact', head: true }).eq('event_type', 'question_submitted'),
-    service.from('scout_events').select('*', { count: 'exact', head: true }).eq('event_type', 'question_submitted').gte('created_at', weekAgo),
-    service.from('scout_events').select('*', { count: 'exact', head: true }).eq('event_type', 'question_submitted').gte('created_at', dayAgo),
+    service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user'),
+    service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user').gte('created_at', weekAgo),
+    service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user').gte('created_at', dayAgo),
     service.from('search_usage').select('user_id, usage_date, count').order('usage_date', { ascending: false }).limit(100),
     service.from('scout_leads').select('*', { count: 'exact', head: true }),
     service.from('property_analysis_requests').select('*', { count: 'exact', head: true }),
@@ -191,29 +191,14 @@ export async function GET() {
     service.from('listings').select('id,user_id,title,owner_name,status,state,county,city,asking_price,lot_size_acres,promoted,view_count,created_at,updated_at').order('created_at', { ascending: false }).limit(25),
     service.from('buyer_requests').select('id,user_id,display_name,display_company,status,target_city,target_county,target_state,state,budget_min,budget_max,timeline,view_count,created_at').order('created_at', { ascending: false }).limit(25),
     service.from('messages').select('id,conversation_id,sender_id,body,is_read,created_at').order('created_at', { ascending: false }).limit(25),
-    service.from('scout_events').select('id,user_id,event_type,question,metadata,created_at').eq('event_type', 'question_submitted').order('created_at', { ascending: false }).limit(25),
+    service.from('advisor_conversations').select('id,user_id,role,content,created_at').eq('role', 'user').order('created_at', { ascending: false }).limit(25),
     service.from('scout_leads').select('id,email,source,status,guest_questions,created_at,updated_at').order('created_at', { ascending: false }).limit(25),
     service.from('property_analysis_requests').select('id,user_id,user_name,user_email,street_address,city,county,state,status,submitted_at,completed_at').order('submitted_at', { ascending: false }).limit(20),
     service.from('market_report_requests').select('id,email,first_name,last_name,county,state,status,is_paid,report_frequency,created_at').order('created_at', { ascending: false }).limit(20),
     service.from('email_logs').select('id,user_id,to_email,from_email,subject,email_type,status,created_at').order('created_at', { ascending: false }).limit(30),
   ]);
 
-  let scoutQuestionsMetric = scoutQuestions;
-  let scout7dMetric = scout7d;
-  let scoutTodayMetric = scoutToday;
-  let scoutRowsForSection: any[] = scout ?? [];
-  if (scoutQuestions.error) {
-    const [legacyQuestions, legacy7d, legacyToday, legacyRows] = await Promise.all([
-      service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user'),
-      service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user').gte('created_at', weekAgo),
-      service.from('advisor_conversations').select('*', { count: 'exact', head: true }).eq('role', 'user').gte('created_at', dayAgo),
-      service.from('advisor_conversations').select('id,user_id,role,content,created_at').eq('role', 'user').order('created_at', { ascending: false }).limit(25),
-    ]);
-    scoutQuestionsMetric = legacyQuestions;
-    scout7dMetric = legacy7d;
-    scoutTodayMetric = legacyToday;
-    scoutRowsForSection = legacyRows.data ?? [];
-  }
+  const scoutRowsForSection: any[] = scout ?? [];
 
   const profileIds = new Set<string>();
   for (const row of [...(subscriptions ?? []), ...(listings ?? []), ...(buyerRequests ?? []), ...(messages ?? []), ...scoutRowsForSection, ...(analyses ?? []), ...(emails ?? [])]) {
@@ -287,7 +272,7 @@ export async function GET() {
 
   const tableHealthSource = [
     ['profiles', usersTotal], ['subscriptions', activeSubs], ['listings', listingsTotal], ['buyer_requests', buyerTotal],
-    ['messages', messagesTotal], ['conversations', conversationsTotal], ['scout_events', scoutQuestions],
+    ['messages', messagesTotal], ['conversations', conversationsTotal], ['advisor_conversations', scoutQuestions],
     ['search_usage', searchUsageRows], ['scout_leads', scoutLeadsTotal], ['property_analysis_requests', analysisTotal], ['market_report_requests', marketReportsTotal], ['email_logs', emailsTotal],
   ] as const;
 
@@ -308,7 +293,7 @@ export async function GET() {
       marketplace: { listings: countValue(listingsTotal), active: countValue(activeListings), pending: countValue(pendingListings), deleted: countValue(deletedListings), sold: countValue(soldListings), promoted: countValue(promotedListings) },
       buyers: { total: countValue(buyerTotal), active: countValue(activeBuyers), pending: countValue(pendingBuyers) },
       messaging: { messages: countValue(messagesTotal), conversations: countValue(conversationsTotal), unread: countValue(unreadMessages) },
-      scout: { questions: countValue(scoutQuestionsMetric), questions7d: countValue(scout7dMetric), questions24h: countValue(scoutTodayMetric), leads: countValue(scoutLeadsTotal), limitedUsersTracked: searchUsageRows.error ? null : (searchUsageRows.data ?? []).length },
+      scout: { questions: countValue(scoutQuestions), questions7d: countValue(scout7d), questions24h: countValue(scoutToday), leads: countValue(scoutLeadsTotal), limitedUsersTracked: searchUsageRows.error ? null : (searchUsageRows.data ?? []).length },
       operations: { propertyAnalysis: countValue(analysisTotal), pendingAnalysis: countValue(pendingAnalysis), marketReports: countValue(marketReportsTotal), emails: countValue(emailsTotal), emails7d: countValue(emails7d) },
     },
     sections: {
