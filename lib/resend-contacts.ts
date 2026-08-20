@@ -11,6 +11,7 @@ type SyncContactInput = {
   lastName?: string | null;
   unsubscribed?: boolean;
   audience?: ResendAudienceKey;
+  properties?: Record<string, string | number | boolean | null | undefined>;
 };
 
 type ResendAudience = { id: string; name: string };
@@ -90,6 +91,9 @@ export async function syncResendContact(input: SyncContactInput) {
     first_name: input.firstName?.trim() || undefined,
     last_name: input.lastName?.trim() || undefined,
     unsubscribed: input.unsubscribed === true,
+    properties: input.properties
+      ? Object.fromEntries(Object.entries(input.properties).filter(([, value]) => value !== undefined && value !== null))
+      : undefined,
   };
 
   const createRes = await resendFetch(`/audiences/${audienceId}/contacts`, {
@@ -129,13 +133,16 @@ export async function removeResendContact(emailInput: string | null | undefined,
 }
 
 export async function moveResendContactToPaid(input: Omit<SyncContactInput, 'audience'>) {
-  await syncResendContact({ ...input, audience: 'paid' });
-  try {
-    await removeResendContact(input.email, 'signed_up');
-  } catch (err) {
-    // Paid tagging is the important part. Do not fail Stripe processing if the
-    // cleanup from the free-user audience has a transient issue.
-    console.error('[resend-contacts] paid audience cleanup error:', err);
-  }
-  return { ok: true, action: 'moved_to_paid' };
+  // Keep paid users in the signed-up audience so they still receive broad
+  // marketplace/new-listing/new-buyer-request updates. Paid-only/account-specific
+  // messages are transactional and should be sent directly from app events.
+  await syncResendContact({
+    ...input,
+    audience: 'signed_up',
+    properties: {
+      ...(input.properties ?? {}),
+      lifecycle_stage: 'paid',
+    },
+  });
+  return { ok: true, action: 'marked_paid_in_signed_up_audience' };
 }

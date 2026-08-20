@@ -171,7 +171,13 @@ export async function GET(request: NextRequest) {
 
         if (user.email) {
           try {
-            await syncResendContact({ email: user.email, firstName: firstName ?? profile?.first_name ?? null, lastName, audience: 'signed_up' })
+            await syncResendContact({
+              email: user.email,
+              firstName: firstName ?? profile?.first_name ?? null,
+              lastName,
+              audience: 'signed_up',
+              properties: { lifecycle_stage: 'free' },
+            })
           } catch (contactErr) {
             console.error('[auth/callback] Resend contact sync error:', contactErr)
           }
