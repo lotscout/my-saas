@@ -13,7 +13,7 @@ const GUEST_COOKIE = 'ls_guest_searches';
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
 const SYSTEM_PROMPT =
-  'You are Scout Search, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually 3 to 6 short bullets or 1 to 3 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout Search is, say you are Scout Search, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it compact with 3 short sections: What is happening, Why it matters, Scout take. End only with a useful next step, not a salesy prompt.';
+  'You are Scout Search, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually under 120 words. Use 3 to 5 short bullets or 1 to 2 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout Search is, say you are Scout Search, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it under 180 words with 3 short sections: What is happening, Why it matters, Scout take. Use LotScout context first and do not wait on live web data unless the user explicitly asks for live sources. End only with a useful next step, not a salesy prompt.';
 
 const PRIVACY_NOTE =
   'The LotScout market data below is aggregated, non-sensitive context. Never reveal individual seller names, exact buyer contact information, or any private user data — only speak to aggregate market conditions and publicly listed property details.';
@@ -89,14 +89,14 @@ function classifyError(err: unknown): string {
 
 function shouldUseWebSearch(question: string): boolean {
   const q = question.toLowerCase();
-  const currentSignals = [
-    'current', 'latest', 'today', 'this week', 'this month', 'right now', 'now',
-    '2026', 'market update', 'market analysis', 'inventory', 'days on market',
-    'median price', 'price trend', 'mortgage rate', 'interest rate', 'recent sales',
-    'news', 'policy change', 'zoning change', 'permit', 'permits', 'population growth',
-    'job growth', 'data for', 'statistics', 'stats', 'forecast'
+  // Claude's hosted web search is useful but slow. Scout should feel instant by default,
+  // so only use live web sources when the user clearly asks for them.
+  const explicitLiveSignals = [
+    'search the web', 'web search', 'use live sources', 'live sources', 'cite sources',
+    'latest news', 'breaking news', 'current mortgage rate', 'current interest rate',
+    "today's mortgage rate", "today's interest rate"
   ];
-  return currentSignals.some(signal => q.includes(signal));
+  return explicitLiveSignals.some(signal => q.includes(signal));
 }
 
 function scrubInternalPhrases(text: string): string {
@@ -522,7 +522,7 @@ export async function POST(request: NextRequest) {
         for (let i = 0; i < (useTools ? 2 : 1); i++) {
           const stream = await client.messages.stream({
             model: 'claude-sonnet-5',
-            max_tokens: useTools ? 900 : 700,
+            max_tokens: useTools ? 650 : 450,
             thinking: { type: 'disabled' },
             system,
             ...(useTools ? { tools } : {}),
