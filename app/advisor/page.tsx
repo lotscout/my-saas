@@ -43,6 +43,7 @@ const INK = '#0D1F16';
 const MUTED = '#717973';
 const GREEN = '#1D9E75';
 const CHIP_BG = '#E7F3EC';
+const PAGE_BG = '#F6F8F4';
 
 function newId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -437,7 +438,7 @@ export default function AdvisorPage() {
   const showRemaining = access && !access.unlimited && typeof access.remaining === 'number';
 
   const blockedCard = limitHit && (
-    <div className="w-full max-w-xl mx-auto bg-white border border-black/10 rounded-2xl p-6 text-center shadow-sm">
+    <div className="w-full max-w-xl mx-auto bg-white/90 backdrop-blur border border-emerald-900/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-[0_24px_80px_rgba(13,31,22,0.10)]">
       {limitHit === 'guest' ? (
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached the guest limit.</p>
@@ -453,11 +454,11 @@ export default function AdvisorPage() {
               onChange={e => setLeadEmail(e.target.value)}
               required
               placeholder="you@example.com"
-              className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/25"
+              className="w-full rounded-2xl border border-emerald-900/10 bg-[#F9FBF7] px-4 py-3 text-base focus:outline-none focus:ring-4 focus:ring-[#1D9E75]/15 focus:border-[#1D9E75]/50 transition"
               style={{ color: INK }}
             />
             {leadError && <p className="text-sm text-red-600">{leadError}</p>}
-            <button type="submit" disabled={leadLoading} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: GREEN }}>
+            <button type="submit" disabled={leadLoading} className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold text-base shadow-lg shadow-emerald-900/10 transition hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-60 disabled:hover:translate-y-0" style={{ backgroundColor: GREEN }}>
               {leadLoading ? 'Saving…' : 'Continue with Scout Search'}
             </button>
           </form>
@@ -466,7 +467,7 @@ export default function AdvisorPage() {
         <>
           <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
           <p className="text-base mb-4" style={{ color: MUTED }}>Get Scout Search for $20/mo, or upgrade to any paid LotScout plan, for unlimited Scout Search and saved reports.</p>
-          <a href="/pricing" onClick={() => track('scout_upgrade_click', { source: 'free_limit_card' })} className="inline-block text-white px-6 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90" style={{ backgroundColor: GREEN }}>
+          <a href="/pricing" onClick={() => track('scout_upgrade_click', { source: 'free_limit_card' })} className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold text-base shadow-lg shadow-emerald-900/10 transition hover:-translate-y-0.5 hover:opacity-95" style={{ backgroundColor: GREEN }}>
             View options
           </a>
         </>
@@ -477,8 +478,8 @@ export default function AdvisorPage() {
   const composer = (large: boolean) => (
     <form
       onSubmit={e => { e.preventDefault(); send(input); }}
-      className={`w-full flex items-end gap-2 bg-white rounded-2xl border border-black/10 px-2.5 py-2 sm:px-3 sm:py-2.5 ${large ? 'shadow-lg' : 'shadow-md'} ${limitHit ? 'opacity-60' : ''}`}
-      style={large ? { minHeight: '3.35rem' } : undefined}
+      className={`w-full flex items-end gap-2 bg-white/95 backdrop-blur rounded-[1.75rem] border border-emerald-900/10 px-3 py-2.5 sm:px-4 sm:py-3 ring-1 ring-white/60 ${large ? 'shadow-[0_26px_90px_rgba(13,31,22,0.16)]' : 'shadow-[0_16px_50px_rgba(13,31,22,0.10)]'} ${limitHit ? 'opacity-60' : ''}`}
+      style={large ? { minHeight: '4rem' } : undefined}
     >
       <textarea
         ref={inputRef}
@@ -487,8 +488,8 @@ export default function AdvisorPage() {
         onKeyDown={onKeyDown}
         disabled={!!limitHit}
         rows={1}
-        placeholder={limitHit ? 'Limit reached' : 'Ask anything about real estate...'}
-        className="flex-grow resize-none bg-transparent px-2 py-1.5 text-base sm:text-lg leading-snug sm:leading-relaxed placeholder:text-[#717973] focus:outline-none disabled:cursor-not-allowed max-h-32 sm:max-h-40"
+        placeholder={limitHit ? 'Limit reached' : 'Ask Scout about a market, parcel, zoning rule, or deal...'}
+        className="flex-grow resize-none bg-transparent px-2 py-2 text-base sm:text-lg leading-snug sm:leading-relaxed placeholder:text-[#717973]/80 focus:outline-none disabled:cursor-not-allowed max-h-32 sm:max-h-40"
         style={{ color: INK }}
         aria-label="Scout Search"
       />
@@ -496,7 +497,7 @@ export default function AdvisorPage() {
         type="submit"
         disabled={loading || !!limitHit || !input.trim()}
         aria-label="Send"
-        className="shrink-0 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full text-white transition-transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-2xl text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         style={{ backgroundColor: GREEN }}
       >
         <span className="material-symbols-outlined text-lg sm:text-xl">arrow_upward</span>
@@ -515,12 +516,22 @@ export default function AdvisorPage() {
   );
 
   const sidebarInner = (
-    <div className="flex flex-col h-full">
-      {/* Top rows — clean text items */}
-      <div className="px-2 pt-3 sm:pt-4">
+    <div className="flex flex-col h-full bg-white/80 backdrop-blur-xl">
+      <div className="px-4 pt-5 pb-3 border-b border-emerald-900/10">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-900/15" style={{ backgroundColor: GREEN }}>
+            <span className="material-symbols-outlined text-xl">travel_explore</span>
+          </div>
+          <div>
+            <p className="text-sm font-extrabold leading-tight" style={{ color: INK }}>Scout Search</p>
+            <p className="text-xs" style={{ color: MUTED }}>Land intelligence</p>
+          </div>
+        </div>
+      </div>
+      <div className="px-3 pt-3 sm:pt-4 space-y-1">
         <button
           onClick={newChat}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-base sm:text-lg text-left transition-colors hover:bg-black/5"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm sm:text-base font-semibold text-left transition-colors hover:bg-emerald-50"
           style={{ color: INK }}
         >
           <span className="material-symbols-outlined text-2xl" style={{ color: MUTED }}>add</span>
@@ -528,7 +539,7 @@ export default function AdvisorPage() {
         </button>
         <button
           onClick={() => { setShowSaved(true); setMobileSidebar(false); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-base sm:text-lg text-left transition-colors hover:bg-black/5"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm sm:text-base font-semibold text-left transition-colors hover:bg-emerald-50"
           style={{ color: INK }}
         >
           <span className="material-symbols-outlined text-2xl" style={{ color: MUTED }}>bookmark</span>
@@ -537,8 +548,8 @@ export default function AdvisorPage() {
       </div>
 
       {/* Recents */}
-      <div className="flex-grow overflow-y-auto px-2 pb-3 mt-3">
-        <p className="px-3 pb-1 text-sm font-semibold uppercase tracking-wider" style={{ color: MUTED }}>Recents</p>
+      <div className="flex-grow overflow-y-auto px-3 pb-4 mt-4">
+        <p className="px-3 pb-2 text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: MUTED }}>Recents</p>
         {conversations.length === 0 ? (
           <p className="px-3 py-2 text-xs" style={{ color: MUTED }}>
             {access?.status === 'guest' ? 'Sign in to save your chat history.' : 'No recent chats yet.'}
@@ -550,7 +561,7 @@ export default function AdvisorPage() {
                 key={c.id}
                 onClick={() => loadConversation(c)}
                 title={c.title}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-base sm:text-lg text-left transition-colors ${c.id === currentId ? '' : 'hover:bg-black/5'}`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm sm:text-base text-left transition-colors ${c.id === currentId ? 'shadow-sm' : 'hover:bg-emerald-50'}`}
                 style={{ color: INK, backgroundColor: c.id === currentId ? CHIP_BG : undefined }}
               >
                 <span className="material-symbols-outlined text-xl shrink-0" style={{ color: MUTED }}>chat_bubble</span>
@@ -567,13 +578,14 @@ export default function AdvisorPage() {
   );
 
   return (
-    <div className="bg-surface h-[100svh] flex flex-col overflow-hidden">
+    <div className="h-[100svh] flex flex-col overflow-hidden" style={{ backgroundColor: PAGE_BG }}>
       <Header />
       <div className="h-16 shrink-0" aria-hidden />
 
-      <div className="flex-grow flex w-full min-h-0">
+      <div className="flex-grow flex w-full min-h-0 relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(29,158,117,0.16),transparent_34%),radial-gradient(circle_at_78%_8%,rgba(13,31,22,0.08),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.80),rgba(246,248,244,0.95))]" />
         {/* Desktop sidebar (always visible) */}
-        <aside className="hidden md:flex md:flex-col w-64 shrink-0 border-r border-black/10 bg-white overflow-hidden">
+        <aside className="hidden md:flex md:flex-col w-72 shrink-0 border-r border-emerald-900/10 bg-white/70 backdrop-blur-xl overflow-hidden relative z-10">
           {sidebarInner}
         </aside>
 
@@ -581,16 +593,16 @@ export default function AdvisorPage() {
         {mobileSidebar && (
           <div className="md:hidden fixed inset-0 z-40">
             <div className="absolute inset-0 bg-black/30" onClick={() => setMobileSidebar(false)} />
-            <div className="absolute left-0 top-0 bottom-0 w-72 max-w-[82vw] bg-white shadow-xl">{sidebarInner}</div>
+            <div className="absolute left-0 top-0 bottom-0 w-72 max-w-[82vw] bg-white shadow-2xl">{sidebarInner}</div>
           </div>
         )}
 
-        <div className="flex-grow flex flex-col min-w-0 min-h-0">
+        <div className="flex-grow flex flex-col min-w-0 min-h-0 relative z-10">
           {/* Mobile pull-out history control */}
           <button
             onClick={() => setMobileSidebar(true)}
             aria-label="Open Scout Search history"
-            className="md:hidden fixed left-2 top-20 z-30 w-10 h-10 rounded-full bg-white border border-black/10 shadow-md flex items-center justify-center active:scale-95"
+            className="md:hidden fixed left-3 top-20 z-30 w-11 h-11 rounded-2xl bg-white/90 backdrop-blur border border-emerald-900/10 shadow-lg flex items-center justify-center active:scale-95"
             style={{ color: INK }}
           >
             <span className="material-symbols-outlined text-xl">menu</span>
@@ -598,31 +610,35 @@ export default function AdvisorPage() {
 
           {isEmpty ? (
             /* ── Centered empty state ── */
-            <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-3 sm:px-4 pb-3 sm:pb-6 min-h-0">
-              <div className="flex-grow flex flex-col items-center justify-center gap-3 sm:gap-6 pt-1">
+            <main className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-8 min-h-0">
+              <div className="flex-grow flex flex-col items-center justify-center gap-5 sm:gap-7 pt-1">
                 <div className="flex flex-col items-center text-center">
-                  <h1 className="font-headline text-4xl sm:text-6xl md:text-7xl font-extrabold text-primary tracking-tighter leading-tight">
+                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/70 backdrop-blur px-3 py-1.5 text-xs font-bold shadow-sm" style={{ color: GREEN }}>
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: GREEN }} />
+                    Fast land intelligence
+                  </div>
+                  <h1 className="font-headline text-5xl sm:text-7xl md:text-8xl font-black text-primary tracking-[-0.07em] leading-[0.88]">
                     Scout Search
                   </h1>
-                  <p className="mt-1 sm:mt-3 text-sm sm:text-lg" style={{ color: MUTED }}>What land market are we researching today?</p>
+                  <p className="mt-5 max-w-2xl text-base sm:text-xl leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, and deal strategy. Get the useful version first.</p>
                 </div>
 
                 {limitHit ? (
-                  <div className="w-full max-w-2xl">{blockedCard}</div>
+                  <div className="w-full max-w-3xl">{blockedCard}</div>
                 ) : (
                   <>
-                    <div className="w-full max-w-2xl">
+                    <div className="w-full max-w-3xl">
                       {composer(true)}
                       {remainingLine}
                     </div>
 
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2.5 justify-center max-w-2xl">
+                    <div className="flex flex-wrap gap-2 sm:gap-3 justify-center max-w-3xl">
                       {SUGGESTIONS.map(s => (
                         <button
                           key={s}
                           onClick={() => send(s)}
                           disabled={loading}
-                          className="text-xs sm:text-base leading-tight font-normal rounded-full px-3 py-1.5 sm:px-4 sm:py-2 border border-black/25 bg-white text-black transition-colors hover:bg-surface-container-low disabled:opacity-50"
+                          className="text-xs sm:text-sm leading-tight font-semibold rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 border border-emerald-900/10 bg-white/80 backdrop-blur text-[#0D1F16] shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
                         >
                           {s}
                         </button>
@@ -636,21 +652,22 @@ export default function AdvisorPage() {
             </main>
           ) : (
             /* ── Active chat state ── */
-            <main className="flex-grow flex flex-col w-full max-w-3xl mx-auto px-3 sm:px-4 pb-3 sm:pb-4 min-h-0">
-              <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-4 sm:space-y-6 py-3 sm:py-4 min-h-0">
+            <main className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-5 min-h-0">
+              <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-5 sm:space-y-7 py-5 sm:py-7 pr-1 min-h-0">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
                     {m.role === 'assistant' && (
-                      <div className="mb-1.5">
-                        <span className="text-sm font-bold" style={{ color: INK }}>Scout Search</span>
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-xl flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: GREEN }}><span className="material-symbols-outlined text-base">travel_explore</span></span>
+                        <span className="text-sm font-extrabold" style={{ color: INK }}>Scout</span>
                       </div>
                     )}
 
                     <div
-                      className={`rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 text-base sm:text-lg leading-snug sm:leading-relaxed ${
-                        m.role === 'user' ? 'max-w-[75%] rounded-br-md whitespace-pre-wrap' : 'max-w-[85%] rounded-bl-md border border-black/5 shadow-sm'
+                      className={`rounded-[1.6rem] px-4 py-3 sm:px-5 sm:py-4 text-base sm:text-[17px] leading-snug sm:leading-relaxed ${
+                        m.role === 'user' ? 'max-w-[82%] rounded-br-md whitespace-pre-wrap shadow-sm' : 'max-w-[92%] rounded-bl-md border border-emerald-900/10 shadow-[0_18px_60px_rgba(13,31,22,0.08)]'
                       }`}
-                      style={m.role === 'user' ? { backgroundColor: CHIP_BG, color: INK } : { backgroundColor: '#ffffff', color: INK }}
+                      style={m.role === 'user' ? { backgroundColor: GREEN, color: '#ffffff' } : { backgroundColor: 'rgba(255,255,255,0.92)', color: INK }}
                     >
                       {m.content
                         ? (m.role === 'assistant' ? <Markdown text={m.content} /> : m.content)
@@ -669,7 +686,7 @@ export default function AdvisorPage() {
                         onClick={() => handleSaveClick(i)}
                         disabled={!!saved[i]}
                         title={access.canSave ? 'Summarize and save this chat as a report' : 'Saving reports requires a LotScout plan'}
-                        className="mt-1.5 flex items-center gap-1 text-sm font-semibold hover:underline disabled:no-underline"
+                        className="mt-2 flex items-center gap-1.5 text-sm font-bold hover:underline disabled:no-underline"
                         style={{ color: saved[i] ? MUTED : access.canSave ? GREEN : MUTED }}
                       >
                         <span className="material-symbols-outlined text-base">
@@ -702,8 +719,8 @@ export default function AdvisorPage() {
       {showSaved && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowSaved(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
+          <div className="relative bg-white rounded-[2rem] shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-emerald-900/10">
               <h2 className="text-lg font-bold" style={{ color: INK }}>Saved reports</h2>
               <button onClick={() => setShowSaved(false)} className="p-1 rounded hover:bg-black/5" aria-label="Close">
                 <span className="material-symbols-outlined" style={{ color: MUTED }}>close</span>
@@ -718,7 +735,7 @@ export default function AdvisorPage() {
                 </p>
               ) : (
                 savedReports.map((r, i) => (
-                  <div key={i} className="border border-black/10 rounded-xl p-3">
+                  <div key={i} className="border border-emerald-900/10 rounded-2xl p-3 bg-[#F9FBF7]">
                     <p className="text-sm font-semibold truncate mb-1" style={{ color: INK }}>{r.title}</p>
                     <div className="text-sm max-h-24 overflow-hidden" style={{ color: MUTED }}>{r.content}</div>
                     {access?.canSave && (
