@@ -33,7 +33,7 @@ const SUGGESTIONS = [
 ];
 
 const DISCLAIMER = 'Educational information only, not financial, legal, or investment advice.';
-const GUEST_LIMIT = 3;
+const GUEST_LIMIT = 1;
 const GUEST_COUNT_KEY = 'ls_guest_count';
 const SESSION_KEY = 'ls_advisor_session';
 const ANALYTICS_SESSION_KEY = 'ls_scout_analytics_session';
@@ -216,7 +216,7 @@ export default function AdvisorPage() {
     const q = text.trim();
     if (!q || loading || limitHit) return;
 
-    // Enforce the guest limit client-side before sending a 4th question.
+    // Enforce the one-question guest limit client-side before sending another question.
     const isGuest = access?.status === 'guest';
     if (isGuest && guestCount >= GUEST_LIMIT) {
       setLimitHit('guest');
@@ -441,8 +441,8 @@ export default function AdvisorPage() {
     <div className="w-full max-w-xl mx-auto bg-white/90 backdrop-blur border border-emerald-900/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-[0_24px_80px_rgba(13,31,22,0.10)]">
       {limitHit === 'guest' ? (
         <>
-          <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached the guest limit.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Enter your email to keep using Scout Search, then create a password to save your searches.</p>
+          <p className="text-lg font-semibold mb-1" style={{ color: INK }}>Create a free account to keep going.</p>
+          <p className="text-base mb-4" style={{ color: MUTED }}>You got one free Scout question. Sign up to ask more and save your searches.</p>
           <p className="text-sm mb-4" style={{ color: MUTED }}>
             Already have a LotScout account?{' '}
           <a href="/sign-in?redirect=/scout" onClick={() => track('scout_signin_click', { source: 'guest_limit_card' })} className="font-semibold hover:underline" style={{ color: GREEN }}>Sign in to continue</a>.
@@ -507,8 +507,9 @@ export default function AdvisorPage() {
 
   const remainingLine = showRemaining && !limitHit && (
     <p className="text-xs sm:text-sm text-center mt-1.5 sm:mt-2" style={{ color: MUTED }}>
-      {access!.remaining} {access!.remaining === 1 ? 'question' : 'questions'} left
-      {access!.status === 'guest' ? ' as a guest' : ' today'}.
+      {access!.status === 'guest'
+        ? `${access!.remaining} free ${access!.remaining === 1 ? 'question' : 'questions'} before signup`
+        : `${access!.remaining} ${access!.remaining === 1 ? 'question' : 'questions'} left today`}.
       {access!.status === 'free' && (
         <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Get unlimited</button>
       )}
