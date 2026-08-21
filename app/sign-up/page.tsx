@@ -53,49 +53,46 @@ export default function SignUpPage() {
       return;
     }
 
-    const supabase = createClient();
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { first_name: firstName, last_name: lastName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+    const signupRes = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        password,
+        signupSource,
+        signupMedium,
+        signupCampaign,
+      }),
     });
+    const signupJson = await signupRes.json().catch(() => ({}));
 
-    if (signUpError) {
-      setError(signUpError.message);
+    if (!signupRes.ok) {
+      setError(signupJson.error || 'Could not create account. Please try again.');
       setLoading(false);
       return;
     }
 
-    if (data.user) {
-      await fetch('/api/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: data.user.id,
-          firstName,
-          lastName,
-          email,
-          signupSource,
-          signupMedium,
-          signupCampaign,
-        }),
-      });
+    const supabase = createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-      localStorage.removeItem('utm_source');
-      localStorage.removeItem('utm_medium');
-      localStorage.removeItem('utm_campaign');
-      track('signup_completed', {
-        source: signupSource,
-        medium: signupMedium,
-        campaign: signupCampaign,
-      });
+    if (signInError) {
+      setError('Account created, but automatic sign in failed. Please sign in with your new password.');
+      setLoading(false);
+      return;
     }
 
-    setEmailSent(true);
-    setLoading(false);
+    localStorage.removeItem('utm_source');
+    localStorage.removeItem('utm_medium');
+    localStorage.removeItem('utm_campaign');
+    track('signup_completed', {
+      source: signupSource,
+      medium: signupMedium,
+      campaign: signupCampaign,
+    });
+
+    window.location.replace('/marketplace');
   }
 
   if (emailSent) {
