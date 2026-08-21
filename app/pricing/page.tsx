@@ -160,8 +160,8 @@ export default function PricingPage() {
         {/* ── Mobile stacked tier cards ── */}
         <div className="md:hidden space-y-5">
           <div className="text-center px-2">
-            <h1 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Choose your plan</h1>
-            <p className="mt-1 text-sm text-secondary">Start with Priority if you want unlimited listings and faster reports.</p>
+            <h1 className="font-headline text-2xl font-extrabold text-primary tracking-tight">LotScout plans</h1>
+            <p className="mt-1 text-sm text-secondary">Choose the LotScout access level that fits how you buy, sell, and research land.</p>
           </div>
 
           {/* Billing toggle (shares isAnnual with the desktop table) */}
@@ -183,20 +183,23 @@ export default function PricingPage() {
             <span className="text-emerald-700 text-xs font-bold text-center">Get 3 months free (25% off) with annual billing</span>
           </div>
 
-          {/* LOTSCOUT SEARCH — standalone */}
+          {/* LOTSCOUT SEARCH */}
           <div className="bg-white rounded-3xl border-2 border-[#1D9E75]/30 p-5 shadow-sm">
             <p className="text-[#1D9E75] font-bold text-sm tracking-widest uppercase mb-2">LotScout Search</p>
             <div className="flex items-baseline gap-1 mb-0.5">
               <span className="text-4xl font-extrabold text-primary font-headline">${SEARCH_MONTHLY_PRICE}</span>
               <span className="text-secondary font-medium text-sm">/mo</span>
             </div>
-            <p className="text-xs text-secondary/70 mb-4">Standalone AI access · included with paid LotScout plans</p>
+            <div className="text-xs text-secondary/70 mb-4 space-y-0.5">
+              <p>Unlimited Scout AI search and saved reports.</p>
+              <p>Included with paid LotScout plans.</p>
+            </div>
             <button
               onClick={() => handleCheckout('searchProMonthly')}
               disabled={!!loading || hasPaidLotScoutPlan}
               className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
             >
-              {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get LotScout Search'}
+              {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get Started'}
             </button>
             <ul className="mt-4 space-y-2.5">
               {['Unlimited AI search questions', 'Saved Scout reports', 'Market and land research', 'No marketplace plan required'].map((feature) => (
@@ -222,9 +225,9 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout(getPriceKey('priority'))}
               disabled={!!loading || userTier === 'priority'}
-              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-emerald-900 text-emerald-200 cursor-default' : 'bg-emerald-300 text-emerald-950 hover:bg-emerald-200'}`}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
             >
-              {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Priority'}
+              {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
             </button>
             <KeyFeatures tier="priority" dark />
             <button
@@ -252,7 +255,7 @@ export default function PricingPage() {
               disabled={!!loading || userTier === 'standard'}
               className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
             >
-              {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Standard'}
+              {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
             </button>
             <KeyFeatures tier="standard" />
             <button
@@ -278,10 +281,9 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout(getPriceKey('exclusive'))}
               disabled={!!loading || userTier === 'exclusive'}
-              className={`w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'hover:opacity-90'}`}
-              style={userTier === 'exclusive' ? undefined : { backgroundColor: '#1b4332' }}
+              className={`w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] hover:bg-[#14795A]'}`}
             >
-              {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Exclusive'}
+              {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
             </button>
             <KeyFeatures tier="exclusive" />
             <button
@@ -295,14 +297,15 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Standalone Scout Search product */}
+        {/* Scout Search add-on */}
         <div className="hidden md:flex mb-6 bg-white rounded-2xl border border-[#1D9E75]/25 p-6 shadow-sm items-center justify-between gap-6">
           <div>
-            <p className="text-[#1D9E75] text-xs font-black uppercase tracking-widest mb-2">Standalone AI product</p>
+            <p className="text-[#1D9E75] text-xs font-black uppercase tracking-widest mb-2">Scout Search</p>
             <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">LotScout Search</h2>
-            <p className="mt-1 text-sm text-secondary max-w-2xl">
-              Unlimited Scout AI search and saved reports for ${SEARCH_MONTHLY_PRICE}/month. Included automatically with Standard, Priority, and Exclusive plans.
-            </p>
+            <div className="mt-1 text-sm text-secondary max-w-2xl space-y-1">
+              <p>Unlimited Scout AI search and saved reports for ${SEARCH_MONTHLY_PRICE}/month.</p>
+              <p>Included with Standard, Priority, and Exclusive plans.</p>
+            </div>
           </div>
           <div className="shrink-0 w-64">
             <div className="flex items-baseline gap-1 justify-end mb-2">
@@ -314,7 +317,7 @@ export default function PricingPage() {
               disabled={!!loading || hasPaidLotScoutPlan}
               className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
             >
-              {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get LotScout Search'}
+              {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get Started'}
             </button>
           </div>
         </div>
@@ -325,8 +328,12 @@ export default function PricingPage() {
           {/* ── Header row ── */}
           <div className={`${GRID_CLS} border-b border-outline-variant/10`}>
 
-            {/* Top-left: billing toggle */}
+            {/* Top-left: LotScout header + billing toggle */}
             <div className="p-5 flex flex-col justify-center gap-2">
+              <div>
+                <p className="text-[#1D9E75] text-xs font-black uppercase tracking-widest mb-1">LotScout</p>
+                <h1 className="font-headline text-xl font-extrabold text-primary tracking-tight">Choose your plan</h1>
+              </div>
               <div className="inline-flex items-center p-1 bg-surface-container-high rounded-full self-start">
                 <button
                   onClick={() => setIsAnnual(false)}
@@ -364,7 +371,7 @@ export default function PricingPage() {
                 className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'standard'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'border-2 border-primary text-primary hover:bg-primary/5'
+                    : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'
                 }`}
               >
                 {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
@@ -394,7 +401,7 @@ export default function PricingPage() {
                 className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'priority'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'
                 }`}
               >
                 {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
@@ -417,7 +424,7 @@ export default function PricingPage() {
                 className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'exclusive'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'border-2 border-primary text-primary hover:bg-primary/5'
+                    : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'
                 }`}
               >
                 {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
