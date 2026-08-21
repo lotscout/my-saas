@@ -613,14 +613,10 @@ export default function AdvisorPage() {
             <main className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-8 min-h-0">
               <div className="flex-grow flex flex-col items-center justify-center gap-5 sm:gap-7 pt-1">
                 <div className="flex flex-col items-center text-center">
-                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/70 backdrop-blur px-3 py-1.5 text-xs font-bold shadow-sm" style={{ color: GREEN }}>
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: GREEN }} />
-                    Fast land intelligence
-                  </div>
                   <h1 className="font-headline text-5xl sm:text-7xl md:text-8xl font-black text-primary tracking-[-0.07em] leading-[0.88]">
                     Scout Search
                   </h1>
-                  <p className="mt-5 max-w-2xl text-base sm:text-xl leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, and deal strategy. Get the useful version first.</p>
+                  <p className="mt-5 max-w-2xl text-base sm:text-xl leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, and deal strategy.</p>
                 </div>
 
                 {limitHit ? (
