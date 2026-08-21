@@ -197,7 +197,7 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout('searchProMonthly')}
               disabled={!!loading || hasPaidLotScoutPlan}
-              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-green-700 text-white hover:bg-green-800'}`}
             >
               {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get Started'}
             </button>
@@ -225,7 +225,7 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout(getPriceKey('priority'))}
               disabled={!!loading || userTier === 'priority'}
-              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'priority' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-green-700 text-white hover:bg-green-800'}`}
             >
               {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
             </button>
@@ -253,7 +253,7 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout(getPriceKey('standard'))}
               disabled={!!loading || userTier === 'standard'}
-              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${userTier === 'standard' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-green-700 text-white hover:bg-green-800'}`}
             >
               {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
             </button>
@@ -281,7 +281,7 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout(getPriceKey('exclusive'))}
               disabled={!!loading || userTier === 'exclusive'}
-              className={`w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] hover:bg-[#14795A]'}`}
+              className={`w-full py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-95 disabled:opacity-60 ${userTier === 'exclusive' ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-green-700 hover:bg-green-800'}`}
             >
               {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
             </button>
@@ -315,7 +315,7 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout('searchProMonthly')}
               disabled={!!loading || hasPaidLotScoutPlan}
-              className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'}`}
+              className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-green-700 text-white hover:bg-green-800'}`}
             >
               {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get Started'}
             </button>
@@ -371,7 +371,7 @@ export default function PricingPage() {
                 className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'standard'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'
+                    : 'bg-green-700 text-white hover:bg-green-800'
                 }`}
               >
                 {userTier === 'standard' ? 'Current Plan' : loading === getPriceKey('standard') ? 'Loading…' : 'Get Started'}
@@ -401,7 +401,7 @@ export default function PricingPage() {
                 className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'priority'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'
+                    : 'bg-green-700 text-white hover:bg-green-800'
                 }`}
               >
                 {userTier === 'priority' ? 'Current Plan' : loading === getPriceKey('priority') ? 'Loading…' : 'Get Started'}
@@ -424,7 +424,7 @@ export default function PricingPage() {
                 className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'exclusive'
                     ? 'bg-surface-container-high text-secondary cursor-default'
-                    : 'bg-[#1D9E75] text-white hover:bg-[#14795A]'
+                    : 'bg-green-700 text-white hover:bg-green-800'
                 }`}
               >
                 {userTier === 'exclusive' ? 'Current Plan' : loading === getPriceKey('exclusive') ? 'Loading…' : 'Get Started'}
@@ -469,7 +469,7 @@ export default function PricingPage() {
           </div>
           <a
             href="mailto:support@lotscout.com"
-            className="shrink-0 bg-[#1D9E75] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#14795A] transition-all active:scale-95"
+            className="shrink-0 bg-green-700 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-green-800 transition-all active:scale-95"
           >
             Contact Sales
           </a>
