@@ -13,7 +13,7 @@ const GUEST_COOKIE = 'ls_guest_searches';
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
 const SYSTEM_PROMPT =
-  'You are Scout Search, LotScout\'s land intelligence and real estate advisor tool. You help builders, developers, land acquisition teams, investors, realtors, buyers, sellers, and landowners with real estate questions, including off-market land, market trends, zoning and policy changes, pricing, where and what to invest in, buying and selling strategy, financing, development, residential, and commercial real estate. If the user asks who you are, what your name is, or what Scout Search is, say you are Scout Search, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Give practical, specific, current guidance. Provide market updates and make clear recommendations when asked. Keep responses short and conversational, usually 2 to 4 short paragraphs. For broad questions, ask one or two clarifying questions first before giving detailed guidance. Use neutral, educational framing and include a brief one line reminder that this is educational information and not personalized financial, legal, or investment advice, only when giving specific guidance. Never use em dashes. If a question is outside your reliable knowledge or needs authoritative or local data you do not have, say so honestly and point the user to reliable sources such as a licensed local agent, appraiser, attorney, lender, county records, or established sites like the MLS, county assessor, or reputable market data providers. Stay focused on real estate topics and politely redirect clearly unrelated questions. When a user asks for a market update, market analysis, or current conditions for any city, county, metro, or region, use web search to gather real current data: median home or land prices, price trends, inventory levels, days on market, recent sales activity, new construction, population and job growth, and notable local market news. Do not limit yourself to LotScout internal listings. Combine web-sourced market data with any relevant LotScout listing data to give a complete, specific market analysis for the exact area requested. If the user asks about a city like Denver, give Denver-specific data, not just statewide. Never refuse a market analysis by saying you only have statewide or limited data. Use web search to find the specific local data requested. If after searching some specific figure is genuinely unavailable, note that briefly and provide everything else you did find. When giving a market update, structure it with short bold section headers such as Price Trends, Inventory and Demand, Notable Activity, and a short Outlook or Takeaway. Keep each section tight and readable, and cite the general sources or timeframes where relevant. After delivering a market analysis, end by asking if the user would like to save it as a report. A direct request such as give me a market update for Denver is specific enough to answer directly with web search and does not need a clarifying question first.';
+  'You are Scout Search, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually 3 to 6 short bullets or 1 to 3 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout Search is, say you are Scout Search, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it compact with 3 short sections: What is happening, Why it matters, Scout take. End only with a useful next step, not a salesy prompt.';
 
 const PRIVACY_NOTE =
   'The LotScout market data below is aggregated, non-sensitive context. Never reveal individual seller names, exact buyer contact information, or any private user data — only speak to aggregate market conditions and publicly listed property details.';
@@ -85,6 +85,28 @@ function classifyError(err: unknown): string {
   if (status === 404 || /model|not found/.test(msg)) return 'model';
   if (typeof status === 'number') return `api_${status}`;
   return 'unknown';
+}
+
+function shouldUseWebSearch(question: string): boolean {
+  const q = question.toLowerCase();
+  const currentSignals = [
+    'current', 'latest', 'today', 'this week', 'this month', 'right now', 'now',
+    '2026', 'market update', 'market analysis', 'inventory', 'days on market',
+    'median price', 'price trend', 'mortgage rate', 'interest rate', 'recent sales',
+    'news', 'policy change', 'zoning change', 'permit', 'permits', 'population growth',
+    'job growth', 'data for', 'statistics', 'stats', 'forecast'
+  ];
+  return currentSignals.some(signal => q.includes(signal));
+}
+
+function scrubInternalPhrases(text: string): string {
+  return text
+    .replace(/\s*[—–―]\s*/g, ', ')
+    .replace(/^(?:let me|i(?:'|’)ll|i will|i am going to|i'm going to)\s+(?:retry|search|look up|check)[^\n.?!]*(?:[.?!]\s*)?/i, '')
+    .replace(/\b(?:let me|i(?:'|’)ll|i will|i am going to|i'm going to)\s+retry\s+(?:the\s+)?search\b/gi, 'I hit a temporary data issue')
+    .replace(/\bI(?:'|’)m searching[^.?!]*(?:[.?!])?/gi, '')
+    .replace(/\bI am searching[^.?!]*(?:[.?!])?/gi, '')
+    .replace(/\n{3,}/g, '\n\n');
 }
 
 interface Access {
@@ -212,7 +234,7 @@ async function buildLotScoutContext(userId: string | null): Promise<string> {
       .from('listings')
       .select('state, asking_price')
       .in('status', ['active', 'published'])
-      .limit(3000);
+      .limit(750);
     const rows = (listings ?? []) as any[];
     if (rows.length) {
       const byState: Record<string, number> = {};
@@ -234,7 +256,7 @@ async function buildLotScoutContext(userId: string | null): Promise<string> {
       .from('buyer_requests')
       .select('target_regions')
       .eq('status', 'active')
-      .limit(3000);
+      .limit(750);
     const rows = (buyers ?? []) as any[];
     if (rows.length) {
       const byRegion: Record<string, number> = {};
@@ -479,26 +501,28 @@ export async function POST(request: NextRequest) {
   // questions still show in the admin dashboard.
   await insertMessage(user?.id ?? null, 'user', lastUser, conversationId);
 
-  // web_search server tool (Sonnet 5 supports the _20260209 variant). Passed via `as any`
-  // to stay resilient to SDK tool-type version differences.
-  const tools = [{ type: 'web_search_20260209', name: 'web_search', max_uses: 6 }] as any;
+  const useWebSearch = shouldUseWebSearch(lastUser);
+
+  // Keep Scout fast by default. Use live web data only when the question clearly
+  // asks for current market conditions, recent stats, rates, policy/news, or forecasts.
+  const tools = [{ type: 'web_search_20260209', name: 'web_search', max_uses: 2 }] as any;
 
   const readable = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();
       let fullText = '';
       let lastErr: unknown = null;
-      const stripDashes = (s: string) => s.replace(/\s*[—–―]\s*/g, ', ');
+      const cleanChunk = scrubInternalPhrases;
 
       // One full completion, looping over server-tool pauses. Streams text as it
       // arrives; if no deltas were emitted, extracts text blocks from the final
       // message (robust to text / tool_use / tool_result content blocks).
       const attempt = async (useTools: boolean) => {
         let convo: any[] = history.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content }));
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < (useTools ? 2 : 1); i++) {
           const stream = await client.messages.stream({
             model: 'claude-sonnet-5',
-            max_tokens: 2048,
+            max_tokens: useTools ? 900 : 700,
             thinking: { type: 'disabled' },
             system,
             ...(useTools ? { tools } : {}),
@@ -507,7 +531,7 @@ export async function POST(request: NextRequest) {
 
           for await (const ev of stream) {
             if (ev.type === 'content_block_delta' && ev.delta.type === 'text_delta') {
-              const clean = stripDashes(ev.delta.text);
+              const clean = cleanChunk(ev.delta.text);
               fullText += clean;
               controller.enqueue(enc.encode(clean));
             }
@@ -520,20 +544,20 @@ export async function POST(request: NextRequest) {
           }
           if (!fullText.trim()) {
             const txt = extractText(final);
-            if (txt) { const clean = stripDashes(txt); fullText += clean; controller.enqueue(enc.encode(clean)); }
+            if (txt) { const clean = cleanChunk(txt); fullText += clean; controller.enqueue(enc.encode(clean)); }
           }
           break;
         }
       };
 
       try {
-        await attempt(true);
+        await attempt(useWebSearch);
       } catch (err) {
         lastErr = err;
-        console.error('[advisor] generation error (with web_search):', err instanceof Error ? (err.stack ?? err.message) : err);
-        // Graceful fallback: if web search / tool use failed before producing any
-        // answer, retry once WITHOUT tools so the model still answers from knowledge.
-        if (!fullText.trim()) {
+        console.error(`[advisor] generation error (${useWebSearch ? 'with' : 'without'} web_search):`, err instanceof Error ? (err.stack ?? err.message) : err);
+        // Graceful fallback: if live data/tool use failed before producing any
+        // answer, answer from model knowledge without exposing retry behavior.
+        if (useWebSearch && !fullText.trim()) {
           try {
             await attempt(false);
             lastErr = null;
@@ -546,7 +570,10 @@ export async function POST(request: NextRequest) {
 
       if (!fullText.trim()) {
         const type = classifyError(lastErr);
-        controller.enqueue(enc.encode(`Sorry, I could not complete that request right now (${type}). Please try again in a moment.`));
+        const fallback = type === 'timeout' || type === 'tool'
+          ? 'I hit a temporary live-data issue, but here is the practical short version: check recent comps, active inventory, days on market, permit activity, and buyer demand before making a call. If you share the city or parcel details, I can narrow it down.'
+          : 'I could not complete that request right now. Try again in a moment, or ask for a narrower market, parcel, or strategy question.';
+        controller.enqueue(enc.encode(fallback));
       }
 
       if (user && fullText.trim()) {
