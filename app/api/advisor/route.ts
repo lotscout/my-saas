@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 300;
 
 const GUEST_LIMIT = 1;          // one strong free question for logged-out guests
-const FREE_DAILY_LIMIT = 5;     // questions per calendar day for free accounts
+const FREE_WEEKLY_LIMIT = 2;    // questions per UTC week for free accounts
 const GUEST_COOKIE = 'ls_guest_searches';
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
@@ -18,8 +18,12 @@ const SYSTEM_PROMPT =
 const PRIVACY_NOTE =
   'The LotScout market data below is aggregated, non-sensitive context. Never reveal individual seller names, exact buyer contact information, or any private user data — only speak to aggregate market conditions and publicly listed property details.';
 
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
+function currentWeekKey(): string {
+  const d = new Date();
+  const day = d.getUTCDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + diffToMonday));
+  return monday.toISOString().slice(0, 10);
 }
 
 // Robustly pull the final answer text out of a message: join all text blocks rather
@@ -155,14 +159,14 @@ async function getUserAccess(userId: string): Promise<Access> {
   return { status: 'free', unlimited: false, canSave: false };
 }
 
-async function getFreeUsedToday(userId: string): Promise<number> {
+async function getFreeUsedThisWeek(userId: string): Promise<number> {
   try {
     const supabase = createServiceClient();
     const { data } = await supabase
       .from('search_usage')
       .select('count')
       .eq('user_id', userId)
-      .eq('usage_date', today())
+      .eq('usage_date', currentWeekKey())
       .maybeSingle();
     return (data as any)?.count ?? 0;
   } catch {
@@ -170,12 +174,12 @@ async function getFreeUsedToday(userId: string): Promise<number> {
   }
 }
 
-async function incrementFree(userId: string, current: number): Promise<void> {
+async function incrementFreeWeekly(userId: string, current: number): Promise<void> {
   try {
     const supabase = createServiceClient();
     await supabase
       .from('search_usage')
-      .upsert({ user_id: userId, usage_date: today(), count: current + 1 }, { onConflict: 'user_id,usage_date' });
+      .upsert({ user_id: userId, usage_date: currentWeekKey(), count: current + 1 }, { onConflict: 'user_id,usage_date' });
   } catch { /* table may not exist yet */ }
 }
 
@@ -377,9 +381,9 @@ export async function GET(request: NextRequest) {
 
   let remaining: number | null = null, limit: number | null = null;
   if (!access.unlimited) {
-    const used = await getFreeUsedToday(user.id);
-    limit = FREE_DAILY_LIMIT;
-    remaining = Math.max(0, FREE_DAILY_LIMIT - used);
+    const used = await getFreeUsedThisWeek(user.id);
+    limit = FREE_WEEKLY_LIMIT;
+    remaining = Math.max(0, FREE_WEEKLY_LIMIT - used);
   }
 
   return Response.json({ conversations, access: { ...access, remaining, limit } });
@@ -453,15 +457,15 @@ export async function POST(request: NextRequest) {
     unlimited = access.unlimited;
     canSave = access.canSave;
     if (!unlimited) {
-      const used = await getFreeUsedToday(user.id);
-      if (used >= FREE_DAILY_LIMIT) {
+      const used = await getFreeUsedThisWeek(user.id);
+      if (used >= FREE_WEEKLY_LIMIT) {
         return Response.json(
-          { error: "You have reached today's free limit. Upgrade to any LotScout plan for unlimited Scout and saved reports.", reason: 'free_limit' },
+          { error: "You have used your 2 free Scout questions this week. Upgrade for unlimited Scout and saved reports.", reason: 'free_limit' },
           { status: 429 }
         );
       }
-      await incrementFree(user.id, used);
-      remainingAfter = Math.max(0, FREE_DAILY_LIMIT - (used + 1));
+      await incrementFreeWeekly(user.id, used);
+      remainingAfter = Math.max(0, FREE_WEEKLY_LIMIT - (used + 1));
     }
   } else {
     const used = guestCount(request);

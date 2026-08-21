@@ -180,7 +180,7 @@ export default function AdvisorPage() {
           } else if (j.access.status === 'guest') {
             if (gc >= GUEST_LIMIT || (j.access.remaining !== null && j.access.remaining <= 0)) setLimitHit('guest');
           } else {
-            // Logged-in: clear any stale guest counter, honor the daily free limit.
+            // Logged-in: clear any stale guest counter, honor the weekly free limit.
             try { localStorage.removeItem(GUEST_COUNT_KEY); } catch {}
             setGuestCount(0);
             if (!j.access.unlimited && j.access.remaining !== null && j.access.remaining <= 0) setLimitHit('free');
@@ -305,7 +305,7 @@ export default function AdvisorPage() {
         unlimited,
         canSave,
         remaining,
-        limit: a?.limit ?? (statusHdr === 'guest' ? 3 : statusHdr === 'free' ? 5 : null),
+        limit: a?.limit ?? (statusHdr === 'guest' ? 1 : statusHdr === 'free' ? 2 : null),
       }));
       if (unlimited) {
         setLimitHit(null);
@@ -465,8 +465,8 @@ export default function AdvisorPage() {
         </>
       ) : (
         <>
-          <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You have reached today&apos;s free limit.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Get Scout Search for $20/mo, or upgrade to any paid LotScout plan, for unlimited Scout Search and saved reports.</p>
+          <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You used your 2 free Scout questions this week.</p>
+          <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to keep asking Scout, save reports, and get unlimited searches.</p>
           <a href="/pricing" onClick={() => track('scout_upgrade_click', { source: 'free_limit_card' })} className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold text-base shadow-lg shadow-emerald-900/10 transition hover:-translate-y-0.5 hover:opacity-95" style={{ backgroundColor: GREEN }}>
             View options
           </a>
@@ -509,7 +509,7 @@ export default function AdvisorPage() {
     <p className="text-xs sm:text-sm text-center mt-1.5 sm:mt-2" style={{ color: MUTED }}>
       {access!.status === 'guest'
         ? `${access!.remaining} free ${access!.remaining === 1 ? 'question' : 'questions'} before signup`
-        : `${access!.remaining} ${access!.remaining === 1 ? 'question' : 'questions'} left today`}.
+        : `${access!.remaining} ${access!.remaining === 1 ? 'question' : 'questions'} left this week`}.
       {access!.status === 'free' && (
         <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Get unlimited</button>
       )}
