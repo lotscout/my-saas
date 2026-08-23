@@ -518,17 +518,6 @@ export default function AdvisorPage() {
 
   const sidebarInner = (
     <div className="flex flex-col h-full bg-white/80 backdrop-blur-xl">
-      <div className="px-4 pt-5 pb-3 border-b border-emerald-900/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white shadow-lg shadow-emerald-900/15 border border-emerald-900/10 overflow-hidden">
-            <img src="/logo.png" alt="LotScout" className="w-7 h-7 object-contain" />
-          </div>
-          <div>
-            <p className="text-sm font-extrabold leading-tight" style={{ color: INK }}>Scout Search</p>
-            <p className="text-xs" style={{ color: MUTED }}>Land intelligence</p>
-          </div>
-        </div>
-      </div>
       <div className="px-3 pt-3 sm:pt-4 space-y-1">
         <button
           onClick={newChat}
