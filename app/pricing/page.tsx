@@ -183,9 +183,9 @@ export default function PricingPage() {
             <span className="text-emerald-700 text-xs font-bold text-center">Get 3 months free (25% off) with annual billing</span>
           </div>
 
-          {/* LOTSCOUT SEARCH */}
+          {/* SCOUT SEARCH */}
           <div className="bg-white rounded-3xl border-2 border-[#1D9E75]/30 p-5 shadow-sm">
-            <p className="text-[#1D9E75] font-bold text-sm tracking-widest uppercase mb-2">LotScout Search</p>
+            <p className="text-[#1D9E75] font-bold text-sm tracking-widest uppercase mb-2">Scout Search</p>
             <div className="flex items-baseline gap-1 mb-0.5">
               <span className="text-4xl font-extrabold text-primary font-headline">${SEARCH_MONTHLY_PRICE}</span>
               <span className="text-secondary font-medium text-sm">/mo</span>
@@ -300,8 +300,7 @@ export default function PricingPage() {
         {/* Scout Search add-on */}
         <div className="hidden md:flex mb-6 bg-white rounded-2xl border border-[#1D9E75]/25 p-6 shadow-sm items-center justify-between gap-6">
           <div>
-            <p className="text-[#1D9E75] text-xs font-black uppercase tracking-widest mb-2">Scout Search</p>
-            <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">LotScout Search</h2>
+            <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Scout Search</h2>
             <div className="mt-1 text-sm text-secondary max-w-2xl space-y-1">
               <p>Unlimited Scout AI search and saved reports for ${SEARCH_MONTHLY_PRICE}/month.</p>
               <p>Included with Standard, Priority, and Exclusive plans.</p>
@@ -315,7 +314,7 @@ export default function PricingPage() {
             <button
               onClick={() => handleCheckout('searchProMonthly')}
               disabled={!!loading || hasPaidLotScoutPlan}
-              className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-green-700 text-white hover:bg-green-800'}`}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60 ${hasPaidLotScoutPlan ? 'bg-surface-container-high text-secondary cursor-default' : 'bg-green-700 text-white hover:bg-green-800'}`}
             >
               {hasPaidLotScoutPlan ? 'Included in Your Plan' : loading === 'searchProMonthly' ? 'Loading…' : 'Get Started'}
             </button>
@@ -368,7 +367,7 @@ export default function PricingPage() {
               <button
                 onClick={() => handleCheckout(getPriceKey('standard'))}
                 disabled={!!loading || userTier === 'standard'}
-                className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-3 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'standard'
                     ? 'bg-surface-container-high text-secondary cursor-default'
                     : 'bg-green-700 text-white hover:bg-green-800'
@@ -398,7 +397,7 @@ export default function PricingPage() {
               <button
                 onClick={() => handleCheckout(getPriceKey('priority'))}
                 disabled={!!loading || userTier === 'priority'}
-                className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-3 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'priority'
                     ? 'bg-surface-container-high text-secondary cursor-default'
                     : 'bg-green-700 text-white hover:bg-green-800'
@@ -421,7 +420,7 @@ export default function PricingPage() {
               <button
                 onClick={() => handleCheckout(getPriceKey('exclusive'))}
                 disabled={!!loading || userTier === 'exclusive'}
-                className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
+                className={`mt-auto w-full py-3 text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-60 ${
                   userTier === 'exclusive'
                     ? 'bg-surface-container-high text-secondary cursor-default'
                     : 'bg-green-700 text-white hover:bg-green-800'
