@@ -38,8 +38,18 @@ export default function EditProfilePage() {
   const [toastOk, setToastOk] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
+  const [cropZoom, setCropZoom] = useState(1);
+  const [cropX, setCropX] = useState(0);
+  const [cropY, setCropY] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+    };
+  }, [cropImageUrl]);
 
   useEffect(() => {
     async function load() {
@@ -141,10 +151,21 @@ export default function EditProfilePage() {
       return;
     }
     if (!userId) return;
+    if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+    setCropImageUrl(URL.createObjectURL(file));
+    setCropZoom(1);
+    setCropX(0);
+    setCropY(0);
+    e.target.value = '';
+  }
+
+  async function handleCroppedAvatarSave() {
+    if (!cropImageUrl || !userId) return;
     setUploading(true);
     try {
+      const blob = await createCroppedAvatarBlob(cropImageUrl, cropZoom, cropX, cropY);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', blob, 'profile-avatar.png');
       const res = await fetch('/api/avatar', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) {
@@ -152,6 +173,7 @@ export default function EditProfilePage() {
         throw new Error(data.error ?? 'Upload failed');
       }
       setAvatarUrl(data.url);
+      setCropImageUrl(null);
       setToastOk(true);
       setToast('Profile picture updated!');
       setTimeout(() => setToast(null), 2000);
@@ -161,8 +183,50 @@ export default function EditProfilePage() {
       setToast(err instanceof Error && err.message ? err.message : 'Failed to upload image. Please try again.');
     } finally {
       setUploading(false);
-      e.target.value = '';
     }
+  }
+
+  function cancelAvatarCrop() {
+    if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+    setCropImageUrl(null);
+    setCropZoom(1);
+    setCropX(0);
+    setCropY(0);
+  }
+
+  async function createCroppedAvatarBlob(imageUrl: string, zoom: number, offsetX: number, offsetY: number): Promise<Blob> {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Could not load image'));
+      img.src = imageUrl;
+    });
+
+    const size = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Could not prepare image editor');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+
+    const coverScale = Math.max(size / image.naturalWidth, size / image.naturalHeight) * zoom;
+    const drawWidth = image.naturalWidth * coverScale;
+    const drawHeight = image.naturalHeight * coverScale;
+    const maxShiftX = Math.max(0, (drawWidth - size) / 2);
+    const maxShiftY = Math.max(0, (drawHeight - size) / 2);
+    const clampedX = Math.max(-maxShiftX, Math.min(maxShiftX, offsetX));
+    const clampedY = Math.max(-maxShiftY, Math.min(maxShiftY, offsetY));
+    const dx = (size - drawWidth) / 2 + clampedX;
+    const dy = (size - drawHeight) / 2 + clampedY;
+
+    ctx.drawImage(image, dx, dy, drawWidth, drawHeight);
+
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not save cropped image')), 'image/png', 0.95);
+    });
   }
 
   if (loading) {
@@ -250,6 +314,69 @@ export default function EditProfilePage() {
                 <p className="text-xs text-center text-secondary leading-relaxed">
                   {uploading ? 'Uploading...' : 'JPG, GIF or PNG. Max size of 5MB.'}
                 </p>
+
+                {cropImageUrl && (
+                  <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 space-y-4">
+                    <div>
+                      <p className="text-sm font-bold text-primary">Position your photo</p>
+                      <p className="text-xs text-secondary">Move and zoom until your profile image looks centered.</p>
+                    </div>
+
+                    <div className="mx-auto h-44 w-44 rounded-full overflow-hidden bg-surface shadow-inner border-4 border-white">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={cropImageUrl}
+                        alt="Avatar crop preview"
+                        className="h-full w-full object-cover"
+                        style={{ transform: `translate(${cropX / 3}px, ${cropY / 3}px) scale(${cropZoom})` }}
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-secondary">Zoom</label>
+                      <input
+                        type="range"
+                        min="1"
+                        max="2.5"
+                        step="0.01"
+                        value={cropZoom}
+                        onChange={e => setCropZoom(Number(e.target.value))}
+                        className="w-full accent-[#1D9E75]"
+                      />
+
+                      <div className="grid grid-cols-3 gap-2 max-w-[180px] mx-auto">
+                        <span />
+                        <button type="button" onClick={() => setCropY(y => Math.max(-180, y - 16))} className="rounded-lg bg-white px-3 py-2 text-primary shadow-sm border border-outline-variant/20">
+                          ↑
+                        </button>
+                        <span />
+                        <button type="button" onClick={() => setCropX(x => Math.max(-180, x - 16))} className="rounded-lg bg-white px-3 py-2 text-primary shadow-sm border border-outline-variant/20">
+                          ←
+                        </button>
+                        <button type="button" onClick={() => { setCropX(0); setCropY(0); setCropZoom(1); }} className="rounded-lg bg-white px-3 py-2 text-xs font-bold text-secondary shadow-sm border border-outline-variant/20">
+                          Reset
+                        </button>
+                        <button type="button" onClick={() => setCropX(x => Math.min(180, x + 16))} className="rounded-lg bg-white px-3 py-2 text-primary shadow-sm border border-outline-variant/20">
+                          →
+                        </button>
+                        <span />
+                        <button type="button" onClick={() => setCropY(y => Math.min(180, y + 16))} className="rounded-lg bg-white px-3 py-2 text-primary shadow-sm border border-outline-variant/20">
+                          ↓
+                        </button>
+                        <span />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button type="button" onClick={cancelAvatarCrop} disabled={uploading} className="rounded-xl border border-outline/20 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-surface-container-high disabled:opacity-60">
+                        Cancel
+                      </button>
+                      <button type="button" onClick={handleCroppedAvatarSave} disabled={uploading} className="rounded-xl bg-[#1D9E75] px-3 py-2.5 text-sm font-bold text-white hover:bg-[#14795A] disabled:opacity-60">
+                        {uploading ? 'Saving…' : 'Save Photo'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="lg:col-span-8 bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-4 sm:space-y-6">
