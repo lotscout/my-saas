@@ -174,7 +174,15 @@ function SingleListingMap({ county, state }: { county: string | null; state: str
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
 
-      const map = L.map(mapRef.current!).setView(c, county ? 10 : 6);
+      const map = L.map(mapRef.current!, {
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false,
+        zoomControl: false,
+      }).setView(c, county ? 10 : 6);
       mapInstanceRef.current = map;
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -206,7 +214,8 @@ function SingleListingMap({ county, state }: { county: string | null; state: str
   return (
     <div
       ref={mapRef}
-      className="w-full rounded-xl overflow-hidden border border-outline-variant/20"
+      className="w-full rounded-xl overflow-hidden border border-outline-variant/20 pointer-events-none"
+      aria-hidden="true"
       style={{ height: '300px' }}
     />
   );
@@ -734,27 +743,30 @@ export default function ListingDetailPage() {
               </div>
 
               {/* Action buttons */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
+                  type="button"
                   onClick={handleMessage}
-                  className="w-full py-1.5 bg-green-700 text-white font-bold text-[11px] rounded-md hover:bg-green-800 transition-colors active:scale-95"
+                  className="w-full min-h-11 py-3 bg-green-700 text-white font-bold text-sm rounded-lg hover:bg-green-800 transition-colors active:scale-95"
                 >
                   Message Seller
                 </button>
 
                 {!tierLoading && (tier || isAdmin) ? (
                   <button
+                    type="button"
                     onClick={handleRequestImages}
                     disabled={imageRequestSent || imageRequestLoading}
-                    className="w-full py-1.5 border border-green-700 text-green-700 font-bold text-[11px] rounded-md hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-full min-h-11 py-3 border border-green-700 text-green-700 font-bold text-sm rounded-lg hover:bg-green-50 transition-colors active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {imageRequestSent ? 'Requested ✓' : imageRequestLoading ? 'Sending…' : 'Request Images'}
                   </button>
                 ) : !tierLoading ? (
                   <div className="relative group">
                     <button
+                      type="button"
                       disabled
-                      className="w-full py-1.5 border border-green-700/30 text-green-700/40 font-bold text-[11px] rounded-md cursor-not-allowed"
+                      className="w-full min-h-11 py-3 border border-green-700/30 text-green-700/40 font-bold text-sm rounded-lg cursor-not-allowed"
                     >
                       Request Images
                     </button>
