@@ -5,12 +5,6 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
 
-const TIER_LABELS: Record<string, string> = {
-  standard: 'Standard',
-  priority: 'Priority',
-  exclusive: 'Exclusive',
-};
-
 interface Profile {
   first_name: string | null;
   last_name: string | null;
@@ -19,7 +13,6 @@ interface Profile {
   company_name: string | null;
   phone: string | null;
   contact_visible: boolean | null;
-  tier: string | null;
 }
 
 export default function ProfilePage() {
@@ -38,15 +31,7 @@ export default function ProfilePage() {
         .eq('id', user.id)
         .single();
 
-      // Tier is authoritative in subscriptions, not profiles
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('tier')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
-
-      if (data) setProfile({ ...data, tier: sub?.tier ?? null });
+      if (data) setProfile(data);
     }
     load();
   }, []);
@@ -58,11 +43,6 @@ export default function ProfilePage() {
   const firstPart = nameParts[0];
   const restPart = nameParts.slice(1).join(' ');
   const showContact = profile?.contact_visible === true;
-  const visibleContactItems = [
-    ['Email', email],
-    ['Phone', profile?.phone],
-    ['Company', profile?.company_name],
-  ].filter(([, value]) => !!value) as [string, string][];
 
   return (
     <div className="bg-surface text-on-surface font-body">
@@ -87,14 +67,6 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1 space-y-4 sm:space-y-6 text-center md:text-left w-full min-w-0">
               <div className="space-y-2 sm:space-y-3 min-w-0">
-                {profile?.tier && (
-                  <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                    <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 border border-primary/20">
-                      <span className="material-symbols-outlined" style={{ fontSize: '14px', fontVariationSettings: "'FILL' 1" }}>verified</span>
-                      {TIER_LABELS[profile.tier] ?? profile.tier} Member
-                    </span>
-                  </div>
-                )}
                 <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tight sm:tracking-tighter leading-tight break-words">
                   {firstPart}{restPart ? <> <span className="text-emerald-600">{restPart}</span></> : null}
                 </h1>
@@ -132,37 +104,24 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <div className="mt-5 sm:mt-10 pt-5 sm:pt-8 border-t border-outline-variant/30 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8">
+          <div className="mt-5 sm:mt-10 pt-5 sm:pt-8 border-t border-outline-variant/30 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             <div className="space-y-1">
               <p className="text-xs font-bold uppercase tracking-widest text-secondary">Email</p>
-              <p className="text-sm sm:text-base font-headline font-semibold text-on-surface break-all">{email ?? '—'}</p>
+              <p className="text-sm sm:text-base font-headline font-semibold text-on-surface break-all">{showContact ? (email ?? '—') : 'Private'}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-bold uppercase tracking-widest text-secondary">Membership</p>
-              <p className="text-sm sm:text-base font-headline font-semibold text-on-surface">{profile?.tier ? (TIER_LABELS[profile.tier] ?? profile.tier) : 'Free'}</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary">Phone</p>
+              <p className="text-sm sm:text-base font-headline font-semibold text-on-surface break-all">{showContact ? (profile?.phone ?? '—') : 'Private'}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary">Company</p>
+              <p className="text-sm sm:text-base font-headline font-semibold text-on-surface">{showContact ? (profile?.company_name ?? '—') : 'Private'}</p>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-bold uppercase tracking-widest text-secondary">Contact Visibility</p>
               <p className="text-sm sm:text-base font-headline font-semibold text-on-surface">{showContact ? 'Shown publicly' : 'Private'}</p>
             </div>
           </div>
-
-          {showContact && visibleContactItems.length > 0 && (
-            <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-emerald-700" style={{ fontVariationSettings: "'FILL' 1" }}>visibility</span>
-                <h3 className="font-headline text-lg font-bold text-primary">Public Contact Information</h3>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {visibleContactItems.map(([label, value]) => (
-                  <div key={label} className="space-y-1">
-                    <p className="text-xs font-bold uppercase tracking-widest text-emerald-700/70">{label}</p>
-                    <p className="text-sm sm:text-base font-semibold text-on-surface break-all">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </section>
       </main>
     </div>
