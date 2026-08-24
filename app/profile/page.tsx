@@ -17,6 +17,8 @@ interface Profile {
   bio: string | null;
   avatar_url: string | null;
   company_name: string | null;
+  phone: string | null;
+  contact_visible: boolean | null;
   tier: string | null;
 }
 
@@ -32,7 +34,7 @@ export default function ProfilePage() {
       setEmail(user.email ?? null);
       const { data } = await supabase
         .from('profiles')
-        .select('first_name, last_name, bio, avatar_url, company_name')
+        .select('first_name, last_name, bio, avatar_url, company_name, phone, contact_visible')
         .eq('id', user.id)
         .single();
 
@@ -55,6 +57,12 @@ export default function ProfilePage() {
   const nameParts = displayName.split(' ');
   const firstPart = nameParts[0];
   const restPart = nameParts.slice(1).join(' ');
+  const showContact = profile?.contact_visible === true;
+  const visibleContactItems = [
+    ['Email', email],
+    ['Phone', profile?.phone],
+    ['Company', profile?.company_name],
+  ].filter(([, value]) => !!value) as [string, string][];
 
   return (
     <div className="bg-surface text-on-surface font-body">
@@ -133,13 +141,28 @@ export default function ProfilePage() {
               <p className="text-xs font-bold uppercase tracking-widest text-secondary">Membership</p>
               <p className="text-sm sm:text-base font-headline font-semibold text-on-surface">{profile?.tier ? (TIER_LABELS[profile.tier] ?? profile.tier) : 'Free'}</p>
             </div>
-            {profile?.company_name && (
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-secondary">Company</p>
-                <p className="text-sm sm:text-base font-headline font-semibold text-on-surface">{profile.company_name}</p>
-              </div>
-            )}
+            <div className="space-y-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary">Contact Visibility</p>
+              <p className="text-sm sm:text-base font-headline font-semibold text-on-surface">{showContact ? 'Shown publicly' : 'Private'}</p>
+            </div>
           </div>
+
+          {showContact && visibleContactItems.length > 0 && (
+            <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-emerald-700" style={{ fontVariationSettings: "'FILL' 1" }}>visibility</span>
+                <h3 className="font-headline text-lg font-bold text-primary">Public Contact Information</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {visibleContactItems.map(([label, value]) => (
+                  <div key={label} className="space-y-1">
+                    <p className="text-xs font-bold uppercase tracking-widest text-emerald-700/70">{label}</p>
+                    <p className="text-sm sm:text-base font-semibold text-on-surface break-all">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       </main>
     </div>
