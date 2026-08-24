@@ -573,7 +573,6 @@ export default function AdvisorPage() {
       <div className="h-16 shrink-0" aria-hidden />
 
       <div className="flex-grow flex w-full min-h-0 relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(29,158,117,0.16),transparent_34%),radial-gradient(circle_at_78%_8%,rgba(13,31,22,0.08),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.80),rgba(246,248,244,0.95))]" />
         {/* Desktop sidebar (always visible) */}
         <aside className="hidden md:flex md:flex-col w-72 shrink-0 border-r border-emerald-900/10 bg-white/85 backdrop-blur-xl overflow-hidden relative z-10 shadow-[8px_0_30px_rgba(13,31,22,0.04)]">
           {sidebarInner}
@@ -600,46 +599,23 @@ export default function AdvisorPage() {
 
           {isEmpty ? (
             /* ── Centered empty state ── */
-            <main className="flex-grow flex flex-col w-full max-w-5xl mx-auto px-4 sm:px-8 pb-4 sm:pb-8 min-h-0">
-              <div className="flex-grow flex flex-col justify-center py-8 sm:py-10">
-                <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-emerald-900/10 bg-white/72 backdrop-blur-xl shadow-[0_28px_90px_rgba(13,31,22,0.10)] px-5 py-7 sm:px-9 sm:py-9 md:px-12 md:py-11">
-                  <div className="max-w-3xl">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-800 mb-4">
-                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>travel_explore</span>
-                      Land intelligence
-                    </div>
-                    <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl font-black text-primary tracking-[-0.055em] leading-[0.95]">
-                      Scout Search
-                    </h1>
-                    <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Ask Scout about markets, zoning, lots, buyer demand, comps, and deal strategy.</p>
-                  </div>
-
-                  <div className="mt-7 sm:mt-8">
-                    {limitHit ? (
-                      <div className="w-full max-w-3xl">{blockedCard}</div>
-                    ) : (
-                      <>
-                        <div className="w-full max-w-3xl">
-                          {composer(true)}
-                          {remainingLine}
-                        </div>
-
-                        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-3xl">
-                          {SUGGESTIONS.map(s => (
-                            <button
-                              key={s}
-                              onClick={() => send(s)}
-                              disabled={loading}
-                              className="text-left text-xs sm:text-sm leading-snug font-semibold rounded-2xl px-4 py-3 border border-emerald-900/10 bg-[#F7FAF4]/90 text-[#0D1F16] shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
+            <main className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-8 min-h-0">
+              <div className="flex-grow flex flex-col items-center justify-center gap-6 sm:gap-7 py-8 sm:py-10">
+                <div className="text-center">
+                  <h1 className="font-headline text-5xl sm:text-6xl md:text-7xl font-black text-primary tracking-[-0.065em] leading-[0.9]">
+                    Scout Search
+                  </h1>
+                  <p className="mt-5 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, comps, and deal strategy.</p>
                 </div>
+
+                {limitHit ? (
+                  <div className="w-full max-w-3xl">{blockedCard}</div>
+                ) : (
+                  <div className="w-full max-w-3xl">
+                    {composer(true)}
+                    {remainingLine}
+                  </div>
+                )}
               </div>
 
               <p className="text-[10px] sm:text-xs text-center mt-2 sm:mt-4" style={{ color: MUTED }}>{DISCLAIMER}</p>
