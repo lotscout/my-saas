@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
 import { syncResendContact } from '@/lib/resend-contacts';
 import { sendAdminAlert } from '@/lib/admin-alerts';
 
 export async function POST(request: NextRequest) {
   const {
-    userId,
     firstName,
     lastName,
-    email,
     phone,
     bio,
     companyName,
@@ -21,25 +20,19 @@ export async function POST(request: NextRequest) {
     signupCampaign,
   } = await request.json();
 
-  if (!userId || !email) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  const serverClient = await createServerClient();
+  const { data: { user }, error: authError } = await serverClient.auth.getUser();
+  if (authError || !user?.id || !user.email) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const supabase = createClient(
+  const userId = user.id;
+  const email = user.email;
+
+  const supabase = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-
-  // Verify the user exists in auth.users and that the email in the request
-  // matches their actual auth email. This prevents anyone from writing an
-  // arbitrary email into another user's profile row.
-  const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
-  if (userError || !user) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
-  }
-  if (user.email !== email) {
-    return NextResponse.json({ error: 'Email does not match authenticated user' }, { status: 403 });
-  }
 
   const profaneField = findProfaneField([
     { label: 'first name', value: firstName },
@@ -80,12 +73,7 @@ export async function POST(request: NextRequest) {
     .eq('id', userId)
     .maybeSingle();
 
-  let { error } = await supabase.from('profiles').upsert(payload);
-
-  if (error && /contact_visible/i.test(error.message)) {
-    delete payload.contact_visible;
-    ({ error } = await supabase.from('profiles').upsert(payload));
-  }
+  const { error } = await supabase.from('profiles').upsert(payload);
 
   if (error) {
     console.error('Profile upsert error:', error);
@@ -117,5 +105,5 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, contactVisible: payload.contact_visible ?? null });
 }
