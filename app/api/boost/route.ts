@@ -36,15 +36,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Get user tier
+    // Get user tier. Boosts are a paid-tier add-on, so do not allow free/unsubscribed users.
+    const { data: subscription } = await service
+      .from('subscriptions')
+      .select('tier')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle();
+
     const { data: profile } = await service
       .from('profiles')
-      .select('tier')
+      .select('subscription_tier')
       .eq('id', user.id)
       .single();
 
-    const tier = profile?.tier || 'standard';
-    const weeklyRate = WEEKLY_RATES[tier] ?? WEEKLY_RATES.standard;
+    const tier = subscription?.tier || profile?.subscription_tier || null;
+    if (!tier || !(tier in WEEKLY_RATES)) {
+      return NextResponse.json({ error: 'A paid LotScout plan is required to boost listings' }, { status: 403 });
+    }
+
+    const weeklyRate = WEEKLY_RATES[tier];
     const weeks = Math.max(1, Math.floor(budgetCents / weeklyRate));
     const totalCents = weeks * weeklyRate;
 

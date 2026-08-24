@@ -1242,7 +1242,7 @@ export default function MarketplacePage() {
                             <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
                           </div>
                         )}
-                        {profile?.id && listing.user_id === profile.id && (
+                        {showMyListings && isPaidUser && profile?.id && listing.user_id === profile.id && (
                           <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoostModal({ listingId: listing.id, title: listing.title ?? 'Your Listing' }); }}
                             className="mt-3 w-full flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 py-2 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors"
