@@ -517,8 +517,8 @@ export default function AdvisorPage() {
   );
 
   const sidebarInner = (
-    <div className="flex flex-col h-full bg-white/80 backdrop-blur-xl">
-      <div className="px-3 pt-3 sm:pt-4 space-y-1">
+    <div className="flex flex-col h-full bg-white/92 backdrop-blur-xl">
+      <div className="px-4 pt-4 sm:pt-5 space-y-1.5">
         <button
           onClick={newChat}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm sm:text-base font-semibold text-left transition-colors hover:bg-emerald-50"
@@ -538,7 +538,7 @@ export default function AdvisorPage() {
       </div>
 
       {/* Recents */}
-      <div className="flex-grow overflow-y-auto px-3 pb-4 mt-4">
+      <div className="flex-grow overflow-y-auto px-4 pb-4 mt-5">
         <p className="px-3 pb-2 text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: MUTED }}>Recents</p>
         {conversations.length === 0 ? (
           <p className="px-3 py-2 text-xs" style={{ color: MUTED }}>
@@ -551,11 +551,11 @@ export default function AdvisorPage() {
                 key={c.id}
                 onClick={() => loadConversation(c)}
                 title={c.title}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm sm:text-base text-left transition-colors ${c.id === currentId ? 'shadow-sm' : 'hover:bg-emerald-50'}`}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm text-left transition-colors ${c.id === currentId ? 'shadow-sm' : 'hover:bg-emerald-50'}`}
                 style={{ color: INK, backgroundColor: c.id === currentId ? CHIP_BG : undefined }}
               >
                 <span className="material-symbols-outlined text-xl shrink-0" style={{ color: MUTED }}>chat_bubble</span>
-                <span className="truncate">{c.title || 'New chat'}</span>
+                <span className="truncate leading-snug">{c.title || 'New chat'}</span>
               </button>
             ))}
             {access?.status === 'guest' && (
@@ -575,7 +575,7 @@ export default function AdvisorPage() {
       <div className="flex-grow flex w-full min-h-0 relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(29,158,117,0.16),transparent_34%),radial-gradient(circle_at_78%_8%,rgba(13,31,22,0.08),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.80),rgba(246,248,244,0.95))]" />
         {/* Desktop sidebar (always visible) */}
-        <aside className="hidden md:flex md:flex-col w-72 shrink-0 border-r border-emerald-900/10 bg-white/70 backdrop-blur-xl overflow-hidden relative z-10">
+        <aside className="hidden md:flex md:flex-col w-72 shrink-0 border-r border-emerald-900/10 bg-white/85 backdrop-blur-xl overflow-hidden relative z-10 shadow-[8px_0_30px_rgba(13,31,22,0.04)]">
           {sidebarInner}
         </aside>
 
@@ -600,38 +600,46 @@ export default function AdvisorPage() {
 
           {isEmpty ? (
             /* ── Centered empty state ── */
-            <main className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-8 min-h-0">
-              <div className="flex-grow flex flex-col items-center justify-center gap-5 sm:gap-7 pt-1">
-                <div className="flex flex-col items-center text-center">
-                  <h1 className="font-headline text-5xl sm:text-7xl md:text-8xl font-black text-primary tracking-[-0.07em] leading-[0.88]">
-                    Scout Search
-                  </h1>
-                  <p className="mt-5 max-w-2xl text-base sm:text-xl leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, and deal strategy.</p>
+            <main className="flex-grow flex flex-col w-full max-w-5xl mx-auto px-4 sm:px-8 pb-4 sm:pb-8 min-h-0">
+              <div className="flex-grow flex flex-col justify-center py-8 sm:py-10">
+                <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-emerald-900/10 bg-white/72 backdrop-blur-xl shadow-[0_28px_90px_rgba(13,31,22,0.10)] px-5 py-7 sm:px-9 sm:py-9 md:px-12 md:py-11">
+                  <div className="max-w-3xl">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-800 mb-4">
+                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>travel_explore</span>
+                      Land intelligence
+                    </div>
+                    <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl font-black text-primary tracking-[-0.055em] leading-[0.95]">
+                      Scout Search
+                    </h1>
+                    <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Ask Scout about markets, zoning, lots, buyer demand, comps, and deal strategy.</p>
+                  </div>
+
+                  <div className="mt-7 sm:mt-8">
+                    {limitHit ? (
+                      <div className="w-full max-w-3xl">{blockedCard}</div>
+                    ) : (
+                      <>
+                        <div className="w-full max-w-3xl">
+                          {composer(true)}
+                          {remainingLine}
+                        </div>
+
+                        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-3xl">
+                          {SUGGESTIONS.map(s => (
+                            <button
+                              key={s}
+                              onClick={() => send(s)}
+                              disabled={loading}
+                              className="text-left text-xs sm:text-sm leading-snug font-semibold rounded-2xl px-4 py-3 border border-emerald-900/10 bg-[#F7FAF4]/90 text-[#0D1F16] shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-
-                {limitHit ? (
-                  <div className="w-full max-w-3xl">{blockedCard}</div>
-                ) : (
-                  <>
-                    <div className="w-full max-w-3xl">
-                      {composer(true)}
-                      {remainingLine}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 sm:gap-3 justify-center max-w-3xl">
-                      {SUGGESTIONS.map(s => (
-                        <button
-                          key={s}
-                          onClick={() => send(s)}
-                          disabled={loading}
-                          className="text-xs sm:text-sm leading-tight font-semibold rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 border border-emerald-900/10 bg-white/80 backdrop-blur text-[#0D1F16] shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
               </div>
 
               <p className="text-[10px] sm:text-xs text-center mt-2 sm:mt-4" style={{ color: MUTED }}>{DISCLAIMER}</p>
