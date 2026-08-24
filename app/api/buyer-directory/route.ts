@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
   // Manually join profiles. Try to include contact_visible; fall back gracefully if the
   // column hasn't been migrated yet (older databases). Missing column => treated as private.
   const userIds = [...new Set(requests.map((r) => r.user_id).filter(Boolean))];
-  const baseCols = 'id, first_name, last_name, company_name, avatar_url, is_test_profile';
+  const baseCols = 'id, first_name, last_name, company_name, avatar_url, is_test_profile, email, phone, website';
   let profiles: Array<Record<string, unknown>> | null = null;
   const withVisible = await service.from('profiles').select(`${baseCols}, contact_visible`).in('id', userIds);
   if (withVisible.error) {
@@ -63,11 +63,10 @@ export async function GET(request: NextRequest) {
     return {
       ...r,
       profiles: prof,
-      contact_phone: contactVisible ? r.contact_phone : null,
+      contact_phone: contactVisible ? (r.contact_phone ?? prof?.phone ?? null) : null,
       contact_phone_type: contactVisible ? r.contact_phone_type : null,
-      contact_email: contactVisible ? r.contact_email : null,
-      // Website is public-facing company info — shown regardless of contact visibility.
-      contact_website: r.contact_website,
+      contact_email: contactVisible ? (r.contact_email ?? prof?.email ?? null) : null,
+      contact_website: contactVisible ? (r.contact_website ?? prof?.website ?? null) : null,
     };
   });
 
