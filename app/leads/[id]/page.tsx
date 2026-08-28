@@ -97,14 +97,10 @@ export default function PropertyLeadDetailPage() {
                 <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-secondary">Source</dt><dd className="mt-0.5 font-bold text-primary">{lead.source}</dd></div>
               </dl>
               <div className="mt-4 space-y-2">
-                <a href={`mailto:${lead.sellerEmail}`} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors">
-                  <span className="material-symbols-outlined text-base">mail</span>
-                  Email seller
-                </a>
-                <a href={`tel:${lead.sellerPhone}`} className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#1D9E75] bg-white px-4 py-3 text-[#1D9E75] font-headline text-sm font-extrabold hover:bg-[#EAF6F1] transition-colors">
-                  <span className="material-symbols-outlined text-base">call</span>
-                  {lead.sellerPhone}
-                </a>
+                <button type="button" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors">
+                  <span className="material-symbols-outlined text-base">chat</span>
+                  Message seller
+                </button>
                 <a href={lead.sourceUrl} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl border border-outline-variant/20 bg-white px-4 py-3 text-primary font-headline text-sm font-extrabold hover:bg-surface-container-low transition-colors">
                   <span className="material-symbols-outlined text-base">open_in_new</span>
                   View source
