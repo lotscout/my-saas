@@ -114,7 +114,7 @@ export default function PropertyLeadDetailPage() {
 
             <section className="rounded-2xl border-2 border-[#1D9E75] bg-white p-5 shadow-sm">
               <h2 className="font-headline text-base font-extrabold text-primary mb-2">Verify before outreach</h2>
-              <p className="text-sm text-secondary leading-relaxed">This is sample lead data for the LotScout UI. Real leads should be checked for ownership, availability, duplicate listings, title issues, zoning, utilities, and seller authorization.</p>
+              <p className="text-sm text-secondary leading-relaxed">Leads should be checked for ownership, availability, duplicate listings, title defects, liens, encumbrances, zoning restrictions, utility access, environmental conditions, survey matters, seller authorization, and all other due-diligence items before outreach, offer, purchase, financing, or development. LotScout provides lead information for informational purposes only and does not provide legal, financial, tax, brokerage, appraisal, title, engineering, survey, or investment advice. LotScout disclaims all liability for user due diligence, transaction decisions, financial loss, legal exposure, property defects, inaccurate third-party information, or reliance on any lead data.</p>
             </section>
           </aside>
         </div>

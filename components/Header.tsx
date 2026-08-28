@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { label: 'Deal Analysis', href: '/property-analysis' },
   { label: 'Messaging', href: '/messaging' },
   { label: 'Funding', href: '/funding-partners' },
+  { label: 'Support', href: '/support' },
 ];
 
 export default function Header() {
@@ -64,7 +65,7 @@ export default function Header() {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6 font-headline font-bold tracking-tight h-full">
+          <nav className="hidden md:flex items-center gap-5 font-headline font-bold tracking-tight h-full text-sm lg:text-base">
             {NAV_LINKS.map(({ label, href }) => {
               const isActive = href !== '#' && pathname === href;
               return (
