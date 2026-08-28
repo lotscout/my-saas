@@ -40,14 +40,14 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
         <span className="material-symbols-outlined text-xl text-primary/60 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
       </div>
 
-      <div className="grid grid-cols-1 gap-2">
+      <div className="flex flex-wrap gap-x-5 gap-y-3">
         {[
           ['Price', formatLeadPrice(lead.price)],
           ['Lot Size', lead.lotSize],
           ['Date Listed', formatLeadDate(lead.listedDate)],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-xl bg-white border border-outline-variant/20 px-3 py-2 shadow-sm">
-            <p className="text-[10px] font-black text-secondary/70 uppercase tracking-wider leading-none">{label}</p>
+          <div key={label} className="min-w-[92px]">
+            <p className="text-[10px] font-black text-secondary/65 uppercase tracking-wider leading-none">{label}</p>
             <p className="mt-1 text-sm font-extrabold text-primary truncate">{value}</p>
           </div>
         ))}
