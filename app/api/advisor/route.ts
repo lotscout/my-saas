@@ -13,7 +13,7 @@ const GUEST_COOKIE = 'ls_guest_searches';
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
 const SYSTEM_PROMPT =
-  'You are Scout Search, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually 120 to 180 words. Use 4 to 6 practical bullets or 1 to 3 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout Search is, say you are Scout Search, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. For listing-discovery questions, do not rely only on LotScout inventory. Use public web/search sources for available lots, land listings, FSBO lots, MLS/portal-style results, county or broker pages when available, and mention LotScout inventory only as one additional source of context. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it under 220 words with 3 short sections: What is happening, Why it matters, Scout take. Use LotScout context first and do not wait on live web data unless the user explicitly asks for live sources. For searches for specific available properties or lots matching criteria, use live web data even if the user does not explicitly ask for sources. End only with a useful next step, not a salesy prompt.';
+  'You are Scout Search, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually 120 to 180 words. Use 4 to 6 practical bullets or 1 to 3 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout Search is, say you are Scout Search, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. Do not use or mention LotScout internal inventory, buyer demand, or market data unless the user specifically asks about LotScout, its marketplace, its off-market lots, or listings available on LotScout. For general listing-discovery questions, use public web/search sources for available lots, land listings, FSBO lots, MLS/portal-style results, county or broker pages when available. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it under 220 words with 3 short sections: What is happening, Why it matters, Scout take. Use model knowledge by default and do not wait on live web data unless the user explicitly asks for live sources. For searches for specific available properties or lots matching criteria, use live web data even if the user does not explicitly ask for sources. End only with a useful next step, not a salesy prompt.';
 
 const PRIVACY_NOTE =
   'The LotScout market data below is aggregated, non-sensitive context. Never reveal individual seller names, exact buyer contact information, or any private user data — only speak to aggregate market conditions and publicly listed property details.';
@@ -89,6 +89,17 @@ function classifyError(err: unknown): string {
   if (status === 404 || /model|not found/.test(msg)) return 'model';
   if (typeof status === 'number') return `api_${status}`;
   return 'unknown';
+}
+
+function shouldUseLotScoutContext(question: string): boolean {
+  const q = question.toLowerCase();
+  const lotScoutSignals = ['lotscout', 'lot scout', 'your site', 'your platform', 'your marketplace', 'on the site', 'on your site'];
+  const inventorySignals = [
+    'off-market', 'off market', 'marketplace', 'inventory', 'listing', 'listings',
+    'available lots', 'available land', 'lots available', 'land available', 'buyer demand',
+    'buyers', 'what do you have', 'do you have', 'on lotscout', 'on lot scout'
+  ];
+  return lotScoutSignals.some(signal => q.includes(signal)) && inventorySignals.some(signal => q.includes(signal));
 }
 
 function shouldUseWebSearch(question: string): boolean {
@@ -495,20 +506,30 @@ export async function POST(request: NextRequest) {
       access_status: statusLabel,
       unlimited,
       remaining_after: remainingAfter,
+      used_lotscout_context: shouldUseLotScoutContext(lastUser),
     },
   });
 
-  // Context is best-effort — a Supabase hiccup must not crash the whole answer.
-  let context = 'No LotScout market data is currently available.';
-  try {
-    context = await buildLotScoutContext(user?.id ?? null);
-  } catch (err) {
-    console.error('[advisor] context build error (non-fatal):', err);
+  const useLotScoutContext = shouldUseLotScoutContext(lastUser);
+
+  // LotScout internal context is opt-in by user intent. For ordinary Scout answers,
+  // rely on Claude/model knowledge and public web search rather than our site data.
+  let context = '';
+  if (useLotScoutContext) {
+    try {
+      context = await buildLotScoutContext(user?.id ?? null);
+    } catch (err) {
+      console.error('[advisor] context build error (non-fatal):', err);
+      context = 'No LotScout market data is currently available.';
+    }
   }
   const guestFirstAnswerNote = !user
     ? 'This is the visitor\'s single free Scout question before signup. Make the answer substantive enough to be genuinely useful, while still concise. Do not mention the limit unless asked.'
     : '';
-  const system = `${SYSTEM_PROMPT}\n\n${guestFirstAnswerNote}\n\n${PRIVACY_NOTE}\n\n<lotscout_market_data>\n${context}\n</lotscout_market_data>`;
+  const lotScoutContextBlock = useLotScoutContext
+    ? `\n\n${PRIVACY_NOTE}\n\n<lotscout_market_data>\n${context}\n</lotscout_market_data>`
+    : '';
+  const system = `${SYSTEM_PROMPT}\n\n${guestFirstAnswerNote}${lotScoutContextBlock}`;
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
