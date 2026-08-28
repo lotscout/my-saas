@@ -32,6 +32,9 @@ interface BuyerRequest {
   timeline: string | null;
   additional_notes: string | null;
   contact_preference: string[] | null;
+  contact_phone: string | null;
+  contact_email: string | null;
+  contact_website: string | null;
   display_name: string | null;
   display_company: string | null;
   created_at: string;
@@ -208,6 +211,9 @@ export default function BuyerRequestPage() {
   const responseTime = getOptionalString(request, ['response_time', 'response_time_label', 'average_response_time', 'avg_response_time']);
   const matchSearch = locationCounty || cityTags[0] || fullStateName || locationState || '';
   const matchLink = `/marketplace?mine=true&search=${encodeURIComponent(matchSearch)}${acreageMin ? `&minAcres=${encodeURIComponent(String(acreageMin))}` : ''}${acreageMax ? `&maxAcres=${encodeURIComponent(String(acreageMax))}` : ''}${request?.zoning_preference?.[0] ? `&zoning=${encodeURIComponent(request.zoning_preference[0])}` : ''}`;
+  const placeLabel = [cityTags[0] || locationCounty, fullStateName || locationState].filter(Boolean).join(', ') || 'Target market';
+  const leadTitle = lotSize ? `${lotSize} in ${placeLabel}` : `Land opportunity in ${placeLabel}`;
+  const listedBy = request?.display_company?.trim() || buyerName;
 
   useEffect(() => {
     if (!request) return;
@@ -342,7 +348,8 @@ export default function BuyerRequestPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-7 items-start">
           <section className="space-y-5 min-w-0">
             <div className="bg-white border border-[#E2EAE6] rounded-2xl p-5 sm:p-7 shadow-sm">
-              <h1 className="font-headline text-[28px] sm:text-[36px] leading-[1.05] font-extrabold tracking-tight text-[#0D1F16] truncate whitespace-nowrap">{buyerName}</h1>
+              <h1 className="font-headline text-[28px] sm:text-[36px] leading-[1.05] font-extrabold tracking-tight text-[#0D1F16]">{leadTitle}</h1>
+              <p className="mt-2 text-sm font-semibold text-[#5C6D64]">Listed by {listedBy}</p>
               <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-[#5C6D64]">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EAF6F1] px-2.5 py-1 font-headline text-xs font-bold text-[#14795A]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#1D9E75]" /> Verified
@@ -424,14 +431,30 @@ export default function BuyerRequestPage() {
               </dl>
 
               <div className="mt-4 space-y-2">
-                <button onClick={handleMessage} className="w-full rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">Message buyer</button>
+                {request.contact_email && (
+                  <a href={`mailto:${request.contact_email}`} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">
+                    <span className="material-symbols-outlined text-base">mail</span>
+                    Email poster
+                  </a>
+                )}
+                {request.contact_phone && (
+                  <a href={`tel:${request.contact_phone}`} className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E2EAE6] bg-white px-4 py-3 text-[#0D1F16] font-headline text-sm font-extrabold hover:bg-[#F5F8F6] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">
+                    <span className="material-symbols-outlined text-base">call</span>
+                    {request.contact_phone}
+                  </a>
+                )}
+                <button onClick={handleMessage} className="w-full rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">Message poster</button>
               </div>
               {responseTime && <p className="mt-3 text-xs text-[#5C6D64]">Typically responds {responseTime}</p>}
             </section>
 
             <section className="bg-white border border-[#E2EAE6] rounded-2xl p-5 shadow-sm">
-              <h2 className="font-headline text-base font-extrabold text-[#0D1F16] mb-4">About this buyer</h2>
+              <h2 className="font-headline text-base font-extrabold text-[#0D1F16] mb-4">About this lead</h2>
               <dl className="space-y-3">
+                <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-[#5C6D64]">Listed by</dt><dd className="mt-0.5 font-bold text-[#0D1F16]">{listedBy}</dd></div>
+                {request.contact_email && <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-[#5C6D64]">Email</dt><dd className="mt-0.5 font-bold text-[#0D1F16] break-all">{request.contact_email}</dd></div>}
+                {request.contact_phone && <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-[#5C6D64]">Phone</dt><dd className="mt-0.5 font-bold text-[#0D1F16]">{request.contact_phone}</dd></div>}
+                {request.contact_website && <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-[#5C6D64]">Website</dt><dd className="mt-0.5 font-bold text-[#0D1F16] break-all">{request.contact_website}</dd></div>}
                 <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-[#5C6D64]">Verification</dt><dd className="mt-0.5 font-bold text-[#0D1F16]">{request.status === 'active' ? 'Verified' : humanizeStatus(request.status)}</dd></div>
                 {briefCount !== null && <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-[#5C6D64]">Request count</dt><dd className="mt-0.5 font-bold text-[#0D1F16]">{briefCount}</dd></div>}
                 {postedDate && <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-[#5C6D64]">Active since</dt><dd className="mt-0.5 font-bold text-[#0D1F16]">{postedDate}</dd></div>}

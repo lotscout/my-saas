@@ -71,6 +71,22 @@ function fmtTimeline(t: string | null): string {
   return t;
 }
 
+function fmtDate(value: string | null): string {
+  if (!value) return 'Not listed';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not listed';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function leadTitle(req: BuyerLead): string {
+  const city = req.target_city || req.target_county || req.target_regions?.[0] || 'Market';
+  const state = req.target_state ? (STATE_ABBREV[req.target_state.toLowerCase()] ?? req.target_state) : '';
+  const place = state ? `${city}, ${state}` : city;
+  const size = fmtLotSize(req);
+  if (size && size !== 'Flexible') return `${size} in ${place}`;
+  return `Land opportunity in ${place}`;
+}
+
 function fmtLocation(req: BuyerLead): string {
   if (req.target_regions?.length) return req.target_regions.join(', ');
   const abbrev = req.target_state ? (STATE_ABBREV[req.target_state.toLowerCase()] ?? null) : null;
@@ -127,45 +143,45 @@ function LeadCard({ lead }: { lead: BuyerLead }) {
   const name = getBuyerName(lead);
   const company = lead.display_company?.trim();
   const showCompany = !!company && company.toLowerCase() !== name.trim().toLowerCase();
+  const title = leadTitle(lead);
+  const postedDate = fmtDate(lead.created_at);
 
   return (
     <Link
       href={`/buyer-requests/${lead.id}`}
-      className="group relative bg-white rounded-2xl border border-emerald-100 p-5 flex flex-col gap-4 hover:border-emerald-500/60 hover:shadow-xl hover:shadow-emerald-900/10 hover:-translate-y-0.5 transition-all duration-200 ring-1 ring-black/[0.02]"
+      className="group relative bg-white rounded-2xl border border-outline-variant/15 p-5 flex flex-col gap-4 hover:border-primary/35 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-200 ring-1 ring-black/[0.02]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-amber-800 mb-3">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            Lead, not a listing
-          </div>
-          <h3 className="font-headline text-xl font-extrabold text-primary leading-tight line-clamp-1">{name}</h3>
-          {showCompany && <p className="mt-1 text-sm font-semibold text-secondary truncate">{company}</p>}
+          <h3 className="font-headline text-xl font-extrabold text-primary leading-tight line-clamp-2">{title}</h3>
+          <p className="mt-2 text-sm font-semibold text-secondary truncate">
+            Listed by {showCompany ? company : name}
+          </p>
         </div>
-        <span className="material-symbols-outlined text-xl text-emerald-600 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+        <span className="material-symbols-outlined text-xl text-primary/60 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2">
         {[
-          ['Budget', fmtBudget(lead.budget_min, lead.budget_max)],
-          ['Market', fmtLocation(lead)],
+          ['Price', fmtBudget(lead.budget_min, lead.budget_max)],
           ['Lot Size', fmtLotSize(lead)],
-          ['Timeline', fmtTimeline(lead.timeline)],
+          ['Date Listed', postedDate],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-xl bg-emerald-50/60 border border-emerald-100 px-3 py-2">
-            <p className="text-[10px] font-black text-emerald-800/70 uppercase tracking-wider leading-none">{label}</p>
+          <div key={label} className="rounded-xl bg-white border border-outline-variant/20 px-3 py-2 shadow-sm">
+            <p className="text-[10px] font-black text-secondary/70 uppercase tracking-wider leading-none">{label}</p>
             <p className="mt-1 text-sm font-extrabold text-primary truncate">{value}</p>
           </div>
         ))}
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{fmtZoning(lead.zoning_preference)}</span>
+        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{fmtLocation(lead)}</span>
+        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{fmtTimeline(lead.timeline)}</span>
         {lead.use_case && <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary truncate max-w-full">{lead.use_case}</span>}
       </div>
 
       <p className="mt-auto border-t border-outline-variant/15 pt-3 text-xs font-semibold text-secondary leading-relaxed">
-        This is buyer-intent data submitted to LotScout. Verify fit, availability, funding, and timeline before treating it as a transaction opportunity.
+        Click to view seller/poster details, contact options, and the full lead criteria.
       </p>
     </Link>
   );
@@ -233,7 +249,7 @@ export default function LeadsPage() {
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
         <PageHeader
           title={<>Land <span className="text-[#1D9E75]">Leads</span></>}
-          description="Browse active buyer intent from people and companies looking for land. These are leads and acquisition criteria, not LotScout-approved property listings or guaranteed offers."
+          description="Browse active land opportunities and submitted property leads. Click any card to see who listed it, contact details, pricing guidance, lot size, date listed, and full criteria."
           actions={(
             <PrimaryLink href="/create-buyer-request" className="rounded-xl px-4 py-3">
               <span className="material-symbols-outlined text-lg">add_circle</span>
@@ -263,9 +279,9 @@ export default function LeadsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
-          <StatCard label="Active leads" value={loading ? '—' : leads.length.toLocaleString()} sub="Buyer-intent records" icon="person_search" />
+          <StatCard label="Active leads" value={loading ? '—' : leads.length.toLocaleString()} sub="Property lead records" icon="person_search" />
           <StatCard label="Markets" value={loading ? '—' : nationalMarkets.toLocaleString()} sub="States represented" icon="travel_explore" />
-          <StatCard label="Lead type" value="Buyer" sub="Seller lead intake coming next" icon="hub" />
+          <StatCard label="Lead type" value="Property" sub="Seller and acquisition leads" icon="hub" />
         </div>
 
         <SurfaceCard className="p-3 sm:p-4 mb-7">
@@ -275,7 +291,7 @@ export default function LeadsPage() {
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search by buyer, company, market, or use case"
+                placeholder="Search by property, seller, company, market, or use case"
                 className="w-full bg-white border-2 border-primary/25 rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-inner"
               />
             </div>
