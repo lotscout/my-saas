@@ -52,15 +52,6 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{lead.city}, {lead.state}</span>
-        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{lead.source}</span>
-        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary truncate max-w-full">{lead.propertyType}</span>
-      </div>
-
-      <p className="mt-auto border-t border-outline-variant/15 pt-3 text-xs font-semibold text-secondary leading-relaxed">
-        Click to view seller details, contact options, source, zoning, utilities, and due diligence notes.
-      </p>
     </Link>
   );
 }

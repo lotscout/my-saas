@@ -302,15 +302,6 @@ function RequestCard({ req }: { req: BuyerRequest }) {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{location}</span>
-        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{timeline}</span>
-        {req.use_case && <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary truncate max-w-full">{req.use_case}</span>}
-      </div>
-
-      <p className="mt-auto border-t border-outline-variant/15 pt-3 text-xs font-semibold text-secondary leading-relaxed">
-        Click to view buyer details, contact options, and full acquisition criteria.
-      </p>
     </div>
   );
 }
