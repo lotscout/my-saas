@@ -35,6 +35,7 @@ export default function DealAnalysisPage() {
 
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [showSampleReport, setShowSampleReport] = useState(false);
 
   const deliveryTime =
     tier === 'exclusive' ? '15 minutes' : '24 hours';
@@ -88,7 +89,55 @@ export default function DealAnalysisPage() {
           description="Submit a property for a full deal analysis. Our team will review parcel data, zoning, comps, and financing potential."
         />
 
-        <div className="max-w-2xl">
+        {showSampleReport && (
+          <div className="fixed inset-0 z-[10020] flex items-center justify-center px-4 py-8">
+            <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setShowSampleReport(false)} />
+            <div className="relative bg-white rounded-[1.75rem] shadow-2xl border border-outline-variant/20 max-w-3xl w-full max-h-[85vh] overflow-y-auto p-6 sm:p-8">
+              <button
+                type="button"
+                onClick={() => setShowSampleReport(false)}
+                className="absolute top-4 right-4 h-9 w-9 rounded-full bg-surface-container-low text-secondary hover:text-primary flex items-center justify-center"
+                aria-label="Close sample report"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+
+              <div className="pr-10">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#1D9E75] mb-2">Sample Deal Analysis</p>
+                <h2 className="font-headline text-2xl sm:text-3xl font-extrabold text-primary tracking-tight">Vacant Residential Lot Review</h2>
+                <p className="mt-2 text-sm text-secondary">Example only. Final reports vary based on parcel data, local rules, comps, and requested scope.</p>
+              </div>
+
+              <div className="mt-7 grid gap-4">
+                {[
+                  ['Property Snapshot', '0.24-acre infill lot in a growing residential submarket with paved access, nearby utilities, and comparable residential development nearby.'],
+                  ['Scout Take', 'Potentially attractive for a small builder if zoning confirms by-right residential use and utility tap costs are reasonable. Main risks are entitlement timing, setbacks, and finished-lot resale assumptions.'],
+                  ['Valuation Range', 'Preliminary land value estimate: $85K–$115K based on nearby lot and improved-property comps. Verify with current MLS, county records, and recent off-market sales before offering.'],
+                  ['Zoning / Use Check', 'Confirm allowed density, minimum lot size, setbacks, parking, access, and whether any overlays, floodplain, or special review requirements apply.'],
+                  ['Financing Notes', 'Likely best fit for cash, private capital, seller financing, or a construction lender after plans and exit strategy are defined.'],
+                  ['Recommended Next Steps', 'Verify zoning with the city/county, pull 3–5 recent comps, estimate utility/tap fees, confirm access/title, then set a max offer with a contingency buffer.'],
+                ].map(([title, body]) => (
+                  <div key={title} className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4">
+                    <h3 className="font-headline text-base font-extrabold text-primary mb-1">{title}</h3>
+                    <p className="text-sm text-secondary leading-relaxed">{body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="max-w-2xl mx-auto">
+          <div className="mb-5 text-center">
+            <button
+              type="button"
+              onClick={() => setShowSampleReport(true)}
+              className="inline-flex items-center gap-2 text-sm font-extrabold text-[#1D9E75] hover:text-[#14795A] transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">description</span>
+              View sample report
+            </button>
+          </div>
           {submitState === 'success' ? (
             /* ── Success state ─────────────────────────────────── */
             <SurfaceCard className="bg-surface-container p-8 text-center">
