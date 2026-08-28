@@ -37,7 +37,6 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
           <h3 className="font-headline text-xl font-extrabold text-primary leading-tight line-clamp-2">{lead.title}</h3>
           <p className="mt-2 text-sm font-semibold text-secondary truncate">Listed by {lead.sellerCompany}</p>
         </div>
-        <span className="material-symbols-outlined text-xl text-primary/60 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
       </div>
 
       <div className="flex flex-wrap gap-x-5 gap-y-3">

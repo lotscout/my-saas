@@ -262,9 +262,6 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
       ) : (
         <p className="mt-auto text-xs font-semibold text-secondary/80 border-t border-outline-variant/15 pt-2">Contact via platform</p>
       )}
-      <div className="absolute top-3 right-3 flex items-center justify-end text-sm">
-        <span className="material-symbols-outlined text-xl text-emerald-600 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
-      </div>
     </div>
   );
 }
@@ -290,7 +287,6 @@ function RequestCard({ req }: { req: BuyerRequest }) {
           <h3 className="font-headline text-xl font-extrabold text-primary leading-tight line-clamp-2">{name}</h3>
           {showCompany && <p className="mt-2 text-sm font-semibold text-secondary truncate">{company}</p>}
         </div>
-        <span className="material-symbols-outlined text-xl text-primary/60 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
       </div>
 
       <div className="grid grid-cols-1 gap-2">
