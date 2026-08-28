@@ -46,7 +46,6 @@ export default function PropertyLeadDetailPage() {
           <section className="space-y-5 min-w-0">
             <div className="bg-white border border-outline-variant/15 rounded-2xl p-5 sm:p-7 shadow-sm">
               <div className="flex flex-wrap items-center gap-2 mb-4">
-                <span className="rounded-full bg-[#EAF6F1] border border-[#1D9E75]/25 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-[#1D9E75]">{lead.source} lead</span>
                 <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">Listed {formatLeadDate(lead.listedDate)}</span>
               </div>
               <h1 className="font-headline text-[30px] sm:text-[42px] leading-[1.05] font-extrabold tracking-tight text-primary">{lead.title}</h1>
@@ -90,21 +89,16 @@ export default function PropertyLeadDetailPage() {
 
           <aside className="space-y-5 lg:sticky lg:top-24">
             <section className="bg-white border border-outline-variant/15 rounded-2xl p-5 shadow-sm">
-              <h2 className="font-headline text-base font-extrabold text-primary mb-4">Seller / source contact</h2>
+              <h2 className="font-headline text-base font-extrabold text-primary mb-4">Seller contact</h2>
               <dl className="space-y-3 border-y border-outline-variant/15 py-4">
                 <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-secondary">Listed by</dt><dd className="mt-0.5 font-bold text-primary">{lead.sellerName}</dd></div>
                 <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-secondary">Company</dt><dd className="mt-0.5 font-bold text-primary">{lead.sellerCompany}</dd></div>
-                <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-secondary">Source</dt><dd className="mt-0.5 font-bold text-primary">{lead.source}</dd></div>
               </dl>
               <div className="mt-4 space-y-2">
                 <button type="button" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors">
                   <span className="material-symbols-outlined text-base">chat</span>
                   Message seller
                 </button>
-                <a href={lead.sourceUrl} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl border border-outline-variant/20 bg-white px-4 py-3 text-primary font-headline text-sm font-extrabold hover:bg-surface-container-low transition-colors">
-                  <span className="material-symbols-outlined text-base">open_in_new</span>
-                  View source
-                </a>
               </div>
             </section>
 

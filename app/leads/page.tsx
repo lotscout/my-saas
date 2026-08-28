@@ -80,7 +80,7 @@ export default function LeadsPage() {
     const q = search.toLowerCase().trim();
     const stateVals = state ? resolveStateQuery(state).map(v => v.toLowerCase()) : null;
     return MOCK_PROPERTY_LEADS.filter(lead => {
-      const haystack = [lead.title, lead.city, lead.state, lead.county, lead.sellerName, lead.sellerCompany, lead.source, lead.propertyType, lead.zoning].join(' ').toLowerCase();
+      const haystack = [lead.title, lead.city, lead.state, lead.county, lead.sellerName, lead.sellerCompany, lead.propertyType, lead.zoning].join(' ').toLowerCase();
       const matchSearch = !q || haystack.includes(q);
       const matchState = !stateVals || stateVals.some(v => lead.state.toLowerCase() === v || lead.state.toLowerCase() === v.slice(0, 2));
       return matchSearch && matchState && applyBudgetFilter(lead, budget);
@@ -96,7 +96,7 @@ export default function LeadsPage() {
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
         <PageHeader
           title={<>Land <span className="text-[#1D9E75]">Leads</span></>}
-          description="Browse sample property leads sourced from public land-listing patterns across Zillow, Redfin, and Land.com. These mockups show how real seller/opportunity leads should appear inside LotScout."
+          description="Browse sample seller property leads across national land markets. These mockups show how real seller/opportunity leads should appear inside LotScout."
           actions={(
             <Link href="/create-listing" className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#1D9E75] bg-white px-4 py-3 text-sm font-extrabold text-[#1D9E75] hover:bg-[#EAF6F1] transition-colors">
               <span className="material-symbols-outlined text-lg">add_circle</span>
@@ -138,7 +138,7 @@ export default function LeadsPage() {
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search by property, seller, source, market, or zoning"
+                placeholder="Search by property, seller, market, or zoning"
                 className="w-full bg-white border-2 border-primary/25 rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-inner"
               />
             </div>
