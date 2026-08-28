@@ -108,6 +108,13 @@ function fmtTimeline(t: string): string {
   return t;
 }
 
+function fmtDate(value: string | null): string {
+  if (!value) return 'Not listed';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not listed';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 
 // First city from the comma-separated target_cities list (falls back to target_city).
 function primaryCity(req: { target_cities?: string | null; target_city?: string | null }): string | null {
@@ -149,6 +156,23 @@ function DetailGrid({ items }: { items: { label: string; value: string }[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+function StatCard({ label, value, sub, icon }: { label: string; value: string; sub: string; icon: string }) {
+  return (
+    <SurfaceCard className="p-5">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-secondary/70">{label}</p>
+          <p className="mt-1 font-headline text-3xl font-extrabold text-primary tracking-tight">{value}</p>
+          <p className="mt-1 text-xs font-semibold text-secondary">{sub}</p>
+        </div>
+        <div className="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+          <span className="material-symbols-outlined text-2xl text-[#1D9E75]">{icon}</span>
+        </div>
+      </div>
+    </SurfaceCard>
   );
 }
 
@@ -253,29 +277,44 @@ function RequestCard({ req }: { req: BuyerRequest }) {
   const company = req.display_company?.trim();
   const showCompany = !!company && company.toLowerCase() !== name.trim().toLowerCase();
   const location = fmtLocation(req.target_city, req.target_county, req.target_state, req.target_regions);
-  const timeline = req.timeline ? fmtTimeline(req.timeline) : 'N/A';
+  const timeline = req.timeline ? fmtTimeline(req.timeline) : 'Flexible';
+  const postedDate = fmtDate(req.created_at);
 
   return (
     <div
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
-      className="group relative bg-white rounded-xl border border-emerald-100 p-4 flex flex-col gap-3 cursor-pointer hover:border-emerald-500/60 hover:shadow-xl hover:shadow-emerald-900/10 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[155px] ring-1 ring-black/[0.02]"
+      className="group relative bg-white rounded-2xl border border-outline-variant/15 p-5 flex flex-col gap-4 cursor-pointer hover:border-primary/35 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-200 ring-1 ring-black/[0.02]"
     >
-      <div className="min-w-0 border-b border-outline-variant/15 pb-2 text-center pr-5">
-        <p className="font-headline font-extrabold text-primary text-xl leading-tight line-clamp-1">{name}</p>
-        {showCompany && (
-          <p className="text-sm font-semibold text-secondary truncate mt-1 mx-auto max-w-full">{company}</p>
-        )}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-headline text-xl font-extrabold text-primary leading-tight line-clamp-2">{name}</h3>
+          {showCompany && <p className="mt-2 text-sm font-semibold text-secondary truncate">{company}</p>}
+        </div>
+        <span className="material-symbols-outlined text-xl text-primary/60 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
       </div>
-      <DetailGrid items={[
-        { label: 'Budget', value: fmtBudget(req.budget_min, req.budget_max) },
-        { label: 'Timeline', value: timeline },
-        { label: 'Zoning', value: fmtZoning(req.zoning_preference) },
-        { label: 'Location', value: location },
-        { label: 'Lot Size', value: fmtLotSize(req) },
-      ]} />
-      <div className="absolute top-3 right-3 flex items-center justify-end text-sm">
-        <span className="material-symbols-outlined text-xl text-emerald-600 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+
+      <div className="grid grid-cols-1 gap-2">
+        {[
+          ['Budget', fmtBudget(req.budget_min, req.budget_max)],
+          ['Lot Size', fmtLotSize(req)],
+          ['Active Since', postedDate],
+        ].map(([label, value]) => (
+          <div key={label} className="rounded-xl bg-white border border-outline-variant/20 px-3 py-2 shadow-sm">
+            <p className="text-[10px] font-black text-secondary/70 uppercase tracking-wider leading-none">{label}</p>
+            <p className="mt-1 text-sm font-extrabold text-primary truncate">{value}</p>
+          </div>
+        ))}
       </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{location}</span>
+        <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary">{timeline}</span>
+        {req.use_case && <span className="rounded-full bg-surface-container-low border border-outline-variant/15 px-3 py-1 text-xs font-bold text-secondary truncate max-w-full">{req.use_case}</span>}
+      </div>
+
+      <p className="mt-auto border-t border-outline-variant/15 pt-3 text-xs font-semibold text-secondary leading-relaxed">
+        Click to view buyer details, contact options, and full acquisition criteria.
+      </p>
     </div>
   );
 }
@@ -545,6 +584,8 @@ export default function BuyerDirectoryPage() {
     else setActiveBrSearch(val);
   };
 
+  const activeMarkets = useMemo(() => new Set(activeBuyers.map(b => b.target_state).filter(Boolean)).size, [activeBuyers]);
+
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
@@ -582,67 +623,63 @@ export default function BuyerDirectoryPage() {
 
           <PageHeader
             title={<>Buyer <span className="text-[#1D9E75]">Directory</span></>}
-            description="Search active land buyers and review their acquisition criteria."
+            description="Browse active land buyers using the same clean directory layout as Leads. Click any buyer to see contact options, budget, lot size, markets, and full acquisition criteria."
             actions={(
               <PrimaryLink href="/create-buyer-request" className="rounded-xl px-3 py-2 text-xs sm:px-5 sm:py-3 sm:text-sm md:shrink-0 self-start">
                 <span className="material-symbols-outlined text-base sm:text-lg">add_circle</span>
-                Create Request
+                Submit Buy Box
               </PrimaryLink>
             )}
           />
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
+            <StatCard label="Active buyers" value={activeLoading ? '—' : activeBuyers.length.toLocaleString()} sub="Buyer directory records" icon="person_search" />
+            <StatCard label="Markets" value={activeLoading ? '—' : activeMarkets.toLocaleString()} sub="States represented" icon="travel_explore" />
+            <StatCard label="Directory type" value="Buyers" sub="Acquisition criteria" icon="hub" />
+          </div>
+
           {/* Search / sort / filter */}
           <SurfaceCard className="p-3 sm:p-4 mb-7">
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex flex-col lg:flex-row gap-3">
               <div className="relative flex-1">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
                 <input
                   type="text"
                   value={tab === 'requests' ? brSearch : activeBrSearch}
                   onChange={e => handleSearchChange(e.target.value)}
-                  placeholder=""
+                  placeholder="Search by buyer, company, market, or use case"
                   aria-label="Search buyer directory"
-                  className="w-full bg-white border-2 border-primary/25 rounded-xl pl-12 pr-10 py-3 text-sm font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-inner"
+                  className="w-full bg-white border-2 border-primary/25 rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-inner"
                 />
-                {(tab === 'requests' ? brSearch : activeBrSearch) && (
-                  <button
-                    onClick={() => handleSearchChange('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface"
-                  >
-                    <span className="material-symbols-outlined text-lg">close</span>
-                  </button>
-                )}
               </div>
-              {tab === 'directory' && (
-                <>
-                  <div
-                    title="Sort"
-                    className="relative shrink-0 h-[46px] w-[46px] rounded-xl border border-outline-variant/25 text-primary hover:bg-surface-container-low focus-within:ring-2 focus-within:ring-primary/20 transition-colors"
-                  >
-                    <span className="material-symbols-outlined absolute inset-0 flex items-center justify-center text-xl pointer-events-none">sort</span>
-                    <select
-                      value={activeSort}
-                      onChange={e => setActiveSort(e.target.value as 'newest' | 'oldest')}
-                      aria-label="Sort buyer directory"
-                      className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
-                    >
-                      <option value="newest">Newest</option>
-                      <option value="oldest">Oldest</option>
-                    </select>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowActiveFilters(prev => !prev)}
-                    aria-label="Filter buyer directory"
-                    title="Filter"
-                    className="relative shrink-0 inline-flex h-[46px] w-[46px] items-center justify-center rounded-xl border border-outline-variant/25 text-primary hover:bg-surface-container-low focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-xl">tune</span>
-                    {(activeBrState || activeBrBudget || activeBrAcreage || activeBrZoning || activeBrRoadAccess) && (
-                      <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-[#1D9E75] ring-2 ring-white" />
-                    )}
-                  </button>
-                </>
+              <select value={activeBrState} onChange={e => setActiveBrState(e.target.value)} className={SELECT_CLS}>
+                <option value="">All States</option>
+                {Object.keys(STATE_MAP).sort().map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <select value={activeBrBudget} onChange={e => setActiveBrBudget(e.target.value)} className={SELECT_CLS}>
+                <option value="">All Budgets</option>
+                <option value="under50k">Under $50K</option>
+                <option value="50k-100k">$50K–$100K</option>
+                <option value="100k-500k">$100K–$500K</option>
+                <option value="500k-1m">$500K–$1M</option>
+                <option value="1m-5m">$1M–$5M</option>
+                <option value="5m+">$5M+</option>
+              </select>
+              <select value={activeBrAcreage} onChange={e => setActiveBrAcreage(e.target.value)} className={SELECT_CLS}>
+                <option value="">All Acreage</option>
+                <option value="under5">Under 5 acres</option>
+                <option value="5-25">5–25 acres</option>
+                <option value="25-100">25–100 acres</option>
+                <option value="100-500">100–500 acres</option>
+                <option value="500+">500+ acres</option>
+              </select>
+              {(activeBrSearch || activeBrState || activeBrBudget || activeBrAcreage || activeBrZoning || activeBrRoadAccess) && (
+                <button
+                  onClick={() => { setActiveBrState(''); setActiveBrBudget(''); setActiveBrAcreage(''); setActiveBrZoning(''); setActiveBrRoadAccess(''); setActiveBrSearch(''); }}
+                  className="rounded-xl px-4 py-3 text-xs font-extrabold text-secondary hover:text-primary hover:bg-surface-container-low transition-colors"
+                >
+                  Clear
+                </button>
               )}
             </div>
           </SurfaceCard>
