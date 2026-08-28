@@ -639,9 +639,9 @@ export default function BuyerDirectoryPage() {
           </div>
 
           {/* Search / sort / filter */}
-          <SurfaceCard className="p-3 sm:p-4 mb-7">
+          <SurfaceCard className="p-3 sm:p-4 mb-7 max-w-5xl mx-auto">
             <div className="flex flex-col lg:flex-row gap-3">
-              <div className="relative flex-1">
+              <div className="relative flex-1 lg:max-w-md">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
                 <input
                   type="text"
