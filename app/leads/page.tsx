@@ -251,18 +251,18 @@ export default function LeadsPage() {
           title={<>Land <span className="text-[#1D9E75]">Leads</span></>}
           description="Browse active land opportunities and submitted property leads. Click any card to see who listed it, contact details, pricing guidance, lot size, date listed, and full criteria."
           actions={(
-            <PrimaryLink href="/create-buyer-request" className="rounded-xl px-4 py-3">
+            <Link href="/create-buyer-request" className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#1D9E75] bg-white px-4 py-3 text-sm font-extrabold text-[#1D9E75] hover:bg-[#EAF6F1] transition-colors">
               <span className="material-symbols-outlined text-lg">add_circle</span>
               Submit Buy Box
-            </PrimaryLink>
+            </Link>
           )}
         />
 
-        <div className="mb-7 rounded-[1.75rem] border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5 sm:p-6 shadow-sm">
+        <div className="mb-7 rounded-[1.75rem] border-2 border-[#1D9E75] bg-white p-5 sm:p-6 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="h-11 w-11 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-2xl text-amber-800">info</span>
+              <div className="h-11 w-11 rounded-2xl bg-[#EAF6F1] border border-[#1D9E75]/30 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-2xl text-[#1D9E75]">info</span>
               </div>
               <div>
                 <p className="font-headline text-lg font-extrabold text-primary">Lead board, not the marketplace</p>
@@ -271,7 +271,7 @@ export default function LeadsPage() {
                 </p>
               </div>
             </div>
-            <Link href="/marketplace" className="inline-flex items-center justify-center gap-2 rounded-xl border border-outline-variant/25 bg-white px-4 py-3 text-sm font-extrabold text-primary hover:bg-surface-container-low transition-colors shrink-0">
+            <Link href="/marketplace" className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#1D9E75] bg-white px-4 py-3 text-sm font-extrabold text-[#1D9E75] hover:bg-[#EAF6F1] transition-colors shrink-0">
               View Marketplace
               <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </Link>
