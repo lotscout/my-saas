@@ -5,6 +5,15 @@ import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { MOCK_PROPERTY_LEADS, formatLeadDate, formatLeadPrice } from '@/lib/mockPropertyLeads';
 
+const LEGACY_LEAD_IDS: Record<string, string> = {
+  'austin-tx-024-acre-infill': 'austin-tx-0-24-acres',
+  'denver-co-6250-sqft-lot': 'denver-co-6-250-sq-ft',
+  'bend-or-191-acre-buildable': 'bend-or-1-91-acres',
+  'phoenix-az-5000-sqft-lot': 'phoenix-az-5-000-sq-ft',
+  'charlotte-nc-072-acre-lot': 'charlotte-nc-0-72-acres',
+  'boise-id-235-acre-acreage': 'boise-id-2-35-acres',
+};
+
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-outline-variant/15 bg-white p-4 shadow-sm">
@@ -17,7 +26,8 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 export default function PropertyLeadDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const lead = MOCK_PROPERTY_LEADS.find(item => item.id === id);
+  const resolvedId = LEGACY_LEAD_IDS[id] ?? id;
+  const lead = MOCK_PROPERTY_LEADS.find(item => item.id === resolvedId);
 
   if (!lead) {
     return (
