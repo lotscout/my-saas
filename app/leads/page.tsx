@@ -122,12 +122,23 @@ function applyBudgetFilter(req: BuyerLead, f: string): boolean {
   return true;
 }
 
+function leadValue(req: BuyerLead): number | null {
+  if (req.budget_min && req.budget_max) return (req.budget_min + req.budget_max) / 2;
+  return req.budget_max ?? req.budget_min ?? null;
+}
+
+function fmtMoney(value: number | null): string {
+  if (!value) return '—';
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1)}M`;
+  return `$${Math.round(value / 1000)}K`;
+}
+
 function StatCard({ label, value, sub, icon }: { label: string; value: string; sub: string; icon: string }) {
   return (
     <SurfaceCard className="p-5">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-secondary/70">{label}</p>
+          <p className="text-sm font-black uppercase tracking-[0.12em] text-secondary/80">{label}</p>
           <p className="mt-1 font-headline text-3xl font-extrabold text-primary tracking-tight">{value}</p>
           <p className="mt-1 text-xs font-semibold text-secondary">{sub}</p>
         </div>
@@ -242,6 +253,11 @@ export default function LeadsPage() {
   }, [leads, search, state, budget]);
 
   const nationalMarkets = useMemo(() => new Set(leads.map(l => l.target_state).filter(Boolean)).size, [leads]);
+  const averageLeadValue = useMemo(() => {
+    const values = leads.map(leadValue).filter((value): value is number => typeof value === 'number' && value > 0);
+    if (!values.length) return null;
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  }, [leads]);
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
@@ -281,7 +297,7 @@ export default function LeadsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
           <StatCard label="Active leads" value={loading ? '—' : leads.length.toLocaleString()} sub="Property lead records" icon="person_search" />
           <StatCard label="Markets" value={loading ? '—' : nationalMarkets.toLocaleString()} sub="States represented" icon="travel_explore" />
-          <StatCard label="Lead type" value="Property" sub="Seller and acquisition leads" icon="hub" />
+          <StatCard label="Average lead value" value={loading ? '—' : fmtMoney(averageLeadValue)} sub="Based on listed budget ranges" icon="paid" />
         </div>
 
         <SurfaceCard className="p-3 sm:p-4 mb-7">
