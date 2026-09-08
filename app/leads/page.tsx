@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { PageHeader, PrimaryLink, SurfaceCard } from '@/components/ui/LotScoutUI';
-import { MOCK_PROPERTY_LEADS, formatLeadDate, formatLeadPrice, type PropertyLead } from '@/lib/mockPropertyLeads';
+import { MOCK_PROPERTY_LEADS, formatLeadPrice, type PropertyLead } from '@/lib/mockPropertyLeads';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
 
 const SELECT_CLS = 'bg-white px-4 py-3 rounded-xl border border-outline-variant/25 hover:border-primary/30 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all shadow-sm';
@@ -42,7 +42,6 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
         {[
           ['Price', formatLeadPrice(lead.price)],
           ['Lot Size', lead.lotSize],
-          ['Date Listed', formatLeadDate(lead.listedDate)],
         ].map(([label, value]) => (
           <div key={label} className="min-w-[92px]">
             <p className="text-[10px] font-black text-secondary/65 uppercase tracking-wider leading-none">{label}</p>
