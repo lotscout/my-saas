@@ -87,7 +87,7 @@ export default function LeadsPage() {
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
         <PageHeader
           title={<>Land <span className="text-[#1D9E75]">Leads</span></>}
-          description="Discover land opportunities from sellers across active U.S. markets. Review each lead for parcel details, pricing, and seller contact information."
+          description="Leads are early seller opportunities that may need follow-up, verification, or negotiation. Marketplace listings are approved properties ready for broader buyer discovery."
           actions={(
             <PrimaryLink href="/create-listing">
               Submit Property Lead
