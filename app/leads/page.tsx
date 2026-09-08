@@ -87,7 +87,7 @@ export default function LeadsPage() {
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
         <PageHeader
           title={<>Land <span className="text-[#1D9E75]">Leads</span></>}
-          description="Browse sample seller property leads across national land markets. These mockups show how real seller/opportunity leads should appear inside LotScout."
+          description="Discover land opportunities from sellers across active U.S. markets. Review each lead for parcel details, pricing, and seller contact information."
           actions={(
             <PrimaryLink href="/create-listing">
               Submit Property Lead
