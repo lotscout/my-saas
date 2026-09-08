@@ -123,6 +123,20 @@ export default function ProfilePage() {
             </div>
           </div>
         </section>
+
+        <section className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[2rem] border border-outline-variant/30 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined">support_agent</span>
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold text-primary font-headline">Need help with your account?</h2>
+              <p className="mt-1 text-sm sm:text-base text-secondary">
+                Email <a href="mailto:support@lotscout.com" className="font-bold text-[#14795A] hover:underline">support@lotscout.com</a>
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

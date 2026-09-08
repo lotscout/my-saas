@@ -13,7 +13,6 @@ const NAV_LINKS = [
   { label: 'Deal Analysis', href: '/property-analysis' },
   { label: 'Messaging', href: '/messaging' },
   { label: 'Funding', href: '/funding-partners' },
-  { label: 'Support', href: '/support' },
 ];
 
 export default function Header() {
