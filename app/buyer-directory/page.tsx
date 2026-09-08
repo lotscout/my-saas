@@ -219,7 +219,7 @@ function DirectoryCard({ req }: { req: BuyerRequest }) {
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
       className="group relative bg-white rounded-xl border border-emerald-100 p-4 flex flex-col gap-3 cursor-pointer hover:border-emerald-500/60 hover:shadow-xl hover:shadow-emerald-900/10 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[165px] ring-1 ring-black/[0.02]"
     >
-      <div className="min-w-0 text-center pr-5">
+      <div className="min-w-0 text-center">
         <p className="font-headline font-extrabold text-primary text-xl leading-tight line-clamp-1">{name}</p>
         {showCompany && (
           <p className="text-sm font-semibold text-secondary truncate mt-1 mx-auto max-w-full">{company}</p>
@@ -282,11 +282,9 @@ function RequestCard({ req }: { req: BuyerRequest }) {
       onClick={() => router.push(`/buyer-requests/${req.id}`)}
       className="group relative bg-white rounded-2xl border border-outline-variant/15 p-5 flex flex-col gap-4 cursor-pointer hover:border-primary/35 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-200 ring-1 ring-black/[0.02]"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="font-headline text-xl font-extrabold text-primary leading-tight line-clamp-2">{name}</h3>
-          {showCompany && <p className="mt-2 text-sm font-semibold text-secondary truncate">{company}</p>}
-        </div>
+      <div className="text-center">
+        <h3 className="font-headline text-xl font-extrabold text-primary leading-tight line-clamp-2">{name}</h3>
+        {showCompany && <p className="mt-2 text-sm font-semibold text-secondary truncate">{company}</p>}
       </div>
 
       <div className="grid grid-cols-1 gap-2">
