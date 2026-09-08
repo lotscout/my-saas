@@ -434,7 +434,7 @@ export default function BuyerRequestPage() {
                 {request.contact_email && (
                   <a href={`mailto:${request.contact_email}`} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">
                     <span className="material-symbols-outlined text-base">mail</span>
-                    Email poster
+                    Email buyer
                   </a>
                 )}
                 {request.contact_phone && (
@@ -443,7 +443,7 @@ export default function BuyerRequestPage() {
                     {request.contact_phone}
                   </a>
                 )}
-                <button onClick={handleMessage} className="w-full rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">Message poster</button>
+                <button onClick={handleMessage} className="w-full rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">Message buyer</button>
               </div>
               {responseTime && <p className="mt-3 text-xs text-[#5C6D64]">Typically responds {responseTime}</p>}
             </section>
