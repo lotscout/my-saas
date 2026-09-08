@@ -603,7 +603,7 @@ export default function AdvisorPage() {
               <div className="flex-grow flex flex-col items-center justify-center gap-6 sm:gap-7 py-8 sm:py-10">
                 <div className="text-center">
                   <h1 className="font-headline text-5xl sm:text-6xl md:text-7xl font-black text-primary tracking-[-0.065em] leading-[0.9]">
-                    Scout Search
+                    Scout <span style={{ color: GREEN }}>Search</span>
                   </h1>
                   <p className="mt-5 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, comps, and deal strategy.</p>
                 </div>
