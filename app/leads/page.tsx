@@ -65,12 +65,6 @@ function applyBudgetFilter(lead: PropertyLead, filter: string): boolean {
   return true;
 }
 
-function fmtAverage(value: number): string {
-  if (!value) return '—';
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-  return `$${Math.round(value / 1000)}K`;
-}
-
 export default function LeadsPage() {
   const [search, setSearch] = useState('');
   const [state, setState] = useState('');
@@ -88,7 +82,6 @@ export default function LeadsPage() {
   }, [search, state, budget]);
 
   const markets = useMemo(() => new Set(MOCK_PROPERTY_LEADS.map(lead => lead.state)).size, []);
-  const averageLeadValue = useMemo(() => MOCK_PROPERTY_LEADS.reduce((sum, lead) => sum + lead.price, 0) / MOCK_PROPERTY_LEADS.length, []);
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
@@ -105,10 +98,9 @@ export default function LeadsPage() {
         />
 
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-7">
           <StatCard label="Active leads" value={MOCK_PROPERTY_LEADS.length.toLocaleString()} sub="Sample property leads" icon="real_estate_agent" />
           <StatCard label="Markets" value={markets.toLocaleString()} sub="States represented" icon="travel_explore" />
-          <StatCard label="Average lead value" value={fmtAverage(averageLeadValue)} sub="Based on asking prices" icon="paid" />
         </div>
 
         <SurfaceCard className="p-3 sm:p-4 mb-7">
