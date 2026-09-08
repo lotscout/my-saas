@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
-import { PageHeader, SurfaceCard } from '@/components/ui/LotScoutUI';
+import { PageHeader, PrimaryLink, SurfaceCard } from '@/components/ui/LotScoutUI';
 import { MOCK_PROPERTY_LEADS, formatLeadDate, formatLeadPrice, type PropertyLead } from '@/lib/mockPropertyLeads';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
 
@@ -98,10 +98,9 @@ export default function LeadsPage() {
           title={<>Land <span className="text-[#1D9E75]">Leads</span></>}
           description="Browse sample seller property leads across national land markets. These mockups show how real seller/opportunity leads should appear inside LotScout."
           actions={(
-            <Link href="/create-listing" className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#1D9E75] bg-white px-4 py-3 text-sm font-extrabold text-[#1D9E75] hover:bg-[#EAF6F1] transition-colors">
-              <span className="material-symbols-outlined text-lg">add_circle</span>
+            <PrimaryLink href="/create-listing">
               Submit Property Lead
-            </Link>
+            </PrimaryLink>
           )}
         />
 

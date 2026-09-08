@@ -627,7 +627,6 @@ export default function MarketplacePage() {
               My Listings
               </SecondaryAction>
               <PrimaryLink href="/create-listing">
-              <span className="material-symbols-outlined text-lg">add_circle</span>
               Create Listing
               </PrimaryLink>
             </>
