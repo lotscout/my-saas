@@ -105,25 +105,6 @@ export default function LeadsPage() {
           )}
         />
 
-        <div className="mb-7 rounded-[1.75rem] border-2 border-[#1D9E75] bg-white p-5 sm:p-6 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="h-11 w-11 rounded-2xl bg-[#EAF6F1] border border-[#1D9E75]/30 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-2xl text-[#1D9E75]">info</span>
-              </div>
-              <div>
-                <p className="font-headline text-lg font-extrabold text-primary">Property leads, not approved marketplace listings</p>
-                <p className="mt-1 text-sm text-secondary leading-relaxed max-w-3xl">
-                  Leads are raw opportunities found from public land marketplaces or submitted by sellers. Verify ownership, availability, zoning, utilities, title, and price before treating any lead as actionable.
-                </p>
-              </div>
-            </div>
-            <Link href="/marketplace" className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#1D9E75] bg-white px-4 py-3 text-sm font-extrabold text-[#1D9E75] hover:bg-[#EAF6F1] transition-colors shrink-0">
-              View Marketplace
-              <span className="material-symbols-outlined text-lg">arrow_forward</span>
-            </Link>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
           <StatCard label="Active leads" value={MOCK_PROPERTY_LEADS.length.toLocaleString()} sub="Sample property leads" icon="real_estate_agent" />
