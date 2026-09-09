@@ -382,8 +382,8 @@ export default function PropertyAnalysisPage() {
 
           {/* Property analysis request */}
           <div className="mb-8">
-          {/* LEFT: Unified white card — Submit a Property + How It Works */}
-          <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm overflow-hidden lg:grid lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)]">
+          {/* Unified white card — Submit a Property + How It Works */}
+          <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm overflow-hidden">
 
             <div className="min-w-0">
               {isPaid ? (
@@ -584,7 +584,7 @@ export default function PropertyAnalysisPage() {
             </div>
 
             {/* How It Works */}
-            <div className="p-5 sm:p-6 border-t lg:border-t-0 lg:border-l border-outline-variant/15 bg-surface-container-lowest/60">
+            <div className="p-5 sm:p-6 border-t border-outline-variant/15 bg-surface-container-lowest/60">
               <div className="flex flex-col gap-1 mb-4">
                 <div>
                   <h2 className="font-headline text-xl font-extrabold text-primary tracking-tight">How it works</h2>
@@ -593,7 +593,7 @@ export default function PropertyAnalysisPage() {
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
                   { icon: 'input',        step: '01', title: 'Input Property',              body: 'Search by address, parcel ID, or simply drop a pin on our high-resolution topographic map interface.' },
                   { icon: 'auto_awesome', step: '02', title: 'AI-Powered Comparison',       body: 'Our engine instantly scans thousands of recent transactions and environmental data points to calculate true market value.' },
@@ -606,7 +606,7 @@ export default function PropertyAnalysisPage() {
                     <div>
                       <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest mb-0.5">Step {step}</p>
                       <h3 className="font-headline text-sm font-bold text-primary mb-0.5">{title}</h3>
-                      <p className="hidden xl:block text-secondary leading-relaxed text-xs">{body}</p>
+                      <p className="hidden lg:block text-secondary leading-relaxed text-xs">{body}</p>
                     </div>
                   </div>
                 ))}
