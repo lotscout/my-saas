@@ -34,7 +34,7 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-headline text-xl font-extrabold text-primary leading-tight line-clamp-2">{lead.title}</h3>
+          <h3 className="font-headline text-xl font-extrabold text-primary leading-tight truncate whitespace-nowrap">{lead.title}</h3>
         </div>
       </div>
 
