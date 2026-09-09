@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 interface Listing {
   id: string;
@@ -96,62 +95,22 @@ export default function AdminListingsPage() {
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
-    const supabase = createClient();
-
-    let query = supabase
-      .from('listings')
-      .select('id, title, status, state, county, lot_size_acres, lot_size_sqft, asking_price, created_at, updated_at, user_id')
-      .order('created_at', { ascending: false })
-      .limit(100);
-
-    if (statusFilter !== 'all') {
-      query = query.eq('status', statusFilter);
+    try {
+      const res = await fetch(`/api/admin/listings?status=${statusFilter}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Failed to load listings');
+      setListings(data.listings ?? []);
+      setPendingBuyers(data.pendingBuyers ?? []);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to load listings', 'error');
+      setListings([]);
+      setPendingBuyers([]);
+    } finally {
+      setLoading(false);
     }
-
-    const { data } = await query;
-    const rows = data ?? [];
-
-    if (!rows.length) { setListings([]); setLoading(false); return; }
-
-    const userIds = [...new Set(rows.map((r: Listing) => r.user_id))];
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, full_name, email')
-      .in('id', userIds);
-
-    const pm: Record<string, { full_name: string | null; email: string | null }> = {};
-    (profiles ?? []).forEach((p: { id: string; full_name: string | null; email: string | null }) => { pm[p.id] = p; });
-
-    setListings(rows.map((r: Listing) => ({ ...r, profiles: pm[r.user_id] ?? null })));
-    setLoading(false);
   }, [statusFilter]);
 
-  const fetchBuyerRequests = useCallback(async () => {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from('buyer_requests')
-      .select('id, status, target_regions, budget_min, budget_max, min_acreage, max_acreage, use_case, created_at, user_id')
-      .eq('status', 'pending_review')
-      .order('created_at', { ascending: false });
-
-    const rows = data ?? [];
-    if (!rows.length) { setPendingBuyers([]); return; }
-
-    const supabase2 = createClient();
-    const userIds = [...new Set(rows.map((r: BuyerRequest) => r.user_id))];
-    const { data: profiles } = await supabase2
-      .from('profiles')
-      .select('id, full_name, email')
-      .in('id', userIds);
-
-    const pm: Record<string, { full_name: string | null; email: string | null }> = {};
-    (profiles ?? []).forEach((p: { id: string; full_name: string | null; email: string | null }) => { pm[p.id] = p; });
-
-    setPendingBuyers(rows.map((r: BuyerRequest) => ({ ...r, profiles: pm[r.user_id] ?? null })));
-  }, []);
-
   useEffect(() => { fetchListings(); }, [fetchListings]);
-  useEffect(() => { fetchBuyerRequests(); }, [fetchBuyerRequests]);
 
   async function handleStatus(id: string, status: string, reason?: string) {
     setActionLoading(id);
@@ -182,7 +141,7 @@ export default function AdminListingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed');
       showToast('Buyer request approved.', 'success');
-      await fetchBuyerRequests();
+      await fetchListings();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Error', 'error');
     } finally {
@@ -204,7 +163,7 @@ export default function AdminListingsPage() {
       showToast('Buyer request rejected.', 'success');
       setBuyerRejectModal(null);
       setBuyerRejectReason('');
-      await fetchBuyerRequests();
+      await fetchListings();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Error', 'error');
     } finally {
