@@ -586,7 +586,7 @@ export default function MarketplacePage() {
         </div>
       )}
 
-      <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1400px] mx-auto">
+      <main className="pt-24 px-4 sm:px-6 md:px-8 pb-20 min-h-screen max-w-[1600px] mx-auto">
         <PageHeader
           title="Marketplace"
           actions={(
@@ -609,8 +609,8 @@ export default function MarketplacePage() {
 
         {/* ── PROPERTIES ── */}
         <>
-            {/* Map — always visible, collapsible */}
-            <div className="mb-4">
+            {/* Map — stacked/collapsible on mobile and tablet */}
+            <div className="mb-4 xl:hidden">
               <div
                 className="overflow-hidden transition-all duration-300 ease-in-out rounded-2xl"
                 style={{ maxHeight: mapCollapsed ? 0 : 380 }}
@@ -846,7 +846,9 @@ export default function MarketplacePage() {
               </div>
             )}
 
-            <div className="grid grid-cols-12 gap-8 mb-12">
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.8fr)] gap-6 xl:gap-8 items-start mb-12">
+              <section className="min-w-0">
+            <div className="grid grid-cols-12 gap-8">
               <div className="col-span-12 hidden md:flex flex-wrap items-center gap-4 py-6 border-y border-outline-variant/20">
                 {/* Lot Size */}
                 {(() => {
@@ -1075,7 +1077,7 @@ export default function MarketplacePage() {
             </div>
 
             {listingsLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[1,2,3,4,5,6].map(i => (
                   <div key={i} className="flex flex-col animate-pulse">
                     <div className="rounded-2xl bg-surface-container-low aspect-video mb-6" />
@@ -1097,7 +1099,7 @@ export default function MarketplacePage() {
                 <p className="text-sm">{showMyListings ? 'Create your first listing to see it here.' : 'Try a different search term'}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {filteredListings.map(listing => {
                   const imgSrc = listing.photos_urls?.find(url => !!url?.trim())?.trim() ?? null;
                   const sampleImgSrc = getSampleImageUrl(listing.state, listing.id);
@@ -1223,6 +1225,24 @@ export default function MarketplacePage() {
                 })}
               </div>
             )}
+              </section>
+
+              <aside className="hidden xl:block sticky top-24 h-[calc(100vh-7rem)] min-h-[520px] rounded-3xl overflow-hidden border border-outline-variant/20 bg-surface-container-low shadow-sm">
+                <div className="relative h-full w-full">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  <ListingsMap
+                    listings={mapListings as any}
+                    filteredIds={filteredMapIds}
+                    highlightedId={hoveredListingId}
+                    onPinClick={handlePinClick}
+                  />
+                  <div className="absolute left-4 top-4 z-[1001] rounded-2xl bg-white/95 px-4 py-3 shadow-lg border border-outline-variant/20 backdrop-blur-sm">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-secondary/70">Map View</p>
+                    <p className="text-sm font-bold text-primary">{filteredListings.length.toLocaleString()} listings shown</p>
+                  </div>
+                </div>
+              </aside>
+            </div>
           </>
       </main>
 
