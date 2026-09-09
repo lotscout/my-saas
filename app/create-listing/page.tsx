@@ -329,11 +329,12 @@ export default function CreateListingPage() {
       </div>
     )}
 
-    <main className="flex-grow pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-12 max-w-[1440px] mx-auto w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12">
+    <main className="flex-grow pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-10 w-full">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="grid grid-cols-1 lg:grid-cols-[17rem_minmax(0,1fr)] gap-6 sm:gap-10 lg:gap-12 items-start">
 
         {/* Left: Heading & Stepper */}
-        <div className="lg:col-span-4 flex flex-col justify-start">
+        <div className="flex flex-col justify-start">
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight mb-2 sm:mb-4 leading-tight font-headline">
             Create Land Listing
           </h1>
@@ -370,7 +371,7 @@ export default function CreateListingPage() {
         </div>
 
         {/* Right: Form Card */}
-        <div className="lg:col-span-8">
+        <div className="w-full max-w-4xl">
 
           {/* ── Step 1 ── */}
           {currentStep === 1 && (
@@ -1045,6 +1046,7 @@ export default function CreateListingPage() {
             </div>
           )}
 
+        </div>
         </div>
       </div>
     </main>
