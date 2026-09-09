@@ -9,18 +9,13 @@ import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
 
 const SELECT_CLS = 'bg-white px-4 py-3 rounded-xl border border-outline-variant/25 hover:border-primary/30 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all shadow-sm';
 
-function StatCard({ label, value, sub, icon }: { label: string; value: string; sub: string; icon: string }) {
+function StatCard({ label, value, sub }: { label: string; value: string; sub: string; icon: string }) {
   return (
-    <SurfaceCard className="p-5">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-black uppercase tracking-[0.12em] text-secondary/80">{label}</p>
-          <p className="mt-1 font-headline text-3xl font-extrabold text-primary tracking-tight">{value}</p>
-          <p className="mt-1 text-xs font-semibold text-secondary">{sub}</p>
-        </div>
-        <div className="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-          <span className="material-symbols-outlined text-2xl text-[#1D9E75]">{icon}</span>
-        </div>
+    <SurfaceCard className="p-5 border-emerald-900/10">
+      <div>
+        <p className="text-sm font-black uppercase tracking-[0.12em] text-secondary/80">{label}</p>
+        <p className="mt-1 font-headline text-3xl font-extrabold text-primary tracking-tight">{value}</p>
+        <p className="mt-1 text-xs font-semibold text-secondary">{sub}</p>
       </div>
     </SurfaceCard>
   );
@@ -30,7 +25,7 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
   return (
     <Link
       href={`/leads/${lead.id}`}
-      className="group relative bg-white rounded-3xl border border-outline-variant/15 p-6 flex flex-col gap-5 hover:border-primary/35 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-200 ring-1 ring-black/[0.02]"
+      className="group relative bg-[#FCFFFD] rounded-3xl border border-emerald-900/15 p-6 flex flex-col gap-5 shadow-sm hover:border-primary/35 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-200 ring-1 ring-emerald-900/[0.03]"
     >
       <div className="min-w-0">
         <div className="mb-3 flex items-center justify-between gap-3">
@@ -48,7 +43,7 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
           ['Price', formatLeadPrice(lead.price)],
           ['Lot Size', lead.lotSize],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-2xl bg-surface-container-low border border-outline-variant/10 px-3 py-4 text-center">
+          <div key={label} className="rounded-2xl bg-white border border-emerald-900/10 px-3 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
             <p className="text-[10px] font-black text-secondary/65 uppercase tracking-wider leading-none">{label}</p>
             <p className="mt-2 text-base font-extrabold text-primary truncate">{value}</p>
           </div>
@@ -57,9 +52,8 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
 
       <div className="flex items-center justify-between gap-3 border-t border-outline-variant/10 pt-4">
         <span className="text-xs font-bold text-secondary truncate">{lead.zoning}</span>
-        <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#1D9E75] whitespace-nowrap">
-          View lead
-          <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-0.5">arrow_forward</span>
+        <span className="text-xs font-extrabold text-[#1D9E75] whitespace-nowrap">
+          View lead →
         </span>
       </div>
     </Link>
