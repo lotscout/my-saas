@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isAdminEmail } from './lib/admin'
 
 // Default-deny: every page route requires a session EXCEPT these public ones.
 // (API routes authenticate themselves and are bypassed below.)
@@ -82,6 +83,8 @@ export async function proxy(request: NextRequest) {
 
   // Admin area requires the admin flag (this app uses profiles.is_admin).
   if (path === '/admin' || path.startsWith('/admin/')) {
+    if (isAdminEmail(user.email)) return supabaseResponse
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('is_admin')
