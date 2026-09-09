@@ -593,26 +593,25 @@ export default function AdvisorPage() {
         )}
 
         <div className="flex-grow flex flex-col min-w-0 min-h-0 relative z-10">
-          {/* Pull-out history control */}
-          <button
-            onClick={() => setMobileSidebar(true)}
-            aria-label="Open Scout Search history"
-            className="fixed left-3 top-20 z-30 h-11 rounded-2xl bg-white/90 backdrop-blur border border-emerald-900/10 shadow-lg flex items-center gap-2 px-3 active:scale-95 hover:bg-white transition-all"
-            style={{ color: INK }}
-          >
-            <span className="material-symbols-outlined text-xl">menu</span>
-            <span className="hidden sm:inline text-sm font-extrabold">Chats</span>
-          </button>
-
           {isEmpty ? (
             /* ── Centered empty state ── */
-            <main className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-8 min-h-0">
+            <main className="flex-grow flex flex-col w-full px-4 sm:px-6 pb-4 sm:pb-8 min-h-0">
               <div className="flex-grow flex flex-col items-center justify-center gap-6 sm:gap-7 py-8 sm:py-10">
-                <div className="text-center">
+                <button
+                  onClick={() => setMobileSidebar(true)}
+                  aria-label="Open Scout Search history"
+                  className="inline-flex h-11 items-center gap-2 rounded-2xl bg-white/90 backdrop-blur border border-emerald-900/10 shadow-lg px-4 active:scale-95 hover:bg-white transition-all"
+                  style={{ color: INK }}
+                >
+                  <span className="material-symbols-outlined text-xl">menu</span>
+                  <span className="text-sm font-extrabold">Chats</span>
+                </button>
+
+                <div className="w-full max-w-4xl text-center">
                   <h1 className="font-headline text-5xl sm:text-6xl md:text-7xl font-black text-primary tracking-[-0.065em] leading-[0.9]">
                     Scout <span style={{ color: GREEN }}>Search</span>
                   </h1>
-                  <p className="mt-5 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, comps, and deal strategy.</p>
+                  <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, comps, and deal strategy.</p>
                 </div>
 
                 {limitHit ? (
@@ -630,6 +629,16 @@ export default function AdvisorPage() {
           ) : (
             /* ── Active chat state ── */
             <main className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-5 min-h-0">
+              <button
+                onClick={() => setMobileSidebar(true)}
+                aria-label="Open Scout Search history"
+                className="fixed left-3 top-20 z-30 h-11 rounded-2xl bg-white/90 backdrop-blur border border-emerald-900/10 shadow-lg flex items-center gap-2 px-3 active:scale-95 hover:bg-white transition-all"
+                style={{ color: INK }}
+              >
+                <span className="material-symbols-outlined text-xl">menu</span>
+                <span className="hidden sm:inline text-sm font-extrabold">Chats</span>
+              </button>
+
               <div ref={scrollRef} className="flex-grow overflow-y-auto space-y-5 sm:space-y-7 py-5 sm:py-7 pr-1 min-h-0">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
