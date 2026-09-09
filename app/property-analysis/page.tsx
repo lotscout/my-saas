@@ -508,7 +508,7 @@ export default function PropertyAnalysisPage() {
                   <button
                     onClick={handleSubmit}
                     disabled={!canSubmit || submitting}
-                    className="mx-auto flex w-fit items-center justify-center bg-[#1D9E75] text-white font-bold px-5 py-2 rounded-xl text-sm hover:bg-[#14795A] transition-all shadow-lg shadow-[#1D9E75]/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
+                    className="mx-auto flex w-fit items-center justify-center bg-[#1D9E75] text-white font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-[#14795A] transition-all shadow-lg shadow-[#1D9E75]/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
                   >
                     {submitting ? (
                       <span className="flex items-center justify-center gap-2">
