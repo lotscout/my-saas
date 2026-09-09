@@ -1218,6 +1218,26 @@ export default function MarketplacePage() {
                             <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
                           </div>
                         )}
+                        {showMyListings && profile?.id && listing.user_id === profile.id && (
+                          <div className="mt-4 grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/listings/${listing.id}`); }}
+                              className="flex items-center justify-center gap-1.5 rounded-xl border border-outline-variant/25 bg-white px-3 py-2 text-xs font-bold text-primary hover:bg-surface-container-low transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-sm">visibility</span>
+                              Preview
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/listings/${listing.id}/edit`); }}
+                              className="flex items-center justify-center gap-1.5 rounded-xl bg-[#1D9E75] px-3 py-2 text-xs font-bold text-white hover:bg-[#14795A] transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-sm">edit</span>
+                              Edit
+                            </button>
+                          </div>
+                        )}
                         {showMyListings && isPaidUser && profile?.id && listing.user_id === profile.id && (
                           <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoostModal({ listingId: listing.id, title: listing.title ?? 'Your Listing' }); }}
