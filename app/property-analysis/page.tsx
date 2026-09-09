@@ -380,12 +380,13 @@ export default function PropertyAnalysisPage() {
         </div>
 
         {/* Property analysis request */}
-        <div className="max-w-4xl mx-auto mb-8">
+        <div className="max-w-6xl mx-auto mb-8">
           {/* LEFT: Unified white card — Submit a Property + How It Works */}
-          <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm flex flex-col">
+          <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm overflow-hidden lg:grid lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)]">
 
-            {isPaid ? (
-              <>
+            <div className="min-w-0">
+              {isPaid ? (
+                <>
                 {/* Form header */}
                 <div className="px-5 sm:px-6 pt-3 pb-2 border-b border-outline-variant/15">
                   <h2 className="font-headline text-base sm:text-xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
@@ -520,10 +521,10 @@ export default function PropertyAnalysisPage() {
                     ) : 'Submit for Analysis'}
                   </button>
                 </div>
-              </>
-            ) : (
-              /* Free user: search bar */
-              <div className="p-5 sm:p-8">
+                </>
+              ) : (
+                /* Free user: search bar */
+                <div className="p-5 sm:p-8">
                 <div className="mb-4">
                   <h2 className="font-headline text-base sm:text-xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
                 </div>
@@ -577,15 +578,13 @@ export default function PropertyAnalysisPage() {
                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">check_circle</span> AI-Risk Scoring</span>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Divider between form and How It Works */}
-            <div className="border-t border-outline-variant/15 mx-8" />
+                </div>
+              )}
+            </div>
 
             {/* How It Works */}
-            <div className="p-5 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+            <div className="p-5 sm:p-6 border-t lg:border-t-0 lg:border-l border-outline-variant/15 bg-surface-container-lowest/60">
+              <div className="flex flex-col gap-1 mb-4">
                 <div>
                   <h2 className="font-headline text-xl font-extrabold text-primary tracking-tight">How it works</h2>
                   <p className="text-secondary text-xs sm:text-sm leading-relaxed">
@@ -593,20 +592,20 @@ export default function PropertyAnalysisPage() {
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {[
                   { icon: 'input',        step: '01', title: 'Input Property',              body: 'Search by address, parcel ID, or simply drop a pin on our high-resolution topographic map interface.' },
                   { icon: 'auto_awesome', step: '02', title: 'AI-Powered Comparison',       body: 'Our engine instantly scans thousands of recent transactions and environmental data points to calculate true market value.' },
                   { icon: 'description',  step: '03', title: 'Export Comprehensive Report', body: 'Download a detailed PDF report containing zoning insights, risk assessments, and comparable property maps.' },
                 ].map(({ icon, step, title, body }) => (
-                  <div key={step} className="flex gap-3 bg-surface-container-low p-4 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
+                  <div key={step} className="flex gap-3 bg-surface-container-low p-3 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
                     <div className="flex-none w-8 h-8 bg-[#1D9E75] text-white rounded-lg flex items-center justify-center shadow-inner">
                       <span className="material-symbols-outlined text-base">{icon}</span>
                     </div>
                     <div>
                       <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest mb-0.5">Step {step}</p>
                       <h3 className="font-headline text-sm font-bold text-primary mb-0.5">{title}</h3>
-                      <p className="hidden md:block text-secondary leading-relaxed text-xs">{body}</p>
+                      <p className="hidden xl:block text-secondary leading-relaxed text-xs">{body}</p>
                     </div>
                   </div>
                 ))}
