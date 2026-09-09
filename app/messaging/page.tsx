@@ -41,6 +41,7 @@ interface Conversation {
   other_participant: Participant | null;
   listing: ListingContext | null;
   message_locked?: boolean;
+  message_locked_kind?: 'seller_inbound' | 'buyer_reply' | null;
 }
 
 interface Message {
@@ -287,6 +288,8 @@ export default function MessagingPage() {
 
   const otherParticipant = selectedConv ? getOtherParticipant(selectedConv) : null;
   const selectedConversationLocked = Boolean(selectedConv?.message_locked);
+  const selectedConversationLockedAsBuyer = selectedConv?.message_locked_kind === 'buyer_reply';
+  const selectedUserIsBuyer = Boolean(selectedConv && currentUserId && selectedConv.buyer_id === currentUserId);
 
   return (
     <div className="bg-surface font-body text-on-surface overflow-hidden h-screen flex flex-col">
@@ -482,8 +485,14 @@ export default function MessagingPage() {
                           <div className="mx-auto mb-5 w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center">
                             <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
                           </div>
-                          <h3 className="font-headline text-xl font-extrabold text-primary mb-2">Buyer interest received</h3>
-                          <p className="text-secondary text-sm leading-relaxed mb-6">A buyer has contacted you about this property. Upgrade to view the message and respond directly.</p>
+                          <h3 className="font-headline text-xl font-extrabold text-primary mb-2">
+                            {selectedConversationLockedAsBuyer ? 'Seller reply received' : 'Buyer interest received'}
+                          </h3>
+                          <p className="text-secondary text-sm leading-relaxed mb-6">
+                            {selectedConversationLockedAsBuyer
+                              ? 'The seller replied to your property inquiry. Upgrade to view the reply and continue the conversation.'
+                              : 'A buyer has contacted you about this property. Upgrade to view the message and respond directly.'}
+                          </p>
                           <Link href="/pricing" className="inline-flex items-center justify-center rounded-xl bg-[#1D9E75] px-5 py-3 text-sm font-extrabold text-white hover:bg-[#14795A] transition-colors">
                             View Plans →
                           </Link>
@@ -543,7 +552,7 @@ export default function MessagingPage() {
                         <span className="material-symbols-outlined text-base">lock_open</span>
                         Upgrade to View & Respond
                       </button>
-                    ) : isFreeUser ? (
+                    ) : isFreeUser && !selectedUserIsBuyer ? (
                       <button
                         onClick={() => setShowSendUpgradeModal(true)}
                         className="w-full flex items-center justify-center gap-3 bg-surface-container-high border border-outline-variant/20 text-secondary py-4 rounded-2xl font-bold text-sm hover:bg-surface-container-highest transition-colors"

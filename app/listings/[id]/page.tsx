@@ -316,8 +316,6 @@ export default function ListingDetailPage() {
   }, [activePhotoIndex, photos.length]);
 
   function handleMessage() {
-    if (tierLoading) return;
-    if (!tier && !isAdmin) { setShowUpgradeModal(true); return; }
     setShowMessageModal(true);
   }
 

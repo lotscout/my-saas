@@ -21,6 +21,34 @@ import { sendAdminAlert } from '@/lib/admin-alerts';
 
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function hasPaidMessagingAccess(service: ReturnType<typeof createServiceClient>, userId: string): Promise<boolean> {
+  const [{ data: activeSubscription }, { data: profileForTier }] = await Promise.all([
+    service
+      .from('subscriptions')
+      .select('tier')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle(),
+    service
+      .from('profiles')
+      .select('subscription_tier,is_admin')
+      .eq('id', userId)
+      .maybeSingle(),
+  ]);
+
+  const effectiveTier = activeSubscription?.tier ?? profileForTier?.subscription_tier ?? null;
+  return PAID_TIERS.has(String(effectiveTier)) || Boolean(profileForTier?.is_admin);
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -77,30 +105,33 @@ export async function POST(request: NextRequest) {
 
   const { data: conversationForGate } = await service
     .from('conversations')
-    .select('seller_id')
+    .select('buyer_id, seller_id, listing_id')
     .eq('id', conversationId)
     .maybeSingle();
 
-  if (conversationForGate?.seller_id === user.id) {
-    const [{ data: activeSubscription }, { data: profileForTier }] = await Promise.all([
-      service
-        .from('subscriptions')
-        .select('tier')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .maybeSingle(),
-      service
-        .from('profiles')
-        .select('subscription_tier,is_admin')
-        .eq('id', user.id)
-        .maybeSingle(),
-    ]);
+  const currentUserHasPaid = await hasPaidMessagingAccess(service, user.id);
 
-    const effectiveTier = activeSubscription?.tier ?? profileForTier?.subscription_tier ?? null;
-    const hasPaidPlan = PAID_TIERS.has(String(effectiveTier)) || Boolean(profileForTier?.is_admin);
-    if (!hasPaidPlan) {
+  if (conversationForGate?.seller_id === user.id) {
+    if (!currentUserHasPaid) {
       return NextResponse.json(
         { error: 'Upgrade to a paid LotScout account to view buyer messages and respond.' },
+        { status: 403 }
+      );
+    }
+  }
+
+  if (conversationForGate?.buyer_id === user.id && !currentUserHasPaid && conversationForGate.seller_id) {
+    const { data: sellerMessage } = await service
+      .from('messages')
+      .select('id')
+      .eq('conversation_id', conversationId)
+      .eq('sender_id', conversationForGate.seller_id)
+      .limit(1)
+      .maybeSingle();
+
+    if (sellerMessage) {
+      return NextResponse.json(
+        { error: 'Upgrade to a paid LotScout account to view the seller reply and continue the conversation.' },
         { status: 403 }
       );
     }
@@ -169,6 +200,63 @@ export async function POST(request: NextRequest) {
     });
   } catch (alertErr) {
     console.error('[api/messages] admin alert failed:', alertErr);
+  }
+
+  if (conversationForGate?.seller_id === user.id && conversationForGate.buyer_id) {
+    try {
+      const buyerHasPaid = await hasPaidMessagingAccess(service, conversationForGate.buyer_id);
+      if (!buyerHasPaid) {
+        const [{ data: buyerProfile }, { data: listing }] = await Promise.all([
+          service
+            .from('profiles')
+            .select('email, first_name, full_name')
+            .eq('id', conversationForGate.buyer_id)
+            .maybeSingle(),
+          conversationForGate.listing_id
+            ? service.from('listings').select('title, street_address, city, state').eq('id', conversationForGate.listing_id).maybeSingle()
+            : Promise.resolve({ data: null } as { data: null }),
+        ]);
+
+        const buyerEmail = buyerProfile?.email;
+        if (buyerEmail) {
+          const buyerName = buyerProfile?.full_name || buyerProfile?.first_name || 'there';
+          const propertyLabel = listing?.title || [listing?.street_address, listing?.city, listing?.state].filter(Boolean).join(', ') || 'your property inquiry';
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lotscout.com';
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          await resend.emails.send({
+            from: 'support@lotscout.com',
+            to: buyerEmail,
+            subject: 'You have a seller reply waiting — LotScout',
+            html: `
+              <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+                <div style="background:#1B4332;padding:24px 32px;border-radius:12px 12px 0 0">
+                  <h1 style="color:white;margin:0;font-size:22px">LotScout</h1>
+                </div>
+                <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
+                  <h2 style="color:#1B4332;margin-top:0">You have a seller reply waiting</h2>
+                  <p>Hi ${escapeHtml(buyerName)},</p>
+                  <p>The seller replied to your inquiry about <strong>${escapeHtml(propertyLabel)}</strong>.</p>
+                  <p>Upgrade to view the reply and continue the conversation.</p>
+                  <p style="margin:28px 0">
+                    <a href="${baseUrl}/pricing" style="background:#1D9E75;color:white;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:bold;display:inline-block">View Plans →</a>
+                  </p>
+                  <p style="color:#6b7280;font-size:13px">We do not include seller message contents in email notifications for account security.</p>
+                </div>
+              </div>
+            `,
+          });
+          await logEmail({
+            user_id: conversationForGate.buyer_id,
+            to_email: buyerEmail,
+            from_email: 'support@lotscout.com',
+            subject: 'You have a seller reply waiting — LotScout',
+            email_type: 'seller_reply_upgrade_prompt',
+          });
+        }
+      }
+    } catch (notifyErr) {
+      console.error('[api/messages] seller reply notification failed:', notifyErr);
+    }
   }
 
   // Check if recipient is a test profile — triggers email + admin notification

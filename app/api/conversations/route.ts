@@ -39,6 +39,7 @@ type MessagePreviewRow = {
 
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 const LOCKED_MESSAGE_PREVIEW = 'Buyer interest received — upgrade to view message.';
+const LOCKED_BUYER_REPLY_PREVIEW = 'Seller reply received — upgrade to view message.';
 
 function hasStoredName(p: ProfileRow | undefined): boolean {
   return !!(p?.company_name || p?.first_name || p?.last_name || p?.full_name);
@@ -103,17 +104,34 @@ export async function GET() {
     .filter(c => c.seller_id === user.id)
     .map(c => c.id)
     .filter((id): id is string => !!id);
+  const buyerConversationIds = convs
+    .filter(c => c.buyer_id === user.id)
+    .map(c => c.id)
+    .filter((id): id is string => !!id);
 
   const lockedConversationIds = new Set<string>();
-  if (!hasPaidPlan && sellerConversationIds.length > 0) {
+  const lockedConversationKinds = new Map<string, 'seller_inbound' | 'buyer_reply'>();
+  const lockCandidateIds = [...new Set([...sellerConversationIds, ...buyerConversationIds])];
+  if (!hasPaidPlan && lockCandidateIds.length > 0) {
     const { data: previewMessages } = await service
       .from('messages')
       .select('conversation_id, sender_id')
-      .in('conversation_id', sellerConversationIds);
+      .in('conversation_id', lockCandidateIds);
+
+    const convById = new Map(convs.map(c => [c.id, c]));
 
     for (const message of (previewMessages ?? []) as MessagePreviewRow[]) {
-      if (message.conversation_id && message.sender_id && message.sender_id !== user.id) {
+      if (!message.conversation_id || !message.sender_id) continue;
+      const conv = convById.get(message.conversation_id);
+      if (!conv) continue;
+
+      if (conv.seller_id === user.id && message.sender_id !== user.id) {
         lockedConversationIds.add(message.conversation_id);
+        lockedConversationKinds.set(message.conversation_id, 'seller_inbound');
+      }
+      if (conv.buyer_id === user.id && conv.seller_id && message.sender_id === conv.seller_id) {
+        lockedConversationIds.add(message.conversation_id);
+        lockedConversationKinds.set(message.conversation_id, 'buyer_reply');
       }
     }
   }
@@ -274,10 +292,15 @@ export async function GET() {
       seller_id: c.seller_id,
       subject: c.subject,
       last_message_at: c.last_message_at,
-      last_message_preview: lockedConversationIds.has(c.id) ? LOCKED_MESSAGE_PREVIEW : c.last_message_preview,
+      last_message_preview: lockedConversationIds.has(c.id)
+        ? lockedConversationKinds.get(c.id) === 'buyer_reply'
+          ? LOCKED_BUYER_REPLY_PREVIEW
+          : LOCKED_MESSAGE_PREVIEW
+        : c.last_message_preview,
       status: c.status,
       listing_id: c.listing_id,
       message_locked: lockedConversationIds.has(c.id),
+      message_locked_kind: lockedConversationKinds.get(c.id) ?? null,
       other_participant: otherProfile,
       listing: listing
         ? {
