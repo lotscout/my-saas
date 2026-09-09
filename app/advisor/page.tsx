@@ -519,6 +519,17 @@ export default function AdvisorPage() {
   const sidebarInner = (
     <div className="flex flex-col h-full bg-white/92 backdrop-blur-xl">
       <div className="px-4 pt-4 sm:pt-5 space-y-1.5">
+        <div className="flex items-center justify-between px-3 pb-2">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: MUTED }}>Scout history</p>
+          <button
+            onClick={() => setMobileSidebar(false)}
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-emerald-50 transition-colors"
+            aria-label="Close Scout history"
+            style={{ color: MUTED }}
+          >
+            <span className="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
         <button
           onClick={newChat}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm sm:text-base font-semibold text-left transition-colors hover:bg-emerald-50"
@@ -573,28 +584,24 @@ export default function AdvisorPage() {
       <div className="h-16 shrink-0" aria-hidden />
 
       <div className="flex-grow flex w-full min-h-0 relative overflow-hidden">
-        {/* Desktop sidebar (always visible) */}
-        <aside className="hidden md:flex md:flex-col w-72 shrink-0 border-r border-emerald-900/10 bg-white/85 backdrop-blur-xl overflow-hidden relative z-10 shadow-[8px_0_30px_rgba(13,31,22,0.04)]">
-          {sidebarInner}
-        </aside>
-
-        {/* Mobile slide-in sidebar */}
+        {/* Pull-out chat history sidebar */}
         {mobileSidebar && (
-          <div className="md:hidden fixed inset-0 z-40">
-            <div className="absolute inset-0 bg-black/30" onClick={() => setMobileSidebar(false)} />
-            <div className="absolute left-0 top-0 bottom-0 w-72 max-w-[82vw] bg-white shadow-2xl">{sidebarInner}</div>
+          <div className="fixed left-0 right-0 bottom-0 top-16 z-40">
+            <div className="absolute inset-0 bg-black/25" onClick={() => setMobileSidebar(false)} />
+            <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[86vw] bg-white shadow-2xl border-r border-emerald-900/10">{sidebarInner}</div>
           </div>
         )}
 
         <div className="flex-grow flex flex-col min-w-0 min-h-0 relative z-10">
-          {/* Mobile pull-out history control */}
+          {/* Pull-out history control */}
           <button
             onClick={() => setMobileSidebar(true)}
             aria-label="Open Scout Search history"
-            className="md:hidden fixed left-3 top-20 z-30 w-11 h-11 rounded-2xl bg-white/90 backdrop-blur border border-emerald-900/10 shadow-lg flex items-center justify-center active:scale-95"
+            className="fixed left-3 top-20 z-30 h-11 rounded-2xl bg-white/90 backdrop-blur border border-emerald-900/10 shadow-lg flex items-center gap-2 px-3 active:scale-95 hover:bg-white transition-all"
             style={{ color: INK }}
           >
             <span className="material-symbols-outlined text-xl">menu</span>
+            <span className="hidden sm:inline text-sm font-extrabold">Chats</span>
           </button>
 
           {isEmpty ? (
