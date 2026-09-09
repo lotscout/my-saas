@@ -1,18 +1,7 @@
 export type Tier = 'standard' | 'priority' | 'exclusive';
 export type ListingStatus = 'allowed' | 'warn1' | 'warn2' | 'blocked';
 
-// Standard tier is capped at 3 listings per 30-day period.
-// warn1 = 2 used (1 remaining)
-// warn2 = 3 used (0 remaining, not yet blocked)
-// blocked = attempting a 4th
-const STANDARD_LISTING_LIMIT = 3;
-
-export function canCreateListing(tier: Tier, listingsInPeriod: number): ListingStatus {
-  if (tier === 'priority' || tier === 'exclusive') return 'allowed';
-
-  if (listingsInPeriod >= STANDARD_LISTING_LIMIT + 1) return 'blocked';
-  if (listingsInPeriod === STANDARD_LISTING_LIMIT) return 'warn2';
-  if (listingsInPeriod === STANDARD_LISTING_LIMIT - 1) return 'warn1';
+export function canCreateListing(_tier: Tier, _listingsInPeriod: number): ListingStatus {
   return 'allowed';
 }
 

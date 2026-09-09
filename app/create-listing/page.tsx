@@ -37,8 +37,6 @@ export default function CreateListingPage() {
   const [aiStreaming, setAiStreaming] = useState(false)
   const [photoFiles, setPhotoFiles] = useState<File[]>([])
   const [contractFile, setContractFile] = useState<File | null>(null)
-  const [profile, setProfile] = useState<{ id: string; email: string | null; first_name: string | null; last_name: string | null; tier: string | null } | null>(null)
-  const [tierChecked, setTierChecked] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [toast, setToast] = useState('')
@@ -70,24 +68,10 @@ export default function CreateListingPage() {
         .single()
       console.log('[create-listing] profile row:', data)
 
-      // Get tier from subscriptions table (profiles.tier is not the source of truth)
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('tier')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single()
-
-      console.log('[create-listing] resolved tier for gate:', sub?.tier ?? null)
-
       if (data) {
-        setProfile({ ...data, tier: sub?.tier ?? null })
         const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')
         if (fullName) setFormData(prev => ({ ...prev, digital_signature: fullName }))
-      } else if (sub?.tier) {
-        setProfile({ id: user.id, email: user.email ?? null, first_name: null, last_name: null, tier: sub.tier })
       }
-      setTierChecked(true)
     })
   }, [])
 
@@ -295,31 +279,9 @@ export default function CreateListingPage() {
   const progressWidth = ['w-1/4', 'w-1/2', 'w-3/4', 'w-full'][currentStep - 1]
   const stepSubtitle = `Step ${currentStep} of 4: ${STEPS[currentStep - 1].label}`
 
-  const hasTier = !tierChecked || (profile && profile.tier)
-
   return (
     <>
     <Header />
-    {/* Tier gate modal */}
-    {tierChecked && !hasTier && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-        <div className="bg-surface-container-lowest rounded-xl shadow-2xl p-10 max-w-sm w-full text-center">
-          <div className="w-14 h-14 bg-primary-fixed rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-primary text-2xl">lock</span>
-          </div>
-          <h2 className="font-headline text-2xl font-extrabold text-primary mb-3">Create a Listing</h2>
-          <p className="text-secondary text-sm leading-relaxed mb-8">
-            Listing your property requires a paid LotScout account.
-          </p>
-          <a
-            href="/pricing"
-            className="inline-block bg-[#1D9E75] text-white font-headline font-bold px-8 py-3 rounded-xl hover:brightness-125 transition-all shadow-lg shadow-[#1D9E75]/10"
-          >
-            View Plans →
-          </a>
-        </div>
-      </div>
-    )}
 
     {/* Success toast */}
     {toast && (

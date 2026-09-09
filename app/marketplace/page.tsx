@@ -7,8 +7,6 @@ const ListingsMap = dynamic(() => import('@/components/ListingsMap'), { ssr: fal
 import Link from 'next/link';
 import Header from '@/components/Header';
 import LockedFeature from '@/components/LockedFeature';
-import ListingLimitBanner from '@/components/ListingLimitBanner';
-import UpgradeModal from '@/components/UpgradeModal';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -222,9 +220,7 @@ function SellerContact({ name, listingId }: { name: string | null; listingId: st
 
 
 export default function MarketplacePage() {
-  const { tier, profile, loading, listingsThisPeriod, listingStatus } = usePermissions();
-  const [showBlockedModal, setShowBlockedModal] = useState(false);
-  const [showFreeModal, setShowFreeModal] = useState(false);
+  const { tier, profile, loading } = usePermissions();
   const [showMyListings, setShowMyListings] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
@@ -540,9 +536,8 @@ export default function MarketplacePage() {
 
   function handleCreateListing() {
     if (loading) return;
-    if (!profile || !tier) { setShowFreeModal(true); return; }
-    if (listingStatus === 'blocked') { setShowBlockedModal(true); }
-    else { router.push('/create-listing'); }
+    if (!profile) { router.push('/sign-up'); return; }
+    router.push('/create-listing');
   }
 
   function toggleMap() {
@@ -565,28 +560,6 @@ export default function MarketplacePage() {
   return (
     <div className="bg-surface text-on-surface">
       <Header />
-
-      {showBlockedModal && (
-        <UpgradeModal featureName="Unlimited Listings" requiredTier="priority" onDismiss={() => setShowBlockedModal(false)} />
-      )}
-
-      {showFreeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowFreeModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
-            <button onClick={() => setShowFreeModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-xl">close</span></button>
-            <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mb-5">
-              <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
-            </div>
-            <h2 className="font-headline text-xl font-bold text-primary mb-2">Create a Listing</h2>
-            <p className="text-secondary text-sm mb-6 leading-relaxed">Listing your property requires a paid LotScout account. Choose a plan to get started.</p>
-            <div className="flex gap-3">
-              <a href="/pricing" className="flex-1 bg-[#1D9E75] text-white py-3 rounded-xl font-bold text-sm text-center hover:bg-[#14795A] transition-colors">View Plans →</a>
-              <button onClick={() => setShowFreeModal(false)} className="flex-1 border border-surface-container-high text-secondary py-3 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">Maybe Later</button>
-            </div>
-          </div>
-        </div>
-      )}
 
 
       {/* Send message modal */}
@@ -636,12 +609,6 @@ export default function MarketplacePage() {
 
         {/* ── PROPERTIES ── */}
         <>
-            {!loading && tier === 'standard' && listingsThisPeriod >= 2 && (
-              <div className="mb-6">
-                <ListingLimitBanner listingsUsed={listingsThisPeriod} tier="standard" />
-              </div>
-            )}
-
             {/* Map — always visible, collapsible */}
             <div className="mb-4">
               <div

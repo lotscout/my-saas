@@ -19,7 +19,7 @@ const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; exclus
   { name: 'Property Analysis Reports',                       standard: true,  priority: true,  exclusive: true  },
   { name: 'Market Updates',                                  standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  exclusive: true  },
-  { name: 'Unlimited Listings',                              standard: false, priority: true,  exclusive: true  },
+  { name: 'Free Property Listings',                          standard: true,  priority: true,  exclusive: true  },
   { name: 'Promoted Lot Requests',                           standard: false, priority: true,  exclusive: true  },
   { name: 'Financing Partners Access',                       standard: false, priority: true,  exclusive: true  },
   { name: '24/7 Support',                                    standard: false, priority: true,  exclusive: true  },
