@@ -370,29 +370,29 @@ export default function PropertyAnalysisPage() {
 
       <Header />
 
-      <main className="max-w-[1440px] mx-auto pt-24 pb-16 px-4 sm:px-8">
+      <main className="max-w-[1440px] mx-auto pt-20 pb-10 px-4 sm:px-8">
 
         {/* Page heading */}
-        <div className="mb-10 text-left">
-          <h1 className="font-headline text-2xl sm:text-4xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+        <div className="mb-5 text-center">
+          <h1 className="font-headline text-2xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tighter leading-tight">
             Deal <span className="text-[#1D9E75]">Analysis</span>
           </h1>
         </div>
 
         {/* Property analysis request */}
-        <div className="max-w-3xl mx-auto mb-10">
+        <div className="max-w-4xl mx-auto mb-8">
           {/* LEFT: Unified white card — Submit a Property + How It Works */}
           <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm flex flex-col">
 
             {isPaid ? (
               <>
                 {/* Form header */}
-                <div className="px-5 sm:px-8 pt-4 pb-3 border-b border-outline-variant/15">
+                <div className="px-5 sm:px-6 pt-3 pb-2 border-b border-outline-variant/15">
                   <h2 className="font-headline text-base sm:text-xl font-extrabold text-primary tracking-tight">Submit a Property</h2>
                 </div>
 
                 {/* Mode toggle */}
-                <div className="border-b border-outline-variant/20 px-5 sm:px-6 py-3 flex items-center gap-2 sm:gap-4 whitespace-nowrap">
+                <div className="border-b border-outline-variant/20 px-5 sm:px-6 py-2 flex items-center gap-2 sm:gap-4 whitespace-nowrap">
                   <span className="text-sm font-semibold text-secondary shrink-0">Search by:</span>
                   <div className="flex bg-surface-container-low rounded-xl p-1 gap-1">
                     <button
@@ -411,7 +411,7 @@ export default function PropertyAnalysisPage() {
                 </div>
 
                 {/* Form fields */}
-                <div className="p-5 sm:p-8 space-y-4 sm:space-y-5">
+                <div className="p-5 sm:p-6 space-y-3">
                   {inputMode === 'address' ? (
                     <>
                       <div>
@@ -425,7 +425,7 @@ export default function PropertyAnalysisPage() {
                           onBlur={handleAddressBlur}
                         />
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                           <label className={labelClass}>City</label>
                           <input type="text" className={inputClass} placeholder="Austin" value={city} onChange={e => { setCity(e.target.value); resetAddrValidation(); }} onBlur={handleAddressBlur} />
@@ -507,7 +507,7 @@ export default function PropertyAnalysisPage() {
                   <button
                     onClick={handleSubmit}
                     disabled={!canSubmit || submitting}
-                    className="w-full bg-[#1D9E75] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#14795A] transition-all shadow-lg shadow-[#1D9E75]/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
+                    className="w-full bg-[#1D9E75] text-white font-bold py-2.5 rounded-xl text-sm hover:bg-[#14795A] transition-all shadow-lg shadow-[#1D9E75]/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
                   >
                     {submitting ? (
                       <span className="flex items-center justify-center gap-2">
@@ -584,25 +584,29 @@ export default function PropertyAnalysisPage() {
             <div className="border-t border-outline-variant/15 mx-8" />
 
             {/* How It Works */}
-            <div className="p-8">
-              <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight mb-2">How it works</h2>
-              <p className="text-secondary text-sm leading-relaxed mb-6">
-                LotScout uses advanced data and mapping technology to quickly analyze land, so you can confidently make smarter buying and selling decisions.
-              </p>
-              <div className="space-y-3">
+            <div className="p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+                <div>
+                  <h2 className="font-headline text-xl font-extrabold text-primary tracking-tight">How it works</h2>
+                  <p className="text-secondary text-xs sm:text-sm leading-relaxed">
+                    Quick land analysis built for smarter buy/sell decisions.
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   { icon: 'input',        step: '01', title: 'Input Property',              body: 'Search by address, parcel ID, or simply drop a pin on our high-resolution topographic map interface.' },
                   { icon: 'auto_awesome', step: '02', title: 'AI-Powered Comparison',       body: 'Our engine instantly scans thousands of recent transactions and environmental data points to calculate true market value.' },
                   { icon: 'description',  step: '03', title: 'Export Comprehensive Report', body: 'Download a detailed PDF report containing zoning insights, risk assessments, and comparable property maps.' },
                 ].map(({ icon, step, title, body }) => (
-                  <div key={step} className="flex gap-5 bg-surface-container-low p-5 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
-                    <div className="flex-none w-10 h-10 bg-[#1D9E75] text-white rounded-lg flex items-center justify-center shadow-inner">
+                  <div key={step} className="flex gap-3 bg-surface-container-low p-4 rounded-xl border-l-4 border-primary/20 hover:border-primary/50 hover:bg-surface-container transition-all">
+                    <div className="flex-none w-8 h-8 bg-[#1D9E75] text-white rounded-lg flex items-center justify-center shadow-inner">
                       <span className="material-symbols-outlined text-base">{icon}</span>
                     </div>
                     <div>
                       <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest mb-0.5">Step {step}</p>
                       <h3 className="font-headline text-sm font-bold text-primary mb-0.5">{title}</h3>
-                      <p className="text-secondary leading-relaxed text-xs">{body}</p>
+                      <p className="hidden md:block text-secondary leading-relaxed text-xs">{body}</p>
                     </div>
                   </div>
                 ))}
@@ -612,10 +616,10 @@ export default function PropertyAnalysisPage() {
 
 
 
-          <div className="mt-5 text-center">
+          <div className="mt-4 text-center">
             <a
               href="/property-analysis/sample"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-white px-5 py-3 text-sm font-extrabold text-[#1D9E75] shadow-sm hover:border-primary/40 hover:bg-emerald-50 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-white px-5 py-2.5 text-sm font-extrabold text-[#1D9E75] shadow-sm hover:border-primary/40 hover:bg-emerald-50 transition-colors"
             >
               <span className="material-symbols-outlined text-lg">description</span>
               View property analysis report sample
