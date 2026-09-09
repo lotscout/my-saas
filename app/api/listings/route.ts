@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const sort = searchParams.get('sort') || 'newest';
   const search = (searchParams.get('search') || '').trim();
-  const limit = Math.min(parseInt(searchParams.get('limit') || '200'), 500);
+  const limit = Math.min(parseInt(searchParams.get('limit') || '1000'), 1000);
   const mine = searchParams.get('mine') === 'true';
 
   const orderCol =

@@ -369,7 +369,7 @@ export default function MarketplacePage() {
 
   useEffect(() => {
     setListingsLoading(true);
-    const params = new URLSearchParams({ sort: listingsSort, limit: '200' });
+    const params = new URLSearchParams({ sort: listingsSort, limit: '1000' });
     if (showMyListings && profile?.id) params.set('mine', 'true');
     fetch(`/api/listings?${params}`)
       .then(r => r.json())
