@@ -602,7 +602,7 @@ export default function CreateBuyerRequestPage() {
                 </div>
                 <div>
                   <h4 className="font-headline font-bold text-primary">Unlock Priority Matching</h4>
-                  <p className="text-sm text-[#274e3d]">Priority and Exclusive members get their buying criteria featured at the top of the buyer directory and matched directly with incoming listings.</p>
+                  <p className="text-sm text-[#274e3d]">Priority and Exclusive members get their buying criteria featured at the top of Buyers and matched directly with incoming listings.</p>
                 </div>
               </div>
               <Link href="/pricing" className="whitespace-nowrap px-6 py-2.5 bg-[#1D9E75] text-white font-bold rounded-lg hover:bg-[#14795A] transition-colors">

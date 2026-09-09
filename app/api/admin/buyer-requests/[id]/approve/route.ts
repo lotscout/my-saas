@@ -83,7 +83,7 @@ export async function PATCH(
               <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
                 <h2 style="color:#1B4332;margin-top:0">🎉 Your Buyer Profile is Live!</h2>
                 <p>Hi ${buyerName},</p>
-                <p>Great news — your buyer profile has been reviewed and approved. It's now <strong>live in the LotScout buyer directory</strong>!</p>
+                <p>Great news — your buyer profile has been reviewed and approved. It's now <strong>live in LotScout Buyers</strong>!</p>
                 <p>Sellers with matching land can now see your profile and reach out directly based on your criteria.</p>
                 <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin:24px 0">
                   <p style="margin:0 0 12px;color:#666;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Your Active Criteria</p>
@@ -97,7 +97,7 @@ export async function PATCH(
                 </div>
                 <a href="https://lotscout.com/buyer-directory"
                    style="display:inline-block;background:#1B4332;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-bottom:24px">
-                  View Buyer Directory →
+                  View Buyers →
                 </a>
                 <p style="color:#6b7280;font-size:13px">Questions? Reply to this email or visit <a href="https://lotscout.com" style="color:#059669">lotscout.com</a>.</p>
               </div>

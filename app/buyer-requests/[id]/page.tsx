@@ -279,7 +279,7 @@ export default function BuyerRequestPage() {
       <div className="bg-[#F5F8F6] pt-32 pb-24 max-w-7xl mx-auto px-8 text-center">
         <p className="text-[#5C6D64] text-lg">Buyer request not found.</p>
         <Link href="/buyer-directory" className="mt-4 inline-block text-[#14795A] font-semibold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75]">
-          ← Back to Buyer Directory
+          ← Back to Buyers
         </Link>
       </div>
     );
@@ -341,7 +341,7 @@ export default function BuyerRequestPage() {
         <div className="mb-5">
           <Link href="/buyer-directory" className="inline-flex items-center gap-1 text-[#5C6D64] hover:text-[#14795A] text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D9E75] rounded-md">
             <span className="material-symbols-outlined text-base">arrow_back</span>
-            Back to Buyer Directory
+            Back to Buyers
           </Link>
         </div>
 

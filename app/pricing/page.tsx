@@ -15,7 +15,7 @@ const FEATURES = [
   { name: 'Land Marketplace Access',                         standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  exclusive: true  },
   { name: 'Custom Company Profile',                          standard: true,  priority: true,  exclusive: true  },
-  { name: 'Buyer Directory Access',                          standard: true,  priority: true,  exclusive: true  },
+  { name: 'Buyers Access',                                  standard: true,  priority: true,  exclusive: true  },
   { name: 'Property Analysis Reports',                       standard: true,  priority: true,  exclusive: true  },
   { name: 'Market Updates',                                  standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  exclusive: true  },
@@ -31,7 +31,7 @@ const FEATURES = [
 ];
 
 const KEY_FEATURES = {
-  standard: ['3 listings/month', '24hr property reports', 'Marketplace + buyer directory', 'LotScout AI Search'],
+  standard: ['3 listings/month', '24hr property reports', 'Marketplace + Buyers', 'LotScout AI Search'],
   priority: ['Unlimited listings', '15min property reports', 'Promoted lot requests', '24/7 support'],
   exclusive: ['Everything in Priority', 'Financing partners', 'Designated account manager', 'White-glove onboarding'],
 };

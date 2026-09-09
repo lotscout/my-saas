@@ -601,9 +601,9 @@ export default function BuyerDirectoryPage() {
             <div className="mx-auto mb-5 w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center">
               <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
             </div>
-            <h1 className="font-headline text-2xl sm:text-3xl font-extrabold text-primary mb-3">Upgrade to View Buyer Directory</h1>
+            <h1 className="font-headline text-2xl sm:text-3xl font-extrabold text-primary mb-3">Upgrade to View Buyers</h1>
             <p className="text-secondary text-sm sm:text-base leading-relaxed mb-6">
-              Buyer Directory and buyer request access is available on paid LotScout plans.
+              Buyers and buyer requests are available on paid LotScout plans.
             </p>
             <Link href="/pricing" className="inline-flex items-center justify-center rounded-xl bg-[#1D9E75] px-5 py-3 text-sm font-extrabold text-white hover:bg-[#14795A] transition-colors">
               View Plans →
@@ -648,7 +648,7 @@ export default function BuyerDirectoryPage() {
       <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
 
           <PageHeader
-            title={<>Buyer <span className="text-[#1D9E75]">Directory</span></>}
+            title={<><span className="text-[#1D9E75]">Buyers</span></>}
             description="Browse active land buyers who are actively looking for specific lot types, markets, budgets, and acquisition criteria."
             actions={(
               <PrimaryLink href="/create-buyer-request">
@@ -658,7 +658,7 @@ export default function BuyerDirectoryPage() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-7">
-            <StatCard label="Active buyers" value={activeLoading ? '—' : activeBuyers.length.toLocaleString()} sub="Buyer directory records" icon="person_search" />
+            <StatCard label="Active buyers" value={activeLoading ? '—' : activeBuyers.length.toLocaleString()} sub="Buyer records" icon="person_search" />
             <StatCard label="Markets" value={activeLoading ? '—' : activeMarkets.toLocaleString()} sub="States represented" icon="travel_explore" />
           </div>
 
@@ -672,7 +672,7 @@ export default function BuyerDirectoryPage() {
                   value={tab === 'requests' ? brSearch : activeBrSearch}
                   onChange={e => handleSearchChange(e.target.value)}
                   placeholder="Search by buyer, company, market, or use case"
-                  aria-label="Search buyer directory"
+                  aria-label="Search buyers"
                   className="w-full bg-white border-2 border-primary/25 rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-inner"
                 />
               </div>

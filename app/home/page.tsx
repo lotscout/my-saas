@@ -15,7 +15,7 @@ const ALL_FEATURES: { name: string; standard: boolean; priority: boolean; exclus
   { name: 'Land Marketplace Access',                         standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot to Buyer Match AI',                           standard: true,  priority: true,  exclusive: true  },
   { name: 'Custom Company Profile',                          standard: true,  priority: true,  exclusive: true  },
-  { name: 'Buyer Directory Access',                          standard: true,  priority: true,  exclusive: true  },
+  { name: 'Buyers Access',                                  standard: true,  priority: true,  exclusive: true  },
   { name: 'Property Analysis Reports',                       standard: true,  priority: true,  exclusive: true  },
   { name: 'Market Updates',                                  standard: true,  priority: true,  exclusive: true  },
   { name: 'Lot Analysis Reports',                            standard: true,  priority: true,  exclusive: true  },

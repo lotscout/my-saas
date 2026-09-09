@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   const service = createServiceClient();
 
   if (!(await hasPaidBuyerAccess(service, user.id))) {
-    return NextResponse.json({ error: 'Upgrade to a paid LotScout account to view the Buyer Directory.' }, { status: 403 });
+    return NextResponse.json({ error: 'Upgrade to a paid LotScout account to view Buyers.' }, { status: 403 });
   }
 
   let query = service

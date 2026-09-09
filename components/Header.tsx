@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { label: 'Scout', href: '/advisor' },
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Leads', href: '/leads' },
-  { label: 'Buyer Directory', href: '/buyer-directory' },
+  { label: 'Buyers', href: '/buyer-directory' },
   { label: 'Deal Analysis', href: '/property-analysis' },
   { label: 'Messaging', href: '/messaging' },
   { label: 'Funding', href: '/funding-partners' },

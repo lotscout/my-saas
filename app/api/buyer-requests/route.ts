@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
               <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
                 <h2 style="color:#1B4332;margin-top:0">Request Submitted!</h2>
                 <p>Hi ${emailBuyerName},</p>
-                <p>Your buying criteria has been successfully submitted and is <strong>now live</strong> in the buyer directory.</p>
+                <p>Your buying criteria has been successfully submitted and is <strong>now live</strong> in Buyers.</p>
                 <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin:24px 0">
                   <p style="margin:0 0 12px;color:#666;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Your Criteria</p>
                   <table cellpadding="4" style="font-size:14px;width:100%">
