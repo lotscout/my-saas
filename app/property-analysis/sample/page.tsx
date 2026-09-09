@@ -15,7 +15,7 @@ const comps = [
 ];
 
 const zoningItems = [
-  { label: 'Current Zoning', value: 'AG / Rural Residential', note: 'Allows single-family residential and agricultural use.' },
+  { label: 'Current Zoning', value: 'Agricultural', note: 'Confirm permitted residential use with the local zoning office.' },
   { label: 'Permitted Use', value: 'Residential Subdivision', note: 'Subject to county platting, access, and utility requirements.' },
   { label: 'Min. Lot Size', value: '1.0 acre', note: 'Potential for approximately 16 developable lots after roads/open space.' },
   { label: 'Development Outlook', value: 'High Potential', note: 'Growth corridor with builder demand moving east from Austin.' },
@@ -33,7 +33,7 @@ const addedPages = [
   {
     title: 'Buyer Demand Snapshot',
     eyebrow: 'Page 2',
-    body: 'Demand is strongest from small builders, Austin-area investors, and rural residential buyers seeking larger lots within 45–60 minutes of employment centers.',
+    body: 'Demand is strongest from small builders, Austin-area investors, and acreage buyers seeking larger lots within 45–60 minutes of employment centers.',
     bullets: ['Most active buyer type: small builders and land investors', 'Likely hold period: 18–36 months', 'Best resale angle: entitled rural homesite package'],
   },
   {
@@ -84,8 +84,8 @@ export default function PropertyAnalysisSamplePage() {
             <div className="lg:col-span-2 space-y-6">
               <div className="rounded-2xl border border-outline-variant/20 p-6 shadow-sm">
                 <p className="text-[10px] font-extrabold text-secondary uppercase tracking-widest mb-1">Property Overview</p>
-                <h3 className="font-headline text-xl font-extrabold text-primary leading-tight">18.4-acre rural residential parcel with subdivision potential</h3>
-                <p className="mt-3 text-sm text-secondary leading-relaxed">This parcel presents a compelling acquisition opportunity for a buyer pursuing rural residential development or a medium-term hold-and-entitle strategy. Comparable sales support the current valuation range, while infrastructure diligence remains the key gating item.</p>
+                <h3 className="font-headline text-xl font-extrabold text-primary leading-tight">18.4-acre agricultural parcel with subdivision potential</h3>
+                <p className="mt-3 text-sm text-secondary leading-relaxed">This parcel presents a compelling acquisition opportunity for a buyer pursuing acreage development or a medium-term hold-and-entitle strategy. Comparable sales support the current valuation range, while infrastructure diligence remains the key gating item.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 mt-5 border-t border-outline-variant/15">
                   {overviewStats.map(({ label, value, icon }) => (
                     <div key={label} className="flex items-center gap-2">
