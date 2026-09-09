@@ -371,7 +371,7 @@ export default function ListingDetailPage() {
       : null;
 
   const acresDisplay = listing.lot_size_acres
-    ? `${listing.lot_size_acres.toLocaleString(undefined, { maximumFractionDigits: 2 })} ac`
+    ? `${listing.lot_size_acres.toLocaleString(undefined, { maximumFractionDigits: 2 })} acres`
     : null;
   const sqftDisplay = listing.lot_size_sqft
     ? `${listing.lot_size_sqft.toLocaleString()} sq ft`
@@ -416,7 +416,6 @@ export default function ListingDetailPage() {
     ...(listing.apn ? [['APN', listing.apn] as [string, string]] : []),
     ...(listing.preferred_close_date ? [['Preferred Close', fmtCloseDate(listing.preferred_close_date)] as [string, string]] : []),
     ...(listing.ownership_type ? [['Ownership', listing.ownership_type] as [string, string]] : []),
-    ...(listing.comparable_market_value ? [['Market Value', fmtPrice(listing.comparable_market_value)] as [string, string]] : []),
   ];
 
   const descriptionParts = [
@@ -608,37 +607,34 @@ export default function ListingDetailPage() {
             </div>
 
             {/* Stats bar — Redfin-style horizontal chips */}
-            <div className="flex flex-wrap border-y border-outline-variant/30 divide-x divide-outline-variant/30">
+            <div className="grid grid-cols-1 sm:grid-cols-3 border-y border-outline-variant/30 divide-y sm:divide-y-0 sm:divide-x divide-outline-variant/30">
               {listing.asking_price != null && listing.asking_price > 0 && (
-                <div className="flex flex-col py-4 px-5 flex-1 items-center text-center">
+                <div className="flex flex-col py-4 px-5 items-center text-center">
                   <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
                     {fmtPrice(listing.asking_price)}
                   </span>
-                  <span className="text-xs text-secondary font-medium mt-1.5">Price</span>
+                  {pricePerAcre !== null && (
+                    <span className="text-xs sm:text-sm text-secondary font-semibold mt-1 whitespace-nowrap">
+                      ~{fmtPrice(pricePerAcre)} per acre
+                    </span>
+                  )}
+                  <span className="text-xs text-secondary font-medium mt-1.5">Total Price</span>
                 </div>
               )}
               {lotSizeDisplay && (
-                <div className="flex flex-col py-4 px-5 flex-1 items-center text-center">
-                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
+                <div className="flex flex-col py-4 px-5 items-center text-center">
+                  <span className="text-lg sm:text-xl font-extrabold font-headline text-on-surface leading-none whitespace-nowrap">
                     {lotSizeDisplay}
                   </span>
                   <span className="text-xs text-secondary font-medium mt-1.5">Lot Size</span>
                 </div>
               )}
               {listing.zoning && (
-                <div className="flex flex-col py-4 px-5 flex-1 items-center text-center">
-                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
+                <div className="flex flex-col py-4 px-5 items-center text-center">
+                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none whitespace-nowrap">
                     {listing.zoning}
                   </span>
                   <span className="text-xs text-secondary font-medium mt-1.5">Zoning</span>
-                </div>
-              )}
-              {pricePerAcre !== null && (
-                <div className="flex flex-col py-4 px-5 flex-1 items-center text-center">
-                  <span className="text-xl font-extrabold font-headline text-on-surface leading-none">
-                    ~{fmtPrice(pricePerAcre)}
-                  </span>
-                  <span className="text-xs text-secondary font-medium mt-1.5">/ Acre</span>
                 </div>
               )}
             </div>
