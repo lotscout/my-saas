@@ -372,15 +372,16 @@ export default function PropertyAnalysisPage() {
 
       <main className="max-w-[1440px] mx-auto pt-20 pb-10 px-4 sm:px-8">
 
-        {/* Page heading */}
-        <div className="mb-5 text-left">
-          <h1 className="font-headline text-2xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tighter leading-tight">
-            Deal <span className="text-[#1D9E75]">Analysis</span>
-          </h1>
-        </div>
+        <div className="max-w-6xl mx-auto">
+          {/* Page heading */}
+          <div className="mb-5 text-left">
+            <h1 className="font-headline text-2xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tighter leading-tight">
+              Deal <span className="text-[#1D9E75]">Analysis</span>
+            </h1>
+          </div>
 
-        {/* Property analysis request */}
-        <div className="max-w-6xl mx-auto mb-8">
+          {/* Property analysis request */}
+          <div className="mb-8">
           {/* LEFT: Unified white card — Submit a Property + How It Works */}
           <div className="bg-white border border-outline-variant/15 rounded-2xl shadow-sm overflow-hidden lg:grid lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)]">
 
@@ -625,18 +626,19 @@ export default function PropertyAnalysisPage() {
             </a>
           </div>
 
-          {showSpeedBanner && (
-            <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-outline-variant/20 rounded-2xl px-6 py-4 shadow-sm">
-              <span className="material-symbols-outlined text-primary text-2xl shrink-0">bolt</span>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="font-bold text-primary text-sm">Want faster results?</p>
-                <p className="text-secondary text-xs mt-0.5">Standard and Priority plans deliver within 24 hours. Exclusive delivers within 15 minutes.</p>
+            {showSpeedBanner && (
+              <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-outline-variant/20 rounded-2xl px-6 py-4 shadow-sm">
+                <span className="material-symbols-outlined text-primary text-2xl shrink-0">bolt</span>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="font-bold text-primary text-sm">Want faster results?</p>
+                  <p className="text-secondary text-xs mt-0.5">Standard and Priority plans deliver within 24 hours. Exclusive delivers within 15 minutes.</p>
+                </div>
+                <a href="/pricing" className="shrink-0 bg-[#1D9E75] text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-[#14795A] transition-opacity whitespace-nowrap">
+                  Upgrade →
+                </a>
               </div>
-              <a href="/pricing" className="shrink-0 bg-[#1D9E75] text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-[#14795A] transition-opacity whitespace-nowrap">
-                Upgrade →
-              </a>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ── PAST REQUESTS — full width below both columns ── */}
