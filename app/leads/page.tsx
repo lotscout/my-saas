@@ -103,7 +103,7 @@ export default function LeadsPage() {
 
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-7">
-          <StatCard label="Active leads" value={MOCK_PROPERTY_LEADS.length.toLocaleString()} sub="Sample property leads" icon="real_estate_agent" />
+          <StatCard label="Active leads" value={MOCK_PROPERTY_LEADS.length.toLocaleString()} sub="Active property leads" icon="real_estate_agent" />
           <StatCard label="Markets" value={markets.toLocaleString()} sub="States represented" icon="travel_explore" />
         </div>
 
