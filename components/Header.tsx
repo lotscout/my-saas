@@ -54,7 +54,7 @@ export default function Header() {
   return (
     <>
       <header className="fixed top-0 w-full z-[10000] bg-white border-b border-emerald-900/10 shadow-sm">
-        <div className="flex justify-between items-center px-4 sm:px-8 h-16 mx-auto">
+        <div className="flex justify-between items-center gap-4 px-4 sm:px-8 h-16 mx-auto">
 
           {/* Logo */}
           <div className="text-xl font-black text-primary tracking-tighter flex items-center gap-3 font-headline">
@@ -64,7 +64,7 @@ export default function Header() {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-5 font-headline font-bold tracking-tight h-full text-sm lg:text-base">
+          <nav className="hidden md:flex items-center gap-4 lg:gap-7 xl:gap-9 font-headline font-bold tracking-normal h-full text-sm xl:text-base">
             {NAV_LINKS.map(({ label, href }) => {
               const isActive = href !== '#' && pathname === href;
               return (
