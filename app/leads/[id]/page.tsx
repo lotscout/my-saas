@@ -105,10 +105,13 @@ export default function PropertyLeadDetailPage() {
                 <div><dt className="font-headline text-[11px] font-extrabold uppercase tracking-widest text-secondary">Company</dt><dd className="mt-0.5 font-bold text-primary">{lead.sellerCompany}</dd></div>
               </dl>
               <div className="mt-4 space-y-2">
-                <button type="button" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors">
+                <a
+                  href={`mailto:${lead.sellerEmail}?subject=${encodeURIComponent(`LotScout inquiry: ${lead.title}`)}`}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1D9E75] px-4 py-3 text-white font-headline text-sm font-extrabold hover:bg-[#14795A] transition-colors"
+                >
                   <span className="material-symbols-outlined text-base">chat</span>
                   Message seller
-                </button>
+                </a>
               </div>
             </section>
 
