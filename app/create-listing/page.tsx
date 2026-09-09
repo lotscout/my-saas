@@ -39,7 +39,7 @@ export default function CreateListingPage() {
   const [contractFile, setContractFile] = useState<File | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [toast, setToast] = useState('')
+  const [showReviewPopup, setShowReviewPopup] = useState(false)
   const [step2Errors, setStep2Errors] = useState<Record<string, string>>({})
   const [titleStreaming, setTitleStreaming] = useState(false)
   const [step3ContactError, setStep3ContactError] = useState('')
@@ -164,8 +164,7 @@ export default function CreateListingPage() {
       if (!res.ok) throw new Error(json.error ?? 'Submission failed')
 
       sessionStorage.setItem('listing_submitted', '1')
-      setToast('Listing submitted! Redirecting…')
-      setTimeout(() => router.push('/marketplace'), 1500)
+      setShowReviewPopup(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -283,11 +282,25 @@ export default function CreateListingPage() {
     <>
     <Header />
 
-    {/* Success toast */}
-    {toast && (
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#1D9E75] text-white px-6 py-3 rounded-full shadow-xl font-bold text-sm flex items-center gap-2">
-        <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-        {toast}
+    {/* Review submitted popup */}
+    {showReviewPopup && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+        <div className="bg-surface-container-lowest rounded-2xl shadow-2xl p-8 sm:p-10 max-w-md w-full text-center border border-outline-variant/20">
+          <div className="w-14 h-14 bg-[#E8F6F0] rounded-full flex items-center justify-center mx-auto mb-5">
+            <span className="material-symbols-outlined text-[#1D9E75] text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          </div>
+          <h2 className="font-headline text-2xl font-extrabold text-primary mb-3">Listing Submitted</h2>
+          <p className="text-secondary text-sm sm:text-base leading-relaxed mb-7">
+            your listing has been submitted for review. Please wait 2-4 hours for your listing to be published.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push('/marketplace')}
+            className="inline-flex items-center justify-center bg-[#1D9E75] text-white font-headline font-bold px-8 py-3 rounded-xl hover:bg-[#14795A] transition-colors shadow-lg shadow-[#1D9E75]/10"
+          >
+            Back to Marketplace
+          </button>
+        </div>
       </div>
     )}
 
