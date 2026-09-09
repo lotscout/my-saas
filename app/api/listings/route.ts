@@ -13,7 +13,6 @@ function formatOwnerName(first: string | null, last: string | null): string | nu
   return `${f} ${l[0].toUpperCase()}.`;
 }
 
-const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
 export async function GET(request: NextRequest) {
   const auth = await createClient();
@@ -185,38 +184,6 @@ export async function POST(request: NextRequest) {
 
     const serviceClient = createServiceClient();
 
-    const [{ data: activeSubscription }, { data: profileForTier }, { count: existingListingCount, error: listingCountError }] = await Promise.all([
-      serviceClient
-        .from('subscriptions')
-        .select('tier')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .maybeSingle(),
-      serviceClient
-        .from('profiles')
-        .select('subscription_tier')
-        .eq('id', user.id)
-        .maybeSingle(),
-      serviceClient
-        .from('listings')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id),
-    ]);
-
-    if (listingCountError) {
-      console.error('[POST /api/listings] listing count error:', listingCountError);
-      return NextResponse.json({ error: listingCountError.message }, { status: 500 });
-    }
-
-    const effectiveTier = activeSubscription?.tier ?? profileForTier?.subscription_tier ?? null;
-    const hasPaidPlan = PAID_TIERS.has(String(effectiveTier));
-
-    if (!hasPaidPlan && (existingListingCount ?? 0) >= 1) {
-      return NextResponse.json(
-        { error: 'Your first property lead is free. Upgrade to a paid LotScout account to submit additional property leads.' },
-        { status: 403 }
-      );
-    }
 
     // Populate owner_name from the creating user's profile (first name + last initial)
     // so app-created listings surface a real seller name and a seller profile.
