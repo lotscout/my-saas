@@ -21,6 +21,7 @@ export async function sendAdminAlert({
   ctaLabel = 'Open admin dashboard',
   emailType,
   userId = null,
+  toEmail = ADMIN_ALERT_EMAIL,
 }: {
   subject: string;
   title: string;
@@ -29,6 +30,7 @@ export async function sendAdminAlert({
   ctaLabel?: string;
   emailType: string;
   userId?: string | null;
+  toEmail?: string;
 }) {
   if (!process.env.RESEND_API_KEY) return;
 
@@ -48,7 +50,7 @@ export async function sendAdminAlert({
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
-      to: ADMIN_ALERT_EMAIL,
+      to: toEmail,
       subject,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f6f5;padding:28px">
@@ -69,7 +71,7 @@ export async function sendAdminAlert({
 
     await logEmail({
       user_id: userId,
-      to_email: ADMIN_ALERT_EMAIL,
+      to_email: toEmail,
       from_email: FROM_EMAIL,
       subject,
       email_type: emailType,

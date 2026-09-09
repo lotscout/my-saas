@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
 import { normalizeAskingPrice } from '@/lib/listing-price';
+import { sendAdminAlert } from '@/lib/admin-alerts';
 
 // Build a stored seller name as first name + last initial (e.g. "Marcus T.").
 function formatOwnerName(first: string | null, last: string | null): string | null {
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
     // so app-created listings surface a real seller name and a seller profile.
     const { data: creatorProfile } = await serviceClient
       .from('profiles')
-      .select('first_name, last_name')
+      .select('first_name, last_name, email')
       .eq('id', user.id)
       .single();
     const ownerName = formatOwnerName(creatorProfile?.first_name ?? null, creatorProfile?.last_name ?? null);
@@ -250,6 +251,26 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[POST /api/listings] created listing', listing.id);
+    await sendAdminAlert({
+      toEmail: 'support@lotscout.com',
+      subject: 'New property listing submitted for review — LotScout',
+      title: 'New property listing submitted for review',
+      rows: [
+        ['Listing', title || 'Untitled listing'],
+        ['Seller', ownerName || creatorProfile?.email || user.email || user.id],
+        ['Seller email', creatorProfile?.email || user.email || null],
+        ['Location', [cityClean, stateClean, zipCodeClean].filter(Boolean).join(', ')],
+        ['County', county || null],
+        ['Address / APN', streetAddressClean || apnClean || null],
+        ['Lot size', lotSizeAcres ? `${lotSizeAcres.toLocaleString(undefined, { maximumFractionDigits: 2 })} acres` : null],
+        ['Asking price', normalizedAskingPrice ? `$${normalizedAskingPrice.toLocaleString()}` : null],
+        ['Status', 'Pending review'],
+      ],
+      ctaHref: `/admin/listings`,
+      ctaLabel: 'Review listing',
+      emailType: 'listing_submitted_admin_review',
+      userId: user.id,
+    });
     return NextResponse.json({ id: listing.id }, { status: 201 });
 
   } catch (err) {
