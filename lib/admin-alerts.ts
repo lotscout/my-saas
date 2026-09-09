@@ -22,6 +22,7 @@ export async function sendAdminAlert({
   emailType,
   userId = null,
   toEmail = ADMIN_ALERT_EMAIL,
+  fromEmail = FROM_EMAIL,
 }: {
   subject: string;
   title: string;
@@ -31,6 +32,7 @@ export async function sendAdminAlert({
   emailType: string;
   userId?: string | null;
   toEmail?: string;
+  fromEmail?: string;
 }) {
   if (!process.env.RESEND_API_KEY) return;
 
@@ -49,7 +51,7 @@ export async function sendAdminAlert({
 
   try {
     await resend.emails.send({
-      from: FROM_EMAIL,
+      from: fromEmail,
       to: toEmail,
       subject,
       html: `
@@ -72,7 +74,7 @@ export async function sendAdminAlert({
     await logEmail({
       user_id: userId,
       to_email: toEmail,
-      from_email: FROM_EMAIL,
+      from_email: fromEmail,
       subject,
       email_type: emailType,
     });

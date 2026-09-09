@@ -253,6 +253,7 @@ export async function POST(request: NextRequest) {
     console.log('[POST /api/listings] created listing', listing.id);
     await sendAdminAlert({
       toEmail: 'support@lotscout.com',
+      fromEmail: 'LotScout <hello@lotscout.com>',
       subject: 'New property listing submitted for review — LotScout',
       title: 'New property listing submitted for review',
       rows: [
