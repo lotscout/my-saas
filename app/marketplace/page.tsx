@@ -223,6 +223,7 @@ export default function MarketplacePage() {
   const { tier, profile, loading } = usePermissions();
   const [showMyListings, setShowMyListings] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
+  const [totalListings, setTotalListings] = useState(0);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsSort, setListingsSort] = useState('recommended');
   const [mapCollapsed, setMapCollapsed] = useState(false);
@@ -374,9 +375,11 @@ export default function MarketplacePage() {
     fetch(`/api/listings?${params}`)
       .then(r => r.json())
       .then(data => {
-        if (Array.isArray(data)) {
+        const listingRows = Array.isArray(data) ? data : Array.isArray(data?.listings) ? data.listings : null;
+        if (listingRows) {
+          setTotalListings(typeof data?.total === 'number' ? data.total : listingRows.length);
           const now = new Date();
-          const sorted = [...(data as Listing[])].sort((a, b) => {
+          const sorted = [...(listingRows as Listing[])].sort((a, b) => {
             const aActive = !!(a.promoted && a.boost_expires_at && new Date(a.boost_expires_at) > now);
             const bActive = !!(b.promoted && b.boost_expires_at && new Date(b.boost_expires_at) > now);
             if (aActive && !bActive) return -1;
@@ -387,6 +390,7 @@ export default function MarketplacePage() {
         } else if (data && typeof data === 'object' && 'error' in data) {
           console.error('[marketplace] listings API error:', (data as any).error);
           setListings([]);
+          setTotalListings(0);
         }
         setListingsLoading(false);
       })
@@ -505,6 +509,10 @@ export default function MarketplacePage() {
 
   const activeFilterCount = (filterLotSizeMin || filterLotSizeMax || filterSqFtMin || filterSqFtMax ? 1 : 0)
     + filterZoning.length + filterUtilities.length + filterRoadAccessProps.length;
+  const isFilteringListings = Boolean(searchQuery.trim()) || activeFilterCount > 0;
+  const listingCountLabel = isFilteringListings && totalListings > 0
+    ? `${filteredListings.length.toLocaleString()} of ${totalListings.toLocaleString()} listings shown`
+    : `${(totalListings || filteredListings.length).toLocaleString()} listings`;
 
   // State autocomplete suggestions
   const stateSuggestions = useMemo(() => {
@@ -1238,7 +1246,7 @@ export default function MarketplacePage() {
                   />
                   <div className="absolute left-4 top-4 z-[1001] rounded-2xl bg-white/95 px-4 py-3 shadow-lg border border-outline-variant/20 backdrop-blur-sm">
                     <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-secondary/70">Map View</p>
-                    <p className="text-sm font-bold text-primary">{filteredListings.length.toLocaleString()} listings shown</p>
+                    <p className="text-sm font-bold text-primary">{listingCountLabel}</p>
                   </div>
                 </div>
               </aside>

@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
       'id,title,property_description,city,state,county,zip_code,street_address,apn,' +
       'lot_size_acres,lot_size_sqft,zoning,road_access,utilities,asking_price,' +
       'price_negotiable,ownership_type,contact_methods,status,photos_urls,' +
-      'owner_name,digital_signature,created_at,user_id,promoted,boost_expires_at,lat,lng'
+      'owner_name,digital_signature,created_at,user_id,promoted,boost_expires_at,lat,lng',
+      { count: 'exact' }
     )
     .order(orderCol, { ascending })
     .limit(limit);
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const nowSec = Math.floor(Date.now() / 1000);
@@ -88,7 +89,12 @@ export async function GET(request: NextRequest) {
     return 0;
   });
 
-  return NextResponse.json(cleaned);
+  return NextResponse.json({
+    listings: cleaned,
+    total: count ?? cleaned.length,
+    returned: cleaned.length,
+    limit,
+  });
 }
 
 export async function POST(request: NextRequest) {
