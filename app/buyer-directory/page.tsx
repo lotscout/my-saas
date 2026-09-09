@@ -617,10 +617,9 @@ export default function BuyerDirectoryPage() {
             )}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-7">
             <StatCard label="Active buyers" value={activeLoading ? '—' : activeBuyers.length.toLocaleString()} sub="Buyer directory records" icon="person_search" />
             <StatCard label="Markets" value={activeLoading ? '—' : activeMarkets.toLocaleString()} sub="States represented" icon="travel_explore" />
-            <StatCard label="Directory type" value="Buyers" sub="Acquisition criteria" icon="hub" />
           </div>
 
           {/* Search / sort / filter */}
