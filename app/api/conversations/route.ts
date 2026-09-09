@@ -32,6 +32,14 @@ type ListingRow = {
   owner_name: string | null;
 };
 
+type MessagePreviewRow = {
+  conversation_id: string | null;
+  sender_id: string | null;
+};
+
+const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
+const LOCKED_MESSAGE_PREVIEW = 'Buyer interest received — upgrade to view message.';
+
 function hasStoredName(p: ProfileRow | undefined): boolean {
   return !!(p?.company_name || p?.first_name || p?.last_name || p?.full_name);
 }
@@ -73,6 +81,42 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!convs?.length) return NextResponse.json({ conversations: [] });
+
+  const [{ data: activeSubscription }, { data: profileForTier }] = await Promise.all([
+    service
+      .from('subscriptions')
+      .select('tier')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle(),
+    service
+      .from('profiles')
+      .select('subscription_tier,is_admin')
+      .eq('id', user.id)
+      .maybeSingle(),
+  ]);
+
+  const effectiveTier = activeSubscription?.tier ?? profileForTier?.subscription_tier ?? null;
+  const hasPaidPlan = PAID_TIERS.has(String(effectiveTier)) || Boolean(profileForTier?.is_admin);
+
+  const sellerConversationIds = convs
+    .filter(c => c.seller_id === user.id)
+    .map(c => c.id)
+    .filter((id): id is string => !!id);
+
+  const lockedConversationIds = new Set<string>();
+  if (!hasPaidPlan && sellerConversationIds.length > 0) {
+    const { data: previewMessages } = await service
+      .from('messages')
+      .select('conversation_id, sender_id')
+      .in('conversation_id', sellerConversationIds);
+
+    for (const message of (previewMessages ?? []) as MessagePreviewRow[]) {
+      if (message.conversation_id && message.sender_id && message.sender_id !== user.id) {
+        lockedConversationIds.add(message.conversation_id);
+      }
+    }
+  }
 
   // Determine the other participant ID for each conversation (not the current user)
   const otherIds = [
@@ -230,9 +274,10 @@ export async function GET() {
       seller_id: c.seller_id,
       subject: c.subject,
       last_message_at: c.last_message_at,
-      last_message_preview: c.last_message_preview,
+      last_message_preview: lockedConversationIds.has(c.id) ? LOCKED_MESSAGE_PREVIEW : c.last_message_preview,
       status: c.status,
       listing_id: c.listing_id,
+      message_locked: lockedConversationIds.has(c.id),
       other_participant: otherProfile,
       listing: listing
         ? {

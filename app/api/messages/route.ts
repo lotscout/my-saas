@@ -19,6 +19,8 @@ import { Resend } from 'resend';
 import { logEmail } from '@/lib/email-logger';
 import { sendAdminAlert } from '@/lib/admin-alerts';
 
+const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -70,6 +72,37 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: convErr?.message ?? 'Failed to create conversation' }, { status: 500 });
       }
       conversationId = newConv.id;
+    }
+  }
+
+  const { data: conversationForGate } = await service
+    .from('conversations')
+    .select('seller_id')
+    .eq('id', conversationId)
+    .maybeSingle();
+
+  if (conversationForGate?.seller_id === user.id) {
+    const [{ data: activeSubscription }, { data: profileForTier }] = await Promise.all([
+      service
+        .from('subscriptions')
+        .select('tier')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle(),
+      service
+        .from('profiles')
+        .select('subscription_tier,is_admin')
+        .eq('id', user.id)
+        .maybeSingle(),
+    ]);
+
+    const effectiveTier = activeSubscription?.tier ?? profileForTier?.subscription_tier ?? null;
+    const hasPaidPlan = PAID_TIERS.has(String(effectiveTier)) || Boolean(profileForTier?.is_admin);
+    if (!hasPaidPlan) {
+      return NextResponse.json(
+        { error: 'Upgrade to a paid LotScout account to view buyer messages and respond.' },
+        { status: 403 }
+      );
     }
   }
 
