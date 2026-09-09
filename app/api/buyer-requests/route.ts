@@ -21,6 +21,17 @@ import { Resend } from 'resend';
 import { containsProfanity } from '@/lib/profanity-filter';
 import { logEmail } from '@/lib/email-logger';
 
+const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
+
+async function hasPaidBuyerAccess(service: ReturnType<typeof createServiceClient>, userId: string): Promise<boolean> {
+  const [{ data: activeSubscription }, { data: profile }] = await Promise.all([
+    service.from('subscriptions').select('tier').eq('user_id', userId).eq('status', 'active').maybeSingle(),
+    service.from('profiles').select('subscription_tier,is_admin').eq('id', userId).maybeSingle(),
+  ]);
+  const effectiveTier = activeSubscription?.tier ?? profile?.subscription_tier ?? null;
+  return PAID_TIERS.has(String(effectiveTier)) || Boolean(profile?.is_admin);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -48,6 +59,10 @@ export async function POST(request: NextRequest) {
     }
 
     const service = createServiceClient();
+
+    if (!(await hasPaidBuyerAccess(service, user.id))) {
+      return NextResponse.json({ error: 'Upgrade to a paid LotScout account to submit buyer requests.' }, { status: 403 });
+    }
 
     const { data: profile } = await service
       .from('profiles')
@@ -204,6 +219,12 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const service = createServiceClient();
+
+    if (!(await hasPaidBuyerAccess(service, user.id))) {
+      return NextResponse.json({ error: 'Upgrade to a paid LotScout account to view buyer requests.' }, { status: 403 });
     }
 
     const { data: requests, error } = await supabase

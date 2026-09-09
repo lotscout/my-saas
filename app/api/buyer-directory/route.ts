@@ -3,6 +3,17 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { createClient } from '@/lib/supabase/server';
 import { resolveStateQuery } from '@/lib/stateMap';
 
+const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
+
+async function hasPaidBuyerAccess(service: ReturnType<typeof createServiceClient>, userId: string): Promise<boolean> {
+  const [{ data: activeSubscription }, { data: profile }] = await Promise.all([
+    service.from('subscriptions').select('tier').eq('user_id', userId).eq('status', 'active').maybeSingle(),
+    service.from('profiles').select('subscription_tier,is_admin').eq('id', userId).maybeSingle(),
+  ]);
+  const effectiveTier = activeSubscription?.tier ?? profile?.subscription_tier ?? null;
+  return PAID_TIERS.has(String(effectiveTier)) || Boolean(profile?.is_admin);
+}
+
 export async function GET(request: NextRequest) {
   const auth = await createClient();
   const { data: { user } } = await auth.auth.getUser();
@@ -15,6 +26,10 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') ?? '200');
 
   const service = createServiceClient();
+
+  if (!(await hasPaidBuyerAccess(service, user.id))) {
+    return NextResponse.json({ error: 'Upgrade to a paid LotScout account to view the Buyer Directory.' }, { status: 403 });
+  }
 
   let query = service
     .from('buyer_requests')

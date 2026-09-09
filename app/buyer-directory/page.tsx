@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { PageHeader, PrimaryLink, SurfaceCard } from '@/components/ui/LotScoutUI';
+import { useUserTier } from '@/hooks/useUserTier';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
 import { getBuyerName } from '@/lib/getBuyerName';
 
@@ -418,6 +419,9 @@ function ViewHeader({ title, subtitle, count, onBack }: { title: string; subtitl
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function BuyerDirectoryPage() {
+  const { tier, isAdmin, loading: tierLoading } = useUserTier();
+  const hasBuyerDirectoryAccess = !tierLoading && (Boolean(tier) || isAdmin);
+
   // ── Navigation state ──
   const [tab, setTab] = useState<MainTab>('directory');
   const [view] = useState<DirectoryView>('active');
@@ -466,15 +470,17 @@ export default function BuyerDirectoryPage() {
   // ── Data fetching ──
 
   useEffect(() => {
+    if (!hasBuyerDirectoryAccess) return;
     if (view !== 'national') return;
     setNationalLoading(true);
     fetch('/api/buyer-directory?status=active&limit=200')
       .then(r => r.json())
       .then(({ requests }) => { setNationalBuyers((requests ?? []) as BuyerRequest[]); setNationalLoading(false); })
       .catch(() => setNationalLoading(false));
-  }, [view]);
+  }, [view, hasBuyerDirectoryAccess]);
 
   function loadStateBuyers(state: string) {
+    if (!hasBuyerDirectoryAccess) return;
     if (!state) return;
     setStateLoading(true);
     setStateSearched(state);
@@ -485,22 +491,24 @@ export default function BuyerDirectoryPage() {
   }
 
   useEffect(() => {
+    if (!hasBuyerDirectoryAccess) return;
     if (view !== 'active') return;
     setActiveLoading(true);
     fetch('/api/buyer-directory?status=active&limit=200')
       .then(r => r.json())
       .then(({ requests }) => { setActiveBuyers((requests ?? []) as BuyerRequest[]); setActiveLoading(false); })
       .catch(() => setActiveLoading(false));
-  }, [view]);
+  }, [view, hasBuyerDirectoryAccess]);
 
   useEffect(() => {
+    if (!hasBuyerDirectoryAccess) return;
     if (tab !== 'requests') return;
     setBrLoading(true);
     fetch('/api/buyer-directory?status=active&limit=200')
       .then(r => r.json())
       .then(({ requests }) => { setBuyerRequests((requests ?? []) as BuyerRequest[]); setBrLoading(false); })
       .catch(() => setBrLoading(false));
-  }, [tab]);
+  }, [tab, hasBuyerDirectoryAccess]);
 
   // ── Filtered lists ──
 
@@ -572,6 +580,39 @@ export default function BuyerDirectoryPage() {
   const activeMarkets = useMemo(() => new Set(activeBuyers.map(b => b.target_state).filter(Boolean)).size, [activeBuyers]);
 
   // ─── Render ───────────────────────────────────────────────────────────────
+
+  if (tierLoading) {
+    return (
+      <div className="bg-surface text-on-surface min-h-screen">
+        <Header />
+        <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </main>
+      </div>
+    );
+  }
+
+  if (!hasBuyerDirectoryAccess) {
+    return (
+      <div className="bg-surface text-on-surface min-h-screen">
+        <Header />
+        <main className="pt-24 px-4 sm:px-6 md:px-10 pb-20 min-h-screen max-w-[1440px] mx-auto">
+          <div className="max-w-xl mx-auto mt-16 rounded-3xl bg-white border border-outline-variant/20 shadow-sm p-8 text-center">
+            <div className="mx-auto mb-5 w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center">
+              <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+            </div>
+            <h1 className="font-headline text-2xl sm:text-3xl font-extrabold text-primary mb-3">Upgrade to View Buyer Directory</h1>
+            <p className="text-secondary text-sm sm:text-base leading-relaxed mb-6">
+              Buyer Directory and buyer request access is available on paid LotScout plans.
+            </p>
+            <Link href="/pricing" className="inline-flex items-center justify-center rounded-xl bg-[#1D9E75] px-5 py-3 text-sm font-extrabold text-white hover:bg-[#14795A] transition-colors">
+              View Plans →
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
