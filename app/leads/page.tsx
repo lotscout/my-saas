@@ -30,26 +30,38 @@ function LeadCard({ lead }: { lead: PropertyLead }) {
   return (
     <Link
       href={`/leads/${lead.id}`}
-      className="group relative bg-white rounded-2xl border border-outline-variant/15 p-5 flex flex-col gap-4 hover:border-primary/35 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-200 ring-1 ring-black/[0.02]"
+      className="group relative bg-white rounded-3xl border border-outline-variant/15 p-6 flex flex-col gap-5 hover:border-primary/35 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-200 ring-1 ring-black/[0.02]"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="font-headline text-xl font-extrabold text-primary leading-tight truncate whitespace-nowrap">{lead.title}</h3>
+      <div className="min-w-0">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#1D9E75]">
+            Lead
+          </span>
+          <span className="text-xs font-bold text-secondary whitespace-nowrap">{lead.city}, {lead.state}</span>
         </div>
+        <h3 className="font-headline text-xl font-extrabold text-primary leading-tight truncate whitespace-nowrap">{lead.title}</h3>
+        <p className="mt-1 text-sm font-semibold text-secondary truncate">{lead.county} County · {lead.propertyType}</p>
       </div>
 
-      <div className="flex flex-wrap gap-x-5 gap-y-3">
+      <div className="grid grid-cols-2 gap-3">
         {[
           ['Price', formatLeadPrice(lead.price)],
           ['Lot Size', lead.lotSize],
         ].map(([label, value]) => (
-          <div key={label} className="min-w-[92px]">
+          <div key={label} className="rounded-2xl bg-surface-container-low border border-outline-variant/10 px-3 py-4 text-center">
             <p className="text-[10px] font-black text-secondary/65 uppercase tracking-wider leading-none">{label}</p>
-            <p className="mt-1 text-sm font-extrabold text-primary truncate">{value}</p>
+            <p className="mt-2 text-base font-extrabold text-primary truncate">{value}</p>
           </div>
         ))}
       </div>
 
+      <div className="flex items-center justify-between gap-3 border-t border-outline-variant/10 pt-4">
+        <span className="text-xs font-bold text-secondary truncate">{lead.zoning}</span>
+        <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#1D9E75] whitespace-nowrap">
+          View lead
+          <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-0.5">arrow_forward</span>
+        </span>
+      </div>
     </Link>
   );
 }
@@ -96,12 +108,12 @@ export default function LeadsPage() {
         />
 
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-7">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-7">
           <StatCard label="Active leads" value={MOCK_PROPERTY_LEADS.length.toLocaleString()} sub="Sample property leads" icon="real_estate_agent" />
           <StatCard label="Markets" value={markets.toLocaleString()} sub="States represented" icon="travel_explore" />
         </div>
 
-        <SurfaceCard className="p-3 sm:p-4 mb-7">
+        <SurfaceCard className="p-3 sm:p-4 mb-8">
           <div className="flex flex-col lg:flex-row gap-3">
             <div className="relative flex-1">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-xl pointer-events-none">search</span>
@@ -143,7 +155,7 @@ export default function LeadsPage() {
             <p className="text-base text-secondary max-w-md mx-auto">Try clearing filters or widening the market to see more property opportunities.</p>
           </SurfaceCard>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6">
             {filtered.map(lead => <LeadCard key={lead.id} lead={lead} />)}
           </div>
         )}
