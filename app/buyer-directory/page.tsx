@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import { PageHeader, SurfaceCard } from '@/components/ui/LotScoutUI';
+import { PageHeader, PrimaryLink, SurfaceCard } from '@/components/ui/LotScoutUI';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
 import { getBuyerName } from '@/lib/getBuyerName';
 
@@ -610,10 +610,9 @@ export default function BuyerDirectoryPage() {
             title={<>Buyer <span className="text-[#1D9E75]">Directory</span></>}
             description="Browse active land buyers who are actively looking for specific lot types, markets, budgets, and acquisition criteria."
             actions={(
-              <Link href="/create-buyer-request" className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#1D9E75] bg-white px-3 py-2 text-xs font-extrabold text-[#1D9E75] hover:bg-[#EAF6F1] transition-colors sm:px-5 sm:py-3 sm:text-sm md:shrink-0 self-start">
-                <span className="material-symbols-outlined text-base sm:text-lg">add_circle</span>
-                Submit Buy Box
-              </Link>
+              <PrimaryLink href="/create-buyer-request">
+                Submit Buyer Request
+              </PrimaryLink>
             )}
           />
 
