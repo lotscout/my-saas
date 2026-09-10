@@ -7,7 +7,10 @@
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = 'https://axiockuobpttlwzicldo.supabase.co';
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4aW9ja3VvYnB0dGx3emljbGRvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjAxNjk2NCwiZXhwIjoyMDkxNTkyOTY0fQ.PLW0Zjnu-KmlT6fE57j1EzkEj3a2fnHaFEUVyiwUTuk';
+const SERVICE_ROLE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || '');
+const SUPPORT_ADMIN_PASSWORD = process.env.SUPPORT_ADMIN_PASSWORD;
+if (!SERVICE_ROLE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
+if (!SUPPORT_ADMIN_PASSWORD) throw new Error('SUPPORT_ADMIN_PASSWORD is required');
 
 const service = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
@@ -18,7 +21,7 @@ async function main() {
   console.log('Creating auth user support@lotscout.com...');
   const { data: created, error: createErr } = await service.auth.admin.createUser({
     email: 'support@lotscout.com',
-    password: 'Admin@LotScout1!',
+    password: SUPPORT_ADMIN_PASSWORD,
     email_confirm: true,
   });
 

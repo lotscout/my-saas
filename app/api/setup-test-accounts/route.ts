@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // One-shot endpoint to seed 4 QA test accounts.
 // DELETE this route before going to production.
-// Requires SUPABASE_SERVICE_ROLE_KEY in env — never accepts it as input.
+// Requires SUPABASE_SERVICE_ROLE_KEY and SETUP_TEST_ACCOUNTS_TOKEN in env.
 
 const ACCOUNTS = [
   { email: 'teststandard@lotscout.com',  password: 'TestStandard123!',  tier: 'standard'  as string | null, firstName: 'Test', lastName: 'Standard'  },
@@ -12,9 +12,15 @@ const ACCOUNTS = [
   { email: 'testfree@lotscout.com',      password: 'TestFree123!',      tier: null,                        firstName: 'Test', lastName: 'Free'      },
 ];
 
-export async function POST() {
+export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const setupToken = process.env.SETUP_TEST_ACCOUNTS_TOKEN;
+  const providedToken = request.headers.get('x-setup-token');
+
+  if (!setupToken || providedToken !== setupToken) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   if (!supabaseUrl || !serviceRoleKey) {
     return NextResponse.json({ error: 'Missing Supabase env vars' }, { status: 500 });

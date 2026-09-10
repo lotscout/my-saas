@@ -2,10 +2,11 @@ import { createClient } from '@supabase/supabase-js';
 import { parse } from 'csv-parse/sync';
 import { readFileSync } from 'fs';
 
-const sb = createClient(
-  'https://axiockuobpttlwzicldo.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4aW9ja3VvYnB0dGx3emljbGRvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjAxNjk2NCwiZXhwIjoyMDkxNTkyOTY0fQ.PLW0Zjnu-KmlT6fE57j1EzkEj3a2fnHaFEUVyiwUTuk'
-);
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://axiockuobpttlwzicldo.supabase.co';
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!SERVICE_ROLE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
+
+const sb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
 const SEED_USER = '257b51d6-cd33-4611-b2ca-c509f1ee6ac6';
 
