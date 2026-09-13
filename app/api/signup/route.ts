@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
 import { syncResendContact } from '@/lib/resend-contacts';
 import { sendAdminAlert } from '@/lib/admin-alerts';
+import { sendWelcomeEmailOnce } from '@/lib/welcome-email';
 
 function adminSupabase() {
   return createClient(
@@ -97,6 +98,17 @@ export async function POST(request: NextRequest) {
       await syncResendContact({ email, firstName, lastName });
     } catch (resendErr) {
       console.error('Signup Resend contact sync error:', resendErr);
+    }
+
+    try {
+      await sendWelcomeEmailOnce({
+        userId,
+        email,
+        firstName,
+        baseUrl: process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin,
+      });
+    } catch (welcomeErr) {
+      console.error('Signup welcome email error:', welcomeErr);
     }
 
     if (!existingProfile) {
