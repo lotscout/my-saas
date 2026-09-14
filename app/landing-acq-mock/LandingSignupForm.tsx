@@ -14,24 +14,38 @@ export default function LandingSignupForm({ roles, variant }: Props) {
   const isDesktop = variant === 'desktop';
   const suffix = isDesktop ? '' : '-mobile';
 
+  function getFormValues(form: HTMLFormElement) {
+    return {
+      firstName: (form.elements.namedItem(`firstName${suffix}`) as HTMLInputElement).value.trim(),
+      lastName: (form.elements.namedItem(`lastName${suffix}`) as HTMLInputElement).value.trim(),
+      email: (form.elements.namedItem(`email${suffix}`) as HTMLInputElement).value.trim(),
+      market: (form.elements.namedItem(`market${suffix}`) as HTMLInputElement).value.trim(),
+      userType: (form.elements.namedItem(`userType${suffix}`) as HTMLSelectElement).value.trim(),
+    };
+  }
+
+  function validateRequired(values: ReturnType<typeof getFormValues>) {
+    if (!values.firstName || !values.lastName || !values.email || !values.userType) {
+      setError('Please enter your first name, last name, email, and user type.');
+      return false;
+    }
+    return true;
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setNotice(null);
     setLoading(true);
 
-    const form = e.currentTarget;
-    const firstName = (form.elements.namedItem(`firstName${suffix}`) as HTMLInputElement).value.trim();
-    const lastName = (form.elements.namedItem(`lastName${suffix}`) as HTMLInputElement).value.trim();
-    const email = (form.elements.namedItem(`email${suffix}`) as HTMLInputElement).value.trim();
-    const market = (form.elements.namedItem(`market${suffix}`) as HTMLInputElement).value.trim();
-    const userType = (form.elements.namedItem(`userType${suffix}`) as HTMLSelectElement).value.trim();
+    const values = getFormValues(e.currentTarget);
 
-    if (!firstName || !lastName || !email || !userType) {
-      setError('Please enter your first name, last name, email, and user type.');
+    if (!validateRequired(values)) {
       setLoading(false);
       return;
     }
+
+    const { firstName, lastName, email, market, userType } = values;
 
     const res = await fetch('/api/signup', {
       method: 'POST',
@@ -65,6 +79,27 @@ export default function LandingSignupForm({ roles, variant }: Props) {
     window.location.href = '/landing-acq-mock/youre-in';
   }
 
+  function handleGoogleSignup(e: React.MouseEvent<HTMLButtonElement>) {
+    const form = e.currentTarget.form;
+    if (!form) return;
+    setError(null);
+    setNotice(null);
+
+    const values = getFormValues(form);
+    if (!validateRequired(values)) return;
+
+    const params = new URLSearchParams({
+      next: '/profile',
+      landing_source: 'landing-acq-mock',
+      firstName: values.firstName,
+      lastName: values.lastName,
+      market: values.market,
+      userType: values.userType,
+    });
+
+    window.location.href = `/api/auth/google?${params.toString()}`;
+  }
+
   return (
     <>
       {isDesktop && <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />}
@@ -96,6 +131,14 @@ export default function LandingSignupForm({ roles, variant }: Props) {
           {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold leading-5 text-red-700">{error}</p>}
           <button type="submit" disabled={loading} className={`${isDesktop ? 'py-3 text-sm' : 'py-3.5 text-base'} mt-1 rounded-2xl bg-[#1b4332] px-6 font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426] disabled:cursor-not-allowed disabled:opacity-60`}>
             {loading ? 'Sending email...' : 'Find my next land deal'}
+          </button>
+          <div className="flex items-center gap-3 py-1">
+            <div className="h-px flex-1 bg-[#d9d2c3]" />
+            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#7c8b82]">or</span>
+            <div className="h-px flex-1 bg-[#d9d2c3]" />
+          </div>
+          <button type="button" onClick={handleGoogleSignup} disabled={loading} className={`${isDesktop ? 'py-2.5 text-xs' : 'py-3 text-sm'} rounded-2xl border border-[#d8dece] bg-white px-6 font-black uppercase tracking-[0.08em] text-[#1b4332] transition hover:bg-[#e8efe6] disabled:cursor-not-allowed disabled:opacity-60`}>
+            Continue with Google
           </button>
           <p className={`${isDesktop ? 'text-[11px] leading-4' : 'text-xs leading-5'} text-center font-bold text-[#7c8b82]`}>
             No credit card required to get started.

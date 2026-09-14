@@ -6,6 +6,10 @@ function safeInternalPath(value: string | null): string {
   return '/marketplace';
 }
 
+function cleanParam(value: string | null): string {
+  return value?.trim().slice(0, 120) || '';
+}
+
 export async function GET(request: NextRequest) {
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ??
@@ -15,6 +19,19 @@ export async function GET(request: NextRequest) {
   const next = safeInternalPath(request.nextUrl.searchParams.get('next'));
   const callbackUrl = new URL('/auth/callback', siteUrl);
   callbackUrl.searchParams.set('next', next);
+
+  const landingSource = cleanParam(request.nextUrl.searchParams.get('landing_source'));
+  if (landingSource) {
+    callbackUrl.searchParams.set('landing_source', landingSource);
+    const firstName = cleanParam(request.nextUrl.searchParams.get('firstName'));
+    const lastName = cleanParam(request.nextUrl.searchParams.get('lastName'));
+    const market = cleanParam(request.nextUrl.searchParams.get('market'));
+    const userType = cleanParam(request.nextUrl.searchParams.get('userType'));
+    if (firstName) callbackUrl.searchParams.set('firstName', firstName);
+    if (lastName) callbackUrl.searchParams.set('lastName', lastName);
+    if (market) callbackUrl.searchParams.set('market', market);
+    if (userType) callbackUrl.searchParams.set('userType', userType);
+  }
 
   // Use the SSR client here so Supabase starts a PKCE OAuth flow and stores
   // the code verifier in an HTTP-only cookie. A plain @supabase/supabase-js

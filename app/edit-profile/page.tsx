@@ -38,6 +38,9 @@ export default function EditProfilePage() {
   const [toastOk, setToastOk] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
   const [cropZoom, setCropZoom] = useState(1);
   const [cropX, setCropX] = useState(0);
@@ -139,6 +142,39 @@ export default function EditProfilePage() {
       setToast('Profile saved successfully!');
       setTimeout(() => { setToast(null); router.push('/profile'); }, 2000);
     }
+  }
+
+  async function handleUpdatePassword() {
+    setToast(null);
+
+    if (!newPassword || newPassword.length < 8) {
+      setToastOk(false);
+      setToast('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setToastOk(false);
+      setToast('Passwords do not match.');
+      return;
+    }
+
+    setSavingPassword(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setSavingPassword(false);
+
+    if (error) {
+      setToastOk(false);
+      setToast(error.message || 'Could not update password. Please try again.');
+      return;
+    }
+
+    setNewPassword('');
+    setConfirmPassword('');
+    setToastOk(true);
+    setToast('Password updated successfully!');
+    setTimeout(() => setToast(null), 2500);
   }
 
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -510,6 +546,38 @@ export default function EditProfilePage() {
                   </div>
                 )}
               </div>
+              <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 sm:p-6 space-y-4">
+                <div className="space-y-1">
+                  <h4 className="font-headline font-bold text-primary">Password</h4>
+                  <p className="text-sm text-secondary leading-relaxed">Set or update your password for email login. Google sign-in will still work if you use it.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-secondary uppercase mb-1">New Password</label>
+                    <input
+                      className="w-full bg-white border border-outline-variant/30 rounded-lg px-3 sm:px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-[#1D9E75]/20"
+                      type="password"
+                      placeholder="At least 8 characters"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-secondary uppercase mb-1">Confirm Password</label>
+                    <input
+                      className="w-full bg-white border border-outline-variant/30 rounded-lg px-3 sm:px-4 py-2 text-primary font-medium focus:ring-2 focus:ring-[#1D9E75]/20"
+                      type="password"
+                      placeholder="Repeat password"
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <button type="button" onClick={handleUpdatePassword} disabled={savingPassword} className="w-full sm:w-auto px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                  {savingPassword ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="space-y-2 max-w-xl">
                   <h4 className="font-headline font-bold text-primary">Subscription Plan</h4>

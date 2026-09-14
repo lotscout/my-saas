@@ -18,6 +18,11 @@ export async function GET(request: NextRequest) {
     : (searchParams.get('next') ?? searchParams.get('redirect') ?? '/marketplace')
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? origin
+  const landingSource = searchParams.get('landing_source')?.trim() || ''
+  const landingFirstName = searchParams.get('firstName')?.trim() || ''
+  const landingLastName = searchParams.get('lastName')?.trim() || ''
+  const landingMarket = searchParams.get('market')?.trim() || ''
+  const landingUserType = searchParams.get('userType')?.trim() || ''
 
   if (code) {
     // Collect cookies during session exchange, then build the redirect response
@@ -68,8 +73,8 @@ export async function GET(request: NextRequest) {
 
         // Google provides: full_name, name, picture, avatar_url
         const fullName  = (meta.full_name ?? meta.name ?? '').trim()
-        const firstName = (meta.first_name ?? (fullName ? fullName.split(' ')[0] : '')).trim() || null
-        const lastName  = (meta.last_name  ?? (fullName && fullName.includes(' ') ? fullName.slice(fullName.indexOf(' ') + 1) : '')).trim() || null
+        const firstName = (landingFirstName || meta.first_name || (fullName ? fullName.split(' ')[0] : '')).trim() || null
+        const lastName  = (landingLastName || meta.last_name || (fullName && fullName.includes(' ') ? fullName.slice(fullName.indexOf(' ') + 1) : '')).trim() || null
         const avatarUrl = meta.avatar_url ?? meta.picture ?? null
 
         const service = createServiceClient()
@@ -79,7 +84,7 @@ export async function GET(request: NextRequest) {
           {
             id: user.id,
             email: user.email ?? '',
-            role: 'buyer',
+            role: landingUserType ? landingUserType.toLowerCase() : 'buyer',
             is_verified: false,
             is_active: true,
             onboarding_completed: false,
@@ -92,18 +97,27 @@ export async function GET(request: NextRequest) {
         // Step 2: fill in name + avatar only when first_name is not yet set.
         // This populates Google users on first sign-in without overwriting
         // profile data that the user may have edited themselves.
-        if (firstName || lastName || avatarUrl) {
-          await service
+        if (firstName || lastName || avatarUrl || landingMarket || landingUserType) {
+          const profileUpdate: Record<string, string | null> = {
+            first_name: firstName,
+            last_name: lastName,
+            full_name: [firstName, lastName].filter(Boolean).join(' ').trim() || fullName || null,
+            avatar_url: avatarUrl,
+            updated_at: new Date().toISOString(),
+          }
+          if (landingMarket) profileUpdate.state = landingMarket
+          if (landingUserType) profileUpdate.role = landingUserType.toLowerCase()
+
+          const updateQuery = service
             .from('profiles')
-            .update({
-              first_name: firstName,
-              last_name:  lastName,
-              full_name:  fullName || null,
-              avatar_url: avatarUrl,
-              updated_at: new Date().toISOString(),
-            })
+            .update(profileUpdate)
             .eq('id', user.id)
-            .is('first_name', null)
+
+          if (landingSource) {
+            await updateQuery
+          } else {
+            await updateQuery.is('first_name', null)
+          }
         }
 
         // Step 3: fetch profile for routing + welcome email decisions
@@ -184,7 +198,9 @@ export async function GET(request: NextRequest) {
               rows: [
                 ['Name', fullName || [firstName, lastName].filter(Boolean).join(' ').trim() || 'Not provided'],
                 ['Email', user.email],
-                ['Source', isNewOAuthUser ? 'google_oauth' : 'email_confirmation'],
+                ['Source', landingSource || (isNewOAuthUser ? 'google_oauth' : 'email_confirmation')],
+                ['User type', landingUserType],
+                ['Market', landingMarket],
               ],
               ctaHref: '/admin/dashboard/data-center',
               ctaLabel: 'View Data Center',
