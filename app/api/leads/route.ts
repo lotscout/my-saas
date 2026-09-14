@@ -18,6 +18,13 @@ function formatCurrency(value: number | null) {
   return value ? `$${value.toLocaleString()}` : 'Not provided';
 }
 
+function parseAddressLocation(address: string) {
+  const parts = address.split(',').map(part => part.trim()).filter(Boolean);
+  const possibleState = parts.length >= 2 ? parts[parts.length - 1].match(/\b([A-Z]{2})\b/)?.[1] ?? null : null;
+  const possibleCity = parts.length >= 2 ? parts[parts.length - 2] : null;
+  return { city: possibleCity, state: possibleState };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const auth = await createClient();
@@ -83,6 +90,7 @@ export async function POST(request: NextRequest) {
 
     const submitterName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim();
     const title = streetAddress || `APN ${apn}`;
+    const parsedLocation = parseAddressLocation(streetAddress);
     const descriptionLines = [
       'Lead submitted through LotScout Leads.',
       `Contact: ${contactName}`,
@@ -101,6 +109,8 @@ export async function POST(request: NextRequest) {
         ownership_type: 'property_lead',
         title,
         property_description: descriptionLines,
+        city: parsedLocation.city,
+        state: parsedLocation.state,
         street_address: streetAddress || null,
         apn: apn || null,
         lot_size_acres: lotSizeAcres,

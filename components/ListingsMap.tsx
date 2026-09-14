@@ -93,12 +93,14 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
       markersRef.current.forEach(m => m.remove());
       markersRef.current.clear();
 
-      const makeGreenIcon = () => L.divIcon({
+      const makePinIcon = (color = '#1D9E75', size = 12) => L.divIcon({
         className: '',
-        html: `<div style="background:#1D9E75;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
+        html: `<div style="background:${color};width:${size}px;height:${size}px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
       });
+      const makeGreenIcon = () => makePinIcon('#1D9E75', 12);
+      const makeLeadIcon = () => makePinIcon('#F59E0B', 12);
       const makeContractIcon = () => L.divIcon({
         className: '',
         html: `<div style="background:#94a3b8;width:10px;height:10px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>`,
@@ -112,25 +114,27 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
 
       plottable.forEach(listing => {
         const isUnderContract = listing.ownership_type === 'Under Contract';
+        const isLead = listing.ownership_type === 'property_lead';
         const acreage = formatAcreage(listing.lot_size_acres, listing.lot_size_sqft);
         const price = formatPrice(listing.asking_price);
         const location = [listing.county, listing.state].filter(Boolean).join(', ');
 
         const popup = L.popup({ maxWidth: 240, className: 'lotscout-popup' }).setContent(`
           <div style="font-family:system-ui,sans-serif;padding:2px 0;">
-            <div style="font-weight:700;font-size:13px;color:#0f2d1f;margin-bottom:4px;line-height:1.3;">${listing.title ?? 'Unnamed Listing'}</div>
+            ${isLead ? `<div style="display:inline-block;font-size:9px;font-weight:800;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:99px;text-transform:uppercase;margin-bottom:5px;">Lead</div>` : ''}
+            <div style="font-weight:700;font-size:13px;color:#0f2d1f;margin-bottom:4px;line-height:1.3;">${listing.title ?? (isLead ? 'Unnamed Lead' : 'Unnamed Listing')}</div>
             <div style="font-size:11px;color:#64748b;margin-bottom:6px;">${location}${acreage ? ` · ${acreage}` : ''}</div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
               <span style="font-size:15px;font-weight:800;color:#1a7a4a;">${price}</span>
               ${listing.zoning ? `<span style="font-size:9px;font-weight:700;background:#f0fdf4;color:#166534;padding:2px 6px;border-radius:99px;text-transform:uppercase;">${listing.zoning}</span>` : ''}
             </div>
             ${isUnderContract ? `<div style="font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:6px;">UNDER CONTRACT</div>` : ''}
-            <a href="/listings/${listing.id}" style="display:block;text-align:center;background:#1a7a4a;color:white;font-size:11px;font-weight:700;padding:6px 12px;border-radius:8px;text-decoration:none;">View Listing →</a>
+            <a href="/listings/${listing.id}" style="display:block;text-align:center;background:${isLead ? '#D97706' : '#1a7a4a'};color:white;font-size:11px;font-weight:700;padding:6px 12px;border-radius:8px;text-decoration:none;">${isLead ? 'View Lead' : 'View Listing'} →</a>
           </div>
         `);
 
         const marker = L.marker([listing.latitude, listing.longitude], {
-          icon: isUnderContract ? makeContractIcon() : makeGreenIcon(),
+          icon: isLead ? makeLeadIcon() : isUnderContract ? makeContractIcon() : makeGreenIcon(),
         }).bindPopup(popup);
 
         marker.on('click', () => onPinClickRef.current?.(listing.id));
@@ -182,10 +186,12 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
     const L = leafletRef.current;
     if (!L) return;
     markersRef.current.forEach((marker, id) => {
+      const listing = listings.find(item => item.id === id);
+      const baseColor = listing?.ownership_type === 'property_lead' ? '#F59E0B' : listing?.ownership_type === 'Under Contract' ? '#94a3b8' : '#1D9E75';
       if (id === highlightedId) {
         marker.setIcon(L.divIcon({
           className: '',
-          html: `<div style="background:#15803d;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.5);"></div>`,
+          html: `<div style="background:${baseColor};width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.5);"></div>`,
           iconSize: [18, 18],
           iconAnchor: [9, 9],
         }));
@@ -193,14 +199,14 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
       } else {
         marker.setIcon(L.divIcon({
           className: '',
-          html: `<div style="background:#1D9E75;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+          html: `<div style="background:${baseColor};width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
           iconSize: [12, 12],
           iconAnchor: [6, 6],
         }));
         marker.setZIndexOffset(0);
       }
     });
-  }, [highlightedId]);
+  }, [highlightedId, listings]);
 
   // Dim pins that don't match active filters
   useEffect(() => {
@@ -225,13 +231,13 @@ export default function ListingsMap({ listings, filteredIds, highlightedId, onPi
       <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow text-xs font-semibold text-slate-600 flex items-center gap-3 z-[1000]">
         <span className="flex items-center gap-1.5">
           <span style={{ width:10,height:10,borderRadius:'50%',background:'#1D9E75',display:'inline-block',border:'2px solid white',boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
-          Active
+          Listings
         </span>
         <span className="flex items-center gap-1.5">
-          <span style={{ width:10,height:10,borderRadius:'50%',background:'#94a3b8',display:'inline-block',border:'2px solid white',boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
-          Under Contract
+          <span style={{ width:10,height:10,borderRadius:'50%',background:'#F59E0B',display:'inline-block',border:'2px solid white',boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
+          Leads
         </span>
-        <span className="text-slate-400">{listings.length} listings</span>
+        <span className="text-slate-400">{listings.length} shown</span>
       </div>
     </div>
   );
