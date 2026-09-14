@@ -49,8 +49,8 @@ const faqs = [
 
 export default function AcquisitionStyleLandingMock() {
   return (
-    <main className="min-h-screen bg-[#f7f4ec] text-[#10291e]">
-      <div className="border-b border-[#d9d2c3] bg-[#1b4332] px-4 py-3 text-center text-sm font-black uppercase tracking-[0.12em] text-white">
+    <main className="h-svh overflow-y-auto scroll-smooth snap-y snap-proximity bg-[#f7f4ec] text-[#10291e]">
+      <div className="snap-start border-b border-[#d9d2c3] bg-[#1b4332] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-white sm:text-sm sm:tracking-[0.12em]">
         $72M+ in land transactions connected through direct buyer/seller relationships
       </div>
 
@@ -70,16 +70,16 @@ export default function AcquisitionStyleLandingMock() {
         </a>
       </header>
 
-      <section className="mx-auto grid max-w-7xl items-center gap-12 px-5 pb-14 pt-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10 lg:pb-20 lg:pt-12">
+      <section className="mx-auto grid min-h-[calc(100svh-112px)] max-w-7xl snap-start items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12 lg:px-10 lg:py-10">
         <div>
           <p className="mb-5 text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">Land Development Intelligence</p>
-          <h1 className="font-headline text-5xl font-black uppercase leading-[0.9] tracking-[-0.065em] text-[#10291e] sm:text-7xl lg:text-8xl">
+          <h1 className="font-headline text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-6xl lg:text-8xl">
             Find the right land match without waiting on the MLS.
           </h1>
-          <p className="mt-7 max-w-2xl text-xl font-semibold leading-8 text-[#52665b]">
+          <p className="mt-5 max-w-2xl text-lg font-semibold leading-7 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
             LotScout helps land buyers and sellers find each other faster,then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3 text-sm font-black uppercase tracking-[0.08em] text-[#1b4332]">
+          <div className="mt-5 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.08em] text-[#1b4332] sm:mt-7 sm:gap-3 sm:text-sm">
             <span className="rounded-full border border-[#1b4332]/15 bg-white px-4 py-2">Buy-side + sell-side matching</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-white px-4 py-2">No payment to start</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-white px-4 py-2">Works beyond the MLS</span>
@@ -88,26 +88,26 @@ export default function AcquisitionStyleLandingMock() {
 
         <aside id="match-form" className="relative scroll-mt-6">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
-          <div className="relative rounded-[2rem] border border-[#d9d2c3] bg-white p-5 shadow-2xl shadow-[#1b4332]/12 sm:p-6">
-            <div className="mb-5 rounded-[1.4rem] bg-[#10291e] p-5 text-white">
+          <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-white p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] sm:p-6">
+            <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white sm:mb-5 sm:rounded-[1.4rem] sm:p-5">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#a8d4b7]">Free match request</p>
-              <h2 className="mt-2 text-3xl font-black uppercase leading-none tracking-[-0.05em]">Find your next land match.</h2>
+              <h2 className="mt-2 text-2xl font-black uppercase leading-none tracking-[-0.05em] sm:text-3xl">Find your next land match.</h2>
               <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
                 Tell us whether you are buying, selling, sourcing, or building. We will route you toward the right buyer, seller, or land intelligence workflow.
               </p>
             </div>
 
-            <form className="grid gap-3">
-              <div className="grid gap-3 sm:grid-cols-2">
+            <form className="grid gap-2.5">
+              <div className="grid gap-2.5 sm:grid-cols-2">
                 <label className="sr-only" htmlFor="name">Name</label>
-                <input id="name" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-3 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Name" />
+                <input id="name" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Name" />
                 <label className="sr-only" htmlFor="email">Email</label>
-                <input id="email" type="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-3 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Email" />
+                <input id="email" type="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Email" />
               </div>
               <label className="sr-only" htmlFor="market">Market or state</label>
-              <input id="market" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-3 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Market or state" />
+              <input id="market" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Market or state" />
               <label className="sr-only" htmlFor="goal">What side of the land deal are you on?</label>
-              <select id="goal" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-3 text-sm font-bold text-[#52665b] outline-none ring-[#1b4332]/20 focus:ring-4">
+              <select id="goal" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold text-[#52665b] outline-none ring-[#1b4332]/20 focus:ring-4">
                 <option>What side of the land deal are you on?</option>
                 <option>I have land and need buyers</option>
                 <option>I am buying land</option>
@@ -119,14 +119,14 @@ export default function AcquisitionStyleLandingMock() {
                 <p className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-[#607267]">I am a</p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {roles.map((role) => (
-                    <label key={role} className="flex cursor-pointer items-center gap-2 rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-3 py-2 text-sm font-black text-[#1b4332]">
+                    <label key={role} className="flex cursor-pointer items-center gap-2 rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-3 py-1.5 text-sm font-black text-[#1b4332]">
                       <input type="radio" name="role" className="accent-[#1b4332]" />
                       {role}
                     </label>
                   ))}
                 </div>
               </div>
-              <button type="button" className="mt-2 rounded-2xl bg-[#1b4332] px-6 py-4 text-base font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426]">
+              <button type="button" className="mt-1 rounded-2xl bg-[#1b4332] px-6 py-3.5 text-base font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426]">
                 Find my land match
               </button>
               <p className="text-center text-xs font-bold leading-5 text-[#7c8b82]">
@@ -137,41 +137,41 @@ export default function AcquisitionStyleLandingMock() {
         </aside>
       </section>
 
-      <section id="proof" className="border-y border-[#d9d2c3] bg-white text-[#10291e]">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-[#d9d2c3] sm:grid-cols-4">
+      <section id="proof" className="flex min-h-svh snap-start items-center border-y border-[#d9d2c3] bg-white text-[#10291e]">
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-px bg-[#d9d2c3] sm:grid-cols-4">
           {stats.map(([big, small]) => (
-            <div key={big} className="bg-white px-5 py-8 text-center">
-              <div className="font-headline text-4xl font-black uppercase tracking-[-0.05em] text-[#1b4332] sm:text-5xl">{big}</div>
+            <div key={big} className="bg-white px-4 py-7 text-center sm:px-5 sm:py-10">
+              <div className="font-headline text-3xl font-black uppercase tracking-[-0.05em] text-[#1b4332] sm:text-5xl">{big}</div>
               <div className="mt-2 text-sm font-black uppercase tracking-[0.12em] text-[#52665b]">{small}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
-        <div className="mb-10 max-w-3xl">
-          <h2 className="mt-3 font-headline text-5xl font-black uppercase leading-none tracking-[-0.06em] text-[#10291e] sm:text-6xl">Answer the real objections.</h2>
+      <section className="mx-auto flex min-h-svh max-w-7xl snap-start flex-col justify-center px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+        <div className="mb-6 max-w-3xl sm:mb-10">
+          <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] text-[#10291e] sm:text-6xl">Answer the real objections.</h2>
         </div>
         <div className="grid gap-5 lg:grid-cols-3">
           {objections.map((item) => (
-            <article key={item.title} className="rounded-[1.75rem] border border-[#d9d2c3] bg-white p-6 shadow-sm">
-              <h3 className="text-2xl font-black leading-tight tracking-[-0.04em] text-[#10291e]">{item.title}</h3>
-              <p className="mt-4 text-base font-semibold leading-7 text-[#607267]">{item.body}</p>
+            <article key={item.title} className="rounded-[1.5rem] border border-[#d9d2c3] bg-white p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
+              <h3 className="text-xl font-black leading-tight tracking-[-0.04em] text-[#10291e] sm:text-2xl">{item.title}</h3>
+              <p className="mt-3 text-sm font-semibold leading-6 text-[#607267] sm:mt-4 sm:text-base sm:leading-7">{item.body}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section id="how" className="bg-[#e8efe6] text-[#10291e]">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
+      <section id="how" className="flex min-h-svh snap-start items-center bg-[#e8efe6] text-[#10291e]">
+        <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
           <div className="mb-10 max-w-3xl">
-            <h2 className="mt-3 font-headline text-5xl font-black uppercase leading-none tracking-[-0.06em]">Start with the match.</h2>
+            <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Start with the match.</h2>
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
             {steps.map(([num, title, body]) => (
-              <div key={num} className="rounded-[1.75rem] border border-[#1b4332]/15 bg-white/80 p-6">
+              <div key={num} className="rounded-[1.5rem] border border-[#1b4332]/15 bg-white/80 p-5 sm:rounded-[1.75rem] sm:p-6">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1b4332] text-lg font-black text-white">{num}</span>
-                <h3 className="mt-5 text-2xl font-black tracking-[-0.04em]">{title}</h3>
+                <h3 className="mt-4 text-xl font-black tracking-[-0.04em] sm:mt-5 sm:text-2xl">{title}</h3>
                 <p className="mt-3 text-base font-semibold leading-7 text-[#52665b]">{body}</p>
               </div>
             ))}
@@ -184,14 +184,14 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section id="faq" className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-20">
+      <section id="faq" className="mx-auto grid min-h-svh max-w-7xl snap-start items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-12">
         <div>
           <p className="text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">FAQs</p>
-          <h2 className="mt-3 font-headline text-5xl font-black uppercase leading-none tracking-[-0.06em]">Before you scout.</h2>
+          <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Before you scout.</h2>
         </div>
         <div className="divide-y divide-[#1b4332]/15 border-y border-[#1b4332]/15">
           {faqs.map((faq) => (
-            <div key={faq.q} className="py-6">
+            <div key={faq.q} className="py-4 sm:py-6">
               <h3 className="text-2xl font-black tracking-[-0.04em]">{faq.q}</h3>
               <p className="mt-3 text-base font-semibold leading-7 text-[#52665b]">{faq.a}</p>
             </div>
@@ -199,7 +199,7 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-10 lg:pb-24">
+      <section className="mx-auto flex min-h-svh max-w-7xl snap-start items-center px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
         <div className="rounded-[2rem] border border-[#d9d2c3] bg-[#1b4332] p-8 text-center text-white shadow-2xl shadow-[#1b4332]/15 sm:p-10 lg:p-12">
           <h2 className="mx-auto mt-4 max-w-4xl font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">
             Land deals need better matching before they need more listing exposure.
@@ -213,7 +213,7 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <footer className="border-t border-[#d9d2c3] px-5 py-8 text-xs font-semibold leading-6 text-[#7b897f] sm:px-8 lg:px-10">
+      <footer className="snap-start border-t border-[#d9d2c3] px-5 py-8 text-xs font-semibold leading-6 text-[#7b897f] sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p>LotScout does not guarantee buyer interest, sale outcomes, investment returns, zoning approvals, utility availability, or development feasibility. Transaction, commission, and timeline figures are historical/contextual and not a guarantee of future results. All users should complete independent diligence and consult qualified professionals.</p>
           <p className="mt-4">© 2026 LotScout. Land Development Intelligence.</p>
