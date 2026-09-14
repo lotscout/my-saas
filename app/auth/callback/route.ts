@@ -120,6 +120,20 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        if (landingSource && user.id) {
+          try {
+            await service.auth.admin.updateUserById(user.id, {
+              user_metadata: {
+                ...user.user_metadata,
+                requires_password_setup: true,
+                landing_source: landingSource,
+              },
+            })
+          } catch (metadataErr) {
+            console.error('[auth/callback] password setup metadata error:', metadataErr)
+          }
+        }
+
         // Step 3: fetch profile for routing + welcome email decisions
         const { data: profile } = await service
           .from('profiles')

@@ -161,7 +161,10 @@ export default function EditProfilePage() {
 
     setSavingPassword(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+      data: { requires_password_setup: false },
+    });
     setSavingPassword(false);
 
     if (error) {

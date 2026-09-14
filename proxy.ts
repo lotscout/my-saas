@@ -40,14 +40,6 @@ export async function proxy(request: NextRequest) {
   // pages must not depend on an auth roundtrip just to render.
   if (isPublic(path)) return NextResponse.next({ request })
 
-  // The user dashboard was removed — send any hit to the marketplace.
-  if (path === '/dashboard' || path.startsWith('/dashboard/')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/marketplace'
-    url.search = ''
-    return NextResponse.redirect(url)
-  }
-
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -81,6 +73,23 @@ export async function proxy(request: NextRequest) {
     signIn.search = ''
     signIn.searchParams.set('redirect', path)
     return NextResponse.redirect(signIn)
+  }
+
+  const requiresPasswordSetup = user.user_metadata?.requires_password_setup === true
+  if (requiresPasswordSetup && path !== '/edit-profile' && path !== '/profile') {
+    const setup = request.nextUrl.clone()
+    setup.pathname = '/edit-profile'
+    setup.search = ''
+    setup.searchParams.set('setup', 'password')
+    return NextResponse.redirect(setup)
+  }
+
+  // The user dashboard was removed — send any hit to the marketplace.
+  if (path === '/dashboard' || path.startsWith('/dashboard/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/marketplace'
+    url.search = ''
+    return NextResponse.redirect(url)
   }
 
   // Admin area requires the admin flag (this app uses profiles.is_admin).

@@ -3,7 +3,7 @@ import { logEmail } from '@/lib/email-logger';
 
 function buildAccountLoginEmail(firstName: string | null, baseUrl: string, loginUrl?: string): string {
   const greeting = firstName ? `Hi ${firstName},` : 'Hi,';
-  const resolvedLoginUrl = loginUrl || `${baseUrl}/sign-in?redirect=${encodeURIComponent('/profile')}`;
+  const resolvedLoginUrl = loginUrl || `${baseUrl}/sign-in?redirect=${encodeURIComponent('/edit-profile?setup=password')}`;
 
   return `<!DOCTYPE html>
 <html>
@@ -69,7 +69,7 @@ export async function sendAccountLoginEmail({
   }
 
   const resolvedBaseUrl = baseUrl ?? process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_BASE_URL ?? 'https://lotscout.com';
-  const resolvedLoginUrl = loginUrl || `${resolvedBaseUrl}/sign-in?redirect=${encodeURIComponent('/profile')}`;
+  const resolvedLoginUrl = loginUrl || `${resolvedBaseUrl}/sign-in?redirect=${encodeURIComponent('/edit-profile?setup=password')}`;
   const fromEmail = 'LotScout <hello@lotscout.com>';
   const resend = new Resend(process.env.RESEND_API_KEY);
   const subject = 'Complete your LotScout account setup';

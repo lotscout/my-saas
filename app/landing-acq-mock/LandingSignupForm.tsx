@@ -89,7 +89,7 @@ export default function LandingSignupForm({ roles, variant }: Props) {
     if (!validateRequired(values)) return;
 
     const params = new URLSearchParams({
-      next: '/profile',
+      next: '/edit-profile?setup=password',
       landing_source: 'landing-acq-mock',
       firstName: values.firstName,
       lastName: values.lastName,

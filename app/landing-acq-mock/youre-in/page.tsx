@@ -17,10 +17,10 @@ export default function LandingYoureInPage() {
             You'll receive an email shortly with a secure link to complete your account setup.
           </p>
           <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-[#7c8b82]">
-            Your setup link will take you to your profile page. You can still access the marketplace and other LotScout pages before your profile is fully complete.
+            Your setup link will take you to account setup. Create your password first, then you can access the marketplace and other LotScout pages.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a href="/sign-in?redirect=/profile" className="rounded-full bg-[#1b4332] px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426]">
+            <a href="/sign-in?redirect=/edit-profile?setup=password" className="rounded-full bg-[#1b4332] px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426]">
               Sign in
             </a>
             <a href="/landing-acq-mock" className="rounded-full border border-[#1b4332]/20 bg-white px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#e8efe6]">

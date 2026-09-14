@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = adminSupabase();
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
-    const setupDestination = '/profile';
+    const setupDestination = isPasswordlessLanding ? '/edit-profile?setup=password' : '/profile';
     const fallbackLoginUrl = `${baseUrl}/sign-in?redirect=${encodeURIComponent(setupDestination)}`;
 
     async function createMagicLoginUrl() {
@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
         deal_goal: dealGoal,
         role,
         signup_source: signupSource,
+        requires_password_setup: isPasswordlessLanding,
       },
     });
 
