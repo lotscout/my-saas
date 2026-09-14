@@ -120,7 +120,7 @@ export default function AcquisitionStyleLandingMock() {
                 </div>
               </div>
               <button type="button" className="mt-1 rounded-2xl bg-[#1b4332] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426]">
-                Find my land match
+                Find my next land deal
               </button>
               <p className="text-center text-[11px] font-bold leading-4 text-[#7c8b82]">
                 No credit card required to get started.
@@ -166,7 +166,7 @@ export default function AcquisitionStyleLandingMock() {
               </div>
             </div>
             <button type="button" className="mt-1 rounded-2xl bg-[#1b4332] px-6 py-3.5 text-base font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426]">
-              Find my land match
+              Find my next land deal
             </button>
             <p className="text-center text-xs font-bold leading-5 text-[#7c8b82]">
               No credit card required to get started.
@@ -216,10 +216,10 @@ export default function AcquisitionStyleLandingMock() {
           </div>
           <div className="mt-10 text-center">
             <a href="#match-form-mobile" className="inline-flex rounded-full bg-[#1b4332] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426] lg:hidden">
-              Find my land match
+              Find my next land deal
             </a>
             <a href="#match-form-desktop" className="hidden rounded-full bg-[#1b4332] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426] lg:inline-flex">
-              Find my land match
+              Find my next land deal
             </a>
           </div>
         </div>
