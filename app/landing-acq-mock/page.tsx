@@ -45,7 +45,7 @@ const faqs = [
 
 export default function AcquisitionStyleLandingMock() {
   return (
-    <main className="min-h-screen scroll-smooth bg-[#f7f4ec] text-[#10291e] lg:h-svh lg:overflow-y-auto lg:snap-y lg:snap-proximity">
+    <main className="min-h-screen scroll-smooth bg-white text-[#10291e] lg:h-svh lg:overflow-y-auto lg:snap-y lg:snap-proximity">
       <div className="lg:snap-start border-b border-[#d9d2c3] bg-[#1b4332] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-white sm:text-sm sm:tracking-[0.12em]">
         $72M+ in land transactions connected through direct buyer/seller relationships
       </div>
@@ -78,15 +78,15 @@ export default function AcquisitionStyleLandingMock() {
             LotScout helps land buyers and sellers find each other faster, then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.08em] text-[#1b4332] sm:mt-7 sm:gap-3 sm:text-sm">
-            <span className="rounded-full border border-[#1b4332]/15 bg-white px-4 py-2">Buy-side + sell-side matching</span>
-            <span className="rounded-full border border-[#1b4332]/15 bg-white px-4 py-2">No payment to start</span>
-            <span className="rounded-full border border-[#1b4332]/15 bg-white px-4 py-2">Works beyond the MLS</span>
+            <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Buy-side + sell-side matching</span>
+            <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">No payment to start</span>
+            <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Works beyond the MLS</span>
           </div>
         </div>
 
         <aside id="match-form-desktop" className="relative hidden scroll-mt-6 lg:block">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
-          <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-white p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] sm:p-6">
+          <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] sm:p-6">
             <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white sm:mb-5 sm:rounded-[1.4rem] sm:p-5">
               <h2 className="mt-2 text-2xl font-black uppercase leading-none tracking-[-0.05em] sm:text-3xl">Find your next land match.</h2>
               <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
@@ -135,7 +135,7 @@ export default function AcquisitionStyleLandingMock() {
       </section>
 
       <section id="match-form-mobile" className="mx-auto flex max-w-2xl scroll-mt-4 flex-col justify-center px-5 pb-10 sm:px-8 lg:hidden">
-        <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-white p-4 shadow-2xl shadow-[#1b4332]/12">
+        <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12">
           <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white">
             <h2 className="text-2xl font-black uppercase leading-none tracking-[-0.05em]">Find your next land match.</h2>
             <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
@@ -182,7 +182,7 @@ export default function AcquisitionStyleLandingMock() {
       <section id="proof" className="flex border-y border-[#d9d2c3] lg:min-h-svh lg:snap-start lg:items-center bg-white text-[#10291e]">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-px bg-[#d9d2c3] sm:grid-cols-4">
           {stats.map(([big, small]) => (
-            <div key={big} className="bg-white px-4 py-7 text-center sm:px-5 sm:py-10">
+            <div key={big} className="bg-white px-4 py-7 text-center shadow-sm ring-1 ring-[#d9d2c3]/70 sm:px-5 sm:py-10">
               <div className="font-headline text-3xl font-black uppercase tracking-[-0.05em] text-[#1b4332] sm:text-5xl">{big}</div>
               <div className="mt-2 text-sm font-black uppercase tracking-[0.12em] text-[#52665b]">{small}</div>
             </div>
@@ -196,7 +196,7 @@ export default function AcquisitionStyleLandingMock() {
         </div>
         <div className="grid gap-5 lg:grid-cols-3">
           {objections.map((item) => (
-            <article key={item.title} className="rounded-[1.5rem] border border-[#d9d2c3] bg-white p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
+            <article key={item.title} className="rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
               <h3 className="text-xl font-black leading-tight tracking-[-0.04em] text-[#10291e] sm:text-2xl">{item.title}</h3>
               <p className="mt-3 text-sm font-semibold leading-6 text-[#607267] sm:mt-4 sm:text-base sm:leading-7">{item.body}</p>
             </article>
@@ -211,7 +211,7 @@ export default function AcquisitionStyleLandingMock() {
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
             {steps.map(([num, title, body]) => (
-              <div key={num} className="rounded-[1.5rem] border border-[#1b4332]/15 bg-white/80 p-5 sm:rounded-[1.75rem] sm:p-6">
+              <div key={num} className="rounded-[1.5rem] border border-[#1b4332]/15 bg-white p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1b4332] text-lg font-black text-white">{num}</span>
                 <h3 className="mt-4 text-xl font-black tracking-[-0.04em] sm:mt-5 sm:text-2xl">{title}</h3>
                 <p className="mt-3 text-base font-semibold leading-7 text-[#52665b]">{body}</p>
