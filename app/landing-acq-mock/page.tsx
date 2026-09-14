@@ -2,8 +2,8 @@ import LandingSignupForm from './LandingSignupForm';
 import ScrollReveal from './ScrollReveal';
 
 const stats = [
-  ['$72M+', 'land transactions'],
-  ['$4.32M', 'commission saved'],
+  ['$77M+', 'land transactions'],
+  ['$4.51M', 'Commission Saved'],
   ['21 days', 'avg. contract-to-close'],
   ['2-sided', 'buyer + seller matching'],
 ];
@@ -51,7 +51,7 @@ export default function AcquisitionStyleLandingMock() {
     <main className="min-h-screen scroll-smooth bg-white text-[#10291e] lg:h-svh lg:overflow-y-auto lg:snap-y lg:snap-proximity">
       <ScrollReveal />
       <div className="lg:snap-start border-b border-[#d9d2c3] bg-[#1b4332] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-white sm:text-sm sm:tracking-[0.12em]">
-        $72M+ in land transactions connected through direct buyer/seller relationships
+        $77M+ in land transactions connected through direct buyer/seller relationships
       </div>
 
       <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10 lg:py-5">
