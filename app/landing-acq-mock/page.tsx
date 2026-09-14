@@ -70,7 +70,7 @@ export default function AcquisitionStyleLandingMock() {
 
       <section className="mx-auto grid max-w-7xl items-start gap-5 px-6 pb-5 pt-6 sm:px-8 lg:min-h-[calc(100svh-108px)] lg:snap-start lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-12 lg:px-10 lg:py-6">
         <div data-reveal="left" className="lg:self-center">
-          <h1 className="font-headline text-[2.25rem] font-black uppercase leading-[0.98] tracking-[-0.03em] text-[#10291e] sm:text-5xl sm:leading-[0.96] sm:tracking-[-0.035em] lg:text-5xl xl:text-6xl">
+          <h1 className="font-headline text-center text-[2.25rem] font-black uppercase leading-[0.98] tracking-[-0.03em] text-[#10291e] sm:text-5xl sm:leading-[0.96] sm:tracking-[-0.035em] lg:text-left lg:text-5xl xl:text-6xl">
             <span className="block sm:hidden">
               <span className="block whitespace-nowrap">Ready to buy and</span>
               <span className="block whitespace-nowrap">sell land faster</span>
