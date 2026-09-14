@@ -71,7 +71,6 @@ export default function AcquisitionStyleLandingMock() {
 
       <section className="mx-auto grid max-w-7xl items-start gap-8 px-5 py-8 sm:px-8 lg:min-h-[calc(100svh-112px)] lg:snap-start lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12 lg:px-10 lg:py-10">
         <div>
-          <p className="mb-5 text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">Land Development Intelligence</p>
           <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-6xl lg:text-7xl xl:text-8xl">
             Need the right land match without waiting on the MLS?
           </h1>
@@ -265,7 +264,7 @@ export default function AcquisitionStyleLandingMock() {
       <footer className="lg:snap-start border-t border-[#d9d2c3] px-5 py-8 text-xs font-semibold leading-6 text-[#7b897f] sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p>LotScout does not guarantee buyer interest, sale outcomes, investment returns, zoning approvals, utility availability, or development feasibility. Transaction, commission, and timeline figures are historical/contextual and not a guarantee of future results. All users should complete independent diligence and consult qualified professionals.</p>
-          <p className="mt-4">© 2026 LotScout. Land Development Intelligence.</p>
+          <p className="mt-4">© 2026 LotScout.</p>
         </div>
       </footer>
     </main>
