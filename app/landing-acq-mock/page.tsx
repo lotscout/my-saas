@@ -66,7 +66,7 @@ export default function AcquisitionStyleLandingMock() {
 
       <section className="mx-auto grid max-w-7xl items-start gap-5 px-5 pb-5 pt-6 sm:px-8 lg:min-h-[calc(100svh-108px)] lg:snap-start lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-12 lg:px-10 lg:py-6">
         <div className="lg:self-center">
-          <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-5xl lg:text-5xl xl:text-6xl">
+          <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.96] tracking-[-0.035em] text-[#10291e] sm:text-5xl lg:text-5xl xl:text-6xl">
             Ready to buy or sell land without the MLS?
           </h1>
           <p className="mt-4 max-w-[36rem] text-sm font-semibold leading-6 text-[#52665b] sm:mt-6 sm:text-base sm:leading-7">
