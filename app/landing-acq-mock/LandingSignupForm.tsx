@@ -60,7 +60,13 @@ export default function LandingSignupForm({ roles, variant }: Props) {
     const json = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      setError(json.error || 'Could not create your account. Please try again.');
+      const message = String(json.error || '');
+      if (res.status === 409 || /already|registered|exists/i.test(message)) {
+        window.location.href = '/landing-acq-mock/youre-in';
+        return;
+      }
+
+      setError(message || 'Could not create your account. Please try again.');
       setLoading(false);
       return;
     }
