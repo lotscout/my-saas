@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import AcquisitionStyleLandingMock from '../landing-acq-mock/page';
+import LotScoutHomePage from './LotScoutHomePage';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function HomePage() {
@@ -8,5 +8,5 @@ export default async function HomePage() {
 
   if (user) redirect('/marketplace');
 
-  return <AcquisitionStyleLandingMock />;
+  return <LotScoutHomePage />;
 }

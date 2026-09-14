@@ -56,7 +56,7 @@ export default function LandingSignupForm({ roles, variant }: Props) {
         email,
         market,
         userType,
-        signupSource: 'landing-acq-mock',
+        signupSource: 'lotscout-home',
         signupMedium: 'landing_form',
         signupCampaign: 'buyer_seller_match',
       }),
@@ -90,7 +90,7 @@ export default function LandingSignupForm({ roles, variant }: Props) {
 
     const params = new URLSearchParams({
       next: '/edit-profile?setup=password',
-      landing_source: 'landing-acq-mock',
+      landing_source: 'lotscout-home',
       firstName: values.firstName,
       lastName: values.lastName,
       market: values.market,
