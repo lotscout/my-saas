@@ -77,7 +77,7 @@ export default function AcquisitionStyleLandingMock() {
             Find the right land match without waiting on the MLS.
           </h1>
           <p className="mt-7 max-w-2xl text-xl font-semibold leading-8 text-[#52665b]">
-            LotScout helps land buyers and sellers find each other faster—then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
+            LotScout helps land buyers and sellers find each other faster,then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
           </p>
           <div className="mt-7 flex flex-wrap gap-3 text-sm font-black uppercase tracking-[0.08em] text-[#1b4332]">
             <span className="rounded-full border border-[#1b4332]/15 bg-white px-4 py-2">Buy-side + sell-side matching</span>
@@ -150,7 +150,6 @@ export default function AcquisitionStyleLandingMock() {
 
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
         <div className="mb-10 max-w-3xl">
-          <p className="text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">Why this converts</p>
           <h2 className="mt-3 font-headline text-5xl font-black uppercase leading-none tracking-[-0.06em] text-[#10291e] sm:text-6xl">Answer the real objections.</h2>
         </div>
         <div className="grid gap-5 lg:grid-cols-3">
@@ -166,7 +165,6 @@ export default function AcquisitionStyleLandingMock() {
       <section id="how" className="bg-[#e8efe6] text-[#10291e]">
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
           <div className="mb-10 max-w-3xl">
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">Simple next step</p>
             <h2 className="mt-3 font-headline text-5xl font-black uppercase leading-none tracking-[-0.06em]">Start with the match.</h2>
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
@@ -203,7 +201,6 @@ export default function AcquisitionStyleLandingMock() {
 
       <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-10 lg:pb-24">
         <div className="rounded-[2rem] border border-[#d9d2c3] bg-[#1b4332] p-8 text-center text-white shadow-2xl shadow-[#1b4332]/15 sm:p-10 lg:p-12">
-          <p className="text-sm font-black uppercase tracking-[0.25em] text-[#d9f99d]">The point</p>
           <h2 className="mx-auto mt-4 max-w-4xl font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">
             Land deals need better matching before they need more listing exposure.
           </h2>
