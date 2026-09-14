@@ -1,7 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
@@ -39,12 +38,6 @@ export default function CreateLeadPage() {
       setCheckingAuth(false);
     });
   }, [router]);
-
-  const locationLabel = useMemo(() => {
-    if (form.streetAddress.trim()) return form.streetAddress.trim();
-    if (form.apn.trim()) return `APN ${form.apn.trim()}`;
-    return 'Address or APN';
-  }, [form.streetAddress, form.apn]);
 
   function set(field: keyof typeof form, value: string | boolean) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -86,28 +79,6 @@ export default function CreateLeadPage() {
     <div className="min-h-screen bg-[#F8FBF8] text-[#1B4332]">
       <Header />
       <main className="mx-auto max-w-6xl px-4 pb-20 pt-28 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <Link href="/leads" className="mb-4 inline-flex items-center gap-2 text-sm font-extrabold text-[#1D9E75] hover:text-[#1B4332]">
-              ← Back to leads
-            </Link>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#1D9E75]">Submit a lead</p>
-            <h1 className="mt-2 font-headline text-4xl font-black tracking-tight text-[#1B4332] sm:text-5xl">
-              Add a land lead for follow-up.
-            </h1>
-            <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-[#456257]">
-              This is not a full property upload. Add the basic lead details and contact information so LotScout can review, verify, and route the opportunity.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-emerald-900/10 bg-white p-5 shadow-sm md:w-80">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#456257]">Lead preview</p>
-            <p className="mt-2 text-xl font-black text-[#1B4332]">{locationLabel}</p>
-            <p className="mt-2 text-sm font-semibold text-[#456257]">
-              {form.lotSizeValue || 'Lot size'} {lotSizeUnit === 'sqft' ? 'sq ft' : 'acres'} · {form.askingPrice ? `$${Number(form.askingPrice).toLocaleString()}` : 'Price'}
-            </p>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="overflow-hidden rounded-[2rem] border border-emerald-900/10 bg-white shadow-xl shadow-emerald-900/5">
           <div className="border-b border-emerald-900/10 bg-[#E8EFE6] px-6 py-5 sm:px-8">
             <h2 className="font-headline text-2xl font-black text-[#1B4332]">Lead details</h2>
