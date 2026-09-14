@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = adminSupabase();
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
-    const fallbackLoginUrl = `${baseUrl}/sign-in?redirect=${encodeURIComponent('/marketplace')}`;
+    const setupDestination = '/profile';
+    const fallbackLoginUrl = `${baseUrl}/sign-in?redirect=${encodeURIComponent(setupDestination)}`;
 
     async function createMagicLoginUrl() {
       if (!isPasswordlessLanding) return fallbackLoginUrl;
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       const { data, error } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email,
-        options: { redirectTo: `${baseUrl}/auth/callback?next=/marketplace` },
+        options: { redirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(setupDestination)}` },
       });
 
       if (error) {
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
         }
 
         return NextResponse.json({
-          error: 'You already have a LotScout account. We sent you an email with a login link.',
+          error: 'You already have a LotScout account. We sent you an email with your login link.',
           code: 'existing_user',
         }, { status: 409 });
       }

@@ -52,7 +52,7 @@ export default function LandingSignupForm({ roles, variant }: Props) {
     if (!res.ok) {
       const message = String(json.error || '');
       if (res.status === 409 || json.code === 'existing_user' || /already|registered|exists/i.test(message)) {
-        setNotice('You already have a LotScout account. We sent you an email with a login link to the marketplace.');
+        setNotice('You already have a LotScout account. We sent you an email with your login link.');
         setLoading(false);
         return;
       }
