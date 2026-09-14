@@ -80,7 +80,7 @@ export default function AcquisitionStyleLandingMock() {
           </div>
         </div>
 
-        <aside id="match-form-desktop" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:self-center">
+        <aside id="match-form-desktop" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:-translate-y-12 lg:self-center">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
           <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] lg:p-4">
             <div className="mb-3 rounded-[1.25rem] bg-[#10291e] p-3.5 text-white sm:rounded-[1.4rem] lg:p-4">
