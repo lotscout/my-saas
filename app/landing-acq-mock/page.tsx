@@ -73,7 +73,7 @@ export default function AcquisitionStyleLandingMock() {
         <div>
           <p className="mb-5 text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">Land Development Intelligence</p>
           <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-6xl lg:text-7xl xl:text-8xl">
-            Find the right land match without waiting on the MLS.
+            Need the right land match without waiting on the MLS?
           </h1>
           <p className="mt-5 max-w-2xl text-lg font-semibold leading-7 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
             LotScout helps land buyers and sellers find each other faster, then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
