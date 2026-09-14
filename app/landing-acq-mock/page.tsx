@@ -77,6 +77,14 @@ export default function AcquisitionStyleLandingMock() {
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Marketplace with 500+ off-market properties</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">No MLS access required</span>
           </div>
+          <div id="proof" className="mt-5 grid max-w-[36rem] grid-cols-2 gap-2 sm:mt-6">
+            {stats.map(([big, small]) => (
+              <div key={big} className="rounded-2xl border border-[#d9d2c3] bg-[#f7f4ec] px-4 py-3 shadow-sm">
+                <div className="font-headline text-2xl font-black uppercase tracking-[-0.04em] text-[#1b4332] sm:text-3xl">{big}</div>
+                <div className="mt-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#52665b] sm:text-xs">{small}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <aside id="match-form-desktop" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:self-center">
@@ -174,16 +182,6 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section id="proof" className="border-y border-[#d9d2c3] bg-white py-6 text-[#10291e] lg:snap-start lg:py-8">
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-px bg-[#d9d2c3] sm:grid-cols-4">
-          {stats.map(([big, small]) => (
-            <div key={big} className="bg-white px-4 py-6 text-center shadow-sm ring-1 ring-[#d9d2c3]/70 sm:px-5 sm:py-8">
-              <div className="font-headline text-3xl font-black uppercase tracking-[-0.05em] text-[#1b4332] sm:text-5xl">{big}</div>
-              <div className="mt-2 text-sm font-black uppercase tracking-[0.12em] text-[#52665b]">{small}</div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <section className="mx-auto flex max-w-7xl flex-col justify-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
         <div className="mb-6 max-w-3xl sm:mb-10">
