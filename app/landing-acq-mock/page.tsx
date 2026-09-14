@@ -175,10 +175,10 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section id="proof" className="flex border-y border-[#d9d2c3] lg:min-h-svh lg:snap-start lg:items-center bg-white text-[#10291e]">
+      <section id="proof" className="border-y border-[#d9d2c3] bg-white py-6 text-[#10291e] lg:snap-start lg:py-8">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-px bg-[#d9d2c3] sm:grid-cols-4">
           {stats.map(([big, small]) => (
-            <div key={big} className="bg-white px-4 py-7 text-center shadow-sm ring-1 ring-[#d9d2c3]/70 sm:px-5 sm:py-10">
+            <div key={big} className="bg-white px-4 py-6 text-center shadow-sm ring-1 ring-[#d9d2c3]/70 sm:px-5 sm:py-8">
               <div className="font-headline text-3xl font-black uppercase tracking-[-0.05em] text-[#1b4332] sm:text-5xl">{big}</div>
               <div className="mt-2 text-sm font-black uppercase tracking-[0.12em] text-[#52665b]">{small}</div>
             </div>
