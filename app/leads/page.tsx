@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { PageHeader, PrimaryLink, SurfaceCard } from '@/components/ui/LotScoutUI';
 import { MOCK_PROPERTY_LEADS, formatLeadPrice, type PropertyLead } from '@/lib/mockPropertyLeads';
 import { STATE_MAP, resolveStateQuery } from '@/lib/stateMap';
+
+const LeadsMap = dynamic(() => import('@/components/LeadsMap'), { ssr: false, loading: () => <div className="h-full w-full animate-pulse rounded-3xl bg-surface-container-low" /> });
 
 const SELECT_CLS = 'bg-white px-4 py-3 rounded-xl border border-outline-variant/25 hover:border-primary/30 text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all shadow-sm';
 
@@ -74,6 +77,7 @@ export default function LeadsPage() {
   const [state, setState] = useState('');
   const [budget, setBudget] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     setSubmitted(new URLSearchParams(window.location.search).get('submitted') === '1');
@@ -91,6 +95,11 @@ export default function LeadsPage() {
   }, [search, state, budget]);
 
   const markets = useMemo(() => new Set(MOCK_PROPERTY_LEADS.map(lead => lead.state)).size, []);
+
+  const handlePinClick = useCallback((leadId: string) => {
+    const el = cardRefs.current.get(leadId);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
@@ -127,6 +136,10 @@ export default function LeadsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-7">
           <StatCard label="Active leads" value={MOCK_PROPERTY_LEADS.length.toLocaleString()} sub="Active property leads" icon="real_estate_agent" />
           <StatCard label="Markets" value={markets.toLocaleString()} sub="States represented" icon="travel_explore" />
+        </div>
+
+        <div className="mb-8 h-[300px] overflow-hidden rounded-3xl shadow-sm sm:h-[420px]">
+          <LeadsMap leads={filtered} onPinClick={handlePinClick} />
         </div>
 
         <SurfaceCard className="p-3 sm:p-4 mb-8">
@@ -172,7 +185,17 @@ export default function LeadsPage() {
           </SurfaceCard>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6">
-            {filtered.map(lead => <LeadCard key={lead.id} lead={lead} />)}
+            {filtered.map(lead => (
+              <div
+                key={lead.id}
+                ref={node => {
+                  if (node) cardRefs.current.set(lead.id, node);
+                  else cardRefs.current.delete(lead.id);
+                }}
+              >
+                <LeadCard lead={lead} />
+              </div>
+            ))}
           </div>
         )}
       </main>

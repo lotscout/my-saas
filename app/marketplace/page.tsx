@@ -222,7 +222,6 @@ function SellerContact({ name, listingId }: { name: string | null; listingId: st
 export default function MarketplacePage() {
   const { tier, profile, loading } = usePermissions();
   const [showMyListings, setShowMyListings] = useState(false);
-  const [marketplaceView, setMarketplaceView] = useState<'both' | 'listings' | 'leads'>('both');
   const [listings, setListings] = useState<Listing[]>([]);
   const [totalListings, setTotalListings] = useState(0);
   const [listingsLoading, setListingsLoading] = useState(true);
@@ -401,10 +400,6 @@ export default function MarketplacePage() {
   const filteredListings = useMemo(() => {
     let result = listings;
 
-    if (!showMyListings && marketplaceView !== 'both') {
-      result = result.filter(l => marketplaceView === 'leads' ? l.ownership_type === 'property_lead' : l.ownership_type !== 'property_lead');
-    }
-
     // Search — resolves full state names and abbreviations to 2-letter code
     if (searchQuery.trim()) {
       const q = searchQuery.trim();
@@ -421,8 +416,6 @@ export default function MarketplacePage() {
         ) ||
         (l.city ?? '').toLowerCase().includes(qLow) ||
         (l.county ?? '').toLowerCase().includes(qLow) ||
-        (l.street_address ?? '').toLowerCase().includes(qLow) ||
-        (l.apn ?? '').toLowerCase().includes(qLow) ||
         (l.zip_code ?? '').includes(qLow)
       );
     }
@@ -498,7 +491,7 @@ export default function MarketplacePage() {
     });
 
     return result;
-  }, [listings, marketplaceView, showMyListings, searchQuery, filterLotSizeUnit, filterLotSizeMin, filterLotSizeMax, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [listings, searchQuery, filterLotSizeUnit, filterLotSizeMin, filterLotSizeMax, filterSqFtMin, filterSqFtMax, filterRoadAccessProps, filterZoning, filterUtilities, listingsSort, userCriteria]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleMyListingsClick() {
     if (!profile?.id) {
@@ -514,24 +507,12 @@ export default function MarketplacePage() {
     [filteredListings]
   );
 
-  const visibleMapListings = useMemo(() => {
-    if (showMyListings || marketplaceView === 'both') return mapListings;
-    return mapListings.filter((item: any) => marketplaceView === 'leads'
-      ? item.ownership_type === 'property_lead'
-      : item.ownership_type !== 'property_lead'
-    );
-  }, [mapListings, marketplaceView, showMyListings]);
-
   const activeFilterCount = (filterLotSizeMin || filterLotSizeMax || filterSqFtMin || filterSqFtMax ? 1 : 0)
     + filterZoning.length + filterUtilities.length + filterRoadAccessProps.length;
   const isFilteringListings = Boolean(searchQuery.trim()) || activeFilterCount > 0;
-  const visibleListings = filteredListings.filter(l => l.ownership_type !== 'property_lead').length;
-  const visibleLeads = filteredListings.filter(l => l.ownership_type === 'property_lead').length;
-  const listingCountLabel = marketplaceView === 'leads'
-    ? `${visibleLeads.toLocaleString()} leads`
-    : marketplaceView === 'listings'
-    ? `${visibleListings.toLocaleString()} listings`
-    : `${visibleListings.toLocaleString()} listings · ${visibleLeads.toLocaleString()} leads`;
+  const listingCountLabel = isFilteringListings && totalListings > 0
+    ? `${filteredListings.length.toLocaleString()} of ${totalListings.toLocaleString()} listings shown`
+    : `${(totalListings || filteredListings.length).toLocaleString()} listings`;
 
   // State autocomplete suggestions
   const stateSuggestions = useMemo(() => {
@@ -626,11 +607,8 @@ export default function MarketplacePage() {
               <span className="material-symbols-outlined text-lg">inventory_2</span>
               My Listings
               </SecondaryAction>
-              <SecondaryAction type="button" onClick={() => router.push('/create-lead')}>
-                Create Lead
-              </SecondaryAction>
               <PrimaryLink href="/create-listing">
-                Create Listing
+              Create Listing
               </PrimaryLink>
             </>
           )}
@@ -648,7 +626,7 @@ export default function MarketplacePage() {
                 <div className="relative h-[220px] sm:h-[380px]">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <ListingsMap
-                    listings={visibleMapListings as any}
+                    listings={mapListings as any}
                     filteredIds={filteredMapIds}
                     highlightedId={hoveredListingId}
                     onPinClick={handlePinClick}
@@ -669,35 +647,6 @@ export default function MarketplacePage() {
                   Show Map ▼
                 </button>
               )}
-            </div>
-
-            {/* Listings / leads toggle */}
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="inline-flex w-full rounded-2xl border border-emerald-900/10 bg-white p-1 shadow-sm sm:w-auto">
-                {([
-                  ['both', 'Both'],
-                  ['listings', 'Listings'],
-                  ['leads', 'Leads'],
-                ] as const).map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setMarketplaceView(value)}
-                    disabled={showMyListings}
-                    className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] transition sm:flex-none ${
-                      marketplaceView === value && !showMyListings
-                        ? 'bg-[#1B4332] text-white shadow-sm'
-                        : 'text-secondary hover:bg-[#E8EFE6] hover:text-primary disabled:cursor-not-allowed disabled:opacity-45'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <div className="hidden items-center gap-4 text-xs font-bold text-secondary sm:flex">
-                <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#1D9E75]" /> Listing</span>
-                <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#F59E0B]" /> Lead</span>
-              </div>
             </div>
 
             {/* Mobile-first search / sort / filter */}
@@ -1174,7 +1123,6 @@ export default function MarketplacePage() {
                     listing.state,
                   ].filter(Boolean).join(', ');
                   const isHighlighted = hoveredListingId === listing.id;
-                  const isLead = listing.ownership_type === 'property_lead';
                   return (
                     <Link
                       key={listing.id}
@@ -1190,13 +1138,8 @@ export default function MarketplacePage() {
                     >
                       {/* Image */}
                       <div className="relative overflow-hidden bg-surface-container-low aspect-video">
-                        {(isLead || showMyListings || (listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date())) && (
+                        {(showMyListings || (listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date())) && (
                           <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-2">
-                            {isLead && (
-                              <span className="bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest shadow-lg">
-                                Lead
-                              </span>
-                            )}
                             {showMyListings && (() => {
                               const statusMeta = getListingStatusMeta(listing.status);
                               return (
@@ -1205,7 +1148,7 @@ export default function MarketplacePage() {
                                 </span>
                               );
                             })()}
-                            {!isLead && listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() && (
+                            {listing.promoted && listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date() && (
                               <span className="bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-lg">
                                 <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                                 Featured
@@ -1229,7 +1172,7 @@ export default function MarketplacePage() {
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img alt="Sample aerial land image" className="h-full w-full object-cover opacity-85" src={sampleImgSrc} />
                               <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#14795A] shadow-sm">
-                                {isLead ? 'Lead preview' : 'Sample image'}
+                                Sample image
                               </span>
                             </div>
                           </>
@@ -1238,7 +1181,7 @@ export default function MarketplacePage() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img alt="Sample aerial land image" className="h-full w-full object-cover opacity-85" src={sampleImgSrc} />
                             <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#14795A] shadow-sm">
-                              {isLead ? 'Lead preview' : 'Sample image'}
+                              Sample image
                             </span>
                           </div>
                         )}
@@ -1270,12 +1213,7 @@ export default function MarketplacePage() {
                           {acreage && <p className="shrink-0 text-xs sm:text-sm font-bold text-on-surface mt-1 whitespace-nowrap">{acreage}</p>}
                         </div>
                         {countyState && <p className="text-xs text-secondary/70 mt-1 truncate">{countyState}</p>}
-                        {isLead && (
-                          <div className="mt-3">
-                            <span className="inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-700">Property Lead</span>
-                          </div>
-                        )}
-                        {listing.zoning && !isLead && (
+                        {listing.zoning && (
                           <div className="hidden sm:block mt-3">
                             <span className="inline-block bg-surface-container-high px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">{listing.zoning}</span>
                           </div>
@@ -1300,7 +1238,7 @@ export default function MarketplacePage() {
                             </button>
                           </div>
                         )}
-                        {showMyListings && isPaidUser && !isLead && profile?.id && listing.user_id === profile.id && (
+                        {showMyListings && isPaidUser && profile?.id && listing.user_id === profile.id && (
                           <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoostModal({ listingId: listing.id, title: listing.title ?? 'Your Listing' }); }}
                             className="mt-3 w-full flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 py-2 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors"
@@ -1321,7 +1259,7 @@ export default function MarketplacePage() {
                 <div className="relative h-full w-full">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <ListingsMap
-                    listings={visibleMapListings as any}
+                    listings={mapListings as any}
                     filteredIds={filteredMapIds}
                     highlightedId={hoveredListingId}
                     onPinClick={handlePinClick}

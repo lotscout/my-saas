@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
   if (mine) {
     query = query.eq('user_id', user.id);
   } else {
-    query = query.or('status.in.(active,published),ownership_type.eq.property_lead');
+    query = query.in('status', ['active', 'published']);
   }
 
   if (search) {

@@ -8,6 +8,7 @@ import NotificationBell from '@/components/NotificationBell';
 const NAV_LINKS = [
   { label: 'Scout', href: '/advisor' },
   { label: 'Marketplace', href: '/marketplace' },
+  { label: 'Leads', href: '/leads' },
   { label: 'Buyers', href: '/buyer-directory' },
   { label: 'Deal Analysis', href: '/property-analysis' },
   { label: 'Messaging', href: '/messaging' },
