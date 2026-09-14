@@ -67,10 +67,10 @@ export default function AcquisitionStyleLandingMock() {
       <section className="mx-auto grid max-w-7xl items-start gap-5 px-5 pb-5 pt-6 sm:px-8 lg:min-h-[calc(100svh-108px)] lg:snap-start lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-12 lg:px-10 lg:py-6">
         <div className="lg:self-center">
           <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-5xl lg:text-5xl xl:text-6xl">
-            Need the right land match without waiting on the MLS?
+            Ready to buy or sell land without the MLS?
           </h1>
           <p className="mt-4 max-w-2xl text-base font-semibold leading-6 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
-            LotScout helps land buyers and sellers find each other faster, then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
+            LotScout connects real land buyers and sellers so that deals get done quicker. Assisting with due diligence, market data and funding partners so that you can transact land deals with confidence.
           </p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.08em] text-[#1b4332] sm:mt-7 sm:gap-3 sm:text-sm">
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Verified buyers and sellers</span>
