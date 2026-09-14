@@ -69,7 +69,7 @@ export default function AcquisitionStyleLandingMock() {
           <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-5xl lg:text-5xl xl:text-6xl">
             Ready to buy or sell land without the MLS?
           </h1>
-          <p className="mt-4 max-w-2xl text-base font-semibold leading-6 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
+          <p className="mt-4 max-w-[36rem] text-sm font-semibold leading-6 text-[#52665b] sm:mt-6 sm:text-base sm:leading-7">
             LotScout connects real land buyers and sellers so that deals get done quicker. Assisting with due diligence, market data and funding partners so that you can transact land deals with confidence.
           </p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.08em] text-[#1b4332] sm:mt-7 sm:gap-3 sm:text-sm">
@@ -79,7 +79,7 @@ export default function AcquisitionStyleLandingMock() {
           </div>
         </div>
 
-        <aside id="match-form-desktop" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:-translate-y-12 lg:self-center">
+        <aside id="match-form-desktop" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:self-center">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
           <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] lg:p-4">
             <div className="mb-3 rounded-[1.25rem] bg-[#10291e] p-3.5 text-white sm:rounded-[1.4rem] lg:p-4">
