@@ -84,27 +84,27 @@ export default function AcquisitionStyleLandingMock() {
           </div>
         </div>
 
-        <aside id="match-form-desktop" className="relative hidden w-full max-w-xl scroll-mt-6 justify-self-center lg:block lg:-translate-y-12 lg:self-center">
+        <aside id="match-form-desktop" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:-translate-y-12 lg:self-center">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
-          <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] sm:p-5">
-            <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white sm:mb-5 sm:rounded-[1.4rem] sm:p-4">
-              <h2 className="mt-2 text-2xl font-black uppercase leading-none tracking-[-0.05em] sm:text-2xl xl:text-3xl">Find your next land match.</h2>
-              <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
+          <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] lg:p-4">
+            <div className="mb-3 rounded-[1.25rem] bg-[#10291e] p-3.5 text-white sm:rounded-[1.4rem] lg:p-4">
+              <h2 className="mt-1 text-2xl font-black uppercase leading-none tracking-[-0.05em] sm:text-2xl">Find your next land match.</h2>
+              <p className="mt-2 text-sm font-semibold leading-5 text-white/70">
                 Tell us whether you are buying, selling, sourcing, or building. We will route you toward the right buyer, seller, or land intelligence workflow.
               </p>
             </div>
 
-            <form className="grid gap-2.5">
-              <div className="grid gap-2.5 sm:grid-cols-2">
+            <form className="grid gap-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 <label className="sr-only" htmlFor="name">Name</label>
-                <input id="name" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-2" placeholder="Name" />
+                <input id="name" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Name" />
                 <label className="sr-only" htmlFor="email">Email</label>
-                <input id="email" type="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-2" placeholder="Email" />
+                <input id="email" type="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Email" />
               </div>
               <label className="sr-only" htmlFor="market">Market or state</label>
-              <input id="market" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-2" placeholder="Market or state" />
+              <input id="market" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Market or state" />
               <label className="sr-only" htmlFor="goal">What side of the land deal are you on?</label>
-              <select id="goal" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold text-[#52665b] outline-none ring-[#1b4332]/20 focus:ring-4 lg:py-2">
+              <select id="goal" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold text-[#52665b] outline-none ring-[#1b4332]/20 focus:ring-4 lg:py-1.5">
                 <option>What side of the land deal are you on?</option>
                 <option>I have land and need buyers</option>
                 <option>I am buying land</option>
@@ -113,20 +113,20 @@ export default function AcquisitionStyleLandingMock() {
                 <option>I want to build a buyer or seller pipeline</option>
               </select>
               <div>
-                <p className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-[#607267]">I am a</p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <p className="mb-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#607267]">I am a</p>
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
                   {roles.map((role) => (
-                    <label key={role} className="flex cursor-pointer items-center gap-2 rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-3 py-1 text-sm font-black text-[#1b4332]">
+                    <label key={role} className="flex cursor-pointer items-center gap-2 rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-3 py-1 text-xs font-black text-[#1b4332]">
                       <input type="radio" name="role" className="accent-[#1b4332]" />
                       {role}
                     </label>
                   ))}
                 </div>
               </div>
-              <button type="button" className="mt-1 rounded-2xl bg-[#1b4332] px-6 py-3.5 text-base font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426]">
+              <button type="button" className="mt-1 rounded-2xl bg-[#1b4332] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426]">
                 Find my land match
               </button>
-              <p className="text-center text-xs font-bold leading-5 text-[#7c8b82]">
+              <p className="text-center text-[11px] font-bold leading-4 text-[#7c8b82]">
                 No credit card required to get started.
               </p>
             </form>
@@ -138,17 +138,17 @@ export default function AcquisitionStyleLandingMock() {
         <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12">
           <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white">
             <h2 className="text-2xl font-black uppercase leading-none tracking-[-0.05em]">Find your next land match.</h2>
-            <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
+            <p className="mt-2 text-sm font-semibold leading-5 text-white/70">
               Tell us whether you are buying, selling, sourcing, or building. We will route you toward the right buyer, seller, or land intelligence workflow.
             </p>
           </div>
           <form className="grid gap-2.5">
             <label className="sr-only" htmlFor="name-mobile">Name</label>
-            <input id="name-mobile" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-2" placeholder="Name" />
+            <input id="name-mobile" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Name" />
             <label className="sr-only" htmlFor="email-mobile">Email</label>
-            <input id="email-mobile" type="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-2" placeholder="Email" />
+            <input id="email-mobile" type="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Email" />
             <label className="sr-only" htmlFor="market-mobile">Market or state</label>
-            <input id="market-mobile" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-2" placeholder="Market or state" />
+            <input id="market-mobile" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Market or state" />
             <label className="sr-only" htmlFor="goal-mobile">What side of the land deal are you on?</label>
             <select id="goal-mobile" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold text-[#52665b] outline-none ring-[#1b4332]/20 focus:ring-4">
               <option>What side of the land deal are you on?</option>
