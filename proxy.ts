@@ -7,6 +7,7 @@ import { isAdminEmail } from './lib/admin'
 const PUBLIC_ROUTES = [
   '/',
   '/home',
+  '/landing-mock',
   '/login',
   '/sign-in',
   '/signup',
