@@ -114,19 +114,19 @@ export default function LandingSignupForm({ roles, variant }: Props) {
         <form className={isDesktop ? 'grid gap-2' : 'grid gap-2.5'} onSubmit={handleSubmit}>
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="sr-only" htmlFor={`firstName${suffix}`}>First name</label>
-            <input id={`firstName${suffix}`} name={`firstName${suffix}`} required autoComplete="given-name" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="First name" />
+            <input id={`firstName${suffix}`} name={`firstName${suffix}`} required autoComplete="given-name" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="First name *" />
             <label className="sr-only" htmlFor={`lastName${suffix}`}>Last name</label>
-            <input id={`lastName${suffix}`} name={`lastName${suffix}`} required autoComplete="family-name" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Last name" />
+            <input id={`lastName${suffix}`} name={`lastName${suffix}`} required autoComplete="family-name" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Last name *" />
           </div>
           <label className="sr-only" htmlFor={`email${suffix}`}>Email</label>
-          <input id={`email${suffix}`} name={`email${suffix}`} type="email" required autoComplete="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Email" />
+          <input id={`email${suffix}`} name={`email${suffix}`} type="email" required autoComplete="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Email *" />
           <label className="sr-only" htmlFor={`userType${suffix}`}>User type</label>
           <select id={`userType${suffix}`} name={`userType${suffix}`} required defaultValue="" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold text-[#52665b] outline-none ring-[#1b4332]/20 focus:ring-4 lg:py-1.5">
-            <option value="" disabled>User type</option>
+            <option value="" disabled>User type *</option>
             {roles.map((role) => <option key={role} value={role}>{role}</option>)}
           </select>
-          <label className="sr-only" htmlFor={`market${suffix}`}>State or market, optional</label>
-          <input id={`market${suffix}`} name={`market${suffix}`} className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="State or market, optional" />
+          <label className="sr-only" htmlFor={`market${suffix}`}>State or market</label>
+          <input id={`market${suffix}`} name={`market${suffix}`} className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="State or market" />
           {notice && <p className="rounded-xl bg-[#e8efe6] px-3 py-2 text-xs font-bold leading-5 text-[#1b4332]">{notice}</p>}
           {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold leading-5 text-red-700">{error}</p>}
           <button type="submit" disabled={loading} className={`${isDesktop ? 'py-3 text-sm' : 'py-3.5 text-base'} mt-1 rounded-2xl bg-[#1b4332] px-6 font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426] disabled:cursor-not-allowed disabled:opacity-60`}>
