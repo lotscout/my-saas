@@ -76,7 +76,6 @@ export default function AcquisitionStyleLandingMock() {
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Verified buyers and sellers</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Marketplace with 500+ off-market properties</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">No MLS access required</span>
-            <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Build relationships with the right people</span>
           </div>
         </div>
 
