@@ -86,7 +86,6 @@ export default function AcquisitionStyleLandingMock() {
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
           <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-white p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] sm:p-6">
             <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white sm:mb-5 sm:rounded-[1.4rem] sm:p-5">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#a8d4b7]">Free match request</p>
               <h2 className="mt-2 text-2xl font-black uppercase leading-none tracking-[-0.05em] sm:text-3xl">Find your next land match.</h2>
               <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
                 Tell us whether you are buying, selling, sourcing, or building. We will route you toward the right buyer, seller, or land intelligence workflow.
