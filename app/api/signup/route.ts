@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
     const signupSource = cleanString(body.signupSource) || 'direct';
     const signupMedium = cleanString(body.signupMedium);
     const signupCampaign = cleanString(body.signupCampaign);
+    const market = cleanString(body.market);
+    const dealGoal = cleanString(body.dealGoal);
+    const role = cleanString(body.role);
 
     if (!firstName || !lastName || !email || !password) {
       return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
@@ -60,6 +63,10 @@ export async function POST(request: NextRequest) {
       user_metadata: {
         first_name: firstName,
         last_name: lastName,
+        market,
+        deal_goal: dealGoal,
+        role,
+        signup_source: signupSource,
       },
     });
 
@@ -120,6 +127,9 @@ export async function POST(request: NextRequest) {
           ['Email', email],
           ['Source', signupSource || 'direct'],
           ['Campaign', signupCampaign],
+          ['Market', market],
+          ['Deal goal', dealGoal],
+          ['Role', role],
         ],
         ctaHref: '/admin/dashboard/data-center',
         ctaLabel: 'View Data Center',
