@@ -76,7 +76,7 @@ export default function LandingSignupForm({ roles, variant }: Props) {
       return;
     }
 
-    window.location.href = '/landing-acq-mock/youre-in';
+    window.location.href = '/youre-in';
   }
 
   function handleGoogleSignup(e: React.MouseEvent<HTMLButtonElement>) {

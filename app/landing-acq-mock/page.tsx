@@ -55,7 +55,7 @@ export default function AcquisitionStyleLandingMock() {
       </div>
 
       <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10 lg:py-5">
-        <a href="/home" className="flex items-center gap-3" aria-label="LotScout home">
+        <a href="/" className="flex items-center gap-3" aria-label="LotScout home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/lotscout-logo.png" alt="LotScout" className="h-11 w-11 object-contain" />
           <span className="font-headline text-2xl font-black tracking-tight text-[#1b4332]">LotScout</span>

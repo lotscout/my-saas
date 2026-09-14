@@ -9,6 +9,7 @@ const PUBLIC_ROUTES = [
   '/home',
   '/landing-mock',
   '/landing-acq-mock',
+  '/youre-in',
   '/login',
   '/sign-in',
   '/signup',

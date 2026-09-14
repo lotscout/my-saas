@@ -2,7 +2,7 @@ export default function LandingYoureInPage() {
   return (
     <main className="min-h-screen bg-white px-5 py-8 text-[#10291e] sm:px-8 lg:px-10">
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col items-center justify-center text-center">
-        <a href="/home" className="mb-8 flex items-center gap-3" aria-label="LotScout home">
+        <a href="/" className="mb-8 flex items-center gap-3" aria-label="LotScout home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/lotscout-logo.png" alt="LotScout" className="h-12 w-12 object-contain" />
           <span className="font-headline text-3xl font-black tracking-tight text-[#1b4332]">LotScout</span>
@@ -23,8 +23,8 @@ export default function LandingYoureInPage() {
             <a href="/sign-in?redirect=/edit-profile?setup=password" className="rounded-full bg-[#1b4332] px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426]">
               Sign in
             </a>
-            <a href="/landing-acq-mock" className="rounded-full border border-[#1b4332]/20 bg-white px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#e8efe6]">
-              Back to page
+            <a href="/" className="rounded-full border border-[#1b4332]/20 bg-white px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#e8efe6]">
+              Back to home
             </a>
           </div>
         </div>
