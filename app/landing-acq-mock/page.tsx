@@ -3,7 +3,7 @@ import ScrollReveal from './ScrollReveal';
 
 const stats = [
   ['$72M+', 'land transactions'],
-  ['$4.32M', 'commission saved at 6%'],
+  ['$4.32M', 'commission saved'],
   ['21 days', 'avg. contract-to-close'],
   ['2-sided', 'buyer + seller matching'],
 ];
