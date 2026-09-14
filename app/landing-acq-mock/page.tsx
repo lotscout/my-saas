@@ -171,10 +171,10 @@ export default function AcquisitionStyleLandingMock() {
             LotScout was built around the real bottleneck in land: helping the right buyers and sellers find each other, proving deal quality, and creating enough confidence to move.
           </p>
           <a href="#match-form-mobile" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#d9f99d] lg:hidden">
-            Get matched
+            Get started
           </a>
           <a href="#match-form-desktop" className="mt-7 hidden rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#d9f99d] lg:inline-flex">
-            Get matched
+            Get started
           </a>
         </div>
       </section>
