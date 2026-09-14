@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
@@ -79,6 +80,15 @@ export default function CreateLeadPage() {
     <div className="min-h-screen bg-[#F8FBF8] text-[#1B4332]">
       <Header />
       <main className="mx-auto max-w-6xl px-4 pb-20 pt-28 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <Link
+            href="/leads"
+            className="inline-flex items-center justify-center rounded-full border border-emerald-900/15 bg-white px-7 py-3.5 text-sm font-black uppercase tracking-[0.12em] text-[#1B4332] shadow-sm transition hover:border-[#1D9E75]/40 hover:bg-[#E8EFE6]"
+          >
+            Back to Leads
+          </Link>
+        </div>
+
         <form onSubmit={handleSubmit} className="overflow-hidden rounded-[2rem] border border-emerald-900/10 bg-white shadow-xl shadow-emerald-900/5">
           <div className="border-b border-emerald-900/10 bg-[#E8EFE6] px-6 py-5 sm:px-8">
             <h2 className="font-headline text-2xl font-black text-[#1B4332]">Lead details</h2>
