@@ -259,7 +259,12 @@ export default function AcquisitionStyleLandingMock() {
       <footer className="lg:snap-start border-t border-[#d9d2c3] px-5 py-8 text-xs font-semibold leading-6 text-[#7b897f] sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p>LotScout does not guarantee buyer interest, sale outcomes, investment returns, zoning approvals, utility availability, or development feasibility. Transaction, commission, and timeline figures are historical/contextual and not a guarantee of future results. All users should complete independent diligence and consult qualified professionals.</p>
-          <p className="mt-4">© 2026 LotScout.</p>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p>Copyright © 2026 LotScout.</p>
+            <a href="/terms" className="font-black text-[#1b4332] underline decoration-[#1b4332]/30 underline-offset-4 hover:decoration-[#1b4332]">
+              Terms and Conditions
+            </a>
+          </div>
         </div>
       </footer>
     </main>
