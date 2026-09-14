@@ -31,8 +31,8 @@ export default function LandingSignupForm({ roles, variant }: Props) {
     const email = (form.elements.namedItem(`email${suffix}`) as HTMLInputElement).value.trim();
     const password = (form.elements.namedItem(`password${suffix}`) as HTMLInputElement).value;
     const market = (form.elements.namedItem(`market${suffix}`) as HTMLInputElement).value.trim();
-    const dealGoal = (form.elements.namedItem(`goal${suffix}`) as HTMLSelectElement).value;
     const role = ((form.elements.namedItem(`role${suffix}`) as RadioNodeList).value || '').trim();
+    const dealGoal = role ? `I am a ${role}` : '';
     const { firstName, lastName } = splitName(name);
 
     if (!firstName || !email || !password) {
@@ -96,15 +96,6 @@ export default function LandingSignupForm({ roles, variant }: Props) {
           <input id={`password${suffix}`} name={`password${suffix}`} type="password" required minLength={8} autoComplete="new-password" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Password, 8+ characters" />
           <label className="sr-only" htmlFor={`market${suffix}`}>Market or state</label>
           <input id={`market${suffix}`} name={`market${suffix}`} className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4 lg:py-1.5" placeholder="Market or state" />
-          <label className="sr-only" htmlFor={`goal${suffix}`}>What side of the land deal are you on?</label>
-          <select id={`goal${suffix}`} name={`goal${suffix}`} className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold text-[#52665b] outline-none ring-[#1b4332]/20 focus:ring-4 lg:py-1.5">
-            <option>What side of the land deal are you on?</option>
-            <option>I have land and need buyers</option>
-            <option>I am buying land</option>
-            <option>I need seller opportunities</option>
-            <option>I want to analyze a lot</option>
-            <option>I want to build a buyer or seller pipeline</option>
-          </select>
           <div>
             <p className={`${isDesktop ? 'mb-1.5' : 'mb-2'} text-xs font-black uppercase tracking-[0.16em] text-[#607267]`}>I am a</p>
             <div className={`${isDesktop ? 'gap-1.5 sm:grid-cols-3' : 'gap-2'} grid grid-cols-2`}>
