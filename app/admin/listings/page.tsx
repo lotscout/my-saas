@@ -6,6 +6,7 @@ interface Listing {
   id: string;
   title: string;
   status: string;
+  ownership_type: string | null;
   state: string | null;
   county: string | null;
   lot_size_acres: number | null;
@@ -303,7 +304,12 @@ export default function AdminListingsPage() {
                 {listings.map(l => (
                   <tr key={l.id} className="hover:bg-surface-container-low/40 transition-colors">
                     <td className="px-5 py-4">
-                      <span className="font-medium text-on-surface line-clamp-1 max-w-[200px] block">{l.title || '—'}</span>
+                      <div className="flex items-center gap-2">
+                        {l.ownership_type === 'property_lead' && (
+                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-700">Lead</span>
+                        )}
+                        <span className="font-medium text-on-surface line-clamp-1 max-w-[200px] block">{l.title || '—'}</span>
+                      </div>
                       <a
                         href={`/listings/${l.id}`}
                         target="_blank"

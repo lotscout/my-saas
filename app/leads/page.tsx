@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { PageHeader, PrimaryLink, SurfaceCard } from '@/components/ui/LotScoutUI';
@@ -73,6 +73,11 @@ export default function LeadsPage() {
   const [search, setSearch] = useState('');
   const [state, setState] = useState('');
   const [budget, setBudget] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    setSubmitted(new URLSearchParams(window.location.search).get('submitted') === '1');
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -95,12 +100,29 @@ export default function LeadsPage() {
           title={<>Land <span className="text-[#1D9E75]">Leads</span></>}
           description="Leads are early seller opportunities that may need follow-up, verification, or negotiation. Marketplace listings are approved properties ready for broader buyer discovery."
           actions={(
-            <PrimaryLink href="/create-listing">
-              Submit Property Lead
+            <PrimaryLink href="/create-lead">
+              Add Lead
             </PrimaryLink>
           )}
         />
 
+
+        {submitted && (
+          <SurfaceCard className="mb-7 border-[#1D9E75]/25 bg-[#E8EFE6] p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.14em] text-[#1D9E75]">Lead submitted</p>
+                <p className="mt-1 text-base font-bold text-primary">Thanks. LotScout will review and verify the lead before routing it.</p>
+              </div>
+              <button
+                onClick={() => setSubmitted(false)}
+                className="self-start rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-primary shadow-sm hover:bg-surface-container-low"
+              >
+                Dismiss
+              </button>
+            </div>
+          </SurfaceCard>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-7">
           <StatCard label="Active leads" value={MOCK_PROPERTY_LEADS.length.toLocaleString()} sub="Active property leads" icon="real_estate_agent" />

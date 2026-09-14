@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
   let listingsQuery = service
     .from('listings')
-    .select('id, title, status, state, county, lot_size_acres, lot_size_sqft, asking_price, created_at, updated_at, user_id')
+    .select('id, title, status, ownership_type, state, county, lot_size_acres, lot_size_sqft, asking_price, created_at, updated_at, user_id')
     .order('created_at', { ascending: false })
     .limit(100);
 
