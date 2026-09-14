@@ -71,7 +71,7 @@ export default function AcquisitionStyleLandingMock() {
 
       <section className="mx-auto grid max-w-7xl items-start gap-5 px-5 pb-5 pt-6 sm:px-8 lg:min-h-[calc(100svh-108px)] lg:snap-start lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:px-10 lg:py-6">
         <div className="lg:self-center">
-          <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-5xl lg:text-6xl xl:text-7xl">
+          <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-5xl lg:text-5xl xl:text-6xl">
             Need the right land match without waiting on the MLS?
           </h1>
           <p className="mt-4 max-w-2xl text-base font-semibold leading-6 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
@@ -84,7 +84,7 @@ export default function AcquisitionStyleLandingMock() {
           </div>
         </div>
 
-        <aside id="match-form-desktop" className="relative hidden scroll-mt-6 lg:block lg:self-center">
+        <aside id="match-form-desktop" className="relative hidden scroll-mt-6 lg:block lg:-translate-y-12 lg:self-center">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
           <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] sm:p-6">
             <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white sm:mb-5 sm:rounded-[1.4rem] sm:p-4">
