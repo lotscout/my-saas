@@ -30,10 +30,6 @@ const steps = [
 
 const faqs = [
   {
-    q: 'Why not send people straight to pricing?',
-    a: 'Because most land professionals need to see the match potential before a subscription makes sense. This page is designed to capture qualified intent first, then move users into signup and pricing once the value is clearer.',
-  },
-  {
     q: 'Who is LotScout for?',
     a: 'Land sellers, buyers, wholesalers, realtors, builders, developers, and acquisition teams that want to interact with the right side of the deal without depending on the MLS to do all the work.',
   },
