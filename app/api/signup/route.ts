@@ -75,7 +75,14 @@ export async function POST(request: NextRequest) {
         return fallbackLoginUrl;
       }
 
-      return data.properties?.action_link || fallbackLoginUrl;
+      const tokenHash = data.properties?.hashed_token;
+      if (!tokenHash) return fallbackLoginUrl;
+
+      const callbackUrl = new URL('/auth/callback', baseUrl);
+      callbackUrl.searchParams.set('token_hash', tokenHash);
+      callbackUrl.searchParams.set('type', 'magiclink');
+      callbackUrl.searchParams.set('next', destination);
+      return callbackUrl.toString();
     }
 
     // Supabase Auth confirmation email delivery is currently unreliable for this project.

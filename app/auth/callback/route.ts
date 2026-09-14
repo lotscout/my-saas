@@ -9,6 +9,7 @@ import { sendAdminAlert } from '@/lib/admin-alerts'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type')
 
   // Password reset links carry type=recovery — send to the reset form, not the marketplace.
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
   const landingMarket = searchParams.get('market')?.trim() || ''
   const landingUserType = searchParams.get('userType')?.trim() || ''
 
-  if (code) {
+  if (code || tokenHash) {
     // Collect cookies during session exchange, then build the redirect response
     // after determining the correct destination (admin vs regular user).
     const pendingCookies: Array<{ name: string; value: string; options: Parameters<ReturnType<typeof NextResponse.redirect>['cookies']['set']>[2] }> = []
@@ -46,9 +47,15 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data: sessionData, error } = code
+      ? await supabase.auth.exchangeCodeForSession(code)
+      : await supabase.auth.verifyOtp({
+          type: 'magiclink',
+          token_hash: tokenHash!,
+        })
+
     if (error) {
-      console.error('[auth/callback] exchangeCodeForSession error:', error.message)
+      console.error('[auth/callback] auth verification error:', error.message)
       return NextResponse.redirect(`${siteUrl}/sign-in?error=auth_callback_failed`)
     }
 
