@@ -50,7 +50,7 @@ export default function AcquisitionStyleLandingMock() {
         $72M+ in land transactions connected through direct buyer/seller relationships
       </div>
 
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
+      <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10 lg:py-5">
         <a href="/home" className="flex items-center gap-3" aria-label="LotScout home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/lotscout-logo.png" alt="LotScout" className="h-11 w-11 object-contain" />
@@ -69,15 +69,15 @@ export default function AcquisitionStyleLandingMock() {
         </a>
       </header>
 
-      <section className="mx-auto grid max-w-7xl items-start gap-8 px-5 py-8 sm:px-8 lg:min-h-[calc(100svh-112px)] lg:snap-start lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12 lg:px-10 lg:py-10">
+      <section className="mx-auto grid max-w-7xl items-start gap-5 px-5 pb-5 pt-6 sm:px-8 lg:min-h-[calc(100svh-112px)] lg:snap-start lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12 lg:px-10 lg:py-10">
         <div>
           <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-6xl lg:text-7xl xl:text-8xl">
             Need the right land match without waiting on the MLS?
           </h1>
-          <p className="mt-5 max-w-2xl text-lg font-semibold leading-7 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
+          <p className="mt-4 max-w-2xl text-base font-semibold leading-6 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
             LotScout helps land buyers and sellers find each other faster, then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
           </p>
-          <div className="mt-5 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.08em] text-[#1b4332] sm:mt-7 sm:gap-3 sm:text-sm">
+          <div className="mt-4 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.08em] text-[#1b4332] sm:mt-7 sm:gap-3 sm:text-sm">
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Buy-side + sell-side matching</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">No payment to start</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Works beyond the MLS</span>
@@ -127,14 +127,14 @@ export default function AcquisitionStyleLandingMock() {
                 Find my land match
               </button>
               <p className="text-center text-xs font-bold leading-5 text-[#7c8b82]">
-                Free to start. No credit card required. Pricing comes after we understand your land workflow.
+                No credit card required to get started.
               </p>
             </form>
           </div>
         </aside>
       </section>
 
-      <section id="match-form-mobile" className="mx-auto flex max-w-2xl scroll-mt-4 flex-col justify-center px-5 pb-10 sm:px-8 lg:hidden">
+      <section id="match-form-mobile" className="mx-auto flex max-w-2xl scroll-mt-4 flex-col justify-center px-5 pb-10 pt-1 sm:px-8 lg:hidden">
         <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12">
           <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white">
             <h2 className="text-2xl font-black uppercase leading-none tracking-[-0.05em]">Find your next land match.</h2>
@@ -173,7 +173,7 @@ export default function AcquisitionStyleLandingMock() {
               Find my land match
             </button>
             <p className="text-center text-xs font-bold leading-5 text-[#7c8b82]">
-              Free to start. No credit card required. Pricing comes after we understand your land workflow.
+              No credit card required to get started.
             </p>
           </form>
         </div>
