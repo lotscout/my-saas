@@ -241,5 +241,45 @@ export async function GET(request: NextRequest) {
     return response
   }
 
-  return NextResponse.redirect(`${siteUrl}/sign-in?error=auth_callback_failed`)
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/marketplace'
+  const html = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signing you in...</title>
+    <style>
+      body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f7faf7;color:#1b4332;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+      div{max-width:420px;text-align:center;padding:32px}
+      h1{font-size:24px;margin:0 0 8px}
+      p{color:#4b5563;line-height:1.5;margin:0}
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Signing you in...</h1>
+      <p>Please wait while we securely open your LotScout account.</p>
+    </div>
+    <script type="module">
+      import { createBrowserClient } from 'https://esm.sh/@supabase/ssr@0.7.0';
+      const siteUrl = ${JSON.stringify(siteUrl)};
+      const nextPath = ${JSON.stringify(safeNext)};
+      const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      const supabase = createBrowserClient(
+        ${JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_URL)},
+        ${JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)}
+      );
+      if (access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+        if (!error) window.location.replace(nextPath);
+        else window.location.replace(siteUrl + '/sign-in?error=auth_callback_failed');
+      } else {
+        window.location.replace(siteUrl + '/sign-in?error=auth_callback_failed');
+      }
+    </script>
+  </body>
+</html>`
+  return new NextResponse(html, { headers: { 'content-type': 'text/html; charset=utf-8' } })
 }
