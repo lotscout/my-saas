@@ -59,15 +59,15 @@ export async function POST(request: NextRequest) {
     const supabase = adminSupabase();
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
     const setupDestination = isPasswordlessLanding ? '/edit-profile?setup=password' : '/profile';
-    const fallbackLoginUrl = `${baseUrl}/sign-in?redirect=${encodeURIComponent(setupDestination)}`;
 
-    async function createMagicLoginUrl() {
+    async function createMagicLoginUrl(destination = setupDestination) {
+      const fallbackLoginUrl = `${baseUrl}/sign-in?redirect=${encodeURIComponent(destination)}`;
       if (!isPasswordlessLanding) return fallbackLoginUrl;
 
       const { data, error } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email,
-        options: { redirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(setupDestination)}` },
+        options: { redirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(destination)}` },
       });
 
       if (error) {
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
             email,
             firstName: existingProfile?.first_name ?? firstName,
             baseUrl,
-            loginUrl: await createMagicLoginUrl(),
+            loginUrl: await createMagicLoginUrl('/profile'),
           });
         } catch (loginEmailErr) {
           console.error('Existing account login email error:', loginEmailErr);
