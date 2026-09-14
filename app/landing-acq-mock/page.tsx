@@ -88,7 +88,7 @@ export default function AcquisitionStyleLandingMock() {
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
           <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] lg:p-4">
             <div className="mb-3 rounded-[1.25rem] bg-[#10291e] p-3.5 text-white sm:rounded-[1.4rem] lg:p-4">
-              <h2 className="mt-1 text-2xl font-black uppercase leading-none tracking-[-0.05em] sm:text-2xl">Find your next land match.</h2>
+              <h2 className="mt-1 text-2xl font-black uppercase leading-none tracking-[-0.05em] sm:text-2xl">Find your next land deal.</h2>
               <p className="mt-2 text-sm font-semibold leading-5 text-white/70">
                 Tell us whether you are buying, selling, sourcing, or building. We will route you toward the right buyer, seller, or land intelligence workflow.
               </p>
@@ -137,7 +137,7 @@ export default function AcquisitionStyleLandingMock() {
       <section id="match-form-mobile" className="mx-auto flex max-w-2xl scroll-mt-4 flex-col justify-center px-5 pb-10 pt-1 sm:px-8 lg:hidden">
         <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12">
           <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white">
-            <h2 className="text-2xl font-black uppercase leading-none tracking-[-0.05em]">Find your next land match.</h2>
+            <h2 className="text-2xl font-black uppercase leading-none tracking-[-0.05em]">Find your next land deal.</h2>
             <p className="mt-2 text-sm font-semibold leading-5 text-white/70">
               Tell us whether you are buying, selling, sourcing, or building. We will route you toward the right buyer, seller, or land intelligence workflow.
             </p>
