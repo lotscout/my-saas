@@ -1,9 +1,9 @@
 import { Resend } from 'resend';
 import { logEmail } from '@/lib/email-logger';
 
-function buildAccountLoginEmail(firstName: string | null, baseUrl: string): string {
+function buildAccountLoginEmail(firstName: string | null, baseUrl: string, loginUrl?: string): string {
   const greeting = firstName ? `Hi ${firstName},` : 'Hi,';
-  const loginUrl = `${baseUrl}/sign-in?redirect=${encodeURIComponent('/marketplace')}`;
+  const resolvedLoginUrl = loginUrl || `${baseUrl}/sign-in?redirect=${encodeURIComponent('/marketplace')}`;
 
   return `<!DOCTYPE html>
 <html>
@@ -28,7 +28,7 @@ function buildAccountLoginEmail(firstName: string | null, baseUrl: string): stri
             </p>
             <table cellpadding="0" cellspacing="0">
               <tr><td>
-                <a href="${loginUrl}"
+                <a href="${resolvedLoginUrl}"
                    style="display:inline-block;background:#1B4332;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:-0.2px">
                   Log in to Marketplace &rarr;
                 </a>
@@ -55,11 +55,13 @@ export async function sendAccountLoginEmail({
   email,
   firstName = null,
   baseUrl,
+  loginUrl,
 }: {
   userId?: string | null;
   email: string;
   firstName?: string | null;
   baseUrl?: string;
+  loginUrl?: string;
 }) {
   if (!process.env.RESEND_API_KEY) {
     console.error('[account-login-email] RESEND_API_KEY is not configured');
@@ -67,7 +69,7 @@ export async function sendAccountLoginEmail({
   }
 
   const resolvedBaseUrl = baseUrl ?? process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_BASE_URL ?? 'https://lotscout.com';
-  const loginUrl = `${resolvedBaseUrl}/sign-in?redirect=${encodeURIComponent('/marketplace')}`;
+  const resolvedLoginUrl = loginUrl || `${resolvedBaseUrl}/sign-in?redirect=${encodeURIComponent('/marketplace')}`;
   const fromEmail = 'LotScout <hello@lotscout.com>';
   const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -75,8 +77,8 @@ export async function sendAccountLoginEmail({
     from: fromEmail,
     to: email,
     subject: 'Log in to your LotScout account',
-    html: buildAccountLoginEmail(firstName, resolvedBaseUrl),
-    text: `Your LotScout account is ready. Log in to continue to the marketplace: ${loginUrl}`,
+    html: buildAccountLoginEmail(firstName, resolvedBaseUrl, resolvedLoginUrl),
+    text: `Your LotScout account is ready. Log in to continue to the marketplace: ${resolvedLoginUrl}`,
   });
 
   await logEmail({

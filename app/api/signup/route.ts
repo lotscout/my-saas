@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
@@ -27,21 +28,23 @@ export async function POST(request: NextRequest) {
     const firstName = cleanString(body.firstName);
     const lastName = cleanString(body.lastName);
     const email = cleanString(body.email).toLowerCase();
-    const password = typeof body.password === 'string' ? body.password : '';
+    const providedPassword = typeof body.password === 'string' ? body.password : '';
     const signupSource = cleanString(body.signupSource) || 'direct';
     const signupMedium = cleanString(body.signupMedium);
     const signupCampaign = cleanString(body.signupCampaign);
     const market = cleanString(body.market);
-    const dealGoal = cleanString(body.dealGoal);
-    const role = cleanString(body.role);
+    const role = cleanString(body.userType) || cleanString(body.role);
+    const dealGoal = cleanString(body.dealGoal) || (role ? `I am a ${role}` : '');
+    const isPasswordlessLanding = signupSource === 'landing-acq-mock' || signupMedium === 'landing_form';
+    const password = providedPassword || (isPasswordlessLanding ? `${randomBytes(24).toString('base64url')}aA1!` : '');
 
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName || !lastName || !email || !password || (isPasswordlessLanding && !role)) {
       return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
     }
     if (!isEmail(email)) {
       return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 });
     }
-    if (password.length < 8) {
+    if (!isPasswordlessLanding && password.length < 8) {
       return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 });
     }
 
@@ -54,6 +57,25 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = adminSupabase();
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
+    const fallbackLoginUrl = `${baseUrl}/sign-in?redirect=${encodeURIComponent('/marketplace')}`;
+
+    async function createMagicLoginUrl() {
+      if (!isPasswordlessLanding) return fallbackLoginUrl;
+
+      const { data, error } = await supabase.auth.admin.generateLink({
+        type: 'magiclink',
+        email,
+        options: { redirectTo: `${baseUrl}/auth/callback?next=/marketplace` },
+      });
+
+      if (error) {
+        console.error('Signup magic link generation error:', error);
+        return fallbackLoginUrl;
+      }
+
+      return data.properties?.action_link || fallbackLoginUrl;
+    }
 
     // Supabase Auth confirmation email delivery is currently unreliable for this project.
     // Create the account confirmed so users can sign in immediately after signup.
@@ -87,7 +109,8 @@ export async function POST(request: NextRequest) {
             userId: existingProfile?.id ?? null,
             email,
             firstName: existingProfile?.first_name ?? firstName,
-            baseUrl: process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin,
+            baseUrl,
+            loginUrl: await createMagicLoginUrl(),
           });
         } catch (loginEmailErr) {
           console.error('Existing account login email error:', loginEmailErr);
@@ -134,12 +157,22 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      await sendWelcomeEmailOnce({
-        userId,
-        email,
-        firstName,
-        baseUrl: process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin,
-      });
+      if (isPasswordlessLanding) {
+        await sendAccountLoginEmail({
+          userId,
+          email,
+          firstName,
+          baseUrl,
+          loginUrl: await createMagicLoginUrl(),
+        });
+      } else {
+        await sendWelcomeEmailOnce({
+          userId,
+          email,
+          firstName,
+          baseUrl,
+        });
+      }
     } catch (welcomeErr) {
       console.error('Signup welcome email error:', welcomeErr);
     }
