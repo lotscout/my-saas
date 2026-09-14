@@ -45,8 +45,8 @@ const faqs = [
 
 export default function AcquisitionStyleLandingMock() {
   return (
-    <main className="h-svh overflow-y-auto scroll-smooth snap-y snap-proximity bg-[#f7f4ec] text-[#10291e]">
-      <div className="snap-start border-b border-[#d9d2c3] bg-[#1b4332] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-white sm:text-sm sm:tracking-[0.12em]">
+    <main className="min-h-screen scroll-smooth bg-[#f7f4ec] text-[#10291e] lg:h-svh lg:overflow-y-auto lg:snap-y lg:snap-proximity">
+      <div className="lg:snap-start border-b border-[#d9d2c3] bg-[#1b4332] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-white sm:text-sm sm:tracking-[0.12em]">
         $72M+ in land transactions connected through direct buyer/seller relationships
       </div>
 
@@ -66,10 +66,10 @@ export default function AcquisitionStyleLandingMock() {
         </a>
       </header>
 
-      <section className="mx-auto grid min-h-[calc(100svh-112px)] max-w-7xl snap-start items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12 lg:px-10 lg:py-10">
+      <section className="mx-auto grid max-w-7xl items-start gap-8 px-5 py-8 sm:px-8 lg:min-h-[calc(100svh-112px)] lg:snap-start lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12 lg:px-10 lg:py-10">
         <div>
           <p className="mb-5 text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">Land Development Intelligence</p>
-          <h1 className="font-headline text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-6xl lg:text-8xl">
+          <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.9] tracking-[-0.06em] text-[#10291e] sm:text-6xl lg:text-7xl xl:text-8xl">
             Find the right land match without waiting on the MLS.
           </h1>
           <p className="mt-5 max-w-2xl text-lg font-semibold leading-7 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
@@ -132,7 +132,7 @@ export default function AcquisitionStyleLandingMock() {
         </aside>
       </section>
 
-      <section id="proof" className="flex min-h-svh snap-start items-center border-y border-[#d9d2c3] bg-white text-[#10291e]">
+      <section id="proof" className="flex border-y border-[#d9d2c3] lg:min-h-svh lg:snap-start lg:items-center bg-white text-[#10291e]">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-px bg-[#d9d2c3] sm:grid-cols-4">
           {stats.map(([big, small]) => (
             <div key={big} className="bg-white px-4 py-7 text-center sm:px-5 sm:py-10">
@@ -143,7 +143,7 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section className="mx-auto flex min-h-svh max-w-7xl snap-start flex-col justify-center px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+      <section className="mx-auto flex max-w-7xl flex-col justify-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
         <div className="mb-6 max-w-3xl sm:mb-10">
           <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] text-[#10291e] sm:text-6xl">Answer the real objections.</h2>
         </div>
@@ -157,7 +157,7 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section id="how" className="flex min-h-svh snap-start items-center bg-[#e8efe6] text-[#10291e]">
+      <section id="how" className="flex bg-[#e8efe6] text-[#10291e] lg:min-h-svh lg:snap-start lg:items-center">
         <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
           <div className="mb-10 max-w-3xl">
             <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Start with the match.</h2>
@@ -179,7 +179,7 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section id="faq" className="mx-auto grid min-h-svh max-w-7xl snap-start items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-12">
+      <section id="faq" className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:px-10 lg:py-12">
         <div>
           <p className="text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">FAQs</p>
           <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Before you scout.</h2>
@@ -194,7 +194,7 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section className="mx-auto flex min-h-svh max-w-7xl snap-start items-center px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+      <section className="mx-auto flex max-w-7xl items-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
         <div className="rounded-[2rem] border border-[#d9d2c3] bg-[#1b4332] p-8 text-center text-white shadow-2xl shadow-[#1b4332]/15 sm:p-10 lg:p-12">
           <h2 className="mx-auto mt-4 max-w-4xl font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">
             Land deals need better matching before they need more listing exposure.
@@ -208,7 +208,7 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <footer className="snap-start border-t border-[#d9d2c3] px-5 py-8 text-xs font-semibold leading-6 text-[#7b897f] sm:px-8 lg:px-10">
+      <footer className="lg:snap-start border-t border-[#d9d2c3] px-5 py-8 text-xs font-semibold leading-6 text-[#7b897f] sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p>LotScout does not guarantee buyer interest, sale outcomes, investment returns, zoning approvals, utility availability, or development feasibility. Transaction, commission, and timeline figures are historical/contextual and not a guarantee of future results. All users should complete independent diligence and consult qualified professionals.</p>
           <p className="mt-4">© 2026 LotScout. Land Development Intelligence.</p>
