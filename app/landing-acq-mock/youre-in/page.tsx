@@ -14,7 +14,7 @@ export default function LandingYoureInPage() {
             You're in!
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-lg font-bold leading-8 text-[#52665b]">
-            You'll receive an email shortly.
+            You'll receive an email shortly with a link to log in and continue to the marketplace.
           </p>
           <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-[#7c8b82]">
             We are reviewing your land deal profile and will route you toward the right buyer, seller, or LotScout workflow.

@@ -18,12 +18,14 @@ function splitName(name: string) {
 export default function LandingSignupForm({ roles, variant }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const isDesktop = variant === 'desktop';
   const suffix = isDesktop ? '' : '-mobile';
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setNotice(null);
     setLoading(true);
 
     const form = e.currentTarget;
@@ -61,8 +63,9 @@ export default function LandingSignupForm({ roles, variant }: Props) {
 
     if (!res.ok) {
       const message = String(json.error || '');
-      if (res.status === 409 || /already|registered|exists/i.test(message)) {
-        window.location.href = '/landing-acq-mock/youre-in';
+      if (res.status === 409 || json.code === 'existing_user' || /already|registered|exists/i.test(message)) {
+        setNotice('You already have a LotScout account. We sent you an email with a login link to the marketplace.');
+        setLoading(false);
         return;
       }
 
@@ -107,6 +110,7 @@ export default function LandingSignupForm({ roles, variant }: Props) {
               ))}
             </div>
           </div>
+          {notice && <p className="rounded-xl bg-[#e8efe6] px-3 py-2 text-xs font-bold leading-5 text-[#1b4332]">{notice}</p>}
           {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold leading-5 text-red-700">{error}</p>}
           <button type="submit" disabled={loading} className={`${isDesktop ? 'py-3 text-sm' : 'py-3.5 text-base'} mt-1 rounded-2xl bg-[#1b4332] px-6 font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426] disabled:cursor-not-allowed disabled:opacity-60`}>
             {loading ? 'Creating account...' : 'Find my next land deal'}

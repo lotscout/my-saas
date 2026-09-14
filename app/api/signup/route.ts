@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { findProfaneField, profanityError } from '@/lib/profanity-validation';
 import { syncResendContact } from '@/lib/resend-contacts';
 import { sendAdminAlert } from '@/lib/admin-alerts';
+import { sendAccountLoginEmail } from '@/lib/account-login-email';
 import { sendWelcomeEmailOnce } from '@/lib/welcome-email';
 
 function adminSupabase() {
@@ -72,8 +73,33 @@ export async function POST(request: NextRequest) {
 
     if (createError || !created.user) {
       const message = createError?.message || 'Could not create account.';
-      const status = /already|registered|exists/i.test(message) ? 409 : 500;
-      return NextResponse.json({ error: message }, { status });
+      const isExistingUser = /already|registered|exists/i.test(message);
+
+      if (isExistingUser) {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id, first_name')
+          .eq('email', email)
+          .maybeSingle();
+
+        try {
+          await sendAccountLoginEmail({
+            userId: existingProfile?.id ?? null,
+            email,
+            firstName: existingProfile?.first_name ?? firstName,
+            baseUrl: process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin,
+          });
+        } catch (loginEmailErr) {
+          console.error('Existing account login email error:', loginEmailErr);
+        }
+
+        return NextResponse.json({
+          error: 'You already have a LotScout account. We sent you an email with a login link.',
+          code: 'existing_user',
+        }, { status: 409 });
+      }
+
+      return NextResponse.json({ error: message }, { status: 500 });
     }
 
     const userId = created.user.id;
