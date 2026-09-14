@@ -1,3 +1,5 @@
+import ScrollReveal from './ScrollReveal';
+
 const stats = [
   ['$72M+', 'land transactions'],
   ['$4.32M', 'commission saved at 6%'],
@@ -46,6 +48,7 @@ const faqs = [
 export default function AcquisitionStyleLandingMock() {
   return (
     <main className="min-h-screen scroll-smooth bg-white text-[#10291e] lg:h-svh lg:overflow-y-auto lg:snap-y lg:snap-proximity">
+      <ScrollReveal />
       <div className="lg:snap-start border-b border-[#d9d2c3] bg-[#1b4332] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-white sm:text-sm sm:tracking-[0.12em]">
         $72M+ in land transactions connected through direct buyer/seller relationships
       </div>
@@ -65,7 +68,7 @@ export default function AcquisitionStyleLandingMock() {
       </header>
 
       <section className="mx-auto grid max-w-7xl items-start gap-5 px-5 pb-5 pt-6 sm:px-8 lg:min-h-[calc(100svh-108px)] lg:snap-start lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-12 lg:px-10 lg:py-6">
-        <div className="lg:self-center">
+        <div data-reveal="left" className="lg:self-center">
           <h1 className="font-headline text-[2.65rem] font-black uppercase leading-[0.96] tracking-[-0.035em] text-[#10291e] sm:text-5xl lg:text-5xl xl:text-6xl">
             Ready to buy and sell land faster without the MLS?
           </h1>
@@ -79,7 +82,7 @@ export default function AcquisitionStyleLandingMock() {
           </div>
           <div id="proof" className="mt-5 grid max-w-[36rem] grid-cols-2 gap-2 sm:mt-6">
             {stats.map(([big, small]) => (
-              <div key={big} className="rounded-2xl border border-[#d9d2c3] bg-[#f7f4ec] px-4 py-3 shadow-sm">
+              <div key={big} data-reveal className="rounded-2xl border border-[#d9d2c3] bg-[#f7f4ec] px-4 py-3 shadow-sm">
                 <div className="font-headline text-2xl font-black uppercase tracking-[-0.04em] text-[#1b4332] sm:text-3xl">{big}</div>
                 <div className="mt-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#52665b] sm:text-xs">{small}</div>
               </div>
@@ -87,7 +90,7 @@ export default function AcquisitionStyleLandingMock() {
           </div>
         </div>
 
-        <aside id="match-form-desktop" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:self-center">
+        <aside id="match-form-desktop" data-reveal="right" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:self-center">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
           <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] lg:p-4">
             <div className="mb-3 rounded-[1.25rem] bg-[#10291e] p-3.5 text-white sm:rounded-[1.4rem] lg:p-4">
@@ -137,7 +140,7 @@ export default function AcquisitionStyleLandingMock() {
         </aside>
       </section>
 
-      <section id="match-form-mobile" className="mx-auto flex max-w-2xl scroll-mt-4 flex-col justify-center px-5 pb-10 pt-1 sm:px-8 lg:hidden">
+      <section id="match-form-mobile" data-reveal className="mx-auto flex max-w-2xl scroll-mt-4 flex-col justify-center px-5 pb-10 pt-1 sm:px-8 lg:hidden">
         <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-4 shadow-2xl shadow-[#1b4332]/12">
           <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white">
             <h2 className="text-2xl font-black uppercase leading-none tracking-[-0.05em]">Find your next land deal.</h2>
@@ -184,12 +187,12 @@ export default function AcquisitionStyleLandingMock() {
 
 
       <section className="mx-auto flex max-w-7xl flex-col justify-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
-        <div className="mb-6 max-w-3xl sm:mb-10">
+        <div data-reveal className="mb-6 max-w-3xl sm:mb-10">
           <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] text-[#10291e] sm:text-6xl">Answer the real objections.</h2>
         </div>
         <div className="grid gap-5 lg:grid-cols-3">
           {objections.map((item) => (
-            <article key={item.title} className="rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
+            <article key={item.title} data-reveal className="rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
               <h3 className="text-xl font-black leading-tight tracking-[-0.04em] text-[#10291e] sm:text-2xl">{item.title}</h3>
               <p className="mt-3 text-sm font-semibold leading-6 text-[#607267] sm:mt-4 sm:text-base sm:leading-7">{item.body}</p>
             </article>
@@ -199,12 +202,12 @@ export default function AcquisitionStyleLandingMock() {
 
       <section id="how" className="flex bg-[#e8efe6] text-[#10291e] lg:min-h-svh lg:snap-start lg:items-center">
         <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
-          <div className="mb-10 max-w-3xl">
+          <div data-reveal className="mb-10 max-w-3xl">
             <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Start with the match.</h2>
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
             {steps.map(([num, title, body]) => (
-              <div key={num} className="rounded-[1.5rem] border border-[#1b4332]/15 bg-white p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
+              <div key={num} data-reveal className="rounded-[1.5rem] border border-[#1b4332]/15 bg-white p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1b4332] text-lg font-black text-white">{num}</span>
                 <h3 className="mt-4 text-xl font-black tracking-[-0.04em] sm:mt-5 sm:text-2xl">{title}</h3>
                 <p className="mt-3 text-base font-semibold leading-7 text-[#52665b]">{body}</p>
@@ -222,14 +225,14 @@ export default function AcquisitionStyleLandingMock() {
         </div>
       </section>
 
-      <section id="faq" className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:px-10 lg:py-12">
+      <section id="faq" data-reveal className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:px-10 lg:py-12">
         <div>
           <p className="text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">FAQs</p>
           <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Before you scout.</h2>
         </div>
         <div className="divide-y divide-[#1b4332]/15 border-y border-[#1b4332]/15">
           {faqs.map((faq) => (
-            <div key={faq.q} className="py-4 sm:py-6">
+            <div key={faq.q} data-reveal className="py-4 sm:py-6">
               <h3 className="text-2xl font-black tracking-[-0.04em]">{faq.q}</h3>
               <p className="mt-3 text-base font-semibold leading-7 text-[#52665b]">{faq.a}</p>
             </div>
@@ -238,7 +241,7 @@ export default function AcquisitionStyleLandingMock() {
       </section>
 
       <section className="mx-auto flex max-w-7xl items-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
-        <div className="w-full rounded-[2rem] border border-[#d9d2c3] bg-[#1b4332] p-8 text-center text-white shadow-2xl shadow-[#1b4332]/15 sm:p-10 lg:p-12">
+        <div data-reveal className="w-full rounded-[2rem] border border-[#d9d2c3] bg-[#1b4332] p-8 text-center text-white shadow-2xl shadow-[#1b4332]/15 sm:p-10 lg:p-12">
           <h2 className="mx-auto mt-4 max-w-4xl font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">
             Land deals need better matching before they need more listing exposure.
           </h2>
