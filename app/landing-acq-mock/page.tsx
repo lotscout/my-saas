@@ -61,7 +61,10 @@ export default function AcquisitionStyleLandingMock() {
           <a href="#how" className="hover:text-[#1b4332]">How it works</a>
           <a href="#faq" className="hover:text-[#1b4332]">FAQ</a>
         </nav>
-        <a href="#match-form" className="rounded-full border border-[#1b4332] bg-[#1b4332] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white transition hover:bg-[#143426]">
+        <a href="#match-form-mobile" className="rounded-full border border-[#1b4332] bg-[#1b4332] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white transition hover:bg-[#143426] lg:hidden">
+          Get matched
+        </a>
+        <a href="#match-form-desktop" className="hidden rounded-full border border-[#1b4332] bg-[#1b4332] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white transition hover:bg-[#143426] lg:inline-flex">
           Get matched
         </a>
       </header>
@@ -73,7 +76,7 @@ export default function AcquisitionStyleLandingMock() {
             Find the right land match without waiting on the MLS.
           </h1>
           <p className="mt-5 max-w-2xl text-lg font-semibold leading-7 text-[#52665b] sm:mt-7 sm:text-xl sm:leading-8">
-            LotScout helps land buyers and sellers find each other faster,then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
+            LotScout helps land buyers and sellers find each other faster, then adds the diligence, buyer intent, seller context, and market data needed to move with confidence.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.08em] text-[#1b4332] sm:mt-7 sm:gap-3 sm:text-sm">
             <span className="rounded-full border border-[#1b4332]/15 bg-white px-4 py-2">Buy-side + sell-side matching</span>
@@ -82,7 +85,7 @@ export default function AcquisitionStyleLandingMock() {
           </div>
         </div>
 
-        <aside id="match-form" className="relative scroll-mt-6">
+        <aside id="match-form-desktop" className="relative hidden scroll-mt-6 lg:block">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[#86af99]/30 blur-3xl" />
           <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-white p-4 shadow-2xl shadow-[#1b4332]/12 sm:rounded-[2rem] sm:p-6">
             <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white sm:mb-5 sm:rounded-[1.4rem] sm:p-5">
@@ -132,6 +135,51 @@ export default function AcquisitionStyleLandingMock() {
         </aside>
       </section>
 
+      <section id="match-form-mobile" className="mx-auto flex max-w-2xl scroll-mt-4 flex-col justify-center px-5 pb-10 sm:px-8 lg:hidden">
+        <div className="relative rounded-[1.5rem] border border-[#d9d2c3] bg-white p-4 shadow-2xl shadow-[#1b4332]/12">
+          <div className="mb-4 rounded-[1.25rem] bg-[#10291e] p-4 text-white">
+            <h2 className="text-2xl font-black uppercase leading-none tracking-[-0.05em]">Find your next land match.</h2>
+            <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
+              Tell us whether you are buying, selling, sourcing, or building. We will route you toward the right buyer, seller, or land intelligence workflow.
+            </p>
+          </div>
+          <form className="grid gap-2.5">
+            <label className="sr-only" htmlFor="name-mobile">Name</label>
+            <input id="name-mobile" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Name" />
+            <label className="sr-only" htmlFor="email-mobile">Email</label>
+            <input id="email-mobile" type="email" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Email" />
+            <label className="sr-only" htmlFor="market-mobile">Market or state</label>
+            <input id="market-mobile" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold outline-none ring-[#1b4332]/20 placeholder:text-[#8a9a90] focus:ring-4" placeholder="Market or state" />
+            <label className="sr-only" htmlFor="goal-mobile">What side of the land deal are you on?</label>
+            <select id="goal-mobile" className="rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-4 py-2.5 text-sm font-bold text-[#52665b] outline-none ring-[#1b4332]/20 focus:ring-4">
+              <option>What side of the land deal are you on?</option>
+              <option>I have land and need buyers</option>
+              <option>I am buying land</option>
+              <option>I need seller opportunities</option>
+              <option>I want to analyze a lot</option>
+              <option>I want to build a buyer or seller pipeline</option>
+            </select>
+            <div>
+              <p className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-[#607267]">I am a</p>
+              <div className="grid grid-cols-2 gap-2">
+                {roles.map((role) => (
+                  <label key={role} className="flex cursor-pointer items-center gap-2 rounded-2xl border border-[#d8dece] bg-[#fbfaf6] px-3 py-1.5 text-sm font-black text-[#1b4332]">
+                    <input type="radio" name="role-mobile" className="accent-[#1b4332]" />
+                    {role}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <button type="button" className="mt-1 rounded-2xl bg-[#1b4332] px-6 py-3.5 text-base font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-[#1b4332]/20 transition hover:bg-[#143426]">
+              Find my land match
+            </button>
+            <p className="text-center text-xs font-bold leading-5 text-[#7c8b82]">
+              Free to start. No credit card required. Pricing comes after we understand your land workflow.
+            </p>
+          </form>
+        </div>
+      </section>
+
       <section id="proof" className="flex border-y border-[#d9d2c3] lg:min-h-svh lg:snap-start lg:items-center bg-white text-[#10291e]">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-px bg-[#d9d2c3] sm:grid-cols-4">
           {stats.map(([big, small]) => (
@@ -172,7 +220,10 @@ export default function AcquisitionStyleLandingMock() {
             ))}
           </div>
           <div className="mt-10 text-center">
-            <a href="#match-form" className="inline-flex rounded-full bg-[#1b4332] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426]">
+            <a href="#match-form-mobile" className="inline-flex rounded-full bg-[#1b4332] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426] lg:hidden">
+              Find my land match
+            </a>
+            <a href="#match-form-desktop" className="hidden rounded-full bg-[#1b4332] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426] lg:inline-flex">
               Find my land match
             </a>
           </div>
@@ -202,7 +253,10 @@ export default function AcquisitionStyleLandingMock() {
           <p className="mx-auto mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/72">
             LotScout was built around the real bottleneck in land: helping the right buyers and sellers find each other, proving deal quality, and creating enough confidence to move.
           </p>
-          <a href="#match-form" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#d9f99d]">
+          <a href="#match-form-mobile" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#d9f99d] lg:hidden">
+            Get matched
+          </a>
+          <a href="#match-form-desktop" className="mt-7 hidden rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#d9f99d] lg:inline-flex">
             Get matched
           </a>
         </div>
