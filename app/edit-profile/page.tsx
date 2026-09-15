@@ -46,13 +46,20 @@ export default function EditProfilePage() {
   const [cropX, setCropX] = useState(0);
   const [cropY, setCropY] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
+  const [showSetupModal, setShowSetupModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const passwordSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     return () => {
       if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
     };
   }, [cropImageUrl]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('setup') === 'password') setShowSetupModal(true);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -142,6 +149,11 @@ export default function EditProfilePage() {
       setToast('Profile saved successfully!');
       setTimeout(() => { setToast(null); router.push('/profile'); }, 2000);
     }
+  }
+
+  function focusPasswordSetup() {
+    setShowSetupModal(false);
+    passwordSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   async function handleUpdatePassword() {
@@ -282,6 +294,30 @@ export default function EditProfilePage() {
   return (
     <div className="bg-surface text-on-surface antialiased font-body">
       <Header />
+
+      {showSetupModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#10291e]/55 px-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="setup-welcome-title">
+          <div className="w-full max-w-md rounded-[2rem] bg-white p-6 shadow-2xl shadow-black/20 sm:p-8">
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#e8efe6] text-[#1b4332]">
+              <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>waving_hand</span>
+            </div>
+            <h2 id="setup-welcome-title" className="font-headline text-3xl font-extrabold tracking-tight text-primary">
+              Welcome to LotScout!
+            </h2>
+            <p className="mt-3 text-sm font-medium leading-6 text-secondary">
+              Create a password to finish setting up your account. After that, you can use email and password to sign in anytime.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <button type="button" onClick={focusPasswordSetup} className="flex-1 rounded-xl bg-[#1D9E75] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-[#1D9E75]/20 hover:bg-[#14795A]">
+                Create Password
+              </button>
+              <button type="button" onClick={() => setShowSetupModal(false)} className="flex-1 rounded-xl border border-outline/20 px-5 py-3 text-sm font-semibold text-primary hover:bg-surface-container-high">
+                Do it later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast && (
         <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-6 py-3 rounded-xl shadow-lg text-sm font-semibold text-white ${toastOk ? 'bg-emerald-600' : 'bg-red-600'}`}>
@@ -539,7 +575,7 @@ export default function EditProfilePage() {
             </section>
 
             {/* Account Management Section */}
-            <section className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-5 sm:space-y-8">
+            <section ref={passwordSectionRef} className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl space-y-5 sm:space-y-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant/30 pb-4">
                 <h3 className="font-headline text-lg sm:text-xl font-bold text-primary">Account Management</h3>
                 {tier && (
