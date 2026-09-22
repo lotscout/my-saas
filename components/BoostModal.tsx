@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { trackMetaEvent } from '@/lib/meta-pixel';
 
 interface Props {
   listingId: string;
@@ -38,6 +39,23 @@ export default function BoostModal({ listingId, listingTitle, tier, onClose }: P
     if (weeks < 1 || loading) return;
     setLoading(true);
     setError('');
+    trackMetaEvent('InitiateCheckout', {
+      content_name: 'Promoted Listing Boost',
+      content_category: 'listing_boost',
+      content_ids: [listingId],
+      value: actualCost,
+      currency: 'USD',
+      tier,
+      weeks,
+    });
+    localStorage.setItem('meta_pending_checkout', JSON.stringify({
+      priceKey: 'listingBoost',
+      tier,
+      billing: 'one_time',
+      value: actualCost,
+      source: 'listing_boost',
+      startedAt: Date.now(),
+    }));
     try {
       const res = await fetch('/api/boost', {
         method: 'POST',

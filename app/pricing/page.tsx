@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import { useUserTier } from '@/hooks/useUserTier';
 import { track } from '@vercel/analytics';
+import { trackMetaEvent } from '@/lib/meta-pixel';
 
 // Shared responsive grid: feature-label column + 3 tier columns.
 // fr units always fit the container width, so the table never overflows horizontally.
@@ -123,11 +124,35 @@ export default function PricingPage() {
 
   async function handleCheckout(priceKey: string) {
     setLoading(priceKey);
+    const checkoutValue = priceKey === 'searchProMonthly'
+      ? SEARCH_MONTHLY_PRICE
+      : priceKey.includes('Annual')
+        ? ANNUAL_TOTALS[priceKey.replace('Annual', '') as keyof typeof ANNUAL_TOTALS]
+        : MONTHLY_PRICES[priceKey.replace('Monthly', '') as keyof typeof MONTHLY_PRICES];
+    const checkoutTier = priceKey.replace('Monthly', '').replace('Annual', '');
     track('checkout_started', {
       price_key: priceKey,
       billing: isAnnual ? 'annual' : 'monthly',
       source: 'pricing',
     });
+    trackMetaEvent('InitiateCheckout', {
+      content_name: 'LotScout subscription checkout',
+      content_category: 'subscription',
+      content_ids: [priceKey],
+      value: checkoutValue,
+      currency: 'USD',
+      tier: checkoutTier,
+      billing: isAnnual ? 'annual' : 'monthly',
+      source: 'pricing',
+    });
+    localStorage.setItem('meta_pending_checkout', JSON.stringify({
+      priceKey,
+      tier: checkoutTier,
+      billing: isAnnual ? 'annual' : 'monthly',
+      value: checkoutValue,
+      source: 'pricing',
+      startedAt: Date.now(),
+    }));
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',

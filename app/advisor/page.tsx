@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Header from '@/components/Header';
+import MetaCheckoutSuccessTracker from '@/components/MetaCheckoutSuccessTracker';
+import { trackMetaEvent } from '@/lib/meta-pixel';
 import { track } from '@vercel/analytics';
 
 interface Msg {
@@ -392,6 +394,11 @@ export default function AdvisorPage() {
         return;
       }
       track('scout_lead_captured', { source: 'guest_limit_card', guest_questions: guestCount || GUEST_LIMIT });
+      trackMetaEvent('Lead', {
+        content_name: 'Scout email capture',
+        source: 'guest_limit_card',
+        guest_questions: guestCount || GUEST_LIMIT,
+      });
       window.location.href = data.redirect || `/sign-up?email=${encodeURIComponent(leadEmail.trim())}&source=scout`;
     } catch {
       setLeadError('Could not save email. Please try again.');
@@ -580,6 +587,7 @@ export default function AdvisorPage() {
 
   return (
     <div className="h-[100svh] flex flex-col overflow-hidden" style={{ backgroundColor: PAGE_BG }}>
+      <MetaCheckoutSuccessTracker />
       <Header />
       <div className="h-16 shrink-0" aria-hidden />
 

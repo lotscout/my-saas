@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import Header from '@/components/Header';
+import MetaCheckoutSuccessTracker from '@/components/MetaCheckoutSuccessTracker';
 
 export default function SuccessPage() {
   return (
     <div className="bg-background text-on-surface font-body min-h-screen flex flex-col">
+      <MetaCheckoutSuccessTracker />
       <Header />
       <main className="flex-grow flex items-center justify-center px-6">
         <div className="text-center max-w-xl">

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { track } from '@vercel/analytics';
+import { trackMetaCustomEvent, trackMetaEvent } from '@/lib/meta-pixel';
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +43,11 @@ export default function SignUpPage() {
     const signupCampaign = localStorage.getItem('utm_campaign') || '';
 
     track('signup_started', {
+      source: signupSource,
+      medium: signupMedium,
+      campaign: signupCampaign,
+    });
+    trackMetaCustomEvent('SignupStarted', {
       source: signupSource,
       medium: signupMedium,
       campaign: signupCampaign,
@@ -90,6 +96,13 @@ export default function SignUpPage() {
       source: signupSource,
       medium: signupMedium,
       campaign: signupCampaign,
+    });
+    trackMetaEvent('CompleteRegistration', {
+      content_name: 'LotScout account signup',
+      source: signupSource,
+      medium: signupMedium,
+      campaign: signupCampaign,
+      status: true,
     });
 
     window.location.replace('/marketplace');

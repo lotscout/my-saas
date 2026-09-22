@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { trackMetaEvent, trackMetaCustomEvent } from '@/lib/meta-pixel';
 
 type Props = {
   roles: string[];
@@ -47,6 +48,15 @@ export default function LandingSignupForm({ roles, variant }: Props) {
 
     const { firstName, lastName, email, market, userType } = values;
 
+    trackMetaCustomEvent('LeadFormStarted', {
+      source: 'lotscout-home',
+      medium: 'landing_form',
+      campaign: 'buyer_seller_match',
+      user_type: userType,
+      market,
+      form_variant: variant,
+    });
+
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -76,6 +86,16 @@ export default function LandingSignupForm({ roles, variant }: Props) {
       return;
     }
 
+    trackMetaEvent('Lead', {
+      content_name: 'LotScout landing form',
+      source: 'lotscout-home',
+      medium: 'landing_form',
+      campaign: 'buyer_seller_match',
+      user_type: userType,
+      market,
+      form_variant: variant,
+    });
+
     window.location.href = '/youre-in';
   }
 
@@ -87,6 +107,16 @@ export default function LandingSignupForm({ roles, variant }: Props) {
 
     const values = getFormValues(form);
     if (!validateRequired(values)) return;
+
+    trackMetaEvent('Lead', {
+      content_name: 'LotScout Google landing signup',
+      source: 'lotscout-home',
+      medium: 'google_oauth',
+      campaign: 'buyer_seller_match',
+      user_type: values.userType,
+      market: values.market,
+      form_variant: variant,
+    });
 
     const params = new URLSearchParams({
       next: '/edit-profile?setup=password',
