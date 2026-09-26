@@ -20,6 +20,7 @@ const NAV = [
   { href: '/admin/messaging',          label: 'Buyer Messaging',   icon: 'chat'        },
   { href: '/admin/analysis',           label: 'Analysis Queue',    icon: 'analytics'   },
   { href: '/admin/dashboard/sources',  label: 'Marketing Sources', icon: 'track_changes' },
+  { href: '/admin/land-matcher',      label: 'Land Matcher',      icon: 'travel_explore' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

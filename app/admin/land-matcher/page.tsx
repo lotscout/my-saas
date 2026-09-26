@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Header from '@/components/Header';
 import { PageHeader, PrimaryAction, SurfaceCard } from '@/components/ui/LotScoutUI';
 import {
   buildMatches,
@@ -177,8 +176,7 @@ export default function LandMatcherPage() {
 
   return (
     <div className="min-h-screen bg-surface text-on-surface">
-      <Header />
-      <main className="mx-auto max-w-[1500px] px-4 pb-20 pt-24 sm:px-6 md:px-10">
+      <main className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 md:px-10">
         <PageHeader
           title={<>Land <span className="text-[#1D9E75]">Matcher</span></>}
           description="Internal tool for turning builder criteria and ATTOM parcel data into a ranked seller contact queue. Start with the highest opportunity score, then update the outreach status as you work the list."
