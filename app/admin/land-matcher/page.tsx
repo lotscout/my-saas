@@ -1,13 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PageHeader, PrimaryAction, SurfaceCard } from '@/components/ui/LotScoutUI';
 import {
   buildMatches,
   formatCurrency,
   formatSqft,
-  seedBuyers,
-  seedParcels,
+  type BuyerProfile,
+  type LandParcel,
   type ParcelMatch,
 } from '@/lib/land-matcher';
 
@@ -135,9 +135,36 @@ export default function LandMatcherPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [buyers, setBuyers] = useState<BuyerProfile[]>([]);
+  const [parcels, setParcels] = useState<LandParcel[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
 
-  const allMatches = useMemo(() => buildMatches(), []);
-  const neighborhoods = useMemo(() => Array.from(new Set(seedParcels.map(parcel => parcel.neighborhood))).sort(), []);
+  useEffect(() => {
+    let cancelled = false;
+    async function loadData() {
+      setLoadingData(true);
+      setDataError(null);
+      try {
+        const response = await fetch('/api/land-matcher/data', { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data?.details || data?.error || 'Could not load Land Matcher data.');
+        if (!cancelled) {
+          setBuyers(data.buyers || []);
+          setParcels(data.parcels || []);
+        }
+      } catch (error) {
+        if (!cancelled) setDataError(error instanceof Error ? error.message : 'Could not load Land Matcher data.');
+      } finally {
+        if (!cancelled) setLoadingData(false);
+      }
+    }
+    loadData();
+    return () => { cancelled = true; };
+  }, []);
+
+  const allMatches = useMemo(() => buildMatches(buyers, parcels), [buyers, parcels]);
+  const neighborhoods = useMemo(() => Array.from(new Set(parcels.map(parcel => parcel.neighborhood).filter(Boolean))).sort(), [parcels]);
 
   const matches = useMemo(() => {
     return allMatches.filter(match => {
@@ -179,9 +206,21 @@ export default function LandMatcherPage() {
       <main className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 md:px-10">
         <PageHeader
           title={<>Land <span className="text-[#1D9E75]">Matcher</span></>}
-          description="Internal tool for turning builder criteria and ATTOM parcel data into a ranked seller contact queue. Start with the highest opportunity score, then update the outreach status as you work the list."
-          actions={<PrimaryAction onClick={testAttomImport} disabled={importing}>{importing ? 'Testing ATTOM...' : 'Test ATTOM import'}</PrimaryAction>}
+          description="Internal Denver-only dashboard using real ATTOM parcel profiles. It ranks owner outreach by builder fit plus seller motivation."
+          actions={<PrimaryAction onClick={testAttomImport} disabled={importing}>{importing ? 'Testing ATTOM...' : 'Test ATTOM connection'}</PrimaryAction>}
         />
+
+        {loadingData && (
+          <SurfaceCard className="mb-7 p-5">
+            <p className="text-sm font-bold text-secondary">Loading real Denver ATTOM parcel data…</p>
+          </SurfaceCard>
+        )}
+
+        {dataError && (
+          <SurfaceCard className="mb-7 border-red-200 bg-red-50 p-5">
+            <p className="text-sm font-bold text-red-700">{dataError}</p>
+          </SurfaceCard>
+        )}
 
         {importStatus && (
           <SurfaceCard className="mb-7 border-[#1D9E75]/20 bg-[#FCFFFD] p-5">
@@ -190,17 +229,17 @@ export default function LandMatcherPage() {
         )}
 
         <div className="mb-7 grid grid-cols-1 gap-5 md:grid-cols-4">
-          <StatCard label="Active buyers" value={seedBuyers.length.toString()} sub="Builder buy boxes loaded" />
+          <StatCard label="Active buyers" value={buyers.length.toString()} sub="Denver builder buy boxes" />
+          <StatCard label="ATTOM parcels" value={parcels.length.toString()} sub="Real Denver records imported" />
           <StatCard label="Matched parcels" value={matchedParcels.toString()} sub="Lots matching at least one buyer" />
           <StatCard label="Top contacts" value={topContacts.toString()} sub="Opportunity score 75+" />
-          <StatCard label="Source" value="ATTOM" sub="Ready for live parcel imports" />
         </div>
 
         <SurfaceCard className="mb-7 p-3 sm:p-4">
           <div className="flex flex-col gap-3 lg:flex-row">
             <select value={buyerId} onChange={e => setBuyerId(e.target.value)} className={SELECT_CLS}>
               <option value="">All buyers</option>
-              {seedBuyers.map(buyer => <option key={buyer.id} value={buyer.id}>{buyer.company}</option>)}
+              {buyers.map(buyer => <option key={buyer.id} value={buyer.id}>{buyer.company}</option>) }
             </select>
             <select value={neighborhood} onChange={e => setNeighborhood(e.target.value)} className={SELECT_CLS}>
               <option value="">All neighborhoods</option>
