@@ -93,8 +93,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Admin area requires the admin flag (this app uses profiles.is_admin).
-  if (path === '/admin' || path.startsWith('/admin/')) {
+  // Admin/internal areas require the admin flag (this app uses profiles.is_admin).
+  if (path === '/admin' || path.startsWith('/admin/') || path === '/land-matcher' || path.startsWith('/land-matcher/')) {
     if (isAdminEmail(user.email)) return supabaseResponse
 
     const { data: profile } = await supabase
