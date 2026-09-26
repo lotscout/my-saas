@@ -149,7 +149,8 @@ export async function GET(request: NextRequest) {
           .single()
 
         if (profile?.is_admin) {
-          destination = '/admin/dashboard'
+          const requestedAdminPath = next.startsWith('/admin') && !next.startsWith('//') ? next : null
+          destination = requestedAdminPath || '/admin/dashboard'
         }
 
         if (user.email) {
