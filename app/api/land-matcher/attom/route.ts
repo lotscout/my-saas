@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkIsAdmin } from '@/lib/admin-server';
+import { requestHasLandMatcherAccess } from '@/lib/internal-access';
 
 const ATTOM_BASE_URL = process.env.ATTOM_BASE_URL || 'https://api.gateway.attomdata.com';
 const ATTOM_SEARCH_PATH = process.env.ATTOM_PROPERTY_SEARCH_PATH || '/propertyapi/v1.0.0/property/address';
@@ -14,8 +15,8 @@ type AttomImportRequest = {
 
 export async function POST(request: Request) {
   const isAdmin = await checkIsAdmin(request);
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Admin access required.' }, { status: 403 });
+  if (!isAdmin && !requestHasLandMatcherAccess(request)) {
+    return NextResponse.json({ error: 'Internal access required.' }, { status: 403 });
   }
 
   const apiKey = process.env.ATTOM_API_KEY;

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { checkIsAdmin } from '@/lib/admin-server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { requestHasLandMatcherAccess } from '@/lib/internal-access';
 
 function mapBuyer(row: any) {
   return {
@@ -50,7 +51,9 @@ function mapParcel(row: any) {
 
 export async function GET(request: Request) {
   const isAdmin = await checkIsAdmin(request);
-  if (!isAdmin) return NextResponse.json({ error: 'Admin access required.' }, { status: 403 });
+  if (!isAdmin && !requestHasLandMatcherAccess(request)) {
+    return NextResponse.json({ error: 'Internal access required.' }, { status: 403 });
+  }
 
   const supabase = createServiceClient();
   const [{ data: buyers, error: buyersError }, { data: parcels, error: parcelsError }] = await Promise.all([

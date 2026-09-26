@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isAdminEmail } from './lib/admin'
+import { LAND_MATCHER_COOKIE, hasValidLandMatcherToken } from './lib/internal-access'
 
 // Default-deny: every page route requires a session EXCEPT these public ones.
 // (API routes authenticate themselves and are bypassed below.)
@@ -32,6 +33,27 @@ function isPublic(pathname: string) {
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
+
+  // Private no-login internal Land Matcher access. This intentionally avoids
+  // the normal LotScout auth flow while still requiring the secret token.
+  if (path === '/internal/land-matcher' || path.startsWith('/internal/land-matcher/')) {
+    const token = request.nextUrl.searchParams.get('token')
+    const cookieToken = request.cookies.get(LAND_MATCHER_COOKIE)?.value
+    if (hasValidLandMatcherToken(token) || hasValidLandMatcherToken(cookieToken)) {
+      const response = NextResponse.next({ request })
+      if (hasValidLandMatcherToken(token)) {
+        response.cookies.set(LAND_MATCHER_COOKIE, token!, {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: true,
+          path: '/',
+          maxAge: 60 * 60 * 24 * 30,
+        })
+      }
+      return response
+    }
+    return new NextResponse('Not found', { status: 404 })
+  }
 
   // API routes return JSON and enforce their own auth — never redirect them.
   // Keep them out of proxy auth work so public endpoints stay fast.
