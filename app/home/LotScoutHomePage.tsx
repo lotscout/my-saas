@@ -84,12 +84,12 @@ export default function LotScoutHomePage() {
           <a href="#match-form-mobile" className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[#1b4332] px-6 py-4 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-[#1b4332]/15 transition hover:bg-[#143426] sm:w-auto lg:hidden">
             Find your next land deal
           </a>
-          <div className="mt-7 hidden flex-wrap gap-3 text-sm font-black uppercase tracking-[0.08em] text-[#1b4332] text-left sm:flex">
+          <div className="mt-7 hidden flex-wrap gap-3 text-left text-sm font-black uppercase tracking-[0.08em] text-[#1b4332] lg:flex">
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Verified buyers and sellers</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">No MLS access required</span>
             <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Marketplace with 500+ off-market properties</span>
           </div>
-          <div id="results" className="mt-5 grid max-w-[36rem] grid-cols-2 gap-2 sm:mt-6">
+          <div id="results" className="mt-4 grid max-w-[36rem] grid-cols-2 gap-2 sm:mt-6">
             {stats.map(([big, small]) => (
               <div key={big} data-reveal className="rounded-2xl border border-[#d9d2c3] bg-[#f7f4ec] px-4 py-3 shadow-sm">
                 <div className="font-headline text-2xl font-black uppercase tracking-[-0.04em] text-[#1b4332] sm:text-3xl">{big}</div>
