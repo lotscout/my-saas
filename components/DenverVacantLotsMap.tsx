@@ -55,7 +55,7 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
   const markersRef = useRef<Map<string, any>>(new Map());
   const onSelectRef = useRef(onSelect);
   const filteredIdsRef = useRef(filteredIds);
-  const [mapUnlocked, setMapUnlocked] = useState(false);
+  const [mapUnlocked, setMapUnlocked] = useState(true);
 
   useEffect(() => { onSelectRef.current = onSelect; });
   useEffect(() => { filteredIdsRef.current = filteredIds; }, [filteredIds]);
@@ -75,12 +75,12 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
       if (!mapInstanceRef.current) {
         const map = L.map(mapRef.current!, {
           zoomControl: true,
-          scrollWheelZoom: false,
-          dragging: false,
-          touchZoom: false,
-          doubleClickZoom: false,
-          boxZoom: false,
-          keyboard: false,
+          scrollWheelZoom: true,
+          dragging: true,
+          touchZoom: true,
+          doubleClickZoom: true,
+          boxZoom: true,
+          keyboard: true,
           preferCanvas: true,
         }).setView([39.7392, -104.9903], 11);
         mapInstanceRef.current = map;
@@ -168,7 +168,8 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
     toggle(map.doubleClickZoom, mapUnlocked);
     toggle(map.boxZoom, mapUnlocked);
     toggle(map.keyboard, mapUnlocked);
-    map.scrollWheelZoom?.disable?.();
+    if (mapUnlocked) map.scrollWheelZoom?.enable?.();
+    else map.scrollWheelZoom?.disable?.();
   }, [mapUnlocked]);
 
   useEffect(() => () => {
@@ -186,7 +187,7 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
         onClick={() => setMapUnlocked(v => !v)}
         className="absolute right-4 top-4 z-[1000] rounded-xl border border-black/10 bg-white/95 px-3 py-2 text-xs font-black text-slate-700 shadow backdrop-blur hover:bg-white"
       >
-        {mapUnlocked ? 'Map unlocked' : 'Move map'}
+        {mapUnlocked ? 'Map active' : 'Map locked'}
       </button>
       <div className="absolute bottom-4 left-4 z-[1000] flex items-center gap-3 rounded-xl bg-white/95 px-3 py-2 text-xs font-bold text-slate-700 shadow backdrop-blur">
         <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#10291E] shadow" />Vacant lot</span>
