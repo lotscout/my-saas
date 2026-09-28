@@ -48,9 +48,9 @@ const faqs = [
 
 export default function LotScoutHomePage() {
   return (
-    <main className="min-h-screen scroll-smooth bg-white text-[#10291e] lg:h-svh lg:overflow-y-auto lg:snap-y lg:snap-proximity">
+    <main className="min-h-screen scroll-smooth bg-white text-[#10291E] lg:h-svh lg:overflow-y-auto lg:snap-y lg:snap-proximity">
       <ScrollReveal />
-      <div className="lg:snap-start border-b border-[#d9d2c3] bg-[#1b4332] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-white sm:text-sm sm:tracking-[0.12em]">
+      <div className="lg:snap-start border-b border-[#D8C49A] bg-[#D6A13D] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-[#10291E] sm:text-sm sm:tracking-[0.12em]">
         $77M+ in land transactions connected through direct buyer/seller relationships
       </div>
 
@@ -58,19 +58,19 @@ export default function LotScoutHomePage() {
         <a href="/" className="flex items-center gap-3" aria-label="LotScout home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/lotscout-logo.png" alt="LotScout" className="h-11 w-11 object-contain" />
-          <span className="font-headline text-2xl font-black tracking-tight text-[#1b4332]">LotScout</span>
+          <span className="font-headline text-2xl font-black tracking-tight text-[#10291E]">LotScout</span>
         </a>
-        <nav className="hidden items-center gap-8 text-sm font-black uppercase tracking-[0.12em] text-[#52665b] md:flex">
-          <a href="#results" className="hover:text-[#1b4332]">Results</a>
-          <a href="#how" className="hover:text-[#1b4332]">How it works</a>
-          <a href="#faq" className="hover:text-[#1b4332]">FAQ</a>
+        <nav className="hidden items-center gap-8 text-sm font-black uppercase tracking-[0.12em] text-[#6B3F1D] md:flex">
+          <a href="#results" className="hover:text-[#10291E]">Results</a>
+          <a href="#how" className="hover:text-[#10291E]">How it works</a>
+          <a href="#faq" className="hover:text-[#10291E]">FAQ</a>
         </nav>
 
       </header>
 
       <section className="mx-auto grid max-w-7xl items-start gap-5 px-6 pb-5 pt-6 sm:px-8 lg:min-h-[calc(100svh-108px)] lg:snap-start lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-12 lg:px-10 lg:py-6">
         <div data-reveal="left" className="lg:self-center">
-          <h1 className="font-headline text-center text-[2.25rem] font-black uppercase leading-[0.98] tracking-[-0.03em] text-[#10291e] sm:text-5xl sm:leading-[0.96] sm:tracking-[-0.035em] lg:text-left lg:text-5xl xl:text-6xl">
+          <h1 className="font-headline text-center text-[2.25rem] font-black uppercase leading-[0.98] tracking-[-0.03em] text-[#10291E] sm:text-5xl sm:leading-[0.96] sm:tracking-[-0.035em] lg:text-left lg:text-5xl xl:text-6xl">
             <span className="block sm:hidden">
               <span className="block whitespace-nowrap">Ready to buy and</span>
               <span className="block whitespace-nowrap">sell land faster</span>
@@ -78,22 +78,22 @@ export default function LotScoutHomePage() {
             </span>
             <span className="hidden sm:inline">Ready to buy and sell land faster without the MLS?</span>
           </h1>
-          <p className="mt-4 max-w-[36rem] text-sm font-semibold leading-6 text-[#52665b] sm:mt-6 sm:text-base sm:leading-7">
+          <p className="mt-4 max-w-[36rem] text-sm font-semibold leading-6 text-[#6B3F1D] sm:mt-6 sm:text-base sm:leading-7">
             LotScout connects real land buyers and sellers so that deals get done quicker. Assisting with due diligence, market data and funding partners so that you can transact land deals with confidence.
           </p>
-          <a href="#match-form-mobile" className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[#1b4332] px-6 py-4 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-[#1b4332]/15 transition hover:bg-[#143426] sm:w-auto lg:hidden">
+          <a href="#match-form-mobile" className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[#D6A13D] px-6 py-4 text-sm font-black uppercase tracking-[0.1em] text-[#10291E] shadow-lg shadow-[#10291E]/15 transition hover:bg-[#B9852F] sm:w-auto lg:hidden">
             Find your next land deal
           </a>
-          <div className="mt-7 hidden flex-wrap gap-3 text-left text-sm font-black uppercase tracking-[0.08em] text-[#1b4332] lg:flex">
-            <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Verified buyers and sellers</span>
-            <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">No MLS access required</span>
-            <span className="rounded-full border border-[#1b4332]/15 bg-[#f7f4ec] px-4 py-2 shadow-sm">Marketplace with 500+ off-market properties</span>
+          <div className="mt-7 hidden flex-wrap gap-3 text-left text-sm font-black uppercase tracking-[0.08em] text-[#10291E] lg:flex">
+            <span className="rounded-full border border-[#10291E]/15 bg-[#F7F1E3] px-4 py-2 shadow-sm">Verified buyers and sellers</span>
+            <span className="rounded-full border border-[#10291E]/15 bg-[#F7F1E3] px-4 py-2 shadow-sm">No MLS access required</span>
+            <span className="rounded-full border border-[#10291E]/15 bg-[#F7F1E3] px-4 py-2 shadow-sm">Marketplace with 500+ off-market properties</span>
           </div>
           <div id="results" className="mt-4 grid max-w-[36rem] grid-cols-2 gap-2 sm:mt-6">
             {stats.map(([big, small]) => (
-              <div key={big} data-reveal className="rounded-2xl border border-[#d9d2c3] bg-[#f7f4ec] px-4 py-3 shadow-sm">
-                <div className="font-headline text-2xl font-black uppercase tracking-[-0.04em] text-[#1b4332] sm:text-3xl">{big}</div>
-                <div className="mt-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#52665b] sm:text-xs">{small}</div>
+              <div key={big} data-reveal className="rounded-2xl border border-[#D8C49A] bg-[#F7F1E3] px-4 py-3 shadow-sm">
+                <div className="font-headline text-2xl font-black uppercase tracking-[-0.04em] text-[#10291E] sm:text-3xl">{big}</div>
+                <div className="mt-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#6B3F1D] sm:text-xs">{small}</div>
               </div>
             ))}
           </div>
@@ -110,37 +110,37 @@ export default function LotScoutHomePage() {
 
       <section className="mx-auto flex max-w-7xl flex-col justify-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
         <div data-reveal className="mb-6 max-w-3xl sm:mb-10">
-          <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] text-[#10291e] sm:text-6xl">Answer the real objections.</h2>
+          <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] text-[#10291E] sm:text-6xl">Answer the real objections.</h2>
         </div>
         <div className="grid gap-5 lg:grid-cols-3">
           {objections.map((item) => (
-            <article key={item.title} data-reveal className="rounded-[1.5rem] border border-[#d9d2c3] bg-[#f7f4ec] p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
-              <h3 className="text-xl font-black leading-tight tracking-[-0.04em] text-[#10291e] sm:text-2xl">{item.title}</h3>
-              <p className="mt-3 text-sm font-semibold leading-6 text-[#607267] sm:mt-4 sm:text-base sm:leading-7">{item.body}</p>
+            <article key={item.title} data-reveal className="rounded-[1.5rem] border border-[#D8C49A] bg-[#F7F1E3] p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
+              <h3 className="text-xl font-black leading-tight tracking-[-0.04em] text-[#10291E] sm:text-2xl">{item.title}</h3>
+              <p className="mt-3 text-sm font-semibold leading-6 text-[#6B3F1D] sm:mt-4 sm:text-base sm:leading-7">{item.body}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section id="how" className="flex bg-[#e8efe6] text-[#10291e] lg:min-h-svh lg:snap-start lg:items-center">
+      <section id="how" className="flex bg-[#F1E3C6] text-[#10291E] lg:min-h-svh lg:snap-start lg:items-center">
         <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
           <div data-reveal className="mb-10 max-w-3xl">
             <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Start with the match.</h2>
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
             {steps.map(([num, title, body]) => (
-              <div key={num} data-reveal className="rounded-[1.5rem] border border-[#1b4332]/15 bg-white p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1b4332] text-lg font-black text-white">{num}</span>
+              <div key={num} data-reveal className="rounded-[1.5rem] border border-[#10291E]/15 bg-white p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#10291E] text-lg font-black text-white">{num}</span>
                 <h3 className="mt-4 text-xl font-black tracking-[-0.04em] sm:mt-5 sm:text-2xl">{title}</h3>
-                <p className="mt-3 text-base font-semibold leading-7 text-[#52665b]">{body}</p>
+                <p className="mt-3 text-base font-semibold leading-7 text-[#6B3F1D]">{body}</p>
               </div>
             ))}
           </div>
           <div className="mt-10 text-center">
-            <a href="#match-form-mobile" className="inline-flex rounded-full bg-[#1b4332] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426] lg:hidden">
+            <a href="#match-form-mobile" className="inline-flex rounded-full bg-[#10291E] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#B9852F] lg:hidden">
               Find my next land deal
             </a>
-            <a href="#match-form-desktop" className="hidden rounded-full bg-[#1b4332] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#143426] lg:inline-flex">
+            <a href="#match-form-desktop" className="hidden rounded-full bg-[#10291E] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#B9852F] lg:inline-flex">
               Find my next land deal
             </a>
           </div>
@@ -149,42 +149,42 @@ export default function LotScoutHomePage() {
 
       <section id="faq" data-reveal className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:px-10 lg:py-12">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.25em] text-[#1D9E75]">FAQs</p>
+          <p className="text-sm font-black uppercase tracking-[0.25em] text-[#D6A13D]">FAQs</p>
           <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Before you scout.</h2>
         </div>
-        <div className="divide-y divide-[#1b4332]/15 border-y border-[#1b4332]/15">
+        <div className="divide-y divide-[#10291E]/15 border-y border-[#10291E]/15">
           {faqs.map((faq) => (
             <div key={faq.q} data-reveal className="py-4 sm:py-6">
               <h3 className="text-2xl font-black tracking-[-0.04em]">{faq.q}</h3>
-              <p className="mt-3 text-base font-semibold leading-7 text-[#52665b]">{faq.a}</p>
+              <p className="mt-3 text-base font-semibold leading-7 text-[#6B3F1D]">{faq.a}</p>
             </div>
           ))}
         </div>
       </section>
 
       <section className="mx-auto flex max-w-7xl items-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
-        <div data-reveal className="w-full rounded-[2rem] border border-[#d9d2c3] bg-[#1b4332] p-8 text-center text-white shadow-2xl shadow-[#1b4332]/15 sm:p-10 lg:p-12">
+        <div data-reveal className="w-full rounded-[2rem] border border-[#D8C49A] bg-[#10291E] p-8 text-center text-white shadow-2xl shadow-[#10291E]/15 sm:p-10 lg:p-12">
           <h2 className="mx-auto mt-4 max-w-4xl font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">
             Land deals need better matching before they need more listing exposure.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/72">
             LotScout was built around the real bottleneck in land: helping the right buyers and sellers find each other, proving deal quality, and creating enough confidence to move.
           </p>
-          <a href="#match-form-mobile" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#d9f99d] lg:hidden">
+          <a href="#match-form-mobile" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#10291E] hover:bg-[#D6A13D] lg:hidden">
             Get started
           </a>
-          <a href="#match-form-desktop" className="mt-7 hidden rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#1b4332] hover:bg-[#d9f99d] lg:inline-flex">
+          <a href="#match-form-desktop" className="mt-7 hidden rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#10291E] hover:bg-[#D6A13D] lg:inline-flex">
             Get started
           </a>
         </div>
       </section>
 
-      <footer className="lg:snap-start border-t border-[#d9d2c3] px-5 py-8 text-xs font-semibold leading-6 text-[#7b897f] sm:px-8 lg:px-10">
+      <footer className="lg:snap-start border-t border-[#D8C49A] px-5 py-8 text-xs font-semibold leading-6 text-[#6B3F1D] sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p>LotScout does not guarantee buyer interest, sale outcomes, investment returns, zoning approvals, utility availability, or development feasibility. Transaction, commission, and timeline figures are historical/contextual and not a guarantee of future results. All users should complete independent diligence and consult qualified professionals.</p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p>Copyright © 2026 LotScout.</p>
-            <a href="/terms" className="font-black text-[#1b4332] underline decoration-[#1b4332]/30 underline-offset-4 hover:decoration-[#1b4332]">
+            <a href="/terms" className="font-black text-[#10291E] underline decoration-[#10291E]/30 underline-offset-4 hover:decoration-[#10291E]">
               Terms and Conditions
             </a>
           </div>
