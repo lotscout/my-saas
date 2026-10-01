@@ -24,6 +24,16 @@ export type DenverVacantLot = {
   neighborhood?: string;
   yearsOwned?: number | null;
   flags?: string[];
+  publicVerification?: {
+    status?: string;
+    reasons?: string[];
+    source?: string;
+    checkedAt?: string;
+  };
+  publicPropertyClass?: string;
+  publicImprovementValue?: number | null;
+  publicResidentialYearBuilt?: string;
+  publicCommercialYearBuilt?: string;
   assessedTotal?: number | null;
   assessedLand?: number | null;
   lastSalePrice?: number | null;
@@ -47,6 +57,14 @@ function fmtNumber(value?: number | null) {
 
 function fmtMoney(value?: number | null) {
   return value ? `$${value.toLocaleString()}` : '—';
+}
+
+function verificationLabel(status?: string) {
+  if (status === 'verified_vacant_by_public_record') return 'Public verified vacant';
+  if (status === 'likely_improved_not_vacant') return 'Likely improved — review';
+  if (status === 'conflicting_public_record') return 'Conflicting public record';
+  if (status === 'needs_review') return 'Needs review';
+  return 'Unverified';
 }
 
 export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onSelect }: Props) {
@@ -107,7 +125,12 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
       plottableLots.forEach(lot => {
         const id = lot.attomId || `${lot.address}-${lot.lat}-${lot.lng}`;
         const opacity = !currentFiltered || currentFiltered.size === 0 || currentFiltered.has(id) ? 0.86 : 0.08;
-        const fill = lot.zip === '80216' || lot.zip === '80204' || lot.zip === '80249' ? '#D6A13D' : '#10291E';
+        const status = lot.publicVerification?.status;
+        const fill = status === 'likely_improved_not_vacant' || status === 'conflicting_public_record'
+          ? '#DC2626'
+          : status === 'verified_vacant_by_public_record'
+            ? '#10291E'
+            : '#D6A13D';
         const marker = L.circleMarker([lot.lat, lot.lng], {
           radius: 4,
           weight: 1.4,
@@ -123,6 +146,7 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
             <div style="font-size:14px;font-weight:900;color:#10291E;line-height:1.25;margin-bottom:4px;">${esc(lot.address || 'Vacant lot')}</div>
             <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:9px;">${esc(lot.city)}, ${esc(lot.state)} ${esc(lot.zip)} · ATTOM ${esc(lot.attomId)}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
+              <div><b>Public check</b><br/>${esc(verificationLabel(lot.publicVerification?.status))}</div>
               <div><b>Owner</b><br/>${esc(lot.ownerName || 'Not enriched')}</div>
               <div><b>Owner type</b><br/>${esc(lot.ownerType || '—')}</div>
               <div><b>Land use</b><br/>${esc(lot.landUse || 'Vacant land')}</div>
@@ -199,8 +223,9 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
         {mapUnlocked ? 'Map active' : 'Map locked'}
       </button>
       <div className="absolute bottom-4 left-4 z-[1000] flex items-center gap-3 rounded-xl bg-white/95 px-3 py-2 text-xs font-bold text-slate-700 shadow backdrop-blur">
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#10291E] shadow" />Vacant lot</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#D6A13D] shadow" />High-volume ZIP</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#10291E] shadow" />Public verified vacant</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#DC2626] shadow" />Improved/conflict</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#D6A13D] shadow" />Unverified</span>
         <span className="text-slate-400">{plottableLots.length.toLocaleString()} points</span>
       </div>
     </div>

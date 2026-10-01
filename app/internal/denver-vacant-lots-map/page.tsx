@@ -56,7 +56,7 @@ export default function DenverVacantLotsMapPage() {
     return lots.filter(lot => {
       if (zip && lot.zip !== zip) return false;
       if (q) {
-        const haystack = [lot.address, lot.zip, lot.attomId, lot.apn, lot.landUse, lot.zoning].join(' ').toLowerCase();
+        const haystack = [lot.address, lot.zip, lot.attomId, lot.apn, lot.landUse, lot.zoning, lot.ownerName, lot.publicPropertyClass, lot.publicVerification?.status].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -74,6 +74,23 @@ export default function DenverVacantLotsMapPage() {
   const enrichedCount = useMemo(() => lots.filter(lot => Boolean(lot.ownerName || lot.lotSqft || lot.lotAcres || lot.zoning || lot.assessedTotal || lot.lastSaleDate)).length, [lots]);
   const ownerCount = useMemo(() => lots.filter(lot => Boolean(lot.ownerName)).length, [lots]);
   const selectedIsEnriched = Boolean(selected?.ownerName || selected?.lotSqft || selected?.lotAcres || selected?.zoning || selected?.assessedTotal || selected?.lastSaleDate);
+  const verificationCounts = useMemo(() => {
+    const counts = { verified: 0, improved: 0, conflict: 0, review: 0, unverified: 0 };
+    for (const lot of lots) {
+      const status = lot.publicVerification?.status;
+      if (status === 'verified_vacant_by_public_record') counts.verified += 1;
+      else if (status === 'likely_improved_not_vacant') counts.improved += 1;
+      else if (status === 'conflicting_public_record') counts.conflict += 1;
+      else if (status === 'needs_review') counts.review += 1;
+      else counts.unverified += 1;
+    }
+    return counts;
+  }, [lots]);
+  const selectedVerificationLabel = selected?.publicVerification?.status === 'verified_vacant_by_public_record' ? 'Public verified vacant'
+    : selected?.publicVerification?.status === 'likely_improved_not_vacant' ? 'Likely improved — review'
+      : selected?.publicVerification?.status === 'conflicting_public_record' ? 'Conflicting public record'
+        : selected?.publicVerification?.status === 'needs_review' ? 'Needs review'
+          : 'Unverified';
   const listLots = filtered.slice(0, 150);
 
   return (
@@ -88,7 +105,7 @@ export default function DenverVacantLotsMapPage() {
             </p>
             {!loading && (
               <p className="mt-2 max-w-3xl text-xs font-bold text-amber-700">
-                Current local dataset has {enrichedCount.toLocaleString()} enriched records, including {ownerCount.toLocaleString()} with owner names. Owner/lot/zoning fields show when locally available; otherwise they are marked not enriched.
+                Public Denver parcel check: {verificationCounts.verified.toLocaleString()} verified vacant, {(verificationCounts.improved + verificationCounts.conflict).toLocaleString()} improved/conflicting, {verificationCounts.review.toLocaleString()} need review, {verificationCounts.unverified.toLocaleString()} unverified/outside public match. Local data has {ownerCount.toLocaleString()} owner names.
               </p>
             )}
           </div>
@@ -136,9 +153,15 @@ export default function DenverVacantLotsMapPage() {
                   <div className={`mb-3 inline-flex rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.12em] ${selectedIsEnriched ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700'}`}>
                     {selectedIsEnriched ? 'Enriched record' : 'Base record · needs enrichment'}
                   </div>
+                  <div className={`mb-3 inline-flex rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.12em] ${selected?.publicVerification?.status === 'verified_vacant_by_public_record' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : selected?.publicVerification?.status === 'likely_improved_not_vacant' || selected?.publicVerification?.status === 'conflicting_public_record' ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-slate-50 text-slate-700'}`}>
+                    {selectedVerificationLabel}
+                  </div>
                   <h2 className="text-xl font-black leading-tight text-[#10291E]">{selected.address || 'Vacant lot'}</h2>
                   <p className="mt-1 text-sm font-bold text-slate-500">{selected.city}, {selected.state} {selected.zip}</p>
                   <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                    <Detail label="Public class" value={selected.publicPropertyClass || '—'} />
+                    <Detail label="Public improvement value" value={fmtMoney(selected.publicImprovementValue)} />
+                    <Detail label="Public verification reasons" value={selected.publicVerification?.reasons?.length ? selected.publicVerification.reasons.join('; ') : '—'} />
                     <Detail label="Owner" value={selected.ownerName || 'Not enriched'} />
                     <Detail label="Owner mailing" value={selected.ownerMailingAddress || 'Not enriched'} />
                     <Detail label="Owner type" value={selected.ownerType || '—'} />
@@ -178,6 +201,9 @@ export default function DenverVacantLotsMapPage() {
                   const id = lot.attomId || `${lot.address}-${lot.lat}-${lot.lng}`;
                   const active = selectedId === id;
                   const enriched = Boolean(lot.ownerName || lot.lotSqft || lot.lotAcres || lot.zoning || lot.assessedTotal || lot.lastSaleDate);
+                  const status = lot.publicVerification?.status;
+                  const statusLabel = status === 'verified_vacant_by_public_record' ? 'Verified vacant' : status === 'likely_improved_not_vacant' ? 'Improved' : status === 'conflicting_public_record' ? 'Conflict' : status === 'needs_review' ? 'Review' : 'Unverified';
+                  const statusClass = status === 'verified_vacant_by_public_record' ? 'text-emerald-700' : status === 'likely_improved_not_vacant' || status === 'conflicting_public_record' ? 'text-red-700' : 'text-amber-700';
                   return (
                     <button
                       key={id}
@@ -187,7 +213,7 @@ export default function DenverVacantLotsMapPage() {
                       <span className="block truncate text-sm font-black text-slate-900">{lot.address || 'Vacant lot'}</span>
                       <span className="mt-0.5 flex items-center justify-between gap-2 text-xs font-bold text-slate-500">
                         <span>{lot.zip} · {lot.apn || 'No APN'}</span>
-                        <span className={enriched ? 'text-emerald-700' : 'text-amber-700'}>{enriched ? 'Enriched' : 'Base'}</span>
+                        <span className={statusClass}>{statusLabel}</span>
                       </span>
                     </button>
                   );

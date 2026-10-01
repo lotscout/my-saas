@@ -1,0 +1,11 @@
+{
+  "source": "Colorado Information Marketplace / Denver Parcels public dataset",
+  "checkedAt": "2026-10-01T15:54:55.236Z",
+  "total": 3616,
+  "matchedPublicParcels": 2827,
+  "verifiedVacant": 2509,
+  "conflictingPublicRecord": 6,
+  "likelyImprovedNotVacant": 242,
+  "needsReview": 124,
+  "unverified": 735
+}
