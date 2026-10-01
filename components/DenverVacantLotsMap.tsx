@@ -117,12 +117,14 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
             <div style="font-size:14px;font-weight:900;color:#10291E;line-height:1.25;margin-bottom:4px;">${esc(lot.address || 'Vacant lot')}</div>
             <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:9px;">${esc(lot.city)}, ${esc(lot.state)} ${esc(lot.zip)} · ATTOM ${esc(lot.attomId)}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
+              <div><b>Owner</b><br/>${esc(lot.ownerName || 'Not enriched')}</div>
               <div><b>Land use</b><br/>${esc(lot.landUse || 'Vacant land')}</div>
-              <div><b>Zoning</b><br/>${esc(lot.zoning || '—')}</div>
+              <div><b>Zoning</b><br/>${esc(lot.zoning || 'Not enriched')}</div>
               <div><b>Lot sqft</b><br/>${esc(fmtNumber(lot.lotSqft))}</div>
               <div><b>Acres</b><br/>${esc(lot.lotAcres ? lot.lotAcres.toFixed(3) : '—')}</div>
               <div><b>Assessed</b><br/>${esc(fmtMoney(lot.assessedTotal))}</div>
               <div><b>Last sale</b><br/>${esc(fmtMoney(lot.lastSalePrice))}</div>
+              <div><b>Sale date</b><br/>${esc(lot.lastSaleDate || '—')}</div>
             </div>
             <div style="margin-top:9px;font-size:11px;color:#475569;"><b>APN:</b> ${esc(lot.apn || '—')}</div>
           </div>
