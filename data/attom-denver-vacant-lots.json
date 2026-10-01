@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-09-28",
   "source": "ATTOM property/address vacant land by Denver ZIP + merged 250 enriched records from prior Denver dashboard local cache + Denver public parcel vacancy verification",
-  "count": 3616,
+  "count": 3614,
   "lots": [
     {
       "attomId": "184226456",
@@ -62920,36 +62920,6 @@
       "publicCommercialArea": null
     },
     {
-      "attomId": "1002803245",
-      "apn": "1823-00-22-1466-00000",
-      "address": "0 RODGERS RIDGE RD, DENVER, NC 80210",
-      "city": "DENVER",
-      "state": "NC",
-      "zip": "80210",
-      "lat": 39.6787,
-      "lng": -104.9639,
-      "propertyType": "",
-      "landUse": "Vacant land",
-      "zoning": "",
-      "lotSqft": null,
-      "lotAcres": null,
-      "ownerName": "",
-      "ownerMailingAddress": "",
-      "assessedTotal": null,
-      "assessedLand": null,
-      "lastSalePrice": null,
-      "lastSaleDate": "",
-      "publicVerification": {
-        "source": "Colorado Information Marketplace / Denver Parcels public dataset",
-        "schednum": "18230022146600000",
-        "status": "unverified",
-        "reasons": [
-          "No Denver public parcel match"
-        ],
-        "checkedAt": "2026-10-01T15:54:55.223Z"
-      }
-    },
-    {
       "attomId": "1004945967",
       "apn": "05221-29-041-000",
       "address": "1473 S PENNSYLVANIA ST, DENVER, CO 80210",
@@ -111168,36 +111138,6 @@
       "publicCommercialYearBuilt": "",
       "publicResidentialArea": null,
       "publicCommercialArea": null
-    },
-    {
-      "attomId": "329844406",
-      "apn": "R-001-861-56",
-      "address": "BARROW BARROW, BARROW, AK 80220",
-      "city": "BARROW",
-      "state": "AK",
-      "zip": "80220",
-      "lat": 71.124518,
-      "lng": -156.89556,
-      "propertyType": "",
-      "landUse": "Vacant land",
-      "zoning": "",
-      "lotSqft": null,
-      "lotAcres": null,
-      "ownerName": "",
-      "ownerMailingAddress": "",
-      "assessedTotal": null,
-      "assessedLand": null,
-      "lastSalePrice": null,
-      "lastSaleDate": "",
-      "publicVerification": {
-        "source": "Colorado Information Marketplace / Denver Parcels public dataset",
-        "schednum": "186156",
-        "status": "unverified",
-        "reasons": [
-          "No Denver public parcel match"
-        ],
-        "checkedAt": "2026-10-01T15:54:55.231Z"
-      }
     },
     {
       "attomId": "334130174",
@@ -180044,12 +179984,38 @@
   "publicVacancyVerification": {
     "source": "Colorado Information Marketplace / Denver Parcels public dataset",
     "checkedAt": "2026-10-01T15:54:55.236Z",
-    "total": 3616,
+    "total": 3614,
     "matchedPublicParcels": 2827,
     "verifiedVacant": 2509,
     "conflictingPublicRecord": 6,
     "likelyImprovedNotVacant": 242,
     "needsReview": 124,
-    "unverified": 735
+    "unverified": 735,
+    "removedOutliers": 2
+  },
+  "removedOutliers": {
+    "count": 2,
+    "removed": [
+      {
+        "attomId": "1002803245",
+        "apn": "1823-00-22-1466-00000",
+        "address": "0 RODGERS RIDGE RD, DENVER, NC 80210",
+        "city": "DENVER",
+        "state": "NC",
+        "zip": "80210",
+        "lat": 39.6787,
+        "lng": -104.9639
+      },
+      {
+        "attomId": "329844406",
+        "apn": "R-001-861-56",
+        "address": "BARROW BARROW, BARROW, AK 80220",
+        "city": "BARROW",
+        "state": "AK",
+        "zip": "80220",
+        "lat": 71.124518,
+        "lng": -156.89556
+      }
+    ]
   }
 }
