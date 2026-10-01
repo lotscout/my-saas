@@ -56,7 +56,7 @@ export default function DenverVacantLotsMapPage() {
     return lots.filter(lot => {
       if (zip && lot.zip !== zip) return false;
       if (q) {
-        const haystack = [lot.address, lot.zip, lot.attomId, lot.apn, lot.landUse, lot.zoning, lot.ownerName, lot.publicPropertyClass, lot.publicVerification?.status, lot.neighborhood, lot.growthNeighborhood, lot.contractor, lot.permitNumber, lot.buildType, lot.issuedDate].join(' ').toLowerCase();
+        const haystack = [lot.address, lot.zip, lot.attomId, lot.apn, lot.landUse, lot.zoning, lot.ownerName, lot.publicPropertyClass, lot.publicVerification?.status, lot.neighborhood, lot.growthNeighborhood, lot.opportunityType, lot.offMarketStatus].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -98,14 +98,14 @@ export default function DenverVacantLotsMapPage() {
       <div className="mx-auto max-w-[1800px]">
         <div className="mb-4 flex flex-col gap-4 border-b border-slate-200 pb-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#6B3F1D]">Internal · growth proof map</p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Denver 2024–2026 New Residential Builds</h1>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#6B3F1D]">Internal · growth seller targets</p>
+            <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Denver Growth-Area Seller Targets</h1>
             <p className="mt-2 max-w-3xl text-sm font-semibold text-slate-600">
-              {loading ? 'Loading new-build points…' : `${filtered.length.toLocaleString()} of ${lots.length.toLocaleString()} new single-family / townhome build records visible.`} Use this to identify neighborhoods with real infill growth before targeting nearby vacant parcels and old houses.
+              {loading ? 'Loading seller targets…' : `${filtered.length.toLocaleString()} of ${lots.length.toLocaleString()} off-market seller targets visible.`} Priority: vacant lots. Secondary: pre-1950 houses. All are individual-owned, 7,000+ sqft, owned 5+ years, and near 2024–2026 new-build activity.
             </p>
             {!loading && (
               <p className="mt-2 max-w-3xl text-xs font-bold text-amber-700">
-                Growth proof layer: {lots.filter(lot => lot.buildType === 'single_family_or_duplex').length.toLocaleString()} single-family/duplex signals and {lots.filter(lot => lot.buildType === 'townhome_or_attached').length.toLocaleString()} townhome/attached signals from 2024–2026 Denver new-building permits.
+                Target layer: {lots.filter(lot => lot.opportunityType === 'priority_vacant_lot').length.toLocaleString()} priority vacant lots and {lots.filter(lot => lot.opportunityType === 'secondary_old_house').length.toLocaleString()} secondary pre-1950 old-house targets. Sorted by priority and nearby new-build density.
               </p>
             )}
           </div>
@@ -121,7 +121,7 @@ export default function DenverVacantLotsMapPage() {
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search address, neighborhood, contractor, permit number..."
+            placeholder="Search address, owner, growth neighborhood, APN, zoning..."
             className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-[#10291E]"
           />
           <select value={zip} onChange={e => setZip(e.target.value)} className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-[#10291E]">
@@ -159,20 +159,29 @@ export default function DenverVacantLotsMapPage() {
                   <h2 className="text-xl font-black leading-tight text-[#10291E]">{selected.address || 'Vacant lot'}</h2>
                   <p className="mt-1 text-sm font-bold text-slate-500">{selected.city}, {selected.state} {selected.zip}</p>
                   <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <Detail label="Build signal" value={selected.buildType === 'townhome_or_attached' ? 'New townhome / attached' : 'New single-family / duplex'} />
-                    <Detail label="Issued date" value={selected.issuedDate || '—'} />
-                    <Detail label="Permit number" value={selected.permitNumber || '—'} />
-                    <Detail label="Neighborhood" value={selected.neighborhood || selected.growthNeighborhood || '—'} />
-                    <Detail label="Contractor" value={selected.contractor || '—'} />
-                    <Detail label="Valuation" value={fmtMoney(selected.valuation)} />
-                    <Detail label="Units" value={selected.units === null || selected.units === undefined ? '—' : String(selected.units)} />
-                    <Detail label="Permit class" value={selected.permitClass || '—'} />
+                    <Detail label="Target type" value={selected.opportunityType === 'priority_vacant_lot' ? 'Priority vacant lot' : 'Secondary old-house target'} />
+                    <Detail label="Priority score" value={selected.priorityScore ? String(selected.priorityScore) : '—'} />
+                    <Detail label="Growth neighborhood" value={selected.growthNeighborhood || selected.neighborhood || '—'} />
+                    <Detail label="Nearby new builds" value={`${selected.nearbyPermitsOneMile || 0} within 1 mile · ${selected.nearbyPermitsTwoMiles || 0} within 2 miles`} />
+                    <Detail label="Owner" value={selected.ownerName || '—'} />
+                    <Detail label="Owner mailing" value={selected.ownerMailingAddress || '—'} />
+                    <Detail label="Off-market status" value={selected.offMarketStatus || 'Off-market best effort'} />
+                    <Detail label="Years owned" value={selected.yearsOwned ? String(selected.yearsOwned) : '—'} />
                     <Detail label="Public class" value={selected.publicPropertyClass || '—'} />
                     <Detail label="Public improvement value" value={fmtMoney(selected.publicImprovementValue)} />
                     <Detail label="Public verification reasons" value={selected.publicVerification?.reasons?.length ? selected.publicVerification.reasons.join('; ') : '—'} />
                     <Detail label="ATTOM ID" value={selected.attomId || '—'} />
                     <Detail label="APN" value={selected.apn || '—'} />
-                    <Detail label="Land use" value={selected.landUse || 'New residential build permit'} />
+                    <Detail label="Land use" value={selected.landUse || '—'} />
+                    <Detail label="Zoning" value={selected.zoning || '—'} />
+                    <Detail label="Lot sqft" value={fmtNumber(selected.lotSqft)} />
+                    <Detail label="Acres" value={selected.lotAcres ? selected.lotAcres.toFixed(3) : '—'} />
+                    <Detail label="Assessed total" value={fmtMoney(selected.assessedTotal)} />
+                    <Detail label="Improvement value" value={fmtMoney(selected.publicImprovementValue)} />
+                    <Detail label="Last sale year" value={selected.lastSaleDate || '—'} />
+                    <Detail label="Last sale price" value={fmtMoney(selected.lastSalePrice)} />
+                    <Detail label="Year built" value={selected.publicResidentialYearBuilt || '—'} />
+                    <Detail label="Residential sqft" value={fmtNumber(selected.publicResidentialArea)} />
                     <Detail label="Flags" value={selected.flags?.length ? selected.flags.join(', ') : '—'} />
                   </div>
                   <a
@@ -198,8 +207,8 @@ export default function DenverVacantLotsMapPage() {
                   const active = selectedId === id;
                   const enriched = Boolean(lot.ownerName || lot.lotSqft || lot.lotAcres || lot.zoning || lot.assessedTotal || lot.lastSaleDate);
                   const status = lot.publicVerification?.status;
-                  const statusLabel = lot.buildType === 'townhome_or_attached' ? 'Townhome' : 'Single family';
-                  const statusClass = lot.buildType === 'townhome_or_attached' ? 'text-violet-700' : 'text-blue-700';
+                  const statusLabel = lot.opportunityType === 'priority_vacant_lot' ? 'Vacant lot' : 'Old house';
+                  const statusClass = lot.opportunityType === 'priority_vacant_lot' ? 'text-emerald-700' : 'text-violet-700';
                   return (
                     <button
                       key={id}
@@ -208,7 +217,7 @@ export default function DenverVacantLotsMapPage() {
                     >
                       <span className="block truncate text-sm font-black text-slate-900">{lot.address || 'Vacant lot'}</span>
                       <span className="mt-0.5 flex items-center justify-between gap-2 text-xs font-bold text-slate-500">
-                        <span>{lot.neighborhood || 'Denver'} · {lot.issuedDate || 'No date'}</span>
+                        <span>{lot.growthNeighborhood || lot.zip || 'Denver'} · {lot.lotSqft ? `${lot.lotSqft.toLocaleString()} sqft` : 'lot size —'}</span>
                         <span className={statusClass}>{statusLabel}</span>
                       </span>
                     </button>
@@ -231,7 +240,7 @@ export default function DenverVacantLotsMapPage() {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm font-semibold leading-6 text-slate-600 shadow-sm">
               <p className="font-black text-slate-900">Note</p>
-              <p className="mt-1">This page maps the proof-of-growth layer first: substantive Denver residential new-building permits issued from 2024–2026. I filtered out obvious garages/accessory/low-value permits so the map highlights actual single-family, duplex, townhome, and attached residential construction signals.</p>
+              <p className="mt-1">This page uses the 2024–2026 new-build layer to find growth areas, then surfaces individual-owned off-market seller targets: vacant residential lots first, pre-1950 houses second. Current filters: Denver, 7,000+ sqft, known sale year 2021 or older, non-commercial/non-industrial zoning, and no exact local active-listing match.</p>
             </div>
           </aside>
         </div>

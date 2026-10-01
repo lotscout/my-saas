@@ -52,6 +52,9 @@ export type DenverVacantLot = {
   valuation?: number | null;
   contractor?: string;
   buildType?: string;
+  priorityScore?: number;
+  offMarketStatus?: string;
+  nearbyPermitsTwoMiles?: number;
 };
 
 type Props = {
@@ -80,6 +83,8 @@ function verificationLabel(status?: string) {
   if (status === 'needs_review') return 'Needs review';
   if (status === 'old_house_growth_candidate') return 'Old house · growth area';
   if (status === 'new_build_growth_signal') return 'New build growth signal';
+  if (status === 'priority_vacant_lot') return 'Priority vacant lot';
+  if (status === 'secondary_old_house') return 'Secondary old-house target';
   return 'Unverified';
 }
 
@@ -142,11 +147,15 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
         const id = lot.attomId || `${lot.address}-${lot.lat}-${lot.lng}`;
         const opacity = !currentFiltered || currentFiltered.size === 0 || currentFiltered.has(id) ? 0.86 : 0.08;
         const status = lot.publicVerification?.status;
-        const fill = lot.opportunityType === 'new_build_growth_signal' || status === 'new_build_growth_signal'
-          ? '#2563EB'
-          : lot.opportunityType === 'old_house_teardown_candidate' || status === 'old_house_growth_candidate'
+        const fill = lot.opportunityType === 'priority_vacant_lot' || status === 'priority_vacant_lot'
+          ? '#10291E'
+          : lot.opportunityType === 'secondary_old_house' || status === 'secondary_old_house'
             ? '#7C3AED'
-            : status === 'likely_improved_not_vacant' || status === 'conflicting_public_record'
+            : lot.opportunityType === 'new_build_growth_signal' || status === 'new_build_growth_signal'
+              ? '#2563EB'
+              : lot.opportunityType === 'old_house_teardown_candidate' || status === 'old_house_growth_candidate'
+                ? '#7C3AED'
+                : status === 'likely_improved_not_vacant' || status === 'conflicting_public_record'
             ? '#DC2626'
             : status === 'verified_vacant_by_public_record'
               ? '#10291E'
@@ -166,20 +175,20 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
             <div style="font-size:14px;font-weight:900;color:#10291E;line-height:1.25;margin-bottom:4px;">${esc(lot.address || 'Vacant lot')}</div>
             <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:9px;">${esc(lot.city)}, ${esc(lot.state)} ${esc(lot.zip)} · ATTOM ${esc(lot.attomId)}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
-              <div><b>Opportunity</b><br/>${esc(lot.opportunityType === 'new_build_growth_signal' ? (lot.buildType === 'townhome_or_attached' ? 'New townhome/attached' : 'New single-family/duplex') : lot.opportunityType === 'old_house_teardown_candidate' ? 'Old house / teardown' : 'Vacant lot')}</div>
-              <div><b>Issued</b><br/>${esc(lot.issuedDate || '—')}</div>
+              <div><b>Opportunity</b><br/>${esc(lot.opportunityType === 'priority_vacant_lot' ? 'Priority vacant lot' : lot.opportunityType === 'secondary_old_house' ? 'Secondary old house' : lot.opportunityType === 'new_build_growth_signal' ? 'New build signal' : 'Vacant lot')}</div>
+              <div><b>Priority score</b><br/>${esc(lot.priorityScore ?? lot.growthScore ?? '—')}</div>
               <div><b>Public check</b><br/>${esc(verificationLabel(lot.publicVerification?.status))}</div>
-              <div><b>Contractor</b><br/>${esc(lot.contractor || '—')}</div>
-              <div><b>Valuation</b><br/>${esc(fmtMoney(lot.valuation))}</div>
-              <div><b>Neighborhood</b><br/>${esc(lot.neighborhood || lot.growthNeighborhood || '—')}</div>
+              <div><b>Owner</b><br/>${esc(lot.ownerName || '—')}</div>
+              <div><b>Years owned</b><br/>${esc(lot.yearsOwned ?? '—')}</div>
+              <div><b>Growth area</b><br/>${esc(lot.growthNeighborhood || lot.neighborhood || '—')}</div>
               <div><b>Zoning</b><br/>${esc(lot.zoning || 'Not enriched')}</div>
               <div><b>Lot sqft</b><br/>${esc(fmtNumber(lot.lotSqft))}</div>
               <div><b>Acres</b><br/>${esc(lot.lotAcres ? lot.lotAcres.toFixed(3) : '—')}</div>
-              <div><b>Permit</b><br/>${esc(lot.permitNumber || '—')}</div>
-              <div><b>Units</b><br/>${esc(lot.units ?? '—')}</div>
-              <div><b>Permit class</b><br/>${esc(lot.permitClass || '—')}</div>
+              <div><b>Lot sqft</b><br/>${esc(fmtNumber(lot.lotSqft))}</div>
+              <div><b>Zoning</b><br/>${esc(lot.zoning || '—')}</div>
+              <div><b>Last sale</b><br/>${esc(lot.lastSaleDate || '—')}</div>
               <div><b>Year built</b><br/>${esc(lot.publicResidentialYearBuilt || '—')}</div>
-              <div><b>Permits nearby</b><br/>${esc(`${lot.nearbyPermitsOneMile ?? '—'} / 1mi`)}</div>
+              <div><b>New builds nearby</b><br/>${esc(`${lot.nearbyPermitsOneMile ?? '—'} / 1mi`)}</div>
             </div>
             <div style="margin-top:9px;font-size:11px;color:#475569;"><b>APN:</b> ${esc(lot.apn || '—')}</div>
           </div>
