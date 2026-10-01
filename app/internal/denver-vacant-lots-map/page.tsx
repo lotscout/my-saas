@@ -72,6 +72,7 @@ export default function DenverVacantLotsMapPage() {
   }, [lots, zips]);
 
   const enrichedCount = useMemo(() => lots.filter(lot => Boolean(lot.ownerName || lot.lotSqft || lot.lotAcres || lot.zoning || lot.assessedTotal || lot.lastSaleDate)).length, [lots]);
+  const ownerCount = useMemo(() => lots.filter(lot => Boolean(lot.ownerName)).length, [lots]);
   const selectedIsEnriched = Boolean(selected?.ownerName || selected?.lotSqft || selected?.lotAcres || selected?.zoning || selected?.assessedTotal || selected?.lastSaleDate);
   const listLots = filtered.slice(0, 150);
 
@@ -87,7 +88,7 @@ export default function DenverVacantLotsMapPage() {
             </p>
             {!loading && (
               <p className="mt-2 max-w-3xl text-xs font-bold text-amber-700">
-                Current local dataset has {enrichedCount.toLocaleString()} enriched records and {(lots.length - enrichedCount).toLocaleString()} base-only records. Owner/lot/zoning fields show when locally available; otherwise they are marked not enriched.
+                Current local dataset has {enrichedCount.toLocaleString()} enriched records, including {ownerCount.toLocaleString()} with owner names. Owner/lot/zoning fields show when locally available; otherwise they are marked not enriched.
               </p>
             )}
           </div>
@@ -140,6 +141,8 @@ export default function DenverVacantLotsMapPage() {
                   <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                     <Detail label="Owner" value={selected.ownerName || 'Not enriched'} />
                     <Detail label="Owner mailing" value={selected.ownerMailingAddress || 'Not enriched'} />
+                    <Detail label="Owner type" value={selected.ownerType || '—'} />
+                    <Detail label="Neighborhood" value={selected.neighborhood || '—'} />
                     <Detail label="ATTOM ID" value={selected.attomId || '—'} />
                     <Detail label="APN" value={selected.apn || '—'} />
                     <Detail label="Land use" value={selected.landUse || 'Vacant land'} />
@@ -150,6 +153,8 @@ export default function DenverVacantLotsMapPage() {
                     <Detail label="Assessed land" value={fmtMoney(selected.assessedLand)} />
                     <Detail label="Last sale" value={fmtMoney(selected.lastSalePrice)} />
                     <Detail label="Sale date" value={selected.lastSaleDate || '—'} />
+                    <Detail label="Years owned" value={selected.yearsOwned ? String(selected.yearsOwned) : '—'} />
+                    <Detail label="Flags" value={selected.flags?.length ? selected.flags.join(', ') : '—'} />
                   </div>
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selected.lat},${selected.lng}`)}`}

@@ -18,6 +18,12 @@ export type DenverVacantLot = {
   lotAcres?: number | null;
   ownerName?: string;
   ownerMailingAddress?: string;
+  ownerType?: string;
+  absenteeOwner?: boolean;
+  outOfStateOwner?: boolean;
+  neighborhood?: string;
+  yearsOwned?: number | null;
+  flags?: string[];
   assessedTotal?: number | null;
   assessedLand?: number | null;
   lastSalePrice?: number | null;
@@ -118,6 +124,7 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
             <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:9px;">${esc(lot.city)}, ${esc(lot.state)} ${esc(lot.zip)} · ATTOM ${esc(lot.attomId)}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
               <div><b>Owner</b><br/>${esc(lot.ownerName || 'Not enriched')}</div>
+              <div><b>Owner type</b><br/>${esc(lot.ownerType || '—')}</div>
               <div><b>Land use</b><br/>${esc(lot.landUse || 'Vacant land')}</div>
               <div><b>Zoning</b><br/>${esc(lot.zoning || 'Not enriched')}</div>
               <div><b>Lot sqft</b><br/>${esc(fmtNumber(lot.lotSqft))}</div>
