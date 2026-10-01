@@ -255,10 +255,9 @@ export default function DenverVacantLotsMap({ lots, filteredIds, selectedId, onS
       >
         {mapUnlocked ? 'Map active' : 'Map locked'}
       </button>
-      <div className="absolute bottom-4 left-4 z-[1000] flex items-center gap-3 rounded-xl bg-white/95 px-3 py-2 text-xs font-bold text-slate-700 shadow backdrop-blur">
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#10291E] shadow" />Public verified vacant</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#DC2626] shadow" />Improved/conflict</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#D6A13D] shadow" />Unverified</span>
+      <div className="absolute bottom-4 left-4 z-[1000] flex flex-wrap items-center gap-3 rounded-xl bg-white/95 px-3 py-2 text-xs font-bold text-slate-700 shadow backdrop-blur">
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#10291E] shadow" />Vacant land</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-[#7C3AED] shadow" />Old houses</span>
         <span className="text-slate-400">{plottableLots.length.toLocaleString()} points</span>
       </div>
     </div>
