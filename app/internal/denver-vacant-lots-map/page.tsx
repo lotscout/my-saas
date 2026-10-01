@@ -101,7 +101,7 @@ export default function DenverVacantLotsMapPage() {
             <p className="text-xs font-black uppercase tracking-[0.2em] text-[#6B3F1D]">Internal · growth seller targets</p>
             <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Denver Growth-Area Seller Targets</h1>
             <p className="mt-2 max-w-3xl text-sm font-semibold text-slate-600">
-              {loading ? 'Loading seller targets…' : `${filtered.length.toLocaleString()} of ${lots.length.toLocaleString()} off-market seller targets visible.`} Priority: vacant lots. Secondary: pre-1950 houses. All are individual-owned, 7,000+ sqft, owned 5+ years, and near 2024–2026 new-build activity.
+              {loading ? 'Loading seller targets…' : `${filtered.length.toLocaleString()} of ${lots.length.toLocaleString()} off-market seller targets visible.`} Priority: vacant lots. Secondary: pre-1950 houses. Includes individuals, LLCs, and missing-owner records; 7,000+ sqft; owned 5+ years when sale year is known; and near 2024–2026 new-build activity.
             </p>
             {!loading && (
               <p className="mt-2 max-w-3xl text-xs font-bold text-amber-700">
@@ -240,7 +240,7 @@ export default function DenverVacantLotsMapPage() {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm font-semibold leading-6 text-slate-600 shadow-sm">
               <p className="font-black text-slate-900">Note</p>
-              <p className="mt-1">This page uses the 2024–2026 new-build layer to find growth areas, then surfaces individual-owned off-market seller targets: vacant residential lots first, pre-1950 houses second. Current filters: Denver, 7,000+ sqft, known sale year 2021 or older, non-commercial/non-industrial zoning, and no exact local active-listing match.</p>
+              <p className="mt-1">This page uses the 2024–2026 new-build layer to find growth areas, then surfaces off-market seller targets: vacant residential lots first, pre-1950 houses second. Current filters: Denver, 7,000+ sqft, sale year 2021 or older when known, non-commercial/non-industrial zoning, no exact local active-listing match, and obvious public/utility/rail/HOA/institutional owners excluded. LLCs and missing-owner records are included for enrichment.</p>
             </div>
           </aside>
         </div>

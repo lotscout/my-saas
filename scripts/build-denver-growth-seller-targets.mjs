@@ -55,14 +55,23 @@ function centroid(geom) {
   return [pts.reduce((s,p)=>s+p[0],0)/pts.length, pts.reduce((s,p)=>s+p[1],0)/pts.length]
 }
 
-const entityTerms = ['LLC','INC','CORP','CORPORATION','COMPANY','LTD',' LP','LLP','LLLP','PARTNERSHIP','HOLDING','HOLDINGS','INVEST','INVESTMENT','PROPERTIES','PROPERTY','DEVELOPMENT','HOMES','BUILDERS','CONSTRUCTION','REALTY','GROUP','VENTURES','CAPITAL','BANK','AUTHORITY','DISTRICT','DEPARTMENT','STATE OF','COUNTY','CITY','TOWN','SCHOOL','CHURCH','FOUNDATION','ASSOCIATION','HOMEOWNERS','CONDOMINIUM','TOWNHOMES','TRUST','TRUSTEE','UNKNOWN','ENTERPRISE','CONNECTIONS','SERVICES','CENTER','STADIUM','PUBLIC SERVICE']
-function likelyIndividual(owner) {
+const disqualifiedOwnerTerms = [
+  'CITY', 'CITY OF', 'CITY & COUNTY', 'CITY AND COUNTY', 'COUNTY', 'STATE OF', 'DEPARTMENT', 'GOVERNMENT',
+  'AUTHORITY', 'DISTRICT', 'METROPOLITAN DISTRICT', 'METRO DISTRICT', 'SCHOOL', 'UNIVERSITY', 'COLLEGE',
+  'RAILROAD', 'RAILWAY', 'RR', 'UNION PACIFIC', 'BURLINGTON NORTHERN', 'BNSF',
+  'PUBLIC SERVICE', 'XCEL', 'WATER', 'SANITATION', 'DITCH',
+  'HOMEOWNERS', 'HOMEOWNER', 'HOA', 'ASSOCIATION', 'ASSN', 'CONDOMINIUM',
+  'CHURCH', 'MINISTRIES', 'MINISTRY', 'DIOCESE', 'PARISH', 'FOUNDATION',
+  'DENVER URBAN GARDENS', 'PARKS AND RECREATION', 'REGIONAL TRANSPORTATION DISTRICT'
+]
+function allowedOwner(owner) {
   const o = upper(owner)
-  if (!o || o === 'UNKNOWN' || o === 'UNKNOWN OWNER') return false
-  for (const t of entityTerms) if (new RegExp(`(^|\\s)${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(o)) return false
-  const toks = o.replace(/[^A-Z, &'-]/g, ' ').replace(/[,&]/g, ' ').split(/\s+/).filter(Boolean)
-  if (o.includes(',')) return toks.length >= 2
-  return toks.length >= 2 && toks.length <= 5
+  // Bobby okayed LLCs and missing owner data. Keep unknowns as enrichment targets.
+  if (!o || o === 'UNKNOWN' || o === 'UNKNOWN OWNER') return true
+  for (const t of disqualifiedOwnerTerms) {
+    if (new RegExp(`(^|\\s)${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(o)) return false
+  }
+  return true
 }
 function residentialZoning(z) {
   const u = upper(z)
@@ -108,8 +117,7 @@ const fields = [
 const where = [
   "situs_city='DENVER'",
   "land_area >= 7000",
-  "sale_year IS NOT NULL",
-  "sale_year <= '2021'",
+  "(sale_year IS NULL OR sale_year <= '2021')",
   "((upper(d_class_cn) like '%VACANT%' AND (appraised_imp_value IS NULL OR appraised_imp_value <= 0)) OR (res_orig_year_built IS NOT NULL AND res_orig_year_built <= '1949'))"
 ].join(' AND ')
 const url = new URL(SOCRATA)
@@ -125,7 +133,7 @@ const rows = await res.json()
 const candidates = []
 for (const row of rows) {
   const owner = clean(row.owner_name)
-  if (!likelyIndividual(owner)) continue
+  if (!allowedOwner(owner)) continue
   if (!residentialZoning(row.zone_10)) continue
   const zip = clean(row.situs_zip).slice(0,5)
   const addressLine = clean(row.situs_address_line1)
@@ -169,7 +177,7 @@ for (const row of rows) {
     lotAcres: lotSqft ? Math.round(lotSqft / 43560 * 10000) / 10000 : null,
     ownerName: owner,
     ownerMailingAddress: [row.owner_address_line1,row.owner_city,row.owner_state,row.owner_zip].filter(Boolean).join(', '),
-    ownerType: 'Individual',
+    ownerType: owner ? (upper(owner).includes('LLC') ? 'LLC' : 'Allowed owner') : 'Unknown / needs enrichment',
     publicPropertyClass: row.d_class_cn || '',
     publicImprovementValue: imp,
     publicResidentialYearBuilt: yearBuilt ? String(yearBuilt) : '',
@@ -192,12 +200,12 @@ for (const row of rows) {
       reasons: [
         opportunityType === 'priority_vacant_lot' ? 'Vacant class with no improvement value' : `House built ${yearBuilt}`,
         `${lotSqft?.toLocaleString?.() || lotSqft} sqft lot`,
-        `Sale year ${row.sale_year} / ${saleYear ? 2026 - saleYear : '?'} years owned`,
+        row.sale_year ? `Sale year ${row.sale_year} / ${saleYear ? 2026 - saleYear : '?'} years owned` : 'Sale year unknown — needs enrichment',
         `${near1} new-build signals within 1 mile; ${near2} within 2 miles`,
       ],
       checkedAt: new Date().toISOString(),
     },
-    flags: [opportunityType === 'priority_vacant_lot' ? 'priority_vacant_lot' : 'secondary_old_house', 'individual_owner', 'off_market_best_effort', '7000_plus_sqft', 'owned_5_plus_years'],
+    flags: [opportunityType === 'priority_vacant_lot' ? 'priority_vacant_lot' : 'secondary_old_house', owner ? 'owner_available' : 'owner_missing_needs_enrichment', upper(owner).includes('LLC') ? 'llc_owner' : 'owner_allowed', 'off_market_best_effort', '7000_plus_sqft', saleYear ? 'owned_5_plus_years' : 'sale_year_unknown_needs_enrichment'],
   })
 }
 
@@ -208,7 +216,7 @@ const output = {
   count: candidates.length,
   lots: candidates,
   growthSellerTargetLayer: {
-    rule: 'Priority vacant lots, secondary pre-1950 houses; individual owner; Denver; lot >= 7,000 sqft; sale_year <= 2021; residential/non-commercial zoning; no exact local active-listing match; near 2024-2026 new-build activity.',
+    rule: 'Priority vacant lots, secondary pre-1950 houses; LLCs and missing-owner records allowed; excludes obvious public/utility/rail/HOA/institutional owners; Denver; lot >= 7,000 sqft; sale_year <= 2021 or unknown; residential/non-commercial zoning; no exact local active-listing match; near 2024-2026 new-build activity.',
     priorityVacantLots: candidates.filter(c => c.opportunityType === 'priority_vacant_lot').length,
     secondaryOldHouses: candidates.filter(c => c.opportunityType === 'secondary_old_house').length,
     publicRowsFetched: rows.length,
