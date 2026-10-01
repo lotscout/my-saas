@@ -98,14 +98,14 @@ export default function DenverVacantLotsMapPage() {
       <div className="mx-auto max-w-[1800px]">
         <div className="mb-4 flex flex-col gap-4 border-b border-slate-200 pb-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#6B3F1D]">Internal · growth seller targets</p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Denver Growth-Area Seller Targets</h1>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#6B3F1D]">Internal · vacant land targets</p>
+            <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Denver Growth-Area Vacant Land Targets</h1>
             <p className="mt-2 max-w-3xl text-sm font-semibold text-slate-600">
-              {loading ? 'Loading seller targets…' : `${filtered.length.toLocaleString()} of ${lots.length.toLocaleString()} off-market seller targets visible.`} Priority: vacant lots. Secondary: pre-1950 houses. Includes individuals, LLCs, and missing-owner records; 7,000+ sqft; owned 5+ years when sale year is known; and near 2024–2026 new-build activity.
+              {loading ? 'Loading vacant land targets…' : `${filtered.length.toLocaleString()} of ${lots.length.toLocaleString()} vacant land targets visible.`} Focused on vacant land near 2024–2026 new-build activity. Includes individuals, LLCs, and missing-owner records; 7,000+ sqft; owned 5+ years when sale year is known.
             </p>
             {!loading && (
               <p className="mt-2 max-w-3xl text-xs font-bold text-amber-700">
-                Target layer: {lots.filter(lot => lot.opportunityType === 'priority_vacant_lot').length.toLocaleString()} priority vacant lots and {lots.filter(lot => lot.opportunityType === 'secondary_old_house').length.toLocaleString()} secondary pre-1950 old-house targets. Sorted by priority and nearby new-build density.
+                Target layer: {lots.filter(lot => lot.opportunityType === 'priority_vacant_lot').length.toLocaleString()} vacant land targets. Old-house targets are removed from the active map.
               </p>
             )}
           </div>
@@ -159,7 +159,7 @@ export default function DenverVacantLotsMapPage() {
                   <h2 className="text-xl font-black leading-tight text-[#10291E]">{selected.address || 'Vacant lot'}</h2>
                   <p className="mt-1 text-sm font-bold text-slate-500">{selected.city}, {selected.state} {selected.zip}</p>
                   <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <Detail label="Target type" value={selected.opportunityType === 'priority_vacant_lot' ? 'Priority vacant lot' : 'Secondary old-house target'} />
+                    <Detail label="Target type" value="Vacant land" />
                     <Detail label="Priority score" value={selected.priorityScore ? String(selected.priorityScore) : '—'} />
                     <Detail label="Growth neighborhood" value={selected.growthNeighborhood || selected.neighborhood || '—'} />
                     <Detail label="Nearby new builds" value={`${selected.nearbyPermitsOneMile || 0} within 1 mile · ${selected.nearbyPermitsTwoMiles || 0} within 2 miles`} />
@@ -207,8 +207,8 @@ export default function DenverVacantLotsMapPage() {
                   const active = selectedId === id;
                   const enriched = Boolean(lot.ownerName || lot.lotSqft || lot.lotAcres || lot.zoning || lot.assessedTotal || lot.lastSaleDate);
                   const status = lot.publicVerification?.status;
-                  const statusLabel = lot.opportunityType === 'priority_vacant_lot' ? 'Vacant lot' : 'Old house';
-                  const statusClass = lot.opportunityType === 'priority_vacant_lot' ? 'text-emerald-700' : 'text-violet-700';
+                  const statusLabel = 'Vacant land';
+                  const statusClass = 'text-emerald-700';
                   return (
                     <button
                       key={id}
@@ -240,7 +240,7 @@ export default function DenverVacantLotsMapPage() {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm font-semibold leading-6 text-slate-600 shadow-sm">
               <p className="font-black text-slate-900">Note</p>
-              <p className="mt-1">This page uses the 2024–2026 new-build layer to find growth areas, then surfaces off-market seller targets: vacant residential lots first, pre-1950 houses second. Current filters: Denver, 7,000+ sqft, sale year 2021 or older when known, non-commercial/non-industrial zoning, no exact local active-listing match, and obvious public/utility/rail/HOA/institutional owners excluded. LLCs and missing-owner records are included for enrichment.</p>
+              <p className="mt-1">This page uses the 2024–2026 new-build layer to find growth areas, then surfaces vacant land targets only. Current filters: Denver, 7,000+ sqft, sale year 2021 or older when known, non-commercial/non-industrial zoning, no exact local active-listing match, and obvious public/utility/rail/HOA/institutional owners excluded. LLCs and missing-owner records are included for enrichment.</p>
             </div>
           </aside>
         </div>
