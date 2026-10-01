@@ -57,7 +57,7 @@ async function fetchPublicRows(schednums) {
     'schednum','owner_name','owner_address_line1','owner_city','owner_state','owner_zip',
     'situs_address_line1','situs_city','situs_state','situs_zip','prop_class','d_class_cn','zone_10',
     'appraised_land_value','appraised_imp_value','appraised_total_value','land_area',
-    'res_orig_year_built','res_above_grade_area','com_orig_year_built','com_gross_area','tot_units','legal_desc',
+    'res_orig_year_built','res_above_grade_area','com_orig_year_built','com_gross_area','tot_units','legal_desc','sale_year','sale_price',
     'assessed_bldg_value_sch','assessed_land_value_sch','assessed_total_value_sch'
   ]
   const map = new Map()
@@ -113,6 +113,10 @@ for (const lot of data.lots) {
     lot.publicCommercialYearBuilt = publicRow.com_orig_year_built || ''
     lot.publicResidentialArea = num(publicRow.res_above_grade_area)
     lot.publicCommercialArea = num(publicRow.com_gross_area)
+    lot.publicSaleYear = publicRow.sale_year ? num(publicRow.sale_year) : null
+    lot.publicSalePrice = publicRow.sale_price ? num(publicRow.sale_price) : null
+    if (lot.publicSaleYear && !lot.lastSaleDate) lot.lastSaleDate = String(lot.publicSaleYear)
+    if (lot.publicSalePrice !== null && !lot.lastSalePrice) lot.lastSalePrice = lot.publicSalePrice
 
     // Use public fields to fill blanks, without overwriting existing enriched ATTOM/cache fields.
     lot.ownerName ||= publicRow.owner_name || ''
