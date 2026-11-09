@@ -16,3 +16,10 @@
 @media(max-width:600px){.ls-home main .actions{width:100%}.ls-home main .actions a.button{width:100%}.ls-home header{gap:10px}.ls-home header nav{gap:8px}.ls-home header a.button{padding:10px 12px;font-size:12px;min-height:42px}.ls-home .closing a.button{min-width:0}}
 @media(max-width:380px){.ls-home header .brand{font-size:20px}.ls-home header{gap:6px}.ls-home header nav{gap:6px}.ls-home header a.button{padding:9px 8px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){.ls-home .button{transition:none}}
+
+/* Keep the connected-perspective strip aligned at every viewport. */
+.ls-home .strip{display:grid;grid-template-columns:1.2fr repeat(4,1fr);gap:16px;align-items:center;padding:24px 0}
+.ls-home .strip span{min-width:0;line-height:1.5;text-align:center}
+.ls-home .strip span:first-child{text-align:left;letter-spacing:1px;width:auto}
+@media(max-width:900px){.ls-home .strip{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 12px}.ls-home .strip span:first-child{grid-column:1/-1;text-align:center}}
+@media(max-width:600px){.ls-home .strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px;padding:24px 0}.ls-home .strip span:first-child{width:auto}.ls-home .strip span:not(:first-child){font-size:12px;min-height:36px;display:flex;align-items:center;justify-content:center}}
