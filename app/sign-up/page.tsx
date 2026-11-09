@@ -105,7 +105,7 @@ export default function SignUpPage() {
       status: true,
     });
 
-    window.location.replace('/marketplace');
+    window.location.replace('/scout');
   }
 
   if (emailSent) {
@@ -146,7 +146,7 @@ export default function SignUpPage() {
 
           {/* Google Sign Up */}
           <a
-            href="/api/auth/google"
+            href="/api/auth/google?next=/scout"
             className="w-full flex items-center justify-center gap-3 border border-surface-container-high bg-white text-on-surface py-3 rounded-xl font-semibold text-sm hover:bg-surface-container-low transition-colors mb-4"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">

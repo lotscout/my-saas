@@ -237,12 +237,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    if (process.env.LOTSCOUT_LANDING_ONLY !== 'false') destination = '/scout'
     const response = NextResponse.redirect(`${siteUrl}${destination}`)
     pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
     return response
   }
 
-  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/marketplace'
+  const safeNext = process.env.LOTSCOUT_LANDING_ONLY !== 'false'
+    ? (next === '/reset-password' ? next : '/scout')
+    : (next.startsWith('/') && !next.startsWith('//') ? next : '/marketplace')
   const html = `<!doctype html>
 <html>
   <head>

@@ -14,7 +14,7 @@ export default function SignInPage() {
   const [resetSent, setResetSent] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [redirectPath, setRedirectPath] = useState('/marketplace');
+  const [redirectPath, setRedirectPath] = useState('/scout');
 
   useEffect(() => {
     setHydrated(true);
@@ -23,7 +23,7 @@ export default function SignInPage() {
     const safeRedirect =
       redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
         ? redirectParam
-        : '/marketplace';
+        : '/scout';
     setRedirectPath(safeRedirect);
 
     const utmSource = params.get('utm_source');
@@ -106,12 +106,12 @@ export default function SignInPage() {
       }
     }
     track('login_completed', {
-      destination: '/marketplace',
+      destination: '/scout',
       source: localStorage.getItem('utm_source') || 'direct',
       medium: localStorage.getItem('utm_medium') || '',
       campaign: localStorage.getItem('utm_campaign') || '',
     });
-    window.location.replace('/marketplace');
+    window.location.replace('/scout');
   }
 
   async function handleForgotPassword(e: React.FormEvent<HTMLFormElement>) {
@@ -260,7 +260,7 @@ export default function SignInPage() {
         {/* Sign up link */}
         <p className="text-center text-sm text-secondary mt-6">
           Don&apos;t have an account?{' '}
-          <Link href={`/sign-up${redirectPath !== '/marketplace' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} className="text-primary font-semibold hover:underline">Sign Up</Link>
+          <Link href={`/sign-up${redirectPath !== '/scout' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} className="text-primary font-semibold hover:underline">Sign Up</Link>
         </p>
       </div>
     </div>
