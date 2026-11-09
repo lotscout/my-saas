@@ -10,8 +10,19 @@ const audiences = {developer:{label:'For homebuilders & land teams',title:'Know 
 type Audience = keyof typeof audiences;
 const audienceNames: Record<Audience, string> = { developer: 'Homebuilders', investor: 'Land Developers', community: 'Economic Development' };
 
+const demoViews = [
+ { key: 'community', label: 'Community', title: 'See the places around a potential community.', copy: 'Schools, parks, shopping, and dining provide context beyond the parcel itself.' },
+ { key: 'zoning', label: 'Zoning', title: 'Understand the surrounding land-use picture.', copy: 'Explore the demo’s residential, commercial, industrial, and open-space zoning categories.' },
+ { key: 'entitlements', label: 'Entitlements', title: 'Follow projects through their approval stages.', copy: 'Distinguish submitted, approved, and recorded areas in the demo.' },
+ { key: 'land', label: 'Land', title: 'See where builders are purchasing lots.', copy: 'Locate recorded purchases and review the corresponding transaction details.' },
+ { key: 'development', label: 'Development', title: 'Separate raw land from active development.', copy: 'Compare raw, developed, and active areas without mixing in other layers.' },
+ { key: 'homebuilding', label: 'Homebuilding', title: 'See activity at the home level.', copy: 'Explore the demo’s future, permitted, for-sale, and sold-home categories.' },
+] as const;
+
 export default function LotScoutHomePage() {
  const [selectedAudience, setSelectedAudience] = useState<Audience>('developer');
+ const [selectedView, setSelectedView] = useState(0);
+ const demoView = demoViews[selectedView];
  const audience = audiences[selectedAudience];
  return <div className="ls-home">
 <header><a className="brand" href="/" aria-label="LotScout home"><Image src="/lotscout-logo.png" alt="" width={44} height={44} priority />LotScout</a><nav aria-label="Main navigation"><a href="/scout" className="button light">Scout Search</a><a href="#contact" className="button">Request a Demo</a></nav></header>
@@ -23,10 +34,12 @@ export default function LotScoutHomePage() {
 
 <section className="section" id="economic-growth" style={{paddingTop:10}}>
 <div className="section-heading"><div><div className="eyebrow">Explore the live LotScout demo</div><h2>See the activity.<br />Follow the story.</h2></div><p>Explore Queen Creek, Arizona: switch market layers, compare builder inventory, review land comps, and examine burn schedules and market share. See how connected information can support a more focused decision.</p></div>
-<div className="heat-preview">
-<a className="heat-map" style={{display:'block'}} href="https://lennarv155.netlify.app/" target="_blank" rel="noopener noreferrer" aria-label="Open the live Queen Creek LotScout demo in a new tab"><Image src="/demo-map.png" alt="Actual Queen Creek LotScout demo showing zoning, entitlement, development, and builder activity layers" fill sizes="(max-width: 600px) 100vw, 1200px" style={{objectFit:'cover',objectPosition:'top'}} /><span className="map-tag" style={{position:'absolute',bottom:20,left:20}}>Open interactive demo ↗</span></a>
+<div className="tabs demo-tabs" aria-label="Choose a demo layer">{demoViews.map((view, index) => <button key={view.key} type="button" aria-pressed={selectedView === index} aria-controls="demo-layer-preview" onClick={() => setSelectedView(index)}>{view.label}</button>)}</div>
+<div className="heat-preview" id="demo-layer-preview">
+<div className="demo-layer-caption" aria-live="polite"><strong>{demoView.title}</strong><p>{demoView.copy}</p></div>
+<a className="heat-map" style={{display:'block'}} href="https://lennarv155.netlify.app/" target="_blank" rel="noopener noreferrer" aria-label="Open the live Queen Creek LotScout demo in a new tab"><Image key={demoView.key} src={`/demo-${demoView.key}.jpg`} alt={`Queen Creek LotScout demo with only the ${demoView.label.toLowerCase()} layer enabled`} fill sizes="(max-width: 600px) 100vw, 1200px" style={{objectFit:'contain',objectPosition:'center'}} /><span className="map-tag" style={{position:'absolute',bottom:20,left:20}}>Open interactive demo ↗</span></a>
 <div className="heat-details"><div><strong>Build the market picture</strong><p>Layer zoning, entitlements, land purchases, development, and homebuilding activity in one map.</p></div><div><strong>Compare the competition</strong><p>Explore builder inventory, recorded land comps, and closing-based market share in the demo reports.</p></div><div><strong>Investigate the next move</strong><p>Review supply estimates and burn schedules to inform questions about timing, positioning, and acquisition priorities.</p></div></div>
-</div><p className="micro">Screenshot of the Queen Creek demo. This is not a live data feed. Demo coverage and dates are market-specific; projections are not guaranteed outcomes.</p>
+</div><p className="micro">Separate single-layer screenshots of the Queen Creek demo. These are not live data feeds. Demo coverage and dates are market-specific; projections are not guaranteed outcomes.</p>
 <div className="audience"><div><div className="eyebrow">Trace the fact. Understand the assumption.</div><h3 style={{"marginTop":"18px"}}>A number is only useful if you can question it.</h3><p>Unexplained totals and inflated assumptions undermine decisions. The demo identifies source types, shows reporting periods, and labels projected activity. Use that context to separate recorded activity from estimates, rather than treating every number as equally certain.</p></div><div className="signals"><div className="signal"><span>Source context</span><small>County records, permits & builder websites</small></div><div className="signal"><span>Forecasts & estimates</span><small>Clearly labeled assumptions</small></div><div className="signal"><span>Dates & definitions</span><small>Reporting periods and metric context</small></div></div></div>
 <p style={{"fontSize":"12px"}}>Public records show closings, not pending contracts, and can lag by several months. Data refreshes on a schedule; source availability and coverage vary by market.</p>
 </section>
