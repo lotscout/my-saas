@@ -20,8 +20,8 @@ const inter = Inter({
 const META_PIXEL_ID = "26265704756347398";
 
 export const metadata: Metadata = {
-  title: "LotScout | Off-Market Land Deals",
-  description: "The private marketplace connecting land sellers and buyers. Find off-market deals, connect with serious buyers, and close faster.",
+  title: "LotScout | Land & Development Intelligence",
+  description: "Land and market intelligence for homebuilders and developers. Meet Scout, your AI real estate research assistant, and request a LotScout demo.",
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },

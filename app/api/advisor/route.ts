@@ -471,7 +471,7 @@ export async function POST(request: NextRequest) {
       const used = await getFreeUsedThisWeek(user.id);
       if (used >= FREE_WEEKLY_LIMIT) {
         return Response.json(
-          { error: "You have used your 2 free Scout questions this week. Upgrade for unlimited Scout and saved reports.", reason: 'free_limit' },
+          { error: "You have used your current Scout allowance. Request a team demo to discuss expanded access.", reason: 'free_limit' },
           { status: 429 }
         );
       }
@@ -482,7 +482,7 @@ export async function POST(request: NextRequest) {
     const used = guestCount(request);
     if (used >= GUEST_LIMIT) {
       return Response.json(
-        { error: 'You have reached the guest limit. Sign up free to continue.', reason: 'guest_limit' },
+        { error: 'You have reached the preview limit. Request a team demo on the LotScout homepage.', reason: 'guest_limit' },
         { status: 429 }
       );
     }
@@ -524,7 +524,7 @@ export async function POST(request: NextRequest) {
     }
   }
   const guestFirstAnswerNote = !user
-    ? 'This is the visitor\'s single free Scout question before signup. Make the answer substantive enough to be genuinely useful, while still concise. Do not mention the limit unless asked.'
+    ? 'This is the visitor\'s single free Scout preview question. Make the answer substantive enough to be genuinely useful, while still concise. Do not mention the limit unless asked.'
     : '';
   const lotScoutContextBlock = useLotScoutContext
     ? `\n\n${PRIVACY_NOTE}\n\n<lotscout_market_data>\n${context}\n</lotscout_market_data>`

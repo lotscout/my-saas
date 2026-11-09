@@ -1,195 +1,46 @@
-import LandingSignupForm from './LandingSignupForm';
-import ScrollReveal from './ScrollReveal';
+import Image from 'next/image';
+import './homepage.css';
+import DemoContactForm from './DemoContactForm';
+import LegalDisclosures from './LegalDisclosures';
 
-const stats = [
-  ['$77M+', 'land transactions'],
-  ['$4.51M', 'Commission Saved'],
-  ['21 days', 'avg. contract-to-close'],
-  ['2-sided', 'buyer + seller matching'],
-];
-
-const roles = ['Seller', 'Buyer', 'Builder', 'Developer', 'Realtor', 'Wholesaler'];
-
-const objections = [
-  {
-    title: '“I need the right buyer, not more tire-kickers.”',
-    body: 'For sellers and wholesalers, LotScout helps identify buyers whose criteria actually match the lot, market, budget, and development path.',
-  },
-  {
-    title: '“I need real land opportunities, not stale listings.”',
-    body: 'For buyers, builders, and developers, LotScout helps surface seller-side opportunities and deal context before everything depends on public MLS exposure.',
-  },
-  {
-    title: '“Both sides need confidence before they move.”',
-    body: 'LotScout packages buyer intent, seller context, zoning, utilities, comps, buildability, and market demand so conversations start with confidence instead of guesswork.',
-  },
-];
-
-const steps = [
-  ['1', 'Tell us your market', 'Share where you buy, sell, build, develop, or source land and what kind of opportunities matter to you.'],
-  ['2', 'We identify both sides of the fit', 'LotScout compares buyer criteria, seller opportunities, property fundamentals, and market context.'],
-  ['3', 'Start the right conversation', 'Use better matches and cleaner diligence to create faster, more qualified buyer/seller conversations.'],
-];
-
-const faqs = [
-  {
-    q: 'Who is LotScout for?',
-    a: 'Land sellers, buyers, wholesalers, realtors, builders, developers, and acquisition teams that want to interact with the right side of the deal without depending on the MLS to do all the work.',
-  },
-  {
-    q: 'Is this replacing realtors or the MLS?',
-    a: 'No. LotScout gives land professionals another channel for two-sided buyer/seller matching and diligence. Realtors can use it to price, position, and move land with stronger demand context.',
-  },
-  {
-    q: 'What does “contract-to-close” mean?',
-    a: 'It is the average time from getting a land deal under contract to completing the closing process. LotScout is built around shortening that path by improving buyer/seller fit and deal confidence.',
-  },
+const useCases = [
+  { number: '01', audience: 'Homebuilders', title: 'Find your next market advantage.', copy: 'Research development activity, competing communities, and recorded closing pace to inform your next land acquisition.' },
+  { number: '02', audience: 'Land developers', title: 'Understand the opportunity around your land.', copy: 'Connect plats, permits, and builder activity to investigate the development pipeline and potential demand for lots.' },
+  { number: '03', audience: 'Teams that depend on real estate data', title: 'Put local growth in context.', copy: 'Give investment, lending, supplier, and economic-development teams a clearer starting point for market research.' },
 ];
 
 export default function LotScoutHomePage() {
-  return (
-    <main className="min-h-screen scroll-smooth bg-white text-[#10291E] lg:h-svh lg:overflow-y-auto lg:snap-y lg:snap-proximity">
-      <ScrollReveal />
-      <div className="lg:snap-start border-b border-[#D8C49A] bg-[#D6A13D] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.1em] text-[#10291E] sm:text-sm sm:tracking-[0.12em]">
-        $77M+ in land transactions connected through direct buyer/seller relationships
-      </div>
-
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10 lg:py-5">
-        <a href="/" className="flex items-center gap-3" aria-label="LotScout home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/lotscout-logo.png" alt="LotScout" className="h-11 w-11 object-contain" />
-          <span className="font-headline text-2xl font-black tracking-tight text-[#10291E]">LotScout</span>
-        </a>
-        <nav className="hidden items-center gap-8 text-sm font-black uppercase tracking-[0.12em] text-[#6B3F1D] md:flex">
-          <a href="#results" className="hover:text-[#10291E]">Results</a>
-          <a href="#how" className="hover:text-[#10291E]">How it works</a>
-          <a href="#faq" className="hover:text-[#10291E]">FAQ</a>
-        </nav>
-
-      </header>
-
-      <section className="mx-auto grid max-w-7xl items-start gap-5 px-6 pb-5 pt-6 sm:px-8 lg:min-h-[calc(100svh-108px)] lg:snap-start lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-12 lg:px-10 lg:py-6">
-        <div data-reveal="left" className="lg:self-center">
-          <h1 className="font-headline text-center text-[2.25rem] font-black uppercase leading-[0.98] tracking-[-0.03em] text-[#10291E] sm:text-5xl sm:leading-[0.96] sm:tracking-[-0.035em] lg:text-left lg:text-5xl xl:text-6xl">
-            <span className="block sm:hidden">
-              <span className="block whitespace-nowrap">Ready to buy and</span>
-              <span className="block whitespace-nowrap">sell land faster</span>
-              <span className="block whitespace-nowrap">without the MLS?</span>
-            </span>
-            <span className="hidden sm:inline">Ready to buy and sell land faster without the MLS?</span>
-          </h1>
-          <p className="mt-4 max-w-[36rem] text-sm font-semibold leading-6 text-[#6B3F1D] sm:mt-6 sm:text-base sm:leading-7">
-            LotScout connects real land buyers and sellers so that deals get done quicker. Assisting with due diligence, market data and funding partners so that you can transact land deals with confidence.
-          </p>
-          <a href="#match-form-mobile" className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[#D6A13D] px-6 py-4 text-sm font-black uppercase tracking-[0.1em] text-[#10291E] shadow-lg shadow-[#10291E]/15 transition hover:bg-[#B9852F] sm:w-auto lg:hidden">
-            Find your next land deal
-          </a>
-          <div className="mt-7 hidden flex-wrap gap-3 text-left text-sm font-black uppercase tracking-[0.08em] text-[#10291E] lg:flex">
-            <span className="rounded-full border border-[#10291E]/15 bg-[#F7F1E3] px-4 py-2 shadow-sm">Verified buyers and sellers</span>
-            <span className="rounded-full border border-[#10291E]/15 bg-[#F7F1E3] px-4 py-2 shadow-sm">No MLS access required</span>
-            <span className="rounded-full border border-[#10291E]/15 bg-[#F7F1E3] px-4 py-2 shadow-sm">Marketplace with 500+ off-market properties</span>
-          </div>
-          <div id="results" className="mt-4 grid max-w-[36rem] grid-cols-2 gap-2 sm:mt-6">
-            {stats.map(([big, small]) => (
-              <div key={big} data-reveal className="rounded-2xl border border-[#D8C49A] bg-[#F7F1E3] px-4 py-3 shadow-sm">
-                <div className="font-headline text-2xl font-black uppercase tracking-[-0.04em] text-[#10291E] sm:text-3xl">{big}</div>
-                <div className="mt-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#6B3F1D] sm:text-xs">{small}</div>
-              </div>
-            ))}
-          </div>
+  return <div className="ls-home launch-home">
+    <a href="#main-content" className="skip-link">Skip to content</a>
+    <header>
+      <a className="brand" href="/" aria-label="LotScout home"><Image src="/lotscout-logo.png" alt="" width={44} height={44} priority />LotScout</a>
+      <nav aria-label="Main navigation"><a href="#intelligence">Who it’s for</a><a href="/scout">Scout Search</a><a href="#contact" className="button">Request a Demo</a></nav>
+    </header>
+    <main id="main-content">
+      <section className="hero">
+        <div><div className="eyebrow"><span className="dot" />Land & market intelligence</div>
+          <h1>Know where to<br /><em>build next.</em></h1>
+          <p>Land and market data for homebuilders, developers, and enterprise teams. Research development activity, understand your markets, and explore real estate questions with Scout Search.</p>
+          <div className="actions"><a className="button" href="#contact">Request a Demo <span aria-hidden="true">↗</span></a><a className="button light" href="/scout">Try Scout Search</a></div>
+          <div className="micro">Your markets. Your questions. A clearer next move.</div>
         </div>
-
-        <aside id="match-form-desktop" data-reveal="right" className="relative hidden w-full max-w-lg scroll-mt-6 justify-self-center lg:block lg:self-center">
-          <LandingSignupForm roles={roles} variant="desktop" />
-        </aside>
+        <div className="map-shell" role="img" aria-label="Illustrative development map and sample site brief, not a real parcel or live data"><svg className="map" viewBox="0 0 600 540" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="lots" width="67" height="55" patternTransform="rotate(-22)" patternUnits="userSpaceOnUse"><rect width="67" height="55" fill="#e8ebdf"/><path d="M0 0H67V55H0Z" fill="none" stroke="#fafbf5" strokeWidth="7"/><path d="M32 0V55M0 26H67" stroke="#d4ddca" fill="none" strokeWidth="1"/></pattern></defs><rect width="600" height="540" fill="url(#lots)"/><path d="M0 80Q160 150 175 15L300 0Q210 190 60 200L0 190Z" fill="#c8d6b8"/><path d="M485-20Q345 120 470 210T500 560" fill="none" stroke="#bbd1ce" strokeWidth="32"/><path d="M-40 310 650 40" stroke="#c8ceb9" strokeWidth="24"/><path d="M-40 310 650 40" stroke="#fffff5" strokeWidth="16"/><path d="m210-20 120 600" stroke="#c8ceb9" strokeWidth="19"/><path d="m210-20 120 600" stroke="#fffff5" strokeWidth="12"/><path d="m310 177 77-31 35 78-79 33Z" fill="#aac76e" fillOpacity=".7" stroke="#376441" strokeWidth="2"/><path d="m310 177 77-31 35 78-79 33Z" fill="none" stroke="#376441" strokeWidth="9" strokeOpacity=".1"/><circle cx="365" cy="202" r="8" fill="#214b38" stroke="white" strokeWidth="3"/><circle cx="195" cy="113" r="5" fill="#899a6a" stroke="white" strokeWidth="2"/><circle cx="443" cy="110" r="5" fill="#899a6a" stroke="white" strokeWidth="2"/><text x="80" y="265" fill="#829077" fontFamily="Arial" fontSize="10" transform="rotate(-22 80 265)">GROWTH CORRIDOR</text></svg><div className="map-top"><div className="map-tag">◎ &nbsp; Your market, in focus</div><div className="map-tag"><span>●</span> &nbsp; Illustrative preview</div></div><div className="map-label">Your Focus Area</div><div className="brief"><div className="brief-top"><span>THE BIGGER PICTURE</span><span>EXAMPLE BRIEF / 01</span></div><h3>Your data. In context.</h3><p>Connect land activity, residential development, and economic growth in a market view shaped around your company’s priorities.</p><div className="brief-bottom"><div>Pipeline<span>Plans, plats & permits</span></div><div>Pace<span>Recorded closings</span></div><div>Product<span>Size, price & lot mix</span></div></div></div></div>
       </section>
-
-      <section id="match-form-mobile" data-reveal className="mx-auto flex max-w-2xl scroll-mt-4 flex-col justify-center px-5 pb-10 pt-1 sm:px-8 lg:hidden">
-        <LandingSignupForm roles={roles} variant="mobile" />
+      <div className="strip"><span>BUILT FOR YOUR NEXT DECISION</span><span>Land acquisition</span><span>Development research</span><span>Market intelligence</span><span>AI-assisted research</span></div>
+      <section className="section" id="intelligence">
+        <div className="section-heading"><div><div className="eyebrow">Built for the people building what’s next</div><h2>Better context.<br />More informed decisions.</h2></div><p>Start with the decisions your team needs to make. We’ll discuss the markets, records, and reporting that can support them.</p></div>
+        <div className="use-case-grid">{useCases.map(item => <article className="use-case" key={item.number}><span className="case-number">{item.number}</span><div className="eyebrow">{item.audience}</div><h3>{item.title}</h3><p>{item.copy}</p><a className="text-link" href="#contact">Discuss your market <span aria-hidden="true">↗</span></a></article>)}</div>
       </section>
-
-      <section className="mx-auto flex max-w-7xl flex-col justify-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
-        <div data-reveal className="mb-6 max-w-3xl sm:mb-10">
-          <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] text-[#10291E] sm:text-6xl">Answer the real objections.</h2>
-        </div>
-        <div className="grid gap-5 lg:grid-cols-3">
-          {objections.map((item) => (
-            <article key={item.title} data-reveal className="rounded-[1.5rem] border border-[#D8C49A] bg-[#F7F1E3] p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
-              <h3 className="text-xl font-black leading-tight tracking-[-0.04em] text-[#10291E] sm:text-2xl">{item.title}</h3>
-              <p className="mt-3 text-sm font-semibold leading-6 text-[#6B3F1D] sm:mt-4 sm:text-base sm:leading-7">{item.body}</p>
-            </article>
-          ))}
+      <section className="dark scout-feature" id="scout">
+        <div className="section">
+          <div><div className="eyebrow">Meet Scout by LotScout</div><h2>Your next real estate question.<br />Start with Scout.</h2><p>Scout is your AI real estate research assistant. Explore market questions, understand development concepts, and organize your next round of research through conversation.</p><p>From a first question to a more focused investigation—less time figuring out where to start.</p><a className="button" href="/scout">Try Scout Search <span aria-hidden="true">↗</span></a><p className="micro">Start with a free preview question. Talk to us about access for your team.</p></div>
+          <div className="scout-preview" aria-label="Example questions to explore with Scout"><div className="scout-preview-heading"><span className="scout-avatar">S</span><div><strong>Scout</strong><small>Your real estate research assistant</small></div></div><div className="example-label">A FEW PLACES TO START</div><div className="question">What should I research before buying land for a new community?</div><div className="question">How can permit activity help me compare two markets?</div><div className="question">What’s the difference between entitled land and finished lots?</div><p>Example prompts, not live answers. Market-specific data availability is confirmed during your demo.</p></div>
         </div>
       </section>
-
-      <section id="how" className="flex bg-[#F1E3C6] text-[#10291E] lg:min-h-svh lg:snap-start lg:items-center">
-        <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
-          <div data-reveal className="mb-10 max-w-3xl">
-            <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Start with the match.</h2>
-          </div>
-          <div className="grid gap-5 lg:grid-cols-3">
-            {steps.map(([num, title, body]) => (
-              <div key={num} data-reveal className="rounded-[1.5rem] border border-[#10291E]/15 bg-white p-5 shadow-sm sm:rounded-[1.75rem] sm:p-6">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#10291E] text-lg font-black text-white">{num}</span>
-                <h3 className="mt-4 text-xl font-black tracking-[-0.04em] sm:mt-5 sm:text-2xl">{title}</h3>
-                <p className="mt-3 text-base font-semibold leading-7 text-[#6B3F1D]">{body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <a href="#match-form-mobile" className="inline-flex rounded-full bg-[#10291E] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#B9852F] lg:hidden">
-              Find my next land deal
-            </a>
-            <a href="#match-form-desktop" className="hidden rounded-full bg-[#10291E] px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#B9852F] lg:inline-flex">
-              Find my next land deal
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section id="faq" data-reveal className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:px-10 lg:py-12">
-        <div>
-          <p className="text-sm font-black uppercase tracking-[0.25em] text-[#D6A13D]">FAQs</p>
-          <h2 className="mt-3 font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">Before you scout.</h2>
-        </div>
-        <div className="divide-y divide-[#10291E]/15 border-y border-[#10291E]/15">
-          {faqs.map((faq) => (
-            <div key={faq.q} data-reveal className="py-4 sm:py-6">
-              <h3 className="text-2xl font-black tracking-[-0.04em]">{faq.q}</h3>
-              <p className="mt-3 text-base font-semibold leading-7 text-[#6B3F1D]">{faq.a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto flex max-w-7xl items-center px-5 py-10 sm:px-8 lg:min-h-svh lg:snap-start lg:px-10 lg:py-12">
-        <div data-reveal className="w-full rounded-[2rem] border border-[#D8C49A] bg-[#10291E] p-8 text-center text-white shadow-2xl shadow-[#10291E]/15 sm:p-10 lg:p-12">
-          <h2 className="mx-auto mt-4 max-w-4xl font-headline text-4xl font-black uppercase leading-none tracking-[-0.06em] sm:text-6xl">
-            Land deals need better matching before they need more listing exposure.
-          </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/72">
-            LotScout was built around the real bottleneck in land: helping the right buyers and sellers find each other, proving deal quality, and creating enough confidence to move.
-          </p>
-          <a href="#match-form-mobile" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#10291E] hover:bg-[#D6A13D] lg:hidden">
-            Get started
-          </a>
-          <a href="#match-form-desktop" className="mt-7 hidden rounded-full bg-white px-7 py-4 text-base font-black uppercase tracking-[0.08em] text-[#10291E] hover:bg-[#D6A13D] lg:inline-flex">
-            Get started
-          </a>
-        </div>
-      </section>
-
-      <footer className="lg:snap-start border-t border-[#D8C49A] px-5 py-8 text-xs font-semibold leading-6 text-[#6B3F1D] sm:px-8 lg:px-10">
-        <div className="mx-auto max-w-7xl">
-          <p>LotScout does not guarantee buyer interest, sale outcomes, investment returns, zoning approvals, utility availability, or development feasibility. Transaction, commission, and timeline figures are historical/contextual and not a guarantee of future results. All users should complete independent diligence and consult qualified professionals.</p>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p>Copyright © 2026 LotScout.</p>
-            <a href="/terms" className="font-black text-[#10291E] underline decoration-[#10291E]/30 underline-offset-4 hover:decoration-[#10291E]">
-              Terms and Conditions
-            </a>
-          </div>
-        </div>
-      </footer>
+      <section className="section" id="approach"><div className="section-heading"><div><div className="eyebrow">Intelligence with context</div><h2>Know what’s behind<br />the bigger picture.</h2></div><p>Useful research starts with understanding the source, the date, and what the data can—and cannot—tell you.</p></div><div className="trust-grid"><div><h3>Land & development</h3><p>Connect available permits, plats, and recorded transactions to investigate local activity.</p></div><div><h3>Markets that matter to you</h3><p>Discuss company-specific market views and reporting built around your team’s priorities.</p></div><div><h3>Sources & assumptions</h3><p>Distinguish recorded facts from estimates. Confirm coverage and refresh schedules for your markets.</p></div></div><p className="micro">Coverage varies by market. Public records may lag; recorded closings are not pending contracts. Map previews are illustrative.</p></section>
+      <DemoContactForm />
+      <LegalDisclosures />
     </main>
-  );
+    <footer><a className="brand" href="/"><Image src="/lotscout-logo.png" alt="" width={36} height={36} />LotScout</a><span>Land. Markets. A clearer next move.</span><span>© 2026 LotScout · <a href="/#terms">Terms</a> · <a href="/#privacy">Privacy</a></span></footer>
+  </div>;
 }

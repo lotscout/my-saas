@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import Header from '@/components/Header';
-import MetaCheckoutSuccessTracker from '@/components/MetaCheckoutSuccessTracker';
 import { trackMetaEvent } from '@/lib/meta-pixel';
 import { track } from '@vercel/analytics';
 
@@ -145,9 +143,6 @@ export default function AdvisorPage() {
   const [savedReports, setSavedReports] = useState<{ title: string; content: string }[]>([]);
   const [mobileSidebar, setMobileSidebar] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
-  const [leadEmail, setLeadEmail] = useState('');
-  const [leadLoading, setLeadLoading] = useState(false);
-  const [leadError, setLeadError] = useState<string | null>(null);
   const [analyticsSessionId, setAnalyticsSessionId] = useState<string>('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -346,7 +341,7 @@ export default function AdvisorPage() {
 
   // Scout is included in every paid LotScout plan, or available standalone.
   function upgrade() {
-    window.location.href = '/pricing';
+    window.location.href = '/#contact';
   }
 
   async function saveReport(idx: number) {
@@ -374,37 +369,7 @@ export default function AdvisorPage() {
   function handleSaveClick(idx: number) {
     if (access?.canSave) { saveReport(idx); return; }
     if (access?.status === 'free') { track('scout_upgrade_click', { source: 'save_report' }); upgrade(); return; }
-    alert('Saving reports requires a LotScout plan. Sign up free, then upgrade to any plan to save market reports.');
-  }
-
-  async function captureScoutLead(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLeadError(null);
-    setLeadLoading(true);
-    track('scout_signup_click', { source: 'guest_limit_card', guest_questions: guestCount || GUEST_LIMIT });
-    try {
-      const res = await fetch('/api/scout/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: leadEmail, guestQuestions: guestCount || GUEST_LIMIT }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setLeadError(data.error || 'Could not save email. Please try again.');
-        return;
-      }
-      track('scout_lead_captured', { source: 'guest_limit_card', guest_questions: guestCount || GUEST_LIMIT });
-      trackMetaEvent('Lead', {
-        content_name: 'Scout email capture',
-        source: 'guest_limit_card',
-        guest_questions: guestCount || GUEST_LIMIT,
-      });
-      window.location.href = data.redirect || `/sign-up?email=${encodeURIComponent(leadEmail.trim())}&source=scout`;
-    } catch {
-      setLeadError('Could not save email. Please try again.');
-    } finally {
-      setLeadLoading(false);
-    }
+    window.location.href = '/#contact';
   }
 
   async function downloadPdf(r: { title: string; content: string }) {
@@ -445,40 +410,10 @@ export default function AdvisorPage() {
   const showRemaining = access && !access.unlimited && typeof access.remaining === 'number';
 
   const blockedCard = limitHit && (
-    <div className="w-full max-w-xl mx-auto bg-white/90 backdrop-blur border border-emerald-900/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-[0_24px_80px_rgba(13,31,22,0.10)]">
-      {limitHit === 'guest' ? (
-        <>
-          <p className="text-lg font-semibold mb-1" style={{ color: INK }}>Create a free account to keep going.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>You got one free Scout question. Sign up to ask more and save your searches.</p>
-          <p className="text-sm mb-4" style={{ color: MUTED }}>
-            Already have a LotScout account?{' '}
-          <a href="/sign-in?redirect=/scout" onClick={() => track('scout_signin_click', { source: 'guest_limit_card' })} className="font-semibold hover:underline" style={{ color: GREEN }}>Sign in to continue</a>.
-          </p>
-          <form onSubmit={captureScoutLead} className="space-y-3">
-            <input
-              type="email"
-              value={leadEmail}
-              onChange={e => setLeadEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-              className="w-full rounded-2xl border border-emerald-900/10 bg-[#F9FBF7] px-4 py-3 text-base focus:outline-none focus:ring-4 focus:ring-[#1D9E75]/15 focus:border-[#1D9E75]/50 transition"
-              style={{ color: INK }}
-            />
-            {leadError && <p className="text-sm text-red-600">{leadError}</p>}
-            <button type="submit" disabled={leadLoading} className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold text-base shadow-lg shadow-emerald-900/10 transition hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-60 disabled:hover:translate-y-0" style={{ backgroundColor: GREEN }}>
-              {leadLoading ? 'Saving…' : 'Continue with Scout Search'}
-            </button>
-          </form>
-        </>
-      ) : (
-        <>
-          <p className="text-lg font-semibold mb-1" style={{ color: INK }}>You used your 2 free Scout questions this week.</p>
-          <p className="text-base mb-4" style={{ color: MUTED }}>Upgrade to keep asking Scout, save reports, and get unlimited searches.</p>
-          <a href="/pricing" onClick={() => track('scout_upgrade_click', { source: 'free_limit_card' })} className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold text-base shadow-lg shadow-emerald-900/10 transition hover:-translate-y-0.5 hover:opacity-95" style={{ backgroundColor: GREEN }}>
-            View options
-          </a>
-        </>
-      )}
+    <div className="w-full max-w-xl mx-auto bg-white border border-emerald-900/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-lg">
+      <p className="text-lg font-semibold mb-2" style={{ color: INK }}>Explore Scout with your team.</p>
+      <p className="text-base mb-5" style={{ color: MUTED }}>You’ve reached your current preview limit. Tell us about your company and research needs to discuss expanded access.</p>
+      <a href="/#contact" className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold" style={{ backgroundColor: GREEN }}>Request a Team Demo</a>
     </div>
   );
 
@@ -515,10 +450,10 @@ export default function AdvisorPage() {
   const remainingLine = showRemaining && !limitHit && (
     <p className="text-xs sm:text-sm text-center mt-1.5 sm:mt-2" style={{ color: MUTED }}>
       {access!.status === 'guest'
-        ? `${access!.remaining} free ${access!.remaining === 1 ? 'question' : 'questions'} before signup`
+        ? `${access!.remaining} free ${access!.remaining === 1 ? 'question' : 'questions'} in your preview`
         : `${access!.remaining} ${access!.remaining === 1 ? 'question' : 'questions'} left this week`}.
       {access!.status === 'free' && (
-        <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Get unlimited</button>
+        <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Discuss team access</button>
       )}
     </p>
   );
@@ -560,7 +495,7 @@ export default function AdvisorPage() {
         <p className="px-3 pb-2 text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: MUTED }}>Recents</p>
         {conversations.length === 0 ? (
           <p className="px-3 py-2 text-xs" style={{ color: MUTED }}>
-            {access?.status === 'guest' ? 'Sign in to save your chat history.' : 'No recent chats yet.'}
+            {access?.status === 'guest' ? 'Ask about team access to save your research.' : 'No recent chats yet.'}
           </p>
         ) : (
           <>
@@ -577,7 +512,7 @@ export default function AdvisorPage() {
               </button>
             ))}
             {access?.status === 'guest' && (
-              <p className="text-sm px-3 pt-3" style={{ color: MUTED }}>Sign in to keep your history across visits.</p>
+              <p className="text-sm px-3 pt-3" style={{ color: MUTED }}>Contact us about saved research for your team.</p>
             )}
           </>
         )}
@@ -587,8 +522,13 @@ export default function AdvisorPage() {
 
   return (
     <div className="h-[100svh] flex flex-col overflow-hidden" style={{ backgroundColor: PAGE_BG }}>
-      <MetaCheckoutSuccessTracker />
-      <Header />
+      <header className="h-16 shrink-0 border-b border-emerald-900/10 bg-white flex items-center justify-between gap-3 px-4 sm:px-8">
+        <a href="/" className="font-bold text-lg tracking-tight" style={{ color: INK }}>LotScout</a>
+        <nav aria-label="Main navigation" className="flex items-center gap-4 text-sm font-semibold">
+          <a href="/" style={{ color: INK }}>Home</a>
+          <a href="/#contact" className="rounded-xl px-3 py-2 text-white" style={{ backgroundColor: GREEN }}>Request a Demo</a>
+        </nav>
+      </header>
       <div className="h-16 shrink-0" aria-hidden />
 
       <div className="flex-grow flex w-full min-h-0 relative overflow-hidden">
@@ -619,7 +559,7 @@ export default function AdvisorPage() {
                   <h1 className="font-headline text-5xl sm:text-6xl md:text-7xl font-black text-primary tracking-[-0.065em] leading-[0.9]">
                     Scout <span style={{ color: GREEN }}>Search</span>
                   </h1>
-                  <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Ask about markets, zoning, lots, buyer demand, comps, and deal strategy.</p>
+                  <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Your AI real estate research assistant. Explore markets, development, land, and the questions driving your next decision.</p>
                 </div>
 
                 {limitHit ? (
@@ -707,7 +647,7 @@ export default function AdvisorPage() {
         </div>
       </div>
 
-      {/* Scout is included in every paid LotScout plan, or available standalone; upgrade links to /pricing. */}
+      {/* Team access is handled through the landing-page demo form during the transition. */}
 
       {/* Saved reports (saved this session) */}
       {showSaved && (

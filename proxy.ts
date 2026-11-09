@@ -34,6 +34,33 @@ function isPublic(pathname: string) {
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
 
+  // Temporary landing-only launch. Set LOTSCOUT_LANDING_ONLY=false and
+  // redeploy to restore the preserved platform routes below.
+  if (process.env.LOTSCOUT_LANDING_ONLY !== 'false') {
+    const publicPages = ['/', '/home', '/scout', '/lotscout-logo.png', '/logo.png', '/apple-touch-icon.png'];
+    // Keep the contact form and signed payment lifecycle callbacks working.
+    const allowedApis = ['/api/demo-request', '/api/advisor', '/api/advisor/pdf', '/api/webhooks/stripe'];
+    if (publicPages.includes(path) || allowedApis.includes(path)) {
+      return NextResponse.next({ request });
+    }
+    if (path === '/api' || path.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: 'The platform is temporarily unavailable. Please request a demo on our homepage.' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+    const landing = request.nextUrl.clone();
+    if (path === '/terms' || path === '/privacy') landing.hash = path.slice(1);
+    landing.pathname = '/';
+    landing.search = '';
+    const response = NextResponse.redirect(landing, 307);
+    response.headers.set('Cache-Control', 'no-store');
+    return response;
+  }
+
+  // Preserve asset handling when the full platform is restored.
+  if (/\.(?:svg|png|jpg|jpeg|gif|webp)$/.test(path)) return NextResponse.next({ request });
+
   // Private no-login internal Land Matcher access. This intentionally avoids
   // the normal LotScout auth flow while still requiring the secret token.
   if (path === '/internal/land-matcher' || path.startsWith('/internal/land-matcher/')) {
@@ -138,6 +165,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Run on everything except Next.js internals and static assets
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }
