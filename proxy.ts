@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
   // Temporary landing-only launch. Set LOTSCOUT_LANDING_ONLY=false and
   // redeploy to restore the preserved platform routes below.
   if (process.env.LOTSCOUT_LANDING_ONLY !== 'false') {
-    const publicPages = ['/', '/home', '/scout', '/lotscout-logo.png', '/logo.png', '/apple-touch-icon.png'];
+    const publicPages = ['/', '/home', '/scout', '/lotscout-logo.png', '/logo.png', '/apple-touch-icon.png', '/demo-map.png'];
     // Keep the contact form and signed payment lifecycle callbacks working.
     const allowedApis = ['/api/demo-request', '/api/advisor', '/api/advisor/pdf', '/api/webhooks/stripe'];
     if (publicPages.includes(path) || allowedApis.includes(path)) {
