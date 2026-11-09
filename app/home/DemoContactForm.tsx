@@ -32,7 +32,7 @@ export default function DemoContactForm() {
 
   return <section className="section contact-section" id="contact" aria-labelledby="contact-title">
     <div><div className="eyebrow">Let’s talk about your next move</div><h2 id="contact-title">See what LotScout<br />can do for your team.</h2><p>Tell us about your company and the markets you care about. We’ll get in touch to discuss your needs and arrange a demo.</p><p className="micro">Submitting this form requests a conversation. It does not book a time or create an account.</p></div>
-    {status === 'sent' ? <div className="contact-success" role="status"><h3>Thanks—your request is in. We’ll be in touch.</h3></div> : <form className="demo-form" onSubmit={submit} aria-busy={status === 'sending'}>
+    {status === 'sent' ? <div className="contact-success" role="status"><h3>Thanks, your request is in. We’ll be in touch.</h3></div> : <form className="demo-form" onSubmit={submit} aria-busy={status === 'sending'}>
       <fieldset disabled={status === 'sending'}>
         <legend className="micro">All fields marked * are required.</legend>
         <div className="contact-fields">
