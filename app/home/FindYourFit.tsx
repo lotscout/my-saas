@@ -2,6 +2,8 @@
 
 import { useId, useRef, useState } from 'react';
 import { FIT_OFFER } from './fit-offer';
+import { track } from '@vercel/analytics';
+import { FIT_CONSENT_TEXT, recommendFit } from '@/lib/fit-quiz';
 
 type Plan = 'basic' | 'market' | 'enterprise';
 const plans: { key: Plan; name: string; summary: string; features: string[] }[] = [
@@ -24,14 +26,46 @@ export default function FindYourFit() {
   const [showPlans, setShowPlans] = useState(false);
   const [recommended, setRecommended] = useState<Plan | null>(null);
 
-  function open() { dialog.current?.showModal(); }
+  const [contactStep, setContactStep] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [marketingPending, setMarketingPending] = useState(false);
+  const requestId = useRef('');
+  const lastPayload = useRef('');
+  function event(name: string, properties: Record<string, string | boolean> = {}) {
+    // Analytics receives categories only, never contact information.
+    track(name, properties);
+  }
+  function open() { event('fit_opened'); dialog.current?.showModal(); }
+  async function submitContact(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault(); if (saving) return;
+    setSaving(true); setError('');
+    const form = new FormData(e.currentTarget);
+    const payload = {
+      name: form.get('name'), email: form.get('email'), company: form.get('company'), phone: form.get('phone'), website: form.get('website'),
+      answers, marketingOptIn: form.get('marketingOptIn') === 'on',
+    };
+    const signature = JSON.stringify(payload);
+    if (!requestId.current || lastPayload.current !== signature) requestId.current = crypto.randomUUID();
+    lastPayload.current = signature;
+    try {
+      const response = await fetch('/api/fit-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, requestId: requestId.current }) });
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.error || 'Please try again.');
+      setRecommended(result.recommendation); setContactStep(false); setShowPlans(true);
+      setMarketingPending(result.marketingSync === 'pending');
+      event('fit_lead_submitted', { recommended: result.recommendation, marketingOptIn: form.get('marketingOptIn') === 'on' });
+      requestAnimationFrame(() => heading.current?.focus());
+    } catch (err) { setError(err instanceof Error ? err.message : 'Please try again.'); }
+    finally { setSaving(false); }
+  }
   function next() {
     if (!answers[step]) return;
     if (step < questions.length - 1) { setStep(step + 1); }
     else {
-      const choice: Plan = answers[0] === 'deep' || answers[1] === 'custom' || answers[2] === 'special'
-        ? 'enterprise' : answers[0] === 'local' || answers[2] === 'markets' ? 'market' : 'basic';
-      setRecommended(choice); setShowPlans(true);
+      const choice = recommendFit(answers);
+      setRecommended(choice); setContactStep(true); requestId.current = '';
+      event('fit_answers_completed', { recommended: choice, need: answers[0], workflow: answers[1], coverage: answers[2] });
     }
     requestAnimationFrame(() => heading.current?.focus());
   }
@@ -46,8 +80,22 @@ export default function FindYourFit() {
     <dialog className="fit-dialog" ref={dialog} aria-labelledby={titleId} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
       <div className="fit-content">
         <button className="fit-close" type="button" aria-label="Close Find Your Fit" onClick={() => dialog.current?.close()}>×</button>
-        <h2 id={titleId} ref={heading} tabIndex={-1}>{showPlans ? recommended ? `Your fit: ${plans.find(p => p.key === recommended)?.name}` : 'Compare your options.' : 'Find your fit.'}</h2>
-        {showPlans ? <>
+        <h2 id={titleId} ref={heading} tabIndex={-1}>{showPlans ? recommended ? `Your fit: ${plans.find(p => p.key === recommended)?.name}` : 'Compare your options.' : contactStep ? 'Your results are ready.' : 'Find your fit.'}</h2>
+        {contactStep ? <form className="fit-contact-form" onSubmit={submitContact}>
+          <p className="fit-intro">Add your details to see your recommendation and pricing. Marketing emails are optional.</p>
+          <fieldset disabled={saving}><div className="contact-fields">
+            <label>Name<input name="name" autoComplete="name" maxLength={150} required /></label>
+            <label>Email<input name="email" type="email" autoComplete="email" maxLength={254} required /></label>
+            <label>Company (optional)<input name="company" autoComplete="organization" maxLength={200} /></label>
+            <label>Phone (optional)<input name="phone" type="tel" autoComplete="tel" maxLength={200} /></label>
+          </div><label className="contact-trap" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
+          <label className="fit-opt-in"><input type="checkbox" name="marketingOptIn" /><span>{FIT_CONSENT_TEXT}</span></label>
+          <p className="fit-note">We use your details and answers to handle your request. <a href="/#privacy" onClick={() => dialog.current?.close()}>Privacy policy</a>. No purchase required.</p>
+          {error && <p role="alert">{error}</p>}
+          <div className="fit-actions"><button type="button" className="button light" onClick={() => setContactStep(false)}>Back</button><button className="button" type="submit">{saving ? 'Saving…' : 'See My Fit & Pricing'}</button></div>
+          <button className="fit-text-button" type="button" onClick={() => { setContactStep(false); setRecommended(null); setShowPlans(true); event('fit_compare_all'); }}>View all options without submitting</button>
+          </fieldset>
+        </form> : showPlans ? <>
           <p className="fit-intro">{recommended ? reason : 'Choose the level of coverage and customization you need.'} You can choose any option below.</p>
           <div className="fit-plans">
             {plans.map(plan => <article key={plan.key} className={`fit-plan ${recommended === plan.key ? 'is-recommended' : ''}`}>
@@ -55,14 +103,15 @@ export default function FindYourFit() {
               <h3>{plan.name}</h3><p>{plan.summary}</p>
               <div className="fit-price">{plan.key === 'enterprise' ? 'Custom pricing' : (plan.key === 'basic' ? FIT_OFFER.basicMonthly : FIT_OFFER.marketMonthly) === null ? 'Pricing coming soon' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((plan.key === 'basic' ? FIT_OFFER.basicMonthly : FIT_OFFER.marketMonthly)!)}<small>{plan.key === 'basic' ? 'per month' : plan.key === 'market' ? 'per market / month' : 'Scoped with your team'}</small></div>
               <ul>{plan.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
-              {plan.key === 'enterprise' ? FIT_OFFER.calendarUrl ? <a className="button" href={FIT_OFFER.calendarUrl} target="_blank" rel="noopener noreferrer">Schedule a Call <span className="sr-only">(opens booking calendar in a new tab)</span></a> : <a className="button" href="#contact" onClick={() => dialog.current?.close()}>Request a Call</a> : <a className="button light" href={`/sign-up?plan=${plan.key}`}>Choose {plan.name}</a>}
+              {plan.key === 'enterprise' ? FIT_OFFER.calendarUrl ? <a className="button" href={FIT_OFFER.calendarUrl} onClick={() => event('fit_calendar_clicked', { recommended: recommended || 'none' })} target="_blank" rel="noopener noreferrer">Schedule a Call <span className="sr-only">(opens booking calendar in a new tab)</span></a> : <a className="button" href="#contact" onClick={() => { event('fit_call_requested', { recommended: recommended || 'none' }); dialog.current?.close(); }}>Request a Call</a> : <a className="button light" href={`/sign-up?plan=${plan.key}`} onClick={() => event('fit_plan_clicked', { chosen: plan.key, recommended: recommended || 'none' })}>Choose {plan.name}</a>}
               {plan.key === 'enterprise' && FIT_OFFER.calendarUrl && <p className="fit-calendar-note">Choose an available time in our booking calendar.</p>}
             </article>)}
           </div>
+          {marketingPending && <p className="fit-note" role="status">Your results are ready. Your marketing email subscription is pending.</p>}
           <p className="fit-note">Scout is included in every plan. Data access, usage allowances, and coverage depend on your plan. Detailed market coverage is purchased separately from the national overview.</p>
           <button className="fit-text-button" type="button" onClick={() => { setShowPlans(false); setStep(0); requestAnimationFrame(() => heading.current?.focus()); }}>Edit my answers</button>
         </> : <>
-          <p className="fit-intro">Three quick questions. No contact details needed.</p>
+          <p className="fit-intro">Three quick questions, then your contact details. Marketing emails are optional.</p>
           <div className="fit-progress">Question {step + 1} of {questions.length}</div>
           <fieldset className="fit-question"><legend>{questions[step].title}</legend>
             {questions[step].options.map(([value, label, detail]) => <label className={`fit-option ${answers[step] === value ? 'is-selected' : ''}`} key={value}>
@@ -71,7 +120,7 @@ export default function FindYourFit() {
             </label>)}
           </fieldset>
           <div className="fit-actions">{step > 0 && <button type="button" className="button light" onClick={() => setStep(step - 1)}>Back</button>}<button type="button" className="button" disabled={!answers[step]} onClick={next}>{step === questions.length - 1 ? 'See My Fit & Pricing' : 'Next'}</button></div>
-          <button className="fit-text-button" type="button" onClick={() => { setRecommended(null); setShowPlans(true); }}>Skip the quiz. View all options.</button>
+          <button className="fit-text-button" type="button" onClick={() => { setRecommended(null); setShowPlans(true); event('fit_compare_all'); }}>Skip the quiz. View all options.</button>
         </>}
       </div>
     </dialog>
