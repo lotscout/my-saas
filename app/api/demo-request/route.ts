@@ -12,8 +12,11 @@ export async function POST(request: NextRequest) {
   try { body = JSON.parse(raw); } catch { return NextResponse.json({ error: 'Invalid request.' }, { status: 400 }); }
   if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
   if (body.website) return NextResponse.json({ error: 'Could not submit this request.' }, { status: 400 });
-  const fields = ['firstName', 'lastName', 'email', 'phone', 'company', 'jobTitle', 'industry', 'market', 'interest'] as const;
-  if (fields.some(field => typeof body[field] !== 'string' || !(body[field] as string).trim() || (body[field] as string).length > 200)) return NextResponse.json({ error: 'Please complete all required fields.' }, { status: 400 });
+  // Accept the streamlined form and preserve compatibility with older clients.
+  const compact = typeof body.name === 'string';
+  const fields = compact ? ['name', 'email', 'company'] : ['firstName', 'lastName', 'email', 'phone', 'company', 'jobTitle', 'industry', 'market', 'interest'];
+  const required = compact ? ['name', 'email'] : fields;
+  if (required.some(field => typeof body[field] !== 'string' || !(body[field] as string).trim()) || fields.some(field => body[field] != null && (typeof body[field] !== 'string' || (body[field] as string).length > 200))) return NextResponse.json({ error: 'Please complete your name and email.' }, { status: 400 });
   const email = (body.email as string).trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || body.consent !== 'on' || typeof body.requestId !== 'string' || !/^[a-f0-9-]{36}$/i.test(body.requestId) || (body.message != null && (typeof body.message !== 'string' || body.message.length > 2000))) return NextResponse.json({ error: 'Check your email and contact consent.' }, { status: 400 });
   const now = Date.now();
@@ -31,7 +34,7 @@ export async function POST(request: NextRequest) {
       to: 'support@lotscout.com',
       replyTo: email,
       subject: 'New LotScout Demo Request',
-      text: fields.map(field => `${field}: ${(body[field] as string).trim()}`).join('\n') + '\n\nMessage: ' + (body.message || '(none)') + '\n\nContact consent: granted via homepage form.',
+      text: fields.map(field => `${field}: ${typeof body[field] === 'string' ? (body[field] as string).trim() || '(not provided)' : '(not provided)'}`).join('\n') + '\n\nMessage: ' + (body.message || '(none)') + '\n\nContact consent: granted via homepage form.',
     }, { idempotencyKey: 'demo-request/' + body.requestId });
     if (error || !data?.id) throw new Error('Delivery failed');
     return NextResponse.json({ ok: true });

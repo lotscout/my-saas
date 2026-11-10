@@ -6,6 +6,7 @@ import DemoContactForm from './DemoContactForm';
 import LegalDisclosures from './LegalDisclosures';
 import FindYourFit from './FindYourFit';
 import LandingMotion from './LandingMotion';
+import Offerings from './Offerings';
 
 const capabilities = [
  { key: 'community', label: 'Community', title: 'What surrounds the site?', solution: 'See schools, parks, shopping, and dining without piecing together separate maps.' },
@@ -18,7 +19,7 @@ const capabilities = [
 
 export default function LotScoutHomePage() {
  return <div className="ls-home"><LandingMotion />
-<header><a className="brand" href="/" aria-label="LotScout home"><Image src="/lotscout-logo.png" alt="" width={44} height={44} priority />LotScout</a><nav aria-label="Main navigation"><a href="#contact" className="button">Book a Demo</a><a href="/sign-up" className="button light">Sign Up</a></nav></header>
+<header><a className="brand" href="/" aria-label="LotScout home"><Image src="/lotscout-logo.png" alt="" width={44} height={44} priority />LotScout</a><nav aria-label="Main navigation"><a href="#offerings">Offerings</a><a href="#contact" className="button">Book a Demo</a><a href="/sign-up" className="button light">Sign Up</a></nav></header>
 <main>
 <section className="hero"><div><div className="eyebrow"><span className="dot"></span>Land & market data for your team</div><h1>Your markets.<br /><em>Your next move.</em></h1><p>Land, development, and builder data in context. Understand your market, assess the competition, and decide where to focus next.</p><div className="actions"><a className="button" href="#contact">Book a Demo</a><a href="/sign-up" className="button light">Sign Up</a><FindYourFit /></div><div className="micro">Built for homebuilders, developers, and enterprise real estate teams.</div></div>
 <div className="map-shell" role="img" aria-label="Illustrative development map and sample site brief, not a real parcel or live data"><svg className="map" viewBox="0 0 600 540" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="lots" width="67" height="55" patternTransform="rotate(-22)" patternUnits="userSpaceOnUse"><rect width="67" height="55" fill="#e8ebdf"/><path d="M0 0H67V55H0Z" fill="none" stroke="#fafbf5" strokeWidth="7"/><path d="M32 0V55M0 26H67" stroke="#d4ddca" fill="none" strokeWidth="1"/></pattern></defs><rect width="600" height="540" fill="url(#lots)"/><path d="M0 80Q160 150 175 15L300 0Q210 190 60 200L0 190Z" fill="#c8d6b8"/><path d="M485-20Q345 120 470 210T500 560" fill="none" stroke="#bbd1ce" strokeWidth="32"/><path d="M-40 310 650 40" stroke="#c8ceb9" strokeWidth="24"/><path d="M-40 310 650 40" stroke="#fffff5" strokeWidth="16"/><path d="m210-20 120 600" stroke="#c8ceb9" strokeWidth="19"/><path d="m210-20 120 600" stroke="#fffff5" strokeWidth="12"/><path d="m310 177 77-31 35 78-79 33Z" fill="#aac76e" fillOpacity=".7" stroke="#376441" strokeWidth="2"/><path d="m310 177 77-31 35 78-79 33Z" fill="none" stroke="#376441" strokeWidth="9" strokeOpacity=".1"/><circle cx="365" cy="202" r="8" fill="#214b38" stroke="white" strokeWidth="3"/><circle cx="195" cy="113" r="5" fill="#899a6a" stroke="white" strokeWidth="2"/><circle cx="443" cy="110" r="5" fill="#899a6a" stroke="white" strokeWidth="2"/><text x="80" y="265" fill="#829077" fontFamily="Arial" fontSize="10" transform="rotate(-22 80 265)">GROWTH CORRIDOR</text></svg><div className="map-top"><div className="map-tag">◎ &nbsp; Your market, in focus</div><div className="map-tag"><span>●</span> &nbsp; Illustrative preview</div></div><div className="map-label">Your Focus Area</div><div className="brief"><div className="brief-top"><span>THE BIGGER PICTURE</span><span>EXAMPLE BRIEF / 01</span></div><h3>Your data. In context.</h3><p>Connect land activity, residential development, and economic growth in a market view shaped around your company’s priorities.</p><div className="brief-bottom"><div>Pipeline<span>Plans, plats & permits</span></div><div>Pace<span>Recorded closings</span></div><div>Product<span>Size, price & lot mix</span></div></div></div></div></section>
@@ -47,6 +48,7 @@ export default function LotScoutHomePage() {
 <p className="micro">Pricing varies by coverage and scope. Integration depends on your systems and setup. Platform updates daily; county-record updates are weekly where covered. Source publication may lag. Policy coverage varies by jurisdiction.</p>
 </section>
 </section>
+<Offerings />
 <section className="section setup-section" aria-labelledby="setup-heading"><h2 id="setup-heading">Get started in three steps.</h2><div className="setup-grid">
 <div className="setup-step"><span className="setup-number">01</span><h3>Select your market.</h3><p>Choose the locations your team needs to understand.</p></div>
 <div className="setup-step"><span className="setup-number">02</span><h3>Select your tools.</h3><p>Choose the data, filters, and reports that support your decisions.</p></div>
