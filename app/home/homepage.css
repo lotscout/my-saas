@@ -92,3 +92,35 @@
 .ls-home .market-word{font-weight:700;color:#285342}
 .ls-home .market-word>span{justify-self:start;border-radius:8px;background:#d8ed9e;box-shadow:6px 0 #d8ed9e,-6px 0 #d8ed9e;transition:opacity .25s ease,transform .25s ease}
 @media(prefers-reduced-motion:reduce){.ls-home .market-word>span{transition:none;transform:none}}
+/* Stronger contrast and energy within the established green palette. */
+.ls-home{--paper:#ffffff;--ink:#103f2d;--muted:#3f5549;--line:#c7dacd;--lime:#b9ee50;background:#fff}
+.ls-home header{background:#103f2d;color:#fff;border-bottom:0;border-radius:0 0 18px 18px}
+.ls-home .hero{background:linear-gradient(115deg,#ffffff 64%,#e8fac7 100%)}
+.ls-home .hero p,.ls-home .micro{color:#3f5549}
+.ls-home .market-word{color:#103f2d}
+.ls-home .market-word>span{background:#b9ee50;box-shadow:6px 0 #b9ee50,-6px 0 #b9ee50}
+.ls-home .button,.ls-home a.button,.ls-home .button.light,.ls-home a.button.light,.ls-home header a.button,.ls-home .demo-form button.button,.ls-home .offering-card .button,.ls-home .fit-plan .button,.ls-home main .actions a.button{background:#146b43;border-color:#146b43;color:#fff;box-shadow:0 5px 0 #0b452a;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.ls-home .button:hover,.ls-home a.button:hover{background:#0e5735;border-color:#0e5735;transform:translateY(-3px);box-shadow:0 8px 0 #0b452a}
+.ls-home .button:active,.ls-home a.button:active{transform:translateY(2px);box-shadow:0 2px 0 #0b452a}
+.ls-home header a.button{background:#b9ee50;border-color:#b9ee50;color:#103f2d;box-shadow:none}
+.ls-home header a.button:hover{background:#ceff70;border-color:#ceff70;color:#103f2d;box-shadow:none}
+.ls-home .filter-heading{background:#103f2d;color:#fff;padding:30px;border-radius:12px;margin-bottom:24px}
+.ls-home .filter-heading p{color:#d2f29d}
+.ls-home .filter-card{background:#fff;border:2px solid #c7dacd;box-shadow:0 8px 22px #103f2d12;transition:transform .2s ease,box-shadow .2s ease}
+.ls-home .filter-card:hover{transform:translateY(-7px);box-shadow:0 16px 30px #103f2d25;border-color:#146b43}
+.ls-home .comparison-head>div{background:#103f2d;color:white}
+.ls-home .comparison-head>div:last-child{background:#146b43;color:white}
+.ls-home .comparison-row:not(.comparison-head)>div:last-child{background:#edfad9}
+.ls-home .offering-card{border:2px solid #b6cebf;box-shadow:0 8px 22px #103f2d12}
+.ls-home .offering-card:nth-child(2){border-color:#146b43;background:#edfad9;box-shadow:0 8px 24px #146b4320}
+.ls-home .offering-price{color:#0c6139;font-size:28px}
+.ls-home .pricing-intro{border-bottom:4px solid #b9ee50;padding-bottom:24px}
+.ls-home .scout-plan{background:#edfad9;border-radius:18px}
+.ls-home footer{border-top:4px solid #146b43}
+@media(prefers-reduced-motion:reduce){.ls-home .button,.ls-home a.button,.ls-home .filter-card{transition:none!important;transform:none!important}}
+.ls-home header a.button{background:#146b43;border-color:#146b43;color:#fff;box-shadow:0 5px 0 #0b452a}
+.ls-home header a.button:hover{background:#0e5735;border-color:#0e5735;color:#fff;box-shadow:0 8px 0 #0b452a}
+.ls-home header .brand{color:#fff}
+.ls-home header .brand img{background:#fff;border-radius:50%;padding:3px}
+
+.ls-home .audience-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}.ls-home .audience-list span{font-size:16px;font-weight:600;line-height:1.4;color:#103f2d;background:#e8fac7;border:1px solid #b9d38f;padding:9px 12px;border-radius:6px}

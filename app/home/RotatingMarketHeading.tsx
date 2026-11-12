@@ -19,8 +19,8 @@ export default function RotatingMarketHeading() {
     return () => window.clearInterval(timer);
   }, [paused, reduced]);
   return <div className="market-heading-wrap">
-    <h1 className="market-heading" aria-label="Know your housing, labor, development, and business market.">
-      <span aria-hidden="true">Know your<em className="market-word">{markets.map((word, i) => <span key={word} className={i === index ? 'is-current' : ''}>{word}</span>)}</em>market.</span>
+    <h1 className="market-heading" aria-label="Research your housing, labor, development, and business market.">
+      <span aria-hidden="true">Research your<em className="market-word">{markets.map((word, i) => <span key={word} className={i === index ? 'is-current' : ''}>{word}</span>)}</em>market.</span>
     </h1>
     {!reduced && <button type="button" className="market-motion-toggle" onClick={() => setPaused(p => !p)} aria-label={paused ? 'Resume headline rotation' : 'Pause headline rotation'}>{paused ? 'Resume' : 'Pause'}</button>}
   </div>;
