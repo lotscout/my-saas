@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 export default function LandingMotion() {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
-    const elements = document.querySelectorAll<HTMLElement>('.filter-card, .comparison-row:not(.comparison-head), .setup-step, .section-cta');
+    const elements = document.querySelectorAll<HTMLElement>('.offering-card, .filter-card, .comparison-row:not(.comparison-head), .setup-step, .section-cta');
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
