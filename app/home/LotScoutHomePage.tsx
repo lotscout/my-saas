@@ -9,10 +9,7 @@ import LandingMotion from './LandingMotion';
 import Offerings from './Offerings';
 
 const capabilities = [
- { key: 'community', label: 'Community', title: 'What surrounds the site?', solution: 'See schools, parks, shopping, and dining without piecing together separate maps.' },
  { key: 'zoning', label: 'Zoning', title: 'What land uses are nearby?', solution: 'Understand surrounding zoning before choosing where to investigate.' },
- { key: 'entitlements', label: 'Entitlements', title: 'What is actually moving forward?', solution: 'Separate submitted plans from approved and recorded projects.' },
- { key: 'land', label: 'Land', title: 'Where are competitors buying?', solution: 'Connect builder purchases with recorded transactions and land comps.' },
  { key: 'development', label: 'Development', title: 'How close is future supply?', solution: 'Distinguish raw land, developed lots, and active projects.' },
  { key: 'homebuilding', label: 'Homebuilding', title: 'What competition is taking shape?', solution: 'Compare future, permitted, for-sale, and sold homes in one market.' },
 ] as const;
