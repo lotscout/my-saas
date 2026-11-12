@@ -79,3 +79,16 @@
 .ls-home .pricing-nav-link{font-size:18px;font-weight:600;padding:12px}.ls-home .pricing-nav-link:hover,.ls-home .pricing-nav-link[aria-current="page"]{text-decoration:underline;text-underline-offset:5px}.ls-home .pricing-intro{padding-bottom:0}.ls-home .pricing-intro h1{font-size:clamp(36px,4vw,58px);line-height:1.1;max-width:850px;margin:20px 0}.ls-home .pricing-intro p,.ls-home .scout-plan p{font-size:19px;line-height:1.6;max-width:750px}.ls-home .scout-plan{display:flex;align-items:center;justify-content:space-between;gap:32px;border-top:1px solid var(--line)}.ls-home .scout-plan h2{font-size:36px}@media(max-width:600px){.ls-home header nav{flex-wrap:wrap}.ls-home .scout-plan{flex-direction:column;align-items:flex-start}}
 
 .ls-home nav>a.pricing-nav-link:not(.button){display:inline-flex}
+/* Selected direction: Bold and Spacious. */
+.ls-home .market-heading{font-size:76px}
+.ls-home .hero p,.ls-home .pricing-intro p,.ls-home .scout-plan p{font-size:22px;line-height:1.55}
+.ls-home .filter-heading h2,.ls-home .comparison-heading h2,.ls-home .contact-copy h2{font-size:46px;line-height:1.15}
+.ls-home .filter-copy p,.ls-home .comparison-row p,.ls-home .offering-card p,.ls-home .offering-card li{font-size:20px;line-height:1.6}
+.ls-home .button,.ls-home a.button,.ls-home .button.light,.ls-home a.button.light,.ls-home header a.button,.ls-home .demo-form button.button,.ls-home .offering-card .button,.ls-home .fit-plan .button,.ls-home main .actions a.button{width:250px;height:60px;min-height:60px;font-size:20px;border-radius:12px}
+@media(max-width:1000px){.ls-home .market-heading{font-size:60px}}
+@media(max-width:600px){.ls-home .market-heading{font-size:46px;letter-spacing:-1.5px}.ls-home .filter-heading h2,.ls-home .comparison-heading h2,.ls-home .contact-copy h2{font-size:34px}.ls-home .hero p,.ls-home .pricing-intro p,.ls-home .scout-plan p{font-size:20px}}
+
+/* Give the rotating market category a stronger visual emphasis. */
+.ls-home .market-word{font-weight:700;color:#285342}
+.ls-home .market-word>span{justify-self:start;border-radius:8px;background:#d8ed9e;box-shadow:6px 0 #d8ed9e,-6px 0 #d8ed9e;transition:opacity .25s ease,transform .25s ease}
+@media(prefers-reduced-motion:reduce){.ls-home .market-word>span{transition:none;transform:none}}

@@ -15,7 +15,7 @@ export default function RotatingMarketHeading() {
   }, []);
   useEffect(() => {
     if (paused || reduced) return;
-    const timer = window.setInterval(() => { if (!document.hidden) setIndex(i => (i + 1) % markets.length); }, 3000);
+    const timer = window.setInterval(() => { if (!document.hidden) setIndex(i => (i + 1) % markets.length); }, 1800);
     return () => window.clearInterval(timer);
   }, [paused, reduced]);
   return <div className="market-heading-wrap">
