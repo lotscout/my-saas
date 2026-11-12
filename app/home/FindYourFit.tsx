@@ -76,13 +76,13 @@ export default function FindYourFit() {
       : 'You want national trends and market comparisons, without deeper local coverage or custom tools.';
 
   return <>
-    <button className="button light" type="button" onClick={open}>Find Your Fit</button>
+    <button className="button light" type="button" onClick={open}>Take the 30 second quiz</button>
     <dialog className="fit-dialog" ref={dialog} aria-labelledby={titleId} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
       <div className="fit-content">
         <button className="fit-close" type="button" aria-label="Close Find Your Fit" onClick={() => dialog.current?.close()}>×</button>
         <h2 id={titleId} ref={heading} tabIndex={-1}>{showPlans ? recommended ? `Your fit: ${plans.find(p => p.key === recommended)?.name}` : 'Compare your options.' : contactStep ? 'Your results are ready.' : 'Find your fit.'}</h2>
         {contactStep ? <form className="fit-contact-form" onSubmit={submitContact}>
-          <p className="fit-intro">Add your details to see your recommendation and pricing. Marketing emails are optional.</p>
+          <p className="fit-intro">Add your details to see your recommendation. Contact us for current pricing. Marketing emails are optional.</p>
           <fieldset disabled={saving}><div className="contact-fields">
             <label>Name<input name="name" autoComplete="name" maxLength={150} required /></label>
             <label>Email<input name="email" type="email" autoComplete="email" maxLength={254} required /></label>
@@ -92,7 +92,7 @@ export default function FindYourFit() {
           <label className="fit-opt-in"><input type="checkbox" name="marketingOptIn" /><span>{FIT_CONSENT_TEXT}</span></label>
           <p className="fit-note">We use your details and answers to handle your request. <a href="/#privacy" onClick={() => dialog.current?.close()}>Privacy policy</a>. No purchase required.</p>
           {error && <p role="alert">{error}</p>}
-          <div className="fit-actions"><button type="button" className="button light" onClick={() => setContactStep(false)}>Back</button><button className="button" type="submit">{saving ? 'Saving…' : 'See My Fit & Pricing'}</button></div>
+          <div className="fit-actions"><button type="button" className="button light" onClick={() => setContactStep(false)}>Back</button><button className="button" type="submit">{saving ? 'Saving…' : 'See My Recommendation'}</button></div>
           <button className="fit-text-button" type="button" onClick={() => { setContactStep(false); setRecommended(null); setShowPlans(true); event('fit_compare_all'); }}>View all options without submitting</button>
           </fieldset>
         </form> : showPlans ? <>
@@ -101,9 +101,9 @@ export default function FindYourFit() {
             {plans.map(plan => <article key={plan.key} className={`fit-plan ${recommended === plan.key ? 'is-recommended' : ''}`}>
               <div className="fit-badge">{recommended === plan.key ? 'Recommended for you' : '\u00a0'}</div>
               <h3>{plan.name}</h3><p>{plan.summary}</p>
-              <div className="fit-price">{plan.key === 'enterprise' ? 'Custom pricing' : (plan.key === 'basic' ? FIT_OFFER.basicMonthly : FIT_OFFER.marketMonthly) === null ? 'Pricing coming soon' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((plan.key === 'basic' ? FIT_OFFER.basicMonthly : FIT_OFFER.marketMonthly)!)}<small>{plan.key === 'basic' ? 'per month' : plan.key === 'market' ? 'per market / month' : 'Scoped with your team'}</small></div>
+              <div className="fit-price">{plan.key === 'enterprise' ? 'Custom pricing' : (plan.key === 'basic' ? FIT_OFFER.basicMonthly : FIT_OFFER.marketMonthly) === null ? 'Ask for pricing' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((plan.key === 'basic' ? FIT_OFFER.basicMonthly : FIT_OFFER.marketMonthly)!)}<small>{plan.key === 'basic' ? 'per month' : plan.key === 'market' ? 'per market / month' : 'Scoped with your team'}</small></div>
               <ul>{plan.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
-              {plan.key === 'enterprise' ? FIT_OFFER.calendarUrl ? <a className="button" href={FIT_OFFER.calendarUrl} onClick={() => event('fit_calendar_clicked', { recommended: recommended || 'none' })} target="_blank" rel="noopener noreferrer">Schedule a Call <span className="sr-only">(opens booking calendar in a new tab)</span></a> : <a className="button" href="#contact" onClick={() => { event('fit_call_requested', { recommended: recommended || 'none' }); dialog.current?.close(); }}>Request a Call</a> : <a className="button light" href={`/sign-up?plan=${plan.key}`} onClick={() => event('fit_plan_clicked', { chosen: plan.key, recommended: recommended || 'none' })}>Choose {plan.name}</a>}
+              {plan.key === 'enterprise' ? FIT_OFFER.calendarUrl ? <a className="button" href={FIT_OFFER.calendarUrl} onClick={() => event('fit_calendar_clicked', { recommended: recommended || 'none' })} target="_blank" rel="noopener noreferrer">Schedule a Call <span className="sr-only">(opens booking calendar in a new tab)</span></a> : <a className="button" href="#contact" onClick={() => { event('fit_call_requested', { recommended: recommended || 'none' }); dialog.current?.close(); }}>Request a Call</a> : <a className="button light" href="#contact" onClick={() => { event('fit_plan_clicked', { chosen: plan.key, recommended: recommended || 'none' }); dialog.current?.close(); }}>Ask About {plan.name}</a>}
               {plan.key === 'enterprise' && FIT_OFFER.calendarUrl && <p className="fit-calendar-note">Choose an available time in our booking calendar.</p>}
             </article>)}
           </div>
@@ -119,7 +119,7 @@ export default function FindYourFit() {
               <span><strong>{label}</strong><small>{detail}</small></span>
             </label>)}
           </fieldset>
-          <div className="fit-actions">{step > 0 && <button type="button" className="button light" onClick={() => setStep(step - 1)}>Back</button>}<button type="button" className="button" disabled={!answers[step]} onClick={next}>{step === questions.length - 1 ? 'See My Fit & Pricing' : 'Next'}</button></div>
+          <div className="fit-actions">{step > 0 && <button type="button" className="button light" onClick={() => setStep(step - 1)}>Back</button>}<button type="button" className="button" disabled={!answers[step]} onClick={next}>{step === questions.length - 1 ? 'See My Recommendation' : 'Next'}</button></div>
           <button className="fit-text-button" type="button" onClick={() => { setRecommended(null); setShowPlans(true); event('fit_compare_all'); }}>Skip the quiz. View all options.</button>
         </>}
       </div>
