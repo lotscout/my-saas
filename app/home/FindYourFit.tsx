@@ -7,14 +7,14 @@ import { FIT_CONSENT_TEXT, recommendFit } from '@/lib/fit-quiz';
 
 type Plan = 'basic' | 'market' | 'enterprise';
 const plans: { key: Plan; name: string; summary: string; features: string[] }[] = [
-  { key: 'basic', name: 'Basic', summary: 'Explore the national picture.', features: ['National economic, jobs, and building-permit trends', 'Compare markets and inspect sources', 'Scout AI included'] },
-  { key: 'market', name: 'Market', summary: 'Go deeper in the markets you choose.', features: ['Everything in Basic', 'Standard local data, filters, and reports in purchased markets', 'Covered-market updates and Scout AI'] },
-  { key: 'enterprise', name: 'Enterprise', summary: 'Build around your organization.', features: ['National overview and contracted market coverage', 'Detailed analysis, custom reports, and policy monitoring', 'Custom integrations and Scout AI'] },
+  { key: 'basic', name: 'Basic', summary: 'Explore U.S. markets with local statistical detail where available.', features: ['Population, income, housing, jobs, and residential permit trends', 'Compare markets and inspect sources and dates', 'Scout Search included, normally $20/month separately', 'No detailed local-record research or custom reporting'] },
+  { key: 'market', name: 'Market', summary: 'In-depth local research for builders and small companies expanding.', features: ['Everything in Basic, including Scout Search', 'Deeper zoning, development, housing, and policy research in covered markets', 'Local records, updates, and shared market reports', 'No company-specific analysis or internal-data integration'] },
+  { key: 'enterprise', name: 'Enterprise', summary: 'Research built around your company, data, and competitors.', features: ['Company-specific research in agreed markets', 'Your internal data connected with market data', 'Tailored competitor coverage and custom reports', 'Integration with your reporting workflows and Scout Search'] },
 ];
 const questions = [
-  { title: 'What do you need to understand?', options: [ ['national', 'Compare markets nationally', 'Economic, jobs, population, and building-permit trends.'], ['local', 'Follow specific markets', 'Local activity, development, and standard market reports.'], ['deep', 'Analyze my organization’s opportunities', 'Detailed competitive analysis and company-specific research.'] ] },
+  { title: 'What do you need to understand?', options: [ ['national', 'Compare markets nationally', 'Public economic, jobs, housing, population, and permit statistics.'], ['local', 'Follow specific markets', 'In-depth local records, development, and shared market reports.'], ['deep', 'Analyze my organization’s opportunities', 'Detailed competitive analysis and company-specific research.'] ] },
   { title: 'How do you want to use the data?', options: [ ['standard', 'Use ready-made tools', 'Select filters, ask Scout, and use standard reports.'], ['custom', 'Customize it for my team', 'Tailored reports, private data, or integrations with our systems.'] ] },
-  { title: 'What coverage do you need?', options: [ ['national', 'A national overview', 'Compare U.S. markets without detailed local coverage.'], ['markets', 'One or more U.S. markets', 'Choose paid market coverage where available.'], ['special', 'A custom coverage area', 'Discuss specific boundaries or coverage requirements.'] ] },
+  { title: 'What coverage do you need?', options: [ ['national', 'A national overview', 'National statistics with local drill-downs where available.'], ['markets', 'One or more U.S. markets', 'Choose paid market coverage where available.'], ['special', 'A custom coverage area', 'Discuss specific boundaries or coverage requirements.'] ] },
 ];
 
 export default function FindYourFit() {
@@ -82,7 +82,7 @@ export default function FindYourFit() {
         <button className="fit-close" type="button" aria-label="Close Find Your Fit" onClick={() => dialog.current?.close()}>×</button>
         <h2 id={titleId} ref={heading} tabIndex={-1}>{showPlans ? recommended ? `Your fit: ${plans.find(p => p.key === recommended)?.name}` : 'Compare your options.' : contactStep ? 'Your results are ready.' : 'Find your fit.'}</h2>
         {contactStep ? <form className="fit-contact-form" onSubmit={submitContact}>
-          <p className="fit-intro">Add your details to see your recommendation. Contact us for current pricing. Marketing emails are optional.</p>
+          <p className="fit-intro">Add your details to see your recommendation and package pricing. Marketing emails are optional.</p>
           <fieldset disabled={saving}><div className="contact-fields">
             <label>Name<input name="name" autoComplete="name" maxLength={150} required /></label>
             <label>Email<input name="email" type="email" autoComplete="email" maxLength={254} required /></label>
@@ -103,12 +103,12 @@ export default function FindYourFit() {
               <h3>{plan.name}</h3><p>{plan.summary}</p>
               <div className="fit-price">{plan.key === 'enterprise' ? 'Custom pricing' : (plan.key === 'basic' ? FIT_OFFER.basicMonthly : FIT_OFFER.marketMonthly) === null ? 'Ask for pricing' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((plan.key === 'basic' ? FIT_OFFER.basicMonthly : FIT_OFFER.marketMonthly)!)}<small>{plan.key === 'basic' ? 'per month' : plan.key === 'market' ? 'per market / month' : 'Scoped with your team'}</small></div>
               <ul>{plan.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
-              {plan.key === 'enterprise' ? FIT_OFFER.calendarUrl ? <a className="button" href={FIT_OFFER.calendarUrl} onClick={() => event('fit_calendar_clicked', { recommended: recommended || 'none' })} target="_blank" rel="noopener noreferrer">Schedule a Call <span className="sr-only">(opens booking calendar in a new tab)</span></a> : <a className="button" href="#contact" onClick={() => { event('fit_call_requested', { recommended: recommended || 'none' }); dialog.current?.close(); }}>Request a Call</a> : <a className="button light" href="#contact" onClick={() => { event('fit_plan_clicked', { chosen: plan.key, recommended: recommended || 'none' }); dialog.current?.close(); }}>Ask About {plan.name}</a>}
+              {plan.key === 'enterprise' ? FIT_OFFER.calendarUrl ? <a className="button" href={FIT_OFFER.calendarUrl} onClick={() => event('fit_calendar_clicked', { recommended: recommended || 'none' })} target="_blank" rel="noopener noreferrer">Schedule a Call <span className="sr-only">(opens booking calendar in a new tab)</span></a> : <a className="button" href="/#contact" onClick={() => { event('fit_call_requested', { recommended: recommended || 'none' }); dialog.current?.close(); }}>Book a Call</a> : <a className="button light" href="/#contact" onClick={() => { event('fit_plan_clicked', { chosen: plan.key, recommended: recommended || 'none' }); dialog.current?.close(); }}>Ask About {plan.name}</a>}
               {plan.key === 'enterprise' && FIT_OFFER.calendarUrl && <p className="fit-calendar-note">Choose an available time in our booking calendar.</p>}
             </article>)}
           </div>
           {marketingPending && <p className="fit-note" role="status">Your results are ready. Your marketing email subscription is pending.</p>}
-          <p className="fit-note">Scout is included in every plan. Data access, usage allowances, and coverage depend on your plan. Detailed market coverage is purchased separately from the national overview.</p>
+          <p className="fit-note">Scout is included in every plan. Data access, usage allowances, and coverage depend on your plan. Basic includes local statistical detail where available. Deeper market research is purchased per market. Contact us to confirm availability.</p>
           <button className="fit-text-button" type="button" onClick={() => { setShowPlans(false); setStep(0); requestAnimationFrame(() => heading.current?.focus()); }}>Edit my answers</button>
         </> : <>
           <p className="fit-intro">Three quick questions, then your contact details. Marketing emails are optional.</p>

@@ -1,7 +1,7 @@
-// New package rates and scheduling URL must be confirmed before publication.
+// Approved monthly package rates. Booking calendar is not configured.
 // Legacy marketplace pricing is intentionally not reused.
 export const FIT_OFFER: { basicMonthly: number | null; marketMonthly: number | null; calendarUrl: string | null } = {
-  basicMonthly: null,
-  marketMonthly: null,
+  basicMonthly: 79,
+  marketMonthly: 179,
   calendarUrl: null,
 };

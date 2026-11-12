@@ -5,7 +5,6 @@ import './homepage.css';
 import DemoContactForm from './DemoContactForm';
 import LegalDisclosures from './LegalDisclosures';
 import LandingMotion from './LandingMotion';
-import Offerings from './Offerings';
 import RotatingMarketHeading from './RotatingMarketHeading';
 
 const capabilities = [
@@ -16,7 +15,7 @@ const capabilities = [
 
 export default function LotScoutHomePage() {
  return <div className="ls-home"><LandingMotion />
-<header><a className="brand" href="/" aria-label="LotScout home"><Image src="/lotscout-logo.png" alt="" width={44} height={44} priority />LotScout</a><nav aria-label="Main navigation"><a href="#contact" className="button">Claim My Market</a></nav></header>
+<header><a className="brand" href="/" aria-label="LotScout home"><Image src="/lotscout-logo.png" alt="" width={44} height={44} priority />LotScout</a><nav aria-label="Main navigation"><a href="/pricing" className="pricing-nav-link">Pricing</a><a href="#contact" className="button">Claim My Market</a></nav></header>
 <main>
 <section className="hero"><div><div className="eyebrow"><span className="dot"></span>Built for teams planning their next move.</div><RotatingMarketHeading /><p>Reduce manual market research by 90%. We verify, translate, and publish public-source data so you don’t have to dig through thousands of datasets per market.</p><div className="actions"><a className="button" href="#contact">Claim My Market</a></div><div className="micro">For residential and commercial builders, economic development teams, and companies that need tailored market research.</div></div>
 <div className="map-shell" role="img" aria-label="Illustrative development map and sample site brief, not a real parcel or live data"><svg className="map" viewBox="0 0 600 540" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="lots" width="67" height="55" patternTransform="rotate(-22)" patternUnits="userSpaceOnUse"><rect width="67" height="55" fill="#e8ebdf"/><path d="M0 0H67V55H0Z" fill="none" stroke="#fafbf5" strokeWidth="7"/><path d="M32 0V55M0 26H67" stroke="#d4ddca" fill="none" strokeWidth="1"/></pattern></defs><rect width="600" height="540" fill="url(#lots)"/><path d="M0 80Q160 150 175 15L300 0Q210 190 60 200L0 190Z" fill="#c8d6b8"/><path d="M485-20Q345 120 470 210T500 560" fill="none" stroke="#bbd1ce" strokeWidth="32"/><path d="M-40 310 650 40" stroke="#c8ceb9" strokeWidth="24"/><path d="M-40 310 650 40" stroke="#fffff5" strokeWidth="16"/><path d="m210-20 120 600" stroke="#c8ceb9" strokeWidth="19"/><path d="m210-20 120 600" stroke="#fffff5" strokeWidth="12"/><path d="m310 177 77-31 35 78-79 33Z" fill="#aac76e" fillOpacity=".7" stroke="#376441" strokeWidth="2"/><path d="m310 177 77-31 35 78-79 33Z" fill="none" stroke="#376441" strokeWidth="9" strokeOpacity=".1"/><circle cx="365" cy="202" r="8" fill="#214b38" stroke="white" strokeWidth="3"/><circle cx="195" cy="113" r="5" fill="#899a6a" stroke="white" strokeWidth="2"/><circle cx="443" cy="110" r="5" fill="#899a6a" stroke="white" strokeWidth="2"/><text x="80" y="265" fill="#829077" fontFamily="Arial" fontSize="10" transform="rotate(-22 80 265)">GROWTH CORRIDOR</text></svg><div className="map-top"><div className="map-tag">◎ &nbsp; Your market, in focus</div><div className="map-tag"><span>●</span> &nbsp; Illustrative preview</div></div><div className="map-label">Your Focus Area</div><div className="brief"><h3>Our data. In context</h3><p>Connect development activity, economic trends, and policy changes in a market view shaped around your team’s priorities.</p></div></div></section>
@@ -40,7 +39,6 @@ export default function LotScoutHomePage() {
 </div>
 </section>
 </section>
-<Offerings />
 <DemoContactForm />
 <LegalDisclosures />
 </main><footer><a className="brand" href="/"><Image src="/lotscout-logo.png" alt="" width={36} height={36} />LotScout</a><span>Land & Economic Data. Personalized.</span><span>© 2026 LotScout · <a href="/#terms">Terms & conditions</a> · <a href="/#privacy">Privacy</a></span></footer>

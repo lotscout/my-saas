@@ -1,11 +1,30 @@
 import FindYourFit from './FindYourFit';
+import { FIT_OFFER } from './fit-offer';
 
 export default function Offerings() {
   return <section className="section offerings-section" id="offerings" aria-label="Offerings">
     <div className="offering-grid">
-      <article className="offering-card"><span className="eyebrow">National overview</span><h3>Basic</h3><p>For individuals and teams comparing U.S. markets before deciding where to focus.</p><ul><li><strong>National trends:</strong> Explore economic, population, employment, and building-permit indicators.</li><li><strong>Market comparisons:</strong> Compare areas to identify growth, decline, and questions worth investigating.</li><li><strong>Source context:</strong> See the sources and reporting periods behind the data.</li><li><strong>Scout included:</strong> Ask questions about the national data in your package.</li><li><strong>Coverage:</strong> National overview, without detailed local records or custom research.</li></ul><div className="offering-price">Ask for pricing</div><a className="button light" href="#contact">Ask About Basic</a></article>
-      <article className="offering-card"><span className="eyebrow">Paid market coverage</span><h3>Market</h3><p>For teams tracking specific U.S. markets with standard local data and reports.</p><ul><li><strong>Everything in Basic:</strong> Keep the national overview while focusing on selected markets.</li><li><strong>Local activity:</strong> Explore available zoning, development, and homebuilding data through market filters.</li><li><strong>Market reporting:</strong> Follow covered-market updates and standard reports in one workspace.</li><li><strong>Scout included:</strong> Research using the national and local data in your package.</li><li><strong>Coverage:</strong> Purchased per market. Custom research and integrations are scoped separately.</li></ul><div className="offering-price">Ask for pricing</div><a className="button" href="#contact">Discuss Your Markets</a></article>
-      <article className="offering-card"><span className="eyebrow">Custom scope</span><h3>Enterprise</h3><p>For builders, economic development teams, and companies needing research tailored to their decisions.</p><ul><li><strong>Tailored research:</strong> Define your markets, business questions, and depth of analysis with our team.</li><li><strong>Custom reports:</strong> Organize findings around your opportunities and priorities.</li><li><strong>Policy monitoring:</strong> Track relevant changes in agreed jurisdictions and their potential business implications.</li><li><strong>Team workflows:</strong> Scope integrations, reporting, and support around your existing systems.</li><li><strong>Scout included:</strong> Explore the data covered by your agreement.</li><li><strong>Coverage:</strong> National overview plus contracted markets, deliverables, and services.</li></ul><div className="offering-price">Custom quote</div><a className="button light" href="#contact">Book an Enterprise Demo</a></article>
-    </div><div className="quiz-prompt"><h3>Not sure?</h3><FindYourFit /></div><p className="micro">Contact us to confirm available coverage, included tools, and usage allowances. Detailed local coverage is not included nationwide.</p>
+      <article className="offering-card"><span className="eyebrow">National data</span><h3>Basic</h3><p>For individuals and teams exploring economic conditions and comparing markets across the U.S.</p><ul>
+        <li><strong>National and local statistics:</strong> Explore population, income, housing, jobs, and residential permit trends, with local detail where available.</li>
+        <li><strong>Market comparisons:</strong> Compare states, counties, and supported local areas to understand growth and change.</li>
+        <li><strong>Source context:</strong> See where the numbers come from and the periods they cover.</li>
+        <li><strong>Scout Search included:</strong> Ask questions and explore the data through chat. Normally $20/month on its own.</li>
+        <li><strong>Scope:</strong> Standard public statistics, without detailed local-record research or company-specific reporting.</li>
+      </ul><div className="offering-price">${FIT_OFFER.basicMonthly}/month</div><a className="button" href="/#contact">Ask About Basic</a></article>
+      <article className="offering-card"><span className="eyebrow">In-depth local research</span><h3>Market</h3><p>For local builders and small companies evaluating or expanding into specific markets.</p><ul>
+        <li><strong>Everything in Basic:</strong> National statistics, local statistical comparisons, and Scout Search.</li>
+        <li><strong>Deeper market coverage:</strong> Explore permits, jobs, community activity, housing prices and floor plans, land development, policy changes, and economic trends.</li>
+        <li><strong>Local records and updates:</strong> Follow collected public records and market developments without repeating the research yourself.</li>
+        <li><strong>Market-level reports:</strong> Get standard reports, recommendations, and weekly email summaries, without company-specific customization.</li>
+        <li><strong>Unlimited Scout and exports:</strong> Ask questions and export data from your purchased markets. Add as many markets as you need at $179 each per month.</li>
+      </ul><div className="offering-price">${FIT_OFFER.marketMonthly}/market/month</div><a className="button" href="/#contact">Discuss Your Markets</a></article>
+      <article className="offering-card"><span className="eyebrow">Built around your company</span><h3>Enterprise</h3><p>For teams that need market research tailored to their business, competitors, and existing workflows.</p><ul>
+        <li><strong>Company-specific research:</strong> Focus the analysis on your strategy, questions, and selected markets.</li>
+        <li><strong>Your data, connected:</strong> Bring your internal data together with market research.</li>
+        <li><strong>Tailored competitor coverage:</strong> Follow the competitors and activity relevant to your business.</li>
+        <li><strong>Custom reporting:</strong> Build reports around your needs and integrate findings into your existing reporting workflows.</li>
+        <li><strong>Unlimited Scout Search:</strong> Explore your company’s research with ongoing support and organization access controls.</li>
+      </ul><div className="offering-price">Custom pricing</div><a className="button" href="/#contact">Book a Call</a></article>
+    </div><div className="quiz-prompt"><h3>Not sure?</h3><FindYourFit /></div><p className="micro">Contact us for package availability and coverage before purchasing.</p>
   </section>;
 }

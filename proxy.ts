@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
   // Temporary landing-only launch. Set LOTSCOUT_LANDING_ONLY=false and
   // redeploy to restore the preserved platform routes below.
   if (process.env.LOTSCOUT_LANDING_ONLY !== 'false') {
-    const publicPages = ['/', '/home', '/scout', '/signup', '/sign-up', '/login', '/sign-in', '/reset-password', '/auth/callback', '/lotscout-logo.png', '/logo.png', '/apple-touch-icon.png', '/demo-map.png', '/demo-community.jpg', '/demo-zoning.jpg', '/demo-entitlements.jpg', '/demo-land.jpg', '/demo-development.jpg', '/demo-homebuilding.jpg'];
+    const publicPages = ['/', '/home', '/pricing', '/scout', '/signup', '/sign-up', '/login', '/sign-in', '/reset-password', '/auth/callback', '/lotscout-logo.png', '/logo.png', '/apple-touch-icon.png', '/demo-map.png', '/demo-community.jpg', '/demo-zoning.jpg', '/demo-entitlements.jpg', '/demo-land.jpg', '/demo-development.jpg', '/demo-homebuilding.jpg'];
     // Keep the contact form and signed payment lifecycle callbacks working.
     const allowedApis = ['/api/fit-lead', '/api/signup', '/api/auth/google', '/api/auth/post-signin', '/api/demo-request', '/api/advisor', '/api/advisor/pdf', '/api/webhooks/stripe'];
     if (publicPages.includes(path) || allowedApis.includes(path)) {
