@@ -31,7 +31,6 @@ export default function LotScoutHomePage() {
 <div className="filter-copy"><div className="eyebrow">{item.label}</div><h3>{item.title}</h3><p>{item.solution}</p></div>
 </article>)}</div></div>
 <p className="micro">Product previews. Coverage and reporting dates vary by market.</p>
-<div className="section-cta"><div><h3>Make it your market.</h3><p>Find the coverage and tools that fit your work.</p></div><div className="actions"><FindYourFit /><a className="button" href="#contact">Claim My Market</a></div></div>
 <section className="comparison" aria-labelledby="comparison-title">
 <div className="comparison-heading"><h2 id="comparison-title">From monthly reports to daily decisions.</h2></div>
 <div className="comparison-table" role="table" aria-label="Before and with LotScout">
@@ -44,16 +43,10 @@ export default function LotScoutHomePage() {
 <div className="comparison-row" role="row"><div role="cell"><span className="eyebrow">Policy changes</span><h3>Changes disconnected from your plans.</h3><p>Track policy announcements separately and work out what they could mean for your projects.</p></div><div role="cell"><span className="eyebrow">Policy changes</span><h3>See what could affect your next move.</h3><p>Follow policy changes in covered markets and explore potential implications for investment and business development.</p></div></div>
 <div className="comparison-row" role="row"><div role="cell"><span className="eyebrow">Cost</span><h3>Industry-leader pricing.</h3><p>A higher price for your market data.</p></div><div role="cell"><span className="eyebrow">Cost</span><h3>About 40% lower cost.</h3><p>Approximately 40% less than the industry leader.</p></div></div>
 </div>
-<div className="section-cta compact"><div><h3>Less research. More context.</h3></div><div className="actions"><FindYourFit /><a className="button" href="#contact">Claim My Market</a></div></div>
 <p className="micro">Pricing varies by coverage and scope. Integration depends on your systems and setup. Platform updates daily; county-record updates are weekly where covered. Source publication may lag. Policy coverage varies by jurisdiction.</p>
 </section>
 </section>
 <Offerings />
-<section className="section setup-section" aria-labelledby="setup-heading"><h2 id="setup-heading">Get started in three steps.</h2><div className="setup-grid">
-<div className="setup-step"><span className="setup-number">01</span><h3>Select your market.</h3><p>Choose the locations your team needs to understand.</p></div>
-<div className="setup-step"><span className="setup-number">02</span><h3>Select your tools.</h3><p>Choose the data, filters, and reports that support your decisions.</p></div>
-<div className="setup-step"><span className="setup-number">03</span><h3>Integrate with your workspace.</h3><p>Connect the data and reporting to your team’s workflow.</p></div>
-</div><div className="actions"><a className="button" href="#contact">Claim My Market</a><FindYourFit /></div></section>
 <section className="dark" id="scout"><div className="section"><div><div className="eyebrow">Meet Scout by LotScout</div><h2>Less time searching.<br />A clearer starting point.</h2><p>Ask Scout about land, zoning, and development. Get a clearer starting point for your real estate research.</p><p><a className="button" href="/scout">Try Scout Search</a></p><p>Start with a free preview question. Contact us about expanded access for your team.</p></div><div className="steps"><div className="step"><span className="num">01</span><div><strong>Start with your question.</strong><p>Ask about land, zoning, development concepts, or how to approach a market research question.</p></div></div><div className="step"><span className="num">02</span><div><strong>Explore the context.</strong><p>Use conversation to organize your research and identify the details worth investigating further.</p></div></div><div className="step"><span className="num">03</span><div><strong>Bring your team’s needs.</strong><p>Request a demo to discuss your markets, available data coverage, and company-specific reporting.</p></div></div></div></div></section>
 <DemoContactForm />
 <LegalDisclosures />
