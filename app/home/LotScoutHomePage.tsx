@@ -42,7 +42,6 @@ export default function LotScoutHomePage() {
 </section>
 </section>
 <Offerings />
-<section className="dark" id="scout"><div className="section"><div><div className="eyebrow">Meet Scout by LotScout</div><h2>Less time searching.<br />A clearer starting point.</h2><p>Ask Scout about land, zoning, and development. Get a clearer starting point for your real estate research.</p><p><a className="button" href="/scout">Try Scout Search</a></p><p>Start with a free preview question. Contact us about expanded access for your team.</p></div><div className="steps"><div className="step"><span className="num">01</span><div><strong>Start with your question.</strong><p>Ask about land, zoning, development concepts, or how to approach a market research question.</p></div></div><div className="step"><span className="num">02</span><div><strong>Explore the context.</strong><p>Use conversation to organize your research and identify the details worth investigating further.</p></div></div><div className="step"><span className="num">03</span><div><strong>Bring your team’s needs.</strong><p>Request a demo to discuss your markets, available data coverage, and company-specific reporting.</p></div></div></div></div></section>
 <DemoContactForm />
 <LegalDisclosures />
 </main><footer><a className="brand" href="/"><Image src="/lotscout-logo.png" alt="" width={36} height={36} />LotScout</a><span>Land & Economic Data. Personalized.</span><span>© 2026 LotScout · <a href="/#terms">Terms & conditions</a> · <a href="/#privacy">Privacy</a></span></footer>
