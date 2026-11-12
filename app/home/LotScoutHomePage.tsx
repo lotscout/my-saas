@@ -37,7 +37,6 @@ export default function LotScoutHomePage() {
 <div className="comparison-row" role="row"><div role="cell"><span className="eyebrow">County records</span><h3>Another search. Another outdated file.</h3><p>Search county portals and reconcile records yourself, or rely on older snapshots.</p></div><div role="cell"><span className="eyebrow">County records</span><h3>Weekly updates, brought together.</h3><p>Follow newly available county records in your covered markets without repeating the research.</p></div></div>
 <div className="comparison-row" role="row"><div role="cell"><span className="eyebrow">Policy changes</span><h3>Changes disconnected from your plans.</h3><p>Track policy announcements separately and work out what they could mean for your projects.</p></div><div role="cell"><span className="eyebrow">Policy changes</span><h3>See what could affect your next move.</h3><p>Follow policy changes in covered markets and explore potential implications for investment and business development.</p></div></div>
 </div>
-<p className="micro">Pricing varies by coverage and scope. Integration depends on your systems and setup. Platform updates daily; county-record updates are weekly where covered. Source publication may lag. Policy coverage varies by jurisdiction.</p>
 </section>
 </section>
 <Offerings />
