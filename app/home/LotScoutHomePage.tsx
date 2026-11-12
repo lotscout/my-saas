@@ -27,7 +27,6 @@ export default function LotScoutHomePage() {
 <div className="filter-image"><Image src={`/demo-${item.key}.jpg`} alt={`Queen Creek preview with the ${item.label.toLowerCase()} filter enabled`} fill sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 400px" style={{objectFit:'cover'}} /></div>
 <div className="filter-copy"><div className="eyebrow">{item.label}</div><h3>{item.title}</h3><p>{item.solution}</p></div>
 </article>)}</div></div>
-<p className="micro">Product previews. Coverage and reporting dates vary by market.</p>
 <section className="comparison" aria-labelledby="comparison-title">
 <div className="comparison-heading"><h2 id="comparison-title">From monthly reports to daily decisions.</h2></div>
 <div className="comparison-table" role="table" aria-label="Before and with LotScout">
