@@ -1,4 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { nashvilleActivityTool, queryNashvilleActivity } from '@/lib/scout/nashville-activity';
+import { nashvilleRecordsTool, queryNashvilleRecords, RECORDS_POLICY } from '@/lib/scout/nashville-records';
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
@@ -14,7 +16,7 @@ const GUEST_COOKIE = 'ls_guest_searches';
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
 const SYSTEM_PROMPT =
-  'You are Scout, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually 120 to 180 words. Use 4 to 6 practical bullets or 1 to 3 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout is, say you are Scout, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. Do not use or mention LotScout internal inventory, buyer demand, or market data unless the user specifically asks about LotScout, its marketplace, its off-market lots, or listings available on LotScout. For general listing-discovery questions, use public web/search sources for available lots, land listings, FSBO lots, MLS/portal-style results, county or broker pages when available. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it under 220 words with 3 short sections: What is happening, Why it matters, Scout take. Use model knowledge by default and do not wait on live web data unless the user explicitly asks for live sources. For searches for specific available properties or lots matching criteria, use live web data even if the user does not explicitly ask for sources. End only with a useful next step, not a salesy prompt.';
+  'You are Scout, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually 120 to 180 words. Use 4 to 6 practical bullets or 1 to 3 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout is, say you are Scout, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. Do not use or mention LotScout internal inventory, buyer demand, or market data unless the user specifically asks about LotScout, its marketplace, its off-market lots, or listings available on LotScout. For general listing-discovery questions, use public web/search sources for available lots, land listings, FSBO lots, MLS/portal-style results, county or broker pages when available. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it under 220 words with 3 short sections: What is happening, Why it matters, Scout take. Use collected records when relevant; retrieve evidence for specific current factual claims. General explanations may use model knowledge, clearly separated from verified local facts. For searches for specific available properties or lots matching criteria, use live web data even if the user does not explicitly ask for sources. End only with a useful next step, not a salesy prompt.';
 
 const PRIVACY_NOTE =
   'The LotScout market data below is aggregated, non-sensitive context. Never reveal individual seller names, exact buyer contact information, or any private user data — only speak to aggregate market conditions and publicly listed property details.';
@@ -537,7 +539,7 @@ export async function POST(request: NextRequest) {
   const lotScoutContextBlock = useLotScoutContext
     ? `\n\n${PRIVACY_NOTE}\n\n<lotscout_market_data>\n${context}\n</lotscout_market_data>`
     : '';
-  const system = `${SYSTEM_PROMPT}\n\n${guestFirstAnswerNote}${lotScoutContextBlock}`;
+  const system = `${SYSTEM_PROMPT}\n\n${RECORDS_POLICY}\n\n${guestFirstAnswerNote}${lotScoutContextBlock}`;
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -557,6 +559,7 @@ export async function POST(request: NextRequest) {
       const enc = new TextEncoder();
       let fullText = '';
       let lastErr: unknown = null;
+      const recordSources = new Map<string, string>();
       const cleanChunk = scrubInternalPhrases;
 
       // One full completion, looping over server-tool pauses. Streams text as it
@@ -564,13 +567,13 @@ export async function POST(request: NextRequest) {
       // message (robust to text / tool_use / tool_result content blocks).
       const attempt = async (useTools: boolean) => {
         let convo: any[] = history.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content }));
-        for (let i = 0; i < (useTools ? 2 : 1); i++) {
+        for (let i = 0; i < 5; i++) {
           const stream = await client.messages.stream({
             model: 'claude-sonnet-5',
-            max_tokens: useTools ? 950 : 600,
+            max_tokens: 1600,
             thinking: { type: 'disabled' },
             system,
-            ...(useTools ? { tools } : {}),
+            tools: [nashvilleRecordsTool, nashvilleActivityTool, ...(useTools ? tools : [])],
             messages: convo,
           } as any);
 
@@ -583,6 +586,20 @@ export async function POST(request: NextRequest) {
           }
 
           const final = await stream.finalMessage();
+          if (final.stop_reason === 'tool_use') {
+            const calls = final.content.filter((b: any) => b.type === 'tool_use');
+            const results = await Promise.all(calls.map(async (call: any) => {
+              const result = call.name === 'query_nashville_records'
+                ? queryNashvilleRecords(call.input)
+                : call.name === 'query_nashville_activity' ? queryNashvilleActivity(call.input) : { error: 'Unknown tool' };
+              if ('sources' in result && Array.isArray(result.sources)) {
+                for (const source of result.sources) recordSources.set(String(source.url), String(source.name));
+              }
+              return { type: 'tool_result', tool_use_id: call.id, content: JSON.stringify(result) };
+            }));
+            convo = [...convo, { role: 'assistant', content: final.content }, { role: 'user', content: results }];
+            continue;
+          }
           if (final.stop_reason === 'pause_turn') {
             convo = [...convo, { role: 'assistant', content: final.content }];
             continue;
@@ -601,7 +618,7 @@ export async function POST(request: NextRequest) {
         lastErr = err;
         console.error(`[advisor] generation error (${useWebSearch ? 'with' : 'without'} web_search):`, err instanceof Error ? (err.stack ?? err.message) : err);
         // Graceful fallback: if live data/tool use failed before producing any
-        // answer, answer from model knowledge without exposing retry behavior.
+        // answer, retry with collected-record tools retained. Evidence policy still applies.
         if (useWebSearch && !fullText.trim()) {
           try {
             await attempt(false);
@@ -616,9 +633,16 @@ export async function POST(request: NextRequest) {
       if (!fullText.trim()) {
         const type = classifyError(lastErr);
         const fallback = type === 'timeout' || type === 'tool'
-          ? 'I hit a temporary live-data issue, but here is the practical short version: check recent comps, active inventory, days on market, permit activity, and buyer demand before making a call. If you share the city or parcel details, I can narrow it down.'
+          ? 'I could not finish retrieving the evidence for this answer. Please retry; this does not mean the records are missing or that the result is zero.'
           : 'I could not complete that request right now. Try again in a moment, or ask for a narrower market, parcel, or strategy question.';
         controller.enqueue(enc.encode(fallback));
+      }
+
+      if (recordSources.size && fullText.trim()) {
+        const links = [...recordSources].slice(0, 4).map(([url, name]) => `[${name}](${url})`).join(' · ');
+        const footer = `\n\nSources · collected snapshot November 19, 2026: ${links}`;
+        fullText += footer;
+        controller.enqueue(enc.encode(footer));
       }
 
       if (user && fullText.trim()) {
