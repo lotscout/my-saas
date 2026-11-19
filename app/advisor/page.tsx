@@ -159,7 +159,7 @@ export default function AdvisorPage() {
     setMessages([]);
     setSaved({});
 
-    // Client-side guest counter (reliable enforcement of the 3-question limit).
+    // Client-side preview indicator; server also checks the guest cookie.
     let gc = 0;
     try { gc = parseInt(localStorage.getItem(GUEST_COUNT_KEY) || '0', 10) || 0; } catch {}
     setGuestCount(gc);
@@ -177,7 +177,7 @@ export default function AdvisorPage() {
           } else if (j.access.status === 'guest') {
             if (gc >= GUEST_LIMIT || (j.access.remaining !== null && j.access.remaining <= 0)) setLimitHit('guest');
           } else {
-            // Logged-in: clear any stale guest counter, honor the weekly free limit.
+            // Logged-in: clear any stale guest counter, honor the one-question preview.
             try { localStorage.removeItem(GUEST_COUNT_KEY); } catch {}
             setGuestCount(0);
             if (!j.access.unlimited && j.access.remaining !== null && j.access.remaining <= 0) setLimitHit('free');
@@ -302,7 +302,7 @@ export default function AdvisorPage() {
         unlimited,
         canSave,
         remaining,
-        limit: a?.limit ?? (statusHdr === 'guest' ? 1 : statusHdr === 'free' ? 2 : null),
+        limit: a?.limit ?? (statusHdr === 'guest' ? 1 : statusHdr === 'free' ? 1 : null),
       }));
       if (unlimited) {
         setLimitHit(null);
@@ -341,7 +341,7 @@ export default function AdvisorPage() {
 
   // Scout is included in every paid LotScout plan, or available standalone.
   function upgrade() {
-    window.location.href = '/#contact';
+    window.location.href = '/pricing';
   }
 
   async function saveReport(idx: number) {
@@ -369,7 +369,7 @@ export default function AdvisorPage() {
   function handleSaveClick(idx: number) {
     if (access?.canSave) { saveReport(idx); return; }
     if (access?.status === 'free') { track('scout_upgrade_click', { source: 'save_report' }); upgrade(); return; }
-    window.location.href = '/#contact';
+    window.location.href = '/pricing';
   }
 
   async function downloadPdf(r: { title: string; content: string }) {
@@ -409,11 +409,11 @@ export default function AdvisorPage() {
   const streaming = loading && messages.length > 0 && messages[messages.length - 1].role === 'assistant' && !messages[messages.length - 1].content;
   const showRemaining = access && !access.unlimited && typeof access.remaining === 'number';
 
-  const blockedCard = limitHit && (
+  const blockedCard = limitHit && !loading && (
     <div className="w-full max-w-xl mx-auto bg-white border border-emerald-900/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-lg">
-      <p className="text-lg font-semibold mb-2" style={{ color: INK }}>Explore Scout with your team.</p>
-      <p className="text-base mb-5" style={{ color: MUTED }}>You’ve reached your current preview limit. Tell us about your company and research needs to discuss expanded access.</p>
-      <a href="/#contact" className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold" style={{ backgroundColor: GREEN }}>Request a Team Demo</a>
+      <p className="text-lg font-semibold mb-2" style={{ color: INK }}>This is a paid feature.</p>
+      <p className="text-base mb-5" style={{ color: MUTED }}>Please upgrade to keep using Scout.</p>
+      <a href="/pricing" className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold" style={{ backgroundColor: GREEN }}>Upgrade</a>
     </div>
   );
 
@@ -433,7 +433,7 @@ export default function AdvisorPage() {
         placeholder={limitHit ? 'Limit reached' : 'Ask Scout about a market, parcel, zoning rule, or deal...'}
         className="flex-grow resize-none bg-transparent px-2 py-2 text-base sm:text-lg leading-snug sm:leading-relaxed placeholder:text-[#717973]/80 focus:outline-none disabled:cursor-not-allowed max-h-32 sm:max-h-40"
         style={{ color: INK }}
-        aria-label="Scout Search"
+        aria-label="Scout"
       />
       <button
         type="submit"
@@ -451,9 +451,9 @@ export default function AdvisorPage() {
     <p className="text-xs sm:text-sm text-center mt-1.5 sm:mt-2" style={{ color: MUTED }}>
       {access!.status === 'guest'
         ? `${access!.remaining} free ${access!.remaining === 1 ? 'question' : 'questions'} in your preview`
-        : `${access!.remaining} ${access!.remaining === 1 ? 'question' : 'questions'} left this week`}.
+        : `${access!.remaining} ${access!.remaining === 1 ? 'question' : 'questions'} in your preview`}.
       {access!.status === 'free' && (
-        <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Discuss team access</button>
+        <button onClick={upgrade} className="ml-1 font-semibold hover:underline" style={{ color: GREEN }}>Upgrade</button>
       )}
     </p>
   );
@@ -547,7 +547,7 @@ export default function AdvisorPage() {
               <div className="flex-grow flex flex-col items-center justify-center gap-6 sm:gap-7 py-8 sm:py-10">
                 <button
                   onClick={() => setMobileSidebar(true)}
-                  aria-label="Open Scout Search history"
+                  aria-label="Open Scout history"
                   className="inline-flex h-11 items-center gap-2 rounded-2xl bg-white/90 backdrop-blur border border-emerald-900/10 shadow-lg px-4 active:scale-95 hover:bg-white transition-all"
                   style={{ color: INK }}
                 >
@@ -557,7 +557,7 @@ export default function AdvisorPage() {
 
                 <div className="w-full max-w-4xl text-center">
                   <h1 className="font-headline text-5xl sm:text-6xl md:text-7xl font-black text-primary tracking-[-0.065em] leading-[0.9]">
-                    Scout <span style={{ color: GREEN }}>Search</span>
+                    Scout
                   </h1>
                   <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: MUTED }}>Your AI real estate research assistant. Explore markets, development, land, and the questions driving your next decision.</p>
                 </div>
@@ -579,7 +579,7 @@ export default function AdvisorPage() {
             <main className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-5 min-h-0">
               <button
                 onClick={() => setMobileSidebar(true)}
-                aria-label="Open Scout Search history"
+                aria-label="Open Scout history"
                 className="fixed left-3 top-20 z-30 h-11 rounded-2xl bg-white/90 backdrop-blur border border-emerald-900/10 shadow-lg flex items-center gap-2 px-3 active:scale-95 hover:bg-white transition-all"
                 style={{ color: INK }}
               >

@@ -8,23 +8,16 @@ export const runtime = 'nodejs';
 export const maxDuration = 300;
 
 const GUEST_LIMIT = 1;          // one strong free question for logged-out guests
-const FREE_WEEKLY_LIMIT = 2;    // questions per UTC week for free accounts
+const FREE_PREVIEW_LIMIT = 1;   // one lifetime preview for free accounts
+const PREVIEW_USAGE_KEY = '1970-01-01'; // reserved unique bucket; never resets
 const GUEST_COOKIE = 'ls_guest_searches';
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
 
 const SYSTEM_PROMPT =
-  'You are Scout Search, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually 120 to 180 words. Use 4 to 6 practical bullets or 1 to 3 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout Search is, say you are Scout Search, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. Do not use or mention LotScout internal inventory, buyer demand, or market data unless the user specifically asks about LotScout, its marketplace, its off-market lots, or listings available on LotScout. For general listing-discovery questions, use public web/search sources for available lots, land listings, FSBO lots, MLS/portal-style results, county or broker pages when available. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it under 220 words with 3 short sections: What is happening, Why it matters, Scout take. Use model knowledge by default and do not wait on live web data unless the user explicitly asks for live sources. For searches for specific available properties or lots matching criteria, use live web data even if the user does not explicitly ask for sources. End only with a useful next step, not a salesy prompt.';
+  'You are Scout, LotScout\'s fast land intelligence assistant. Sound like a sharp teammate: direct, practical, calm, and concise. Help builders, developers, land teams, investors, realtors, buyers, sellers, and landowners with land, zoning, policy, pricing, market, financing, acquisition, and development questions. Default to quick useful answers, usually 120 to 180 words. Use 4 to 6 practical bullets or 1 to 3 tight paragraphs. Start with the answer, not a preamble. Make clear recommendations when useful. If the user asks who you are or what Scout is, say you are Scout, LotScout\'s land intelligence tool for researching markets, acquisitions, zoning, policy changes, and land opportunities faster. Never use em dashes. Never say phrases like “let me retry,” “I am searching,” “I will look that up,” or expose internal tool/retry behavior. If live data is available, use it silently and cite source names briefly. If live data is unavailable, say what you can infer and what to verify. Do not use or mention LotScout internal inventory, buyer demand, or market data unless the user specifically asks about LotScout, its marketplace, its off-market lots, or listings available on LotScout. For general listing-discovery questions, use public web/search sources for available lots, land listings, FSBO lots, MLS/portal-style results, county or broker pages when available. For broad questions, answer with a useful starting point first, then ask at most one clarifying question. Keep disclaimers rare and one sentence only when giving specific financial, legal, or investment guidance. Stay focused on real estate and politely redirect unrelated questions. For market updates, keep it under 220 words with 3 short sections: What is happening, Why it matters, Scout take. Use model knowledge by default and do not wait on live web data unless the user explicitly asks for live sources. For searches for specific available properties or lots matching criteria, use live web data even if the user does not explicitly ask for sources. End only with a useful next step, not a salesy prompt.';
 
 const PRIVACY_NOTE =
   'The LotScout market data below is aggregated, non-sensitive context. Never reveal individual seller names, exact buyer contact information, or any private user data — only speak to aggregate market conditions and publicly listed property details.';
-
-function currentWeekKey(): string {
-  const d = new Date();
-  const day = d.getUTCDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + diffToMonday));
-  return monday.toISOString().slice(0, 10);
-}
 
 // Robustly pull the final answer text out of a message: join all text blocks rather
 // than assuming content[0] (web search adds server_tool_use / tool_result blocks).
@@ -170,28 +163,22 @@ async function getUserAccess(userId: string): Promise<Access> {
   return { status: 'free', unlimited: false, canSave: false };
 }
 
-async function getFreeUsedThisWeek(userId: string): Promise<number> {
-  try {
-    const supabase = createServiceClient();
-    const { data } = await supabase
-      .from('search_usage')
-      .select('count')
-      .eq('user_id', userId)
-      .eq('usage_date', currentWeekKey())
-      .maybeSingle();
-    return (data as any)?.count ?? 0;
-  } catch {
-    return 0; // table may not exist yet — don't hard-block
-  }
+async function getFreePreviewUsed(userId: string): Promise<number> {
+  const { data, error } = await createServiceClient().from('search_usage')
+    .select('count').eq('user_id', userId).gt('count', 0).limit(1);
+  if (error) throw new Error('Scout preview usage unavailable');
+  return data?.length ? 1 : 0;
 }
 
-async function incrementFreeWeekly(userId: string, current: number): Promise<void> {
-  try {
-    const supabase = createServiceClient();
-    await supabase
-      .from('search_usage')
-      .upsert({ user_id: userId, usage_date: currentWeekKey(), count: current + 1 }, { onConflict: 'user_id,usage_date' });
-  } catch { /* table may not exist yet */ }
+async function claimFreePreview(userId: string): Promise<boolean> {
+  if (await getFreePreviewUsed(userId)) return false;
+  // Unique (user_id, usage_date) prevents simultaneous requests claiming twice.
+  const { error } = await createServiceClient().from('search_usage').insert({
+    user_id: userId, usage_date: PREVIEW_USAGE_KEY, count: 1,
+  });
+  if (error?.code === '23505') return false;
+  if (error) throw new Error('Scout preview usage unavailable');
+  return true;
 }
 
 async function insertScoutEvent({
@@ -392,9 +379,13 @@ export async function GET(request: NextRequest) {
 
   let remaining: number | null = null, limit: number | null = null;
   if (!access.unlimited) {
-    const used = await getFreeUsedThisWeek(user.id);
-    limit = FREE_WEEKLY_LIMIT;
-    remaining = Math.max(0, FREE_WEEKLY_LIMIT - used);
+    try {
+      const used = Math.max(await getFreePreviewUsed(user.id), guestCount(request));
+      limit = FREE_PREVIEW_LIMIT;
+      remaining = Math.max(0, FREE_PREVIEW_LIMIT - used);
+    } catch {
+      return Response.json({ error: 'Scout access is temporarily unavailable. Please try again.' }, { status: 503 });
+    }
   }
 
   return Response.json({ conversations, access: { ...access, remaining, limit } });
@@ -468,21 +459,24 @@ export async function POST(request: NextRequest) {
     unlimited = access.unlimited;
     canSave = access.canSave;
     if (!unlimited) {
-      const used = await getFreeUsedThisWeek(user.id);
-      if (used >= FREE_WEEKLY_LIMIT) {
-        return Response.json(
-          { error: "You have used your current Scout allowance. Request a team demo to discuss expanded access.", reason: 'free_limit' },
-          { status: 429 }
-        );
+      try {
+        if (guestCount(request) >= GUEST_LIMIT || !(await claimFreePreview(user.id))) {
+          return Response.json(
+            { error: 'This is a paid feature. Please upgrade to keep using Scout.', reason: 'free_limit' },
+            { status: 429 }
+          );
+        }
+      } catch {
+        return Response.json({ error: 'Scout access is temporarily unavailable. Please try again.' }, { status: 503 });
       }
-      await incrementFreeWeekly(user.id, used);
-      remainingAfter = Math.max(0, FREE_WEEKLY_LIMIT - (used + 1));
+      remainingAfter = 0;
+      setCookie = guestCookie(1);
     }
   } else {
     const used = guestCount(request);
     if (used >= GUEST_LIMIT) {
       return Response.json(
-        { error: 'You have reached the preview limit. Request a team demo on the LotScout homepage.', reason: 'guest_limit' },
+        { error: 'This is a paid feature. Please upgrade to keep using Scout.', reason: 'guest_limit' },
         { status: 429 }
       );
     }
