@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { nashvilleActivityTool, queryNashvilleActivity } from '@/lib/scout/nashville-activity';
-import { nashvilleRecordsTool, queryNashvilleRecords, RECORDS_POLICY } from '@/lib/scout/nashville-records';
+import { nashvilleRecordsTool, queryNashvilleRecords, RECORDS_POLICY, LISTING_SCREEN_POLICY } from '@/lib/scout/nashville-records';
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
@@ -544,8 +544,8 @@ export async function POST(request: NextRequest) {
     ? `\n\n${PRIVACY_NOTE}\n\n<lotscout_market_data>\n${context}\n</lotscout_market_data>`
     : '';
   const listingResearch = needsListingResearch(lastUser);
-  const listingPolicy = listingResearch ? `Listing-status research is requested. Use collected parcel records AND public web research (Zillow, Redfin, broker or builder listing pages) during this answer. No paid MLS access is available. Search exact candidate addresses from the records, preserving the user's geography and lot-size filters. A broad city listing count is NOT a count of matched candidate parcels. Report only supported address/parcel matches with URLs and source dates; distinguish active, pending, sold, explicitly not-for-sale, no listing found, and not checked. Search snippets may be stale: label snippet-only evidence provisional. Recently sold does not prove currently off-market. An address match alone can be ambiguous after subdivision: require parcel identity or corroborating lot area/location before declaring a candidate improved or excluding it. Do not round checked/unchecked counts; count distinct candidate parcels actually checked. Unrelated nearby addresses are not candidate evidence. Never invent a full on/off-market split from a small sample. If only a subset is checked, say how many and leave the rest unverified. If access fails or search is unavailable, state that specific limitation, not that all property data is missing. Do the checks now, not an offer to do them later.` : '';
-  const system = `${listingPolicy}\n\n${SYSTEM_PROMPT}\n\n${RECORDS_POLICY}\n\n${guestFirstAnswerNote}${lotScoutContextBlock}`;
+  const listingPolicy = listingResearch ? `Listing-status research is requested. Use collected parcel records and their saved public listing evidence first. Only perform new public web research if the saved screen is absent or the user explicitly requests a fresh check. No paid MLS access is available. Search exact candidate addresses from the records, preserving the user's geography and lot-size filters. A broad city listing count is NOT a count of matched candidate parcels. Report only supported address/parcel matches with URLs and source dates; distinguish active, pending, sold, explicitly not-for-sale, no listing found, and not checked. Search snippets may be stale: label snippet-only evidence provisional. Recently sold does not prove currently off-market. An address match alone can be ambiguous after subdivision: require parcel identity or corroborating lot area/location before declaring a candidate improved or excluding it. Do not round checked/unchecked counts; count distinct candidate parcels actually checked. Unrelated nearby addresses are not candidate evidence. Never invent a full on/off-market split from a small sample. If only a subset is checked, say how many and leave the rest unverified. If access fails or search is unavailable, state that specific limitation, not that all property data is missing. Do the checks now, not an offer to do them later.` : '';
+  const system = `${listingPolicy}\n\n${SYSTEM_PROMPT}\n\n${RECORDS_POLICY}\n\n${LISTING_SCREEN_POLICY}\n\n${guestFirstAnswerNote}${lotScoutContextBlock}`;
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -575,6 +575,7 @@ export async function POST(request: NextRequest) {
       const attempt = async (useTools: boolean) => {
         let searched = false;
         let queriedRecords = false;
+        let savedListingScreen = false;
         let convo: any[] = history.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content }));
         for (let i = 0; i < 5; i++) {
           const stream = await client.messages.stream({
@@ -585,7 +586,7 @@ export async function POST(request: NextRequest) {
             tools: [nashvilleRecordsTool, nashvilleActivityTool, ...(useTools ? tools : [])],
             ...(listingResearch && useTools && !queriedRecords && /nashville|372\d{2}/i.test(history.map((m: {content: string}) => m.content).join(' '))
               ? { tool_choice: { type: 'tool', name: 'query_nashville_records' } }
-              : listingResearch && useTools && !searched ? { tool_choice: { type: 'tool', name: 'web_search' } } : {}),
+              : listingResearch && useTools && !searched && !savedListingScreen ? { tool_choice: { type: 'tool', name: 'web_search' } } : {}),
             messages: convo,
           } as any);
 
@@ -612,6 +613,7 @@ export async function POST(request: NextRequest) {
               const result = call.name === 'query_nashville_records'
                 ? queryNashvilleRecords(call.input)
                 : call.name === 'query_nashville_activity' ? queryNashvilleActivity(call.input) : { error: 'Unknown tool' };
+              if ('listing_research' in result && result.listing_research && result.listing_research.searched_candidates === result.candidate_count) savedListingScreen = true;
               if ('sources' in result && Array.isArray(result.sources)) {
                 for (const source of result.sources) recordSources.set(String(source.url), String(source.name));
               }
