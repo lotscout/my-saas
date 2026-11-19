@@ -411,9 +411,9 @@ export default function AdvisorPage() {
 
   const blockedCard = limitHit && !loading && (
     <div className="w-full max-w-xl mx-auto bg-white border border-emerald-900/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-lg">
-      <p className="text-lg font-semibold mb-2" style={{ color: INK }}>This is a paid feature.</p>
-      <p className="text-base mb-5" style={{ color: MUTED }}>Please upgrade to keep using Scout.</p>
-      <a href="/pricing" className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold" style={{ backgroundColor: GREEN }}>Upgrade</a>
+      <p className="text-lg font-semibold mb-2" style={{ color: INK }}>Keep exploring with Scout</p>
+      <p className="text-base mb-5" style={{ color: MUTED }}>You’ve used your free question. Upgrade to keep researching markets, land, and development.</p>
+      <a href="/pricing" className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold" style={{ backgroundColor: GREEN }}>View plans</a>
     </div>
   );
 
