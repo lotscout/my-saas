@@ -33,7 +33,7 @@ const SUGGESTIONS = [
 ];
 
 const DISCLAIMER = 'Educational information only, not financial, legal, or investment advice.';
-const GUEST_LIMIT = 1;
+const GUEST_LIMIT = 2;
 const GUEST_COUNT_KEY = 'ls_guest_count';
 const SESSION_KEY = 'ls_advisor_session';
 const ANALYTICS_SESSION_KEY = 'ls_scout_analytics_session';
@@ -177,7 +177,7 @@ export default function AdvisorPage() {
           } else if (j.access.status === 'guest') {
             if (gc >= GUEST_LIMIT || (j.access.remaining !== null && j.access.remaining <= 0)) setLimitHit('guest');
           } else {
-            // Logged-in: clear any stale guest counter, honor the one-question preview.
+            // Logged-in: clear any stale guest counter, honor the two-question preview.
             try { localStorage.removeItem(GUEST_COUNT_KEY); } catch {}
             setGuestCount(0);
             if (!j.access.unlimited && j.access.remaining !== null && j.access.remaining <= 0) setLimitHit('free');
@@ -213,7 +213,7 @@ export default function AdvisorPage() {
     const q = text.trim();
     if (!q || loading || limitHit) return;
 
-    // Enforce the one-question guest limit client-side before sending another question.
+    // Enforce the two-question guest limit client-side before sending another question.
     const isGuest = access?.status === 'guest';
     if (isGuest && guestCount >= GUEST_LIMIT) {
       setLimitHit('guest');
@@ -302,7 +302,7 @@ export default function AdvisorPage() {
         unlimited,
         canSave,
         remaining,
-        limit: a?.limit ?? (statusHdr === 'guest' ? 1 : statusHdr === 'free' ? 1 : null),
+        limit: a?.limit ?? (statusHdr === 'guest' ? 2 : statusHdr === 'free' ? 2 : null),
       }));
       if (unlimited) {
         setLimitHit(null);
@@ -412,7 +412,7 @@ export default function AdvisorPage() {
   const blockedCard = limitHit && !loading && (
     <div className="w-full max-w-xl mx-auto bg-white border border-emerald-900/10 rounded-[2rem] p-6 sm:p-8 text-center shadow-lg">
       <p className="text-lg font-semibold mb-2" style={{ color: INK }}>Keep exploring with Scout</p>
-      <p className="text-base mb-5" style={{ color: MUTED }}>You’ve used your free question. Upgrade to keep researching markets, land, and development.</p>
+      <p className="text-base mb-5" style={{ color: MUTED }}>You’ve used your two free questions. Upgrade to keep researching markets, land, and development.</p>
       <a href="/pricing" className="inline-flex items-center justify-center text-white px-6 py-3 rounded-2xl font-bold" style={{ backgroundColor: GREEN }}>View plans</a>
     </div>
   );

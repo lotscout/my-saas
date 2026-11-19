@@ -7,8 +7,8 @@ export const runtime = 'nodejs';
 // Web search + analysis + streaming can exceed 60s; 300s is the Vercel Pro ceiling.
 export const maxDuration = 300;
 
-const GUEST_LIMIT = 1;          // one strong free question for logged-out guests
-const FREE_PREVIEW_LIMIT = 1;   // one lifetime preview for free accounts
+const GUEST_LIMIT = 2;          // two free questions for logged-out guests
+const FREE_PREVIEW_LIMIT = 2;   // two lifetime preview questions for free accounts
 const PREVIEW_USAGE_KEY = '1970-01-01'; // reserved unique bucket; never resets
 const GUEST_COOKIE = 'ls_guest_searches';
 const PAID_TIERS = new Set(['standard', 'priority', 'exclusive']);
@@ -163,22 +163,35 @@ async function getUserAccess(userId: string): Promise<Access> {
   return { status: 'free', unlimited: false, canSave: false };
 }
 
-async function getFreePreviewUsed(userId: string): Promise<number> {
+async function readPreviewUsage(userId: string) {
   const { data, error } = await createServiceClient().from('search_usage')
-    .select('count').eq('user_id', userId).gt('count', 0).limit(1);
+    .select('count, usage_date').eq('user_id', userId).gt('count', 0);
   if (error) throw new Error('Scout preview usage unavailable');
-  return data?.length ? 1 : 0;
+  return data ?? [];
 }
 
-async function claimFreePreview(userId: string): Promise<boolean> {
-  if (await getFreePreviewUsed(userId)) return false;
-  // Unique (user_id, usage_date) prevents simultaneous requests claiming twice.
-  const { error } = await createServiceClient().from('search_usage').insert({
-    user_id: userId, usage_date: PREVIEW_USAGE_KEY, count: 1,
-  });
-  if (error?.code === '23505') return false;
-  if (error) throw new Error('Scout preview usage unavailable');
-  return true;
+async function getFreePreviewUsed(userId: string): Promise<number> {
+  return (await readPreviewUsage(userId)).reduce((sum, row) => sum + Number(row.count), 0);
+}
+
+async function claimFreePreview(userId: string, browserUsed: number): Promise<number | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const rows = await readPreviewUsage(userId);
+    const total = rows.reduce((sum, row) => sum + Number(row.count), 0);
+    const used = Math.max(total, browserUsed);
+    if (used >= FREE_PREVIEW_LIMIT) return null;
+    const bucket = rows.find(row => row.usage_date === PREVIEW_USAGE_KEY);
+    const count = Number(bucket?.count ?? 0) + (used - total) + 1;
+    const db = createServiceClient().from('search_usage');
+    // Compare-and-swap plus the existing unique key protects concurrent requests.
+    const result = bucket
+      ? await db.update({ count }).eq('user_id', userId).eq('usage_date', PREVIEW_USAGE_KEY).eq('count', bucket.count).select('count')
+      : await db.insert({ user_id: userId, usage_date: PREVIEW_USAGE_KEY, count }).select('count');
+    if (result.error?.code === '23505') continue;
+    if (result.error) throw new Error('Scout preview usage unavailable');
+    if (result.data?.length) return used + 1;
+  }
+  throw new Error('Scout preview usage unavailable');
 }
 
 async function insertScoutEvent({
@@ -460,17 +473,18 @@ export async function POST(request: NextRequest) {
     canSave = access.canSave;
     if (!unlimited) {
       try {
-        if (guestCount(request) >= GUEST_LIMIT || !(await claimFreePreview(user.id))) {
+        const usedAfter = await claimFreePreview(user.id, guestCount(request));
+        if (usedAfter === null) {
           return Response.json(
             { error: 'This is a paid feature. Please upgrade to keep using Scout.', reason: 'free_limit' },
             { status: 429 }
           );
         }
+        remainingAfter = Math.max(0, FREE_PREVIEW_LIMIT - usedAfter);
+        setCookie = guestCookie(usedAfter);
       } catch {
         return Response.json({ error: 'Scout access is temporarily unavailable. Please try again.' }, { status: 503 });
       }
-      remainingAfter = 0;
-      setCookie = guestCookie(1);
     }
   } else {
     const used = guestCount(request);
@@ -518,7 +532,7 @@ export async function POST(request: NextRequest) {
     }
   }
   const guestFirstAnswerNote = !user
-    ? 'This is the visitor\'s single free Scout preview question. Make the answer substantive enough to be genuinely useful, while still concise. Do not mention the limit unless asked.'
+    ? 'This is the visitor\'s free Scout preview question. Make the answer substantive enough to be genuinely useful, while still concise. Do not mention the limit unless asked.'
     : '';
   const lotScoutContextBlock = useLotScoutContext
     ? `\n\n${PRIVACY_NOTE}\n\n<lotscout_market_data>\n${context}\n</lotscout_market_data>`
