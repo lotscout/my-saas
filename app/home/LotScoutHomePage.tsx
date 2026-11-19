@@ -15,7 +15,7 @@ const capabilities = [
 ] as const;
 
 export default function LotScoutHomePage() {
- return <div className="ls-home"><LandingMotion />
+ return <div className="ls-home ls-landing"><LandingMotion />
 <header><a className="brand" href="/" aria-label="LotScout home"><Image src="/lotscout-logo.png" alt="" width={44} height={44} priority />LotScout</a><nav aria-label="Main navigation"><a href="/pricing" className="pricing-nav-link">Pricing</a><a href="/pricing" className="button">Claim My Market</a></nav></header>
 <main>
 <section className="hero"><div><RotatingMarketHeading /><p>We turn public records and economic data into clear market research, so you can decide where to build, invest, or expand.</p><div className="actions"><a className="button" href="/pricing">Claim My Market</a></div></div>

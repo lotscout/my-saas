@@ -14,7 +14,7 @@ export default function ScoutPreview() {
   const [reduced, setReduced] = useState(false);
   const example = examples[index];
   useEffect(() => {
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const media = window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 800px)');
     const update = () => setReduced(media.matches);
     update(); media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
