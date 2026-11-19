@@ -97,6 +97,10 @@ function shouldUseLotScoutContext(question: string): boolean {
   return lotScoutSignals.some(signal => q.includes(signal)) && inventorySignals.some(signal => q.includes(signal));
 }
 
+function needsListingResearch(question: string): boolean {
+  return /\b(on[ -]market|off[ -]market|listing status|actively listed|zillow|redfin)\b/i.test(question);
+}
+
 function shouldUseWebSearch(question: string): boolean {
   const q = question.toLowerCase();
   // Claude's hosted web search is useful but slow. Scout stays fast for advice,
@@ -114,7 +118,7 @@ function shouldUseWebSearch(question: string): boolean {
     'acreage', 'zoned', 'zoning', 'buildable lots', 'development sites'
   ];
   const actionSignals = ['find', 'show me', 'search', 'pull', 'list', 'available', 'for sale'];
-  return explicitLiveSignals.some(signal => q.includes(signal)) ||
+  return needsListingResearch(question) || explicitLiveSignals.some(signal => q.includes(signal)) ||
     (listingSignals.some(signal => q.includes(signal)) && actionSignals.some(signal => q.includes(signal)));
 }
 
@@ -539,7 +543,9 @@ export async function POST(request: NextRequest) {
   const lotScoutContextBlock = useLotScoutContext
     ? `\n\n${PRIVACY_NOTE}\n\n<lotscout_market_data>\n${context}\n</lotscout_market_data>`
     : '';
-  const system = `${SYSTEM_PROMPT}\n\n${RECORDS_POLICY}\n\n${guestFirstAnswerNote}${lotScoutContextBlock}`;
+  const listingResearch = needsListingResearch(lastUser);
+  const listingPolicy = listingResearch ? `Listing-status research is requested. Use collected parcel records AND public web research (Zillow, Redfin, broker or builder listing pages) during this answer. No paid MLS access is available. Search exact candidate addresses from the records, preserving the user's geography and lot-size filters. A broad city listing count is NOT a count of matched candidate parcels. Report only supported address/parcel matches with URLs and source dates; distinguish active, pending, sold, explicitly not-for-sale, no listing found, and not checked. Search snippets may be stale: label snippet-only evidence provisional. Recently sold does not prove currently off-market. An address match alone can be ambiguous after subdivision: require parcel identity or corroborating lot area/location before declaring a candidate improved or excluding it. Do not round checked/unchecked counts; count distinct candidate parcels actually checked. Unrelated nearby addresses are not candidate evidence. Never invent a full on/off-market split from a small sample. If only a subset is checked, say how many and leave the rest unverified. If access fails or search is unavailable, state that specific limitation, not that all property data is missing. Do the checks now, not an offer to do them later.` : '';
+  const system = `${listingPolicy}\n\n${SYSTEM_PROMPT}\n\n${RECORDS_POLICY}\n\n${guestFirstAnswerNote}${lotScoutContextBlock}`;
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -552,7 +558,7 @@ export async function POST(request: NextRequest) {
 
   // Keep Scout fast by default. Use live web data only when the question clearly
   // asks for current market conditions, recent stats, rates, policy/news, or forecasts.
-  const tools = [{ type: 'web_search_20260209', name: 'web_search', max_uses: 3 }] as any;
+  const tools = [{ type: 'web_search_20260209', name: 'web_search', allowed_callers: ['direct'], max_uses: 3 }] as any;
 
   const readable = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -560,20 +566,26 @@ export async function POST(request: NextRequest) {
       let fullText = '';
       let lastErr: unknown = null;
       const recordSources = new Map<string, string>();
+      const webSources = new Map<string, string>();
       const cleanChunk = scrubInternalPhrases;
 
       // One full completion, looping over server-tool pauses. Streams text as it
       // arrives; if no deltas were emitted, extracts text blocks from the final
       // message (robust to text / tool_use / tool_result content blocks).
       const attempt = async (useTools: boolean) => {
+        let searched = false;
+        let queriedRecords = false;
         let convo: any[] = history.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content }));
         for (let i = 0; i < 5; i++) {
           const stream = await client.messages.stream({
             model: 'claude-sonnet-5',
             max_tokens: 1600,
             thinking: { type: 'disabled' },
-            system,
+            system: system + (!useTools && listingResearch ? "\nWeb search is unavailable in this attempt. Do not claim to have checked listings. Explain the search failure separately from the available parcel results." : ""),
             tools: [nashvilleRecordsTool, nashvilleActivityTool, ...(useTools ? tools : [])],
+            ...(listingResearch && useTools && !queriedRecords && /nashville|372\d{2}/i.test(history.map((m: {content: string}) => m.content).join(' '))
+              ? { tool_choice: { type: 'tool', name: 'query_nashville_records' } }
+              : listingResearch && useTools && !searched ? { tool_choice: { type: 'tool', name: 'web_search' } } : {}),
             messages: convo,
           } as any);
 
@@ -586,6 +598,14 @@ export async function POST(request: NextRequest) {
           }
 
           const final = await stream.finalMessage();
+          if (listingResearch) console.info('[advisor] listing research tools', JSON.stringify(final.content.filter((b: any) => b.type !== 'text').map((b: any) => ({ type: b.type, name: b.name, result_count: Array.isArray(b.content) ? b.content.length : undefined, error_code: b.content?.error_code }))));
+          for (const block of final.content as any[]) {
+            if (block.type === 'text') for (const citation of block.citations ?? []) {
+              if (typeof citation.url === 'string' && /^https?:\/\//.test(citation.url)) webSources.set(citation.url, citation.title || 'Listing source');
+            }
+          }
+          if (final.content.some((b: any) => b.type === 'server_tool_use' && b.name === 'web_search')) searched = true;
+          if (final.content.some((b: any) => b.type === 'tool_use' && b.name === 'query_nashville_records')) queriedRecords = true;
           if (final.stop_reason === 'tool_use') {
             const calls = final.content.filter((b: any) => b.type === 'tool_use');
             const results = await Promise.all(calls.map(async (call: any) => {
@@ -638,6 +658,11 @@ export async function POST(request: NextRequest) {
         controller.enqueue(enc.encode(fallback));
       }
 
+      if (webSources.size && fullText.trim()) {
+        const footer = '\n\nWeb sources: ' + [...webSources].slice(0, 6).map(([url, title]) => `[${title.replace(/[\[\]]/g, '')}](${url})`).join(' · ');
+        fullText += footer;
+        controller.enqueue(enc.encode(footer));
+      }
       if (recordSources.size && fullText.trim()) {
         const links = [...recordSources].slice(0, 4).map(([url, name]) => `[${name}](${url})`).join(' · ');
         const footer = `\n\nSources · collected snapshot November 19, 2026: ${links}`;
